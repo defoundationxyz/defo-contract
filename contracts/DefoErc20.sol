@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "hardhat/console.sol";
 
 interface Observer {
     function transferLog(
@@ -22,6 +23,9 @@ contract Defo is ERC20, AccessControl, ERC20Burnable {
         // @dev deployer is admin for now this could be changed when we write the deployment scripts
         walletObserver = observer;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
+        // only for test
+        _grantRole(MINTER_ROLE, msg.sender);
     }
 
     // @dev only node contracts should have this role
@@ -55,9 +59,13 @@ contract Defo is ERC20, AccessControl, ERC20Burnable {
         uint256 amount
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, amount);
-        if (address(walletObserver) != address(0)) {
+        console.log(from);
+        if (address(walletObserver) != address(0) && from != address(0)) {
             Observer observer = Observer(walletObserver);
-            require(observer.transferLog(to, from, amount));
+            require(
+                observer.transferLog(to, from, amount),
+                "Transfer forbidden"
+            );
         }
     }
 }
