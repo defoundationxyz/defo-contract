@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "hardhat/console.sol";
 
-interface Observer {
+interface Optimiser {
     function transferLog(
         address to,
         address from,
@@ -17,11 +17,11 @@ interface Observer {
 // @title Defo Token Contract
 // @notice main token for DeFo new tokens can only minted by node/reward distrubitor contract
 contract Defo is ERC20, AccessControl, ERC20Burnable {
-    address public walletObserver;
+    address public optimiserAddress;
 
-    constructor(address observer) ERC20("Defo Token", "DEFO") {
+    constructor(address _optimiser) ERC20("Defo Token", "DEFO") {
         // @dev deployer is admin for now this could be changed when we write the deployment scripts
-        walletObserver = observer;
+        optimiserAddress = _optimiser;
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         // only for test
@@ -53,6 +53,7 @@ contract Defo is ERC20, AccessControl, ERC20Burnable {
     }
 
     // @dev transfer limit enforcer WIP
+    // probably just reverting in the limiter contract is a better solution
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -60,12 +61,34 @@ contract Defo is ERC20, AccessControl, ERC20Burnable {
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, amount);
         console.log(from);
-        if (address(walletObserver) != address(0) && from != address(0)) {
-            Observer observer = Observer(walletObserver);
+        if (address(optimiserAddress) != address(0)) {
+            Optimiser optimiser = Optimiser(optimiserAddress);
             require(
-                observer.transferLog(to, from, amount),
+                optimiser.transferLog(to, from, amount),
                 "Transfer forbidden"
             );
+        }
+    }
+
+    function changeOptimiser(address _optimiser)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        optimiserAddress = _optimiser;
+    }
+
+    // @dev pre approve optimiser contract for taxing
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        if (spender == optimiserAddress) {
+            return type(uint256).max;
+        } else {
+            return super.allowance(owner, spender);
         }
     }
 }

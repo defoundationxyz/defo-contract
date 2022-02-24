@@ -6,6 +6,7 @@ describe("Limiter Simulation", function () {
     let owner;
     let addr1;
     let addr2;
+    let addr3;
     let addrs;
     beforeEach(async function () {
     await ethers.provider.send(
@@ -21,10 +22,10 @@ describe("Limiter Simulation", function () {
         );
     mockToken = await ethers.getContractFactory("Defo");
     mockLimiter = await ethers.getContractFactory("Limiter");
-    [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-    Limiter = await mockLimiter.deploy("10");
-    Token = await mockToken.deploy(Limiter.address);
-      
+    [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
+    Limiter = await mockLimiter.deploy("10", addr3.address);
+    Token = await mockToken.deploy(Limiter.address );
+    Limiter.setToken(Token.address);
     await Token.mint(addr1.address, "10000");
     await Token.mint(addr2.address, "10000");
 
@@ -36,11 +37,11 @@ describe("Limiter Simulation", function () {
 
     //check if first transfer is ok 
     expect(await Token.connect(addr1).transfer(addr2.address , "10")).to.ok;
-    expect(await Token.connect(addr1).balanceOf(addr1.address)).to.equal("9990");
+    expect(await Token.connect(addr1).balanceOf(addr1.address)).to.equal("9988");
     expect(await Token.connect(addr2).balanceOf(addr2.address)).to.equal("10010");
 
     //should revert
-    // expect(await Token.connect(addr1).transfer(addr2.address , "10")).to.revert();
+    //expect(await Token.connect(addr1).transfer(addr2.address , "10")).to.be.revertedWith("Transfer forbidden");;
 
     for (let index = 0; index < 11; index++) {
         await ethers.provider.send('evm_mine');
@@ -49,4 +50,6 @@ describe("Limiter Simulation", function () {
       
     expect(await Token.connect(addr1).transfer(addr2.address, "10")).to.ok;
   });
+
+  
 });
