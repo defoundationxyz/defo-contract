@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract Limiter {
+contract Limiter is AccessControl {
     mapping(address => uint256) TransferLog;
 
     // minimum allowed time between transfers
@@ -21,19 +22,26 @@ contract Limiter {
     mapping(address => bool) Blocklist;
 
     constructor(uint256 _timeLimit, address _taxCollector) {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         TimeLimit = _timeLimit;
         TaxCollector = _taxCollector;
     }
 
-    function setToken(address _token) external {
+    function setToken(address _token) external onlyRole(DEFAULT_ADMIN_ROLE) {
         TaxedToken = _token;
     }
 
-    function editWhitelist(address _address, bool _allow) external {
+    function editWhitelist(address _address, bool _allow)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         Whitelist[_address] = _allow;
     }
 
-    function editBlocklist(address _address, bool _allow) external {
+    function editBlocklist(address _address, bool _allow)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         Blocklist[_address] = _allow;
     }
 
