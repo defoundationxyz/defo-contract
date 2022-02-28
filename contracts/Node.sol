@@ -13,9 +13,13 @@ contract MyToken is ERC721, AccessControl {
 
     IERC20 PaymentToken;
     IERC20 DefoToken;
-
     mapping(NodeType => uint256) public DefoPrice;
     mapping(NodeType => uint256) public StablePrice;
+
+    /// @dev timestamp of last claimed reward
+    mapping(uint256 => uint256) public LastReward;
+    /// @dev minimum time required to claim rewards in seconds
+    uint256 public RewardTime;
 
     enum NodeType {
         Ruby,
@@ -30,10 +34,16 @@ contract MyToken is ERC721, AccessControl {
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
 
+    /// @dev token per second
+    mapping(NodeType => uint256) public RewardRate;
+
     /// @dev if it's 0 users can create unlimited nodes
     uint256 MaxNodes = 0;
-
+    /// @dev sale lock
     bool Lock;
+
+    /// transfer lock
+    bool transferLock;
     modifier SaleLock() {
         require(!Lock, "Sale is Locked");
         _;
@@ -50,8 +60,14 @@ contract MyToken is ERC721, AccessControl {
         PaymentToken = IERC20(_paymentToken);
     }
 
+    // internal functions
+
     /// @dev sends the node payment to other wallets
     function _distributePayment(NodeType _type) internal {}
+
+    function _rewardTax(uint256 _tokenid) internal {}
+
+    function _sendRewardTokens(uint256 _tokenid) internal {}
 
     // Public Functions
 
@@ -79,13 +95,21 @@ contract MyToken is ERC721, AccessControl {
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
         TypeOf[tokenId] = _type;
+        LastReward[tokenId] = block.timestamp;
     }
 
-    function ClaimRewards() external {}
+    function ClaimRewards(uint256 _tokenid) external {
+        uint256 rewardPoints = block.timestamp - LastReward[_tokenid];
+        require(rewardPoints > RewardTime, "Too soon");
+        _rewardTax(_tokenid);
+        _sendRewardTokens(_tokenid);
+    }
 
     function Maintenance() external {}
 
-    function Compound() external {}
+    function Compound() external {
+        require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+    }
 
     function AddModifier(uint256 _tokenid, NodeModif _modifier) external {
         require(
@@ -112,6 +136,10 @@ contract MyToken is ERC721, AccessControl {
         Lock = !Lock;
     }
 
+    function TransferLock() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        transferLock = !transferLock;
+    }
+
     // The following functions are overrides required by Solidity.
 
     function supportsInterface(bytes4 interfaceId)
@@ -121,5 +149,15 @@ contract MyToken is ERC721, AccessControl {
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
+    }
+
+    /// @dev lock transfer
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        require(!transferLock, "Transfer is forbidden");
+        super._transfer(from, to, tokenId);
     }
 }
