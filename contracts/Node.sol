@@ -14,8 +14,8 @@ contract MyToken is ERC721, AccessControl {
     IERC20 PaymentToken;
     IERC20 DefoToken;
 
-    uint256 public DefoPrice;
-    uint256 public StablePrice;
+    mapping(NodeType => uint256) public DefoPrice;
+    mapping(NodeType => uint256) public StablePrice;
 
     enum NodeType {
         Ruby,
@@ -23,6 +23,7 @@ contract MyToken is ERC721, AccessControl {
         Diamond
     }
     enum NodeModif {
+        None,
         Fast,
         Generous
     }
@@ -49,25 +50,61 @@ contract MyToken is ERC721, AccessControl {
         PaymentToken = IERC20(_paymentToken);
     }
 
+    /// @dev sends the node payment to other wallets
+    function _distributePayment(NodeType _type) internal {}
+
+    // Public Functions
+
     function RedeemMint(address to) public onlyRole(MINTER_ROLE) {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
 
-    function MintNode(NodeType _type) external SaleLock {}
+    /// @notice mint a new node
+    function MintNode(NodeType _type) external SaleLock {
+        if (MaxNodes != 0) {
+            require(_tokenIdCounter.current() < MaxNodes, "Sold Out");
+        }
+        require(
+            DefoToken.balanceOf(msg.sender) > DefoPrice[_type],
+            "Insufficient Defo"
+        );
+        require(
+            PaymentToken.balanceOf(msg.sender) > StablePrice[_type],
+            "Insufficient USD"
+        );
+        _distributePayment(_type);
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(msg.sender, tokenId);
+        TypeOf[tokenId] = _type;
+    }
 
     function ClaimRewards() external {}
 
     function Maintenance() external {}
 
-    /// Owner Functions
+    function Compound() external {}
 
-    function AddModifier(uint256 _tokenid, NodeModif _modifier) external {}
+    function AddModifier(uint256 _tokenid, NodeModif _modifier) external {
+        require(
+            ModifierOf[_tokenid] == NodeModif.None,
+            "Node already has a modifier"
+        );
+        ModifierOf[_tokenid] = _modifier;
+    }
+
+    // Owner Functions
 
     function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 
-    function ChangePaymentToken() external onlyRole(DEFAULT_ADMIN_ROLE) {}
+    function ChangePaymentToken(address _newToken)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        PaymentToken = IERC20(_newToken);
+    }
 
     function EmergencyMode() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 
