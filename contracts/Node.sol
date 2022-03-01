@@ -1,11 +1,18 @@
-pragma solidity ^0.8.4;
+// SPDX-License-Identifier: MIT
 
+pragma solidity ^0.8.4;
+// TODO OPTIMIZATION : find a cheaper library
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+/// @dev we need enumerable for compundAll function
+// TODO OPTIMIZATION : find a way to write compoundall system without enumerable
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IERC20.sol";
 
-contract MyToken is ERC721, AccessControl {
+contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
+    // TODO : add events
+
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
@@ -18,6 +25,10 @@ contract MyToken is ERC721, AccessControl {
 
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
+    /**  @dev timestamp of last maintenance
+     *        if maintenance fee is paid upfront the timestamp could show a future time
+     */
+    mapping(uint256 => uint256) public LastMaintained;
     /// @dev minimum time required to claim rewards in seconds
     uint256 public RewardTime;
 
@@ -31,11 +42,17 @@ contract MyToken is ERC721, AccessControl {
         Fast,
         Generous
     }
+    /// @dev probably will be changed to treasury or distrubitor contract
+    address Treasury;
+
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
 
     /// @dev token per second
+    // TODO OPTIMIZATION : Using structs for nodes could be better
     mapping(NodeType => uint256) public RewardRate;
+    /// @dev maintenance fee is stored as a  daily rate
+    mapping(NodeType => uint256) public MaintenanceFee;
 
     /// @dev if it's 0 users can create unlimited nodes
     uint256 MaxNodes = 0;
@@ -52,12 +69,14 @@ contract MyToken is ERC721, AccessControl {
     constructor(
         address _redeemContract,
         address _defoToken,
-        address _paymentToken
+        address _paymentToken,
+        address _treasury
     ) ERC721("Defo Node", "Defo Node") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, _redeemContract);
         DefoToken = IERC20(_defoToken);
         PaymentToken = IERC20(_paymentToken);
+        Treasury = _treasury;
     }
 
     // internal functions
@@ -68,6 +87,43 @@ contract MyToken is ERC721, AccessControl {
     function _rewardTax(uint256 _tokenid) internal {}
 
     function _sendRewardTokens(uint256 _tokenid) internal {}
+
+    function _compound(uint256 _tokenid) internal {}
+
+    function _maintenance(uint256 _tokenid) internal {
+        NodeType _nodeType = TypeOf[_tokenid];
+        uint256 _fee = MaintenanceFee[_nodeType];
+        uint256 _lastTime = LastMaintained[_tokenid];
+        require(_lastTime < block.timestamp, "upfront is paid already");
+        // TODO TEST : check for possible calculation errors
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        require(_passedDays > 30, "Too soon");
+        uint256 _amount = _passedDays * _fee;
+        require(
+            PaymentToken.balanceOf(msg.sender) > _amount,
+            "Not enough funds to pay"
+        );
+        PaymentToken.transferFrom(msg.sender, Treasury, _amount);
+        LastMaintained[_tokenid] = block.timestamp;
+    }
+
+    function _maintenanceUpfront(uint256 _tokenid, uint256 _days) internal {
+        require(_days > 240, "must be less than 6 months");
+        NodeType _nodeType = TypeOf[_tokenid];
+        uint256 _fee = MaintenanceFee[_nodeType];
+        uint256 _lastTime = LastMaintained[_tokenid];
+        require(_lastTime < block.timestamp, "upfront is paid already");
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        _passedDays = _passedDays + _days;
+        uint256 _amount = _passedDays * _fee;
+        require(
+            PaymentToken.balanceOf(msg.sender) > _amount,
+            "Not enough funds to pay"
+        );
+        PaymentToken.transferFrom(msg.sender, Treasury, _amount);
+        uint256 offset = 60 * 60 * 24 * _days;
+        LastMaintained[_tokenid] = block.timestamp + offset;
+    }
 
     // Public Functions
 
@@ -101,14 +157,63 @@ contract MyToken is ERC721, AccessControl {
     function ClaimRewards(uint256 _tokenid) external {
         uint256 rewardPoints = block.timestamp - LastReward[_tokenid];
         require(rewardPoints > RewardTime, "Too soon");
-        _rewardTax(_tokenid);
         _sendRewardTokens(_tokenid);
     }
 
-    function Maintenance() external {}
-
-    function Compound() external {
+    function ClaimRewardsAll() external {
         require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+        address account = msg.sender;
+        uint256[] memory nodesOwned = getNodeIdsOf(account);
+        for (uint256 index = 0; index < nodesOwned.length; index++) {
+            uint256 _tokenid = nodesOwned[index];
+            uint256 rewardPoints = block.timestamp - LastReward[_tokenid];
+            require(rewardPoints > RewardTime, "Too soon");
+            _sendRewardTokens(_tokenid);
+        }
+    }
+
+    function Maintenance(uint256 _tokenid) external {
+        require(ownerOf(_tokenid) == msg.sender, "You don't own this node");
+        _maintenance(_tokenid);
+    }
+
+    function MaintenanceAll() external {
+        require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+        address account = msg.sender;
+        uint256[] memory nodesOwned = getNodeIdsOf(account);
+        for (uint256 index = 0; index < nodesOwned.length; index++) {
+            uint256 _tokenid = nodesOwned[index];
+            _maintenance(_tokenid);
+        }
+    }
+
+    function MaintenanceUpfront(uint256 _tokenid, uint256 _days) external {
+        require(ownerOf(_tokenid) == msg.sender, "You don't own this node");
+        _maintenanceUpfront(_tokenid, _days);
+    }
+
+    function MaintenanceUpfrontAll(uint256 _days) external {
+        require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+        address account = msg.sender;
+        uint256[] memory nodesOwned = getNodeIdsOf(account);
+        for (uint256 index = 0; index < nodesOwned.length; index++) {
+            uint256 _tokenid = nodesOwned[index];
+            _maintenanceUpfront(_tokenid, _days);
+        }
+    }
+
+    function Compound(uint256 _tokenid) external {
+        require(ownerOf(_tokenid) == msg.sender, "You don't own this node");
+        _compound(_tokenid);
+    }
+
+    function CompoundAll() external {
+        require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+        address account = msg.sender;
+        uint256[] memory nodesOwned = getNodeIdsOf(account);
+        for (uint256 index = 0; index < nodesOwned.length; index++) {
+            _compound(nodesOwned[index]);
+        }
     }
 
     function AddModifier(uint256 _tokenid, NodeModif _modifier) external {
@@ -118,6 +223,22 @@ contract MyToken is ERC721, AccessControl {
         );
         ModifierOf[_tokenid] = _modifier;
     }
+
+    // View Functions
+
+    function checkReward(uint256 _tokenid) public view returns (uint256) {}
+
+    function checkPendingMaintenance(uint256 _tokenid)
+        public
+        view
+        returns (uint256)
+    {}
+
+    function getNodeIdsOf(address _user)
+        public
+        view
+        returns (uint256[] memory)
+    {}
 
     // Owner Functions
 
@@ -145,7 +266,7 @@ contract MyToken is ERC721, AccessControl {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, AccessControl)
+        override(ERC721, AccessControl, ERC721Enumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -159,5 +280,13 @@ contract MyToken is ERC721, AccessControl {
     ) internal override {
         require(!transferLock, "Transfer is forbidden");
         super._transfer(from, to, tokenId);
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 }
