@@ -6,15 +6,17 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /// @dev we need enumerable for compundAll function
 // TODO OPTIMIZATION : find a way to write compoundall system without enumerable
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IERC20.sol";
 
-contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
+contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // TODO : add events
 
     using Counters for Counters.Counter;
 
+    uint256 public constant MaintenanceDays = 30;
     Counters.Counter private _tokenIdCounter;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -53,7 +55,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
     mapping(NodeType => uint256) public RewardRate;
     /// @dev maintenance fee is stored as a  daily rate
     mapping(NodeType => uint256) public MaintenanceFee;
-
+    /// @dev upgrade reqs
+    mapping(NodeType => uint256) public UpgradeRequirements;
+    mapping(NodeType => uint256) public UpgradeTax;
     /// @dev if it's 0 users can create unlimited nodes
     uint256 MaxNodes = 0;
     /// @dev sale lock
@@ -90,6 +94,49 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
 
     function _compound(uint256 _tokenid) internal {}
 
+    function _upgrade(uint256[] memory _tokenids) internal {
+        require(_tokenids.length >= 2, "not enough nodes");
+        NodeType firstToCheck = TypeOf[_tokenids[0]];
+        require(
+            _tokenids.length == UpgradeRequirements[firstToCheck],
+            "Token amount is wrong"
+        );
+        require(firstToCheck != NodeType.Diamond, "Can't upgrade diamond");
+        for (uint256 index = 0; index < _tokenids.length; index++) {
+            require(
+                ownerOf(_tokenids[index]) == msg.sender,
+                "You don't own that token"
+            );
+            require(
+                firstToCheck == TypeOf[_tokenids[index]],
+                "Token types must be same"
+            );
+            burn(_tokenids[index]);
+        }
+        require(
+            DefoToken.transferFrom(
+                msg.sender,
+                Treasury,
+                UpgradeTax[firstToCheck]
+            ),
+            "Payment Failed"
+        );
+        if (firstToCheck == NodeType.Ruby) {
+            uint256 tokenId = _tokenIdCounter.current();
+            _tokenIdCounter.increment();
+            _safeMint(msg.sender, tokenId);
+            TypeOf[tokenId] = NodeType.Sapphire;
+            LastReward[tokenId] = block.timestamp;
+        } else {
+            uint256 tokenId = _tokenIdCounter.current();
+            _tokenIdCounter.increment();
+            _safeMint(msg.sender, tokenId);
+            TypeOf[tokenId] = NodeType.Diamond;
+            LastReward[tokenId] = block.timestamp;
+        }
+    }
+
+    // TODO: Add grace period
     function _maintenance(uint256 _tokenid) internal {
         NodeType _nodeType = TypeOf[_tokenid];
         uint256 _fee = MaintenanceFee[_nodeType];
@@ -97,7 +144,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
         require(_lastTime < block.timestamp, "upfront is paid already");
         // TODO TEST : check for possible calculation errors
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        require(_passedDays > 30, "Too soon");
+        require(_passedDays > MaintenanceDays, "Too soon");
         uint256 _amount = _passedDays * _fee;
         require(
             PaymentToken.balanceOf(msg.sender) > _amount,
@@ -155,6 +202,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
     }
 
     function ClaimRewards(uint256 _tokenid) external {
+        require(isActive(_tokenid), "Node is deactivated");
         uint256 rewardPoints = block.timestamp - LastReward[_tokenid];
         require(rewardPoints > RewardTime, "Too soon");
         _sendRewardTokens(_tokenid);
@@ -168,6 +216,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
             uint256 _tokenid = nodesOwned[index];
             uint256 rewardPoints = block.timestamp - LastReward[_tokenid];
             require(rewardPoints > RewardTime, "Too soon");
+            require(isActive(_tokenid), "Node is deactivated");
             _sendRewardTokens(_tokenid);
         }
     }
@@ -225,8 +274,18 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
     }
 
     // View Functions
+    function isActive(uint256 _tokenid) public view returns (bool) {
+        uint256 _lastTime = LastMaintained[_tokenid];
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
 
-    function checkReward(uint256 _tokenid) public view returns (uint256) {}
+        return !(_passedDays > MaintenanceDays);
+    }
+
+    function checkReward(uint256 _tokenid)
+        public
+        view
+        returns (uint256 defoRewards, uint256 daiRewards)
+    {}
 
     function checkPendingMaintenance(uint256 _tokenid)
         public
@@ -238,7 +297,16 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable {
         public
         view
         returns (uint256[] memory)
-    {}
+    {
+        uint256 numberOfNodes = balanceOf(_user);
+        uint256[] memory nodeIds = new uint256[](numberOfNodes);
+        for (uint256 i = 0; i < numberOfNodes; i++) {
+            uint256 nodeId = tokenOfOwnerByIndex(_user, i);
+            require(_exists(nodeId), "This node doesn't exists");
+            nodeIds[i] = nodeId;
+        }
+        return nodeIds;
+    }
 
     // Owner Functions
 
