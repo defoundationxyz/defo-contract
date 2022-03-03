@@ -41,7 +41,7 @@ contract Redeem is Ownable{
         locked = false;
     }
 
-    modifier presaleCompliance(uint256 _tokenId){
+    modifier presaleCompliance(uint256[] memory _tokenIds){
         require (
             ISapphirePresale.balanceOf(msg.sender) > 0 ||
             IRubyPresale.balanceOf(msg.sender) > 0 ||
@@ -49,12 +49,14 @@ contract Redeem is Ownable{
             "You are not in possesion of any presale nodes"
         );
 
-        require (
-            ISapphirePresale.ownerOf(_tokenId) == msg.sender ||
-            IRubyPresale.ownerOf(_tokenId) == msg.sender ||
-            IDiamondPresale.ownerOf(_tokenId) == msg.sender ,
-            "Wrong wallet maybe?"
-        );
+        for (uint256 i = 0; i <= _tokenIds.length - 1; i++) {
+            require (
+                ISapphirePresale.ownerOf(_tokenIds[i]) == msg.sender ||
+                IRubyPresale.ownerOf(_tokenIds[i]) == msg.sender ||
+                IDiamondPresale.ownerOf(_tokenIds[i]) == msg.sender ,
+                "Wrong wallet maybe?"
+            );
+        }
         _;
     }
 
@@ -69,11 +71,11 @@ contract Redeem is Ownable{
 
     /// add if statement to check balance and get approval
     /// add for loop for each balance
-    function redeem(uint256 _tokenId)
+    function redeem(uint256[] memory _tokenIds)
         public
         isActive
         nonReentrant
-        presaleCompliance(_tokenId)
+        presaleCompliance(_tokenIds)
         timeCompliance
         {
             uint256 redeemSapphireBalance = ISapphirePresale.balanceOf(msg.sender);
