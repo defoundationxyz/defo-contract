@@ -46,6 +46,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
     /// @dev probably will be changed to treasury or distrubitor contract
     address Treasury;
+    mapping(NodeType => uint256) public DefoPriceOf;
+    mapping(NodeType => uint256) public DaiPriceOf;
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
@@ -90,9 +92,24 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function _rewardTax(uint256 _tokenid) internal {}
 
+    // TODO : add different functions for dai and defo
     function _sendRewardTokens(uint256 _tokenid) internal {}
 
-    function _compound(uint256 _tokenid) internal {}
+    function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
+        internal
+    {}
+
+    function _compound(uint256 _tokenid) internal {
+        NodeType nodeType = TypeOf[_tokenid];
+        (uint256 rewardDefo, ) = checkReward(_tokenid);
+        require(rewardDefo >= (DefoPriceOf[nodeType] * 2));
+        _sendRewardTokensWithOffset(_tokenid, (DefoPriceOf[nodeType] * 2));
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(msg.sender, tokenId);
+        TypeOf[tokenId] = nodeType;
+        LastMaintained[tokenId] = block.timestamp;
+    }
 
     function _upgrade(uint256[] memory _tokenids) internal {
         require(_tokenids.length >= 2, "not enough nodes");
@@ -111,6 +128,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
                 firstToCheck == TypeOf[_tokenids[index]],
                 "Token types must be same"
             );
+            /// @dev reward if any unclaimed rewards left
+            _sendRewardTokens(_tokenids[index]);
             burn(_tokenids[index]);
         }
         require(
@@ -126,13 +145,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             _tokenIdCounter.increment();
             _safeMint(msg.sender, tokenId);
             TypeOf[tokenId] = NodeType.Sapphire;
-            LastReward[tokenId] = block.timestamp;
+            LastMaintained[tokenId] = block.timestamp;
         } else {
             uint256 tokenId = _tokenIdCounter.current();
             _tokenIdCounter.increment();
             _safeMint(msg.sender, tokenId);
             TypeOf[tokenId] = NodeType.Diamond;
-            LastReward[tokenId] = block.timestamp;
+            LastMaintained[tokenId] = block.timestamp;
         }
     }
 
@@ -309,6 +328,14 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
 
     // Owner Functions
+    function SetNodePrice(
+        NodeType _type,
+        uint256 _daiPrice,
+        uint256 _defoPrice
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        DefoPrice[_type] = _defoPrice;
+        StablePrice[_type] = _daiPrice;
+    }
 
     function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 
