@@ -41,7 +41,11 @@ contract Redeem is Ownable{
         locked = false;
     }
 
-    modifier presaleCompliance(uint256[] memory _tokenIds){
+    modifier presaleCompliance(
+        uint256[] memory _sapphireTokenIds,
+        uint256[] memory _rubyTokenIds,
+        uint256[] memory _diamondTokenIds
+    ){
         require (
             ISapphirePresale.balanceOf(msg.sender) > 0 ||
             IRubyPresale.balanceOf(msg.sender) > 0 ||
@@ -49,11 +53,12 @@ contract Redeem is Ownable{
             "You are not in possesion of any presale nodes"
         );
 
-        for (uint256 i = 0; i <= _tokenIds.length - 1; i++) {
+        uint256 totalLength = (_sapphireTokenIds.length.add(_rubyTokenIds.length)).add(_diamondTokenIds.length);
+        for (uint256 i = 0; i <= totalLength - 1; i++) {
             require (
-                ISapphirePresale.ownerOf(_tokenIds[i]) == msg.sender ||
-                IRubyPresale.ownerOf(_tokenIds[i]) == msg.sender ||
-                IDiamondPresale.ownerOf(_tokenIds[i]) == msg.sender ,
+                ISapphirePresale.ownerOf(_sapphireTokenIds[i]) == msg.sender ||
+                IRubyPresale.ownerOf(_rubyTokenIds[i]) == msg.sender ||
+                IDiamondPresale.ownerOf(_diamondTokenIds[i]) == msg.sender ,
                 "Wrong wallet maybe?"
             );
         }
@@ -62,25 +67,47 @@ contract Redeem is Ownable{
 
     modifier timeCompliance() {
         require (
-            block.timestamp < complianceEndTime &&
-            block.timestamp > complianceStartTime,
+            block.timestamp <= complianceEndTime &&
+            block.timestamp >= complianceStartTime,
             "Either too late or too early"
         );
         _;
     }
 
-    /// add if statement to check balance and get approval
-    /// add for loop for each balance
-    function redeem(uint256[] memory _tokenIds)
+    function redeem(uint256[] memory _sapphireTokenIds, uint256[] memory _rubyTokenIds, uint256[] memory _diamondTokenIds)
         public
         isActive
         nonReentrant
-        presaleCompliance(_tokenIds)
+        presaleCompliance(
+            _sapphireTokenIds,
+            _rubyTokenIds,
+            _diamondTokenIds
+        )
         timeCompliance
         {
             uint256 redeemSapphireBalance = ISapphirePresale.balanceOf(msg.sender);
             uint256 redeemRubyBalance = IRubyPresale.balanceOf(msg.sender);
             uint256 redeemDiamondBalance = IDiamondPresale.balanceOf(msg.sender);
+
+            if (redeemSapphireBalance > 0 ) {
+                ISapphirePresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= _sapphireTokenIds.length - 1; i++) {
+                    ISapphirePresale.transferFrom(address(this), address(0), _sapphireTokenIds[i]);
+                    //then call node contract to redeem
+                }
+            } else if (redeemRubyBalance > 0 ) {
+                IRubyPresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= _rubyTokenIds.length - 1; i++) {
+                    IRubyPresale.transferFrom(address(this), address(0), _rubyTokenIds[i]);
+                    //then call node contract to redeem
+                }
+            } else if (redeemDiamondBalance > 0 ) {
+                IDiamondPresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= _diamondTokenIds.length - 1; i++) {
+                    IDiamondPresale.transferFrom(address(this), address(0), _diamondTokenIds[i]);
+                    //then call node contract to redeem
+                }
+            }
         }
     
     /// add if to check if address was changed successfully
@@ -95,5 +122,7 @@ contract Redeem is Ownable{
         return(complianceStartTime, complianceEndTime);
     }
 
-    
+    function flipActive() public onlyOwner {
+        redeemActive = !redeemActive;
+    }
 }
