@@ -11,6 +11,14 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IERC20.sol";
 
+interface Limiter {
+    function transferLog(
+        address to,
+        address from,
+        uint256 tokenid
+    ) external returns (bool);
+}
+
 contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // TODO : add events
 
@@ -47,6 +55,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
     /// @dev probably will be changed to treasury or distrubitor contract
     address Treasury;
+    address LimiterAddr;
     mapping(NodeType => uint256) public DefoPriceOf;
     mapping(NodeType => uint256) public DaiPriceOf;
 
@@ -77,13 +86,15 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         address _redeemContract,
         address _defoToken,
         address _paymentToken,
-        address _treasury
+        address _treasury,
+        address _limiter
     ) ERC721("Defo Node", "Defo Node") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, _redeemContract);
         DefoToken = IERC20(_defoToken);
         PaymentToken = IERC20(_paymentToken);
         Treasury = _treasury;
+        LimiterAddr = _limiter;
     }
 
     // internal functions
@@ -121,7 +132,30 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
         internal
-    {}
+    {
+        NodeType _type = TypeOf[_tokenid];
+        uint256 _rate = RewardRate[_type];
+        uint256 _lastTime = LastReward[_tokenid];
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        uint256 _rewardDefo = _passedDays *
+            ((_rate * DefoPriceOf[_type]) / 1000);
+        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+        // we are only checking dai because defo could be used for _compounding
+        require(
+            _rewardDai > minDaiReward,
+            "Reward is less than minimum allowed"
+        );
+        /// right now we are taxing before compounding this could change
+        uint256 taxRate = _rewardTax(_tokenid);
+        if (taxRate != 0) {
+            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+        }
+        _rewardDefo = _rewardDefo - _offset;
+        DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
+        PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
+        LastReward[_tokenid] = block.timestamp;
+    }
 
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
@@ -399,6 +433,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 tokenId
     ) internal override {
         require(!transferLock, "Transfer is forbidden");
+        Limiter limiter = Limiter(LimiterAddr);
+        require(
+            limiter.transferLog(to, from, tokenId),
+            "Transfer is forbidden"
+        );
         super._transfer(from, to, tokenId);
     }
 
