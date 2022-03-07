@@ -24,7 +24,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     IERC20 DefoToken;
     mapping(NodeType => uint256) public DefoPrice;
     mapping(NodeType => uint256) public StablePrice;
-
+    uint256 minDefoReward;
+    uint256 minDaiReward;
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
     /**  @dev timestamp of last maintenance
@@ -90,10 +91,33 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     /// @dev sends the node payment to other wallets
     function _distributePayment(NodeType _type) internal {}
 
-    function _rewardTax(uint256 _tokenid) internal {}
+    function _rewardTax(uint256 _tokenid) internal view returns (uint256) {}
 
-    // TODO : add different functions for dai and defo
-    function _sendRewardTokens(uint256 _tokenid) internal {}
+    /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
+    function _sendRewardTokens(uint256 _tokenid) internal {
+        NodeType _type = TypeOf[_tokenid];
+        uint256 _rate = RewardRate[_type];
+        uint256 _lastTime = LastReward[_tokenid];
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        uint256 _rewardDefo = _passedDays *
+            ((_rate * DefoPriceOf[_type]) / 1000);
+        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+        // we are only checking dai because defo could be used for _compounding
+        require(
+            _rewardDai > minDaiReward,
+            "Reward is less than minimum allowed"
+        );
+
+        uint256 taxRate = _rewardTax(_tokenid);
+        if (taxRate != 0) {
+            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+        }
+
+        DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
+        PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
+        LastReward[_tokenid] = block.timestamp;
+    }
 
     function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
         internal
@@ -130,6 +154,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             );
             /// @dev reward if any unclaimed rewards left
             _sendRewardTokens(_tokenids[index]);
+
             burn(_tokenids[index]);
         }
         require(
