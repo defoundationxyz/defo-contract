@@ -49,7 +49,7 @@ contract Redeem is Ownable{
         require (
             ISapphirePresale.balanceOf(msg.sender) > 0 ||
             IRubyPresale.balanceOf(msg.sender) > 0 ||
-            IDiamondPresale.balanceOf(msg.sender) > 0 ,
+            IDiamondPresale.balanceOf(msg.sender) > 0,
             "You are not in possesion of any presale nodes"
         );
 
@@ -66,6 +66,10 @@ contract Redeem is Ownable{
     }
 
     modifier timeCompliance() {
+        if (!(block.timestamp <= complianceEndTime && block.timestamp >= complianceStartTime)) {
+            redeemActive = false;
+        }
+
         require (
             block.timestamp <= complianceEndTime &&
             block.timestamp >= complianceStartTime,
@@ -91,21 +95,21 @@ contract Redeem is Ownable{
 
             if (redeemSapphireBalance > 0 ) {
                 ISapphirePresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= _sapphireTokenIds.length - 1; i++) {
+                for (uint256 i = 0; i <= redeemSapphireBalance - 1; i++) {
                     ISapphirePresale.transferFrom(address(this), address(0), _sapphireTokenIds[i]);
-                    //then call node contract to redeem
+                    //then call node contract to redeem RedeemMint
                 }
             } else if (redeemRubyBalance > 0 ) {
                 IRubyPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= _rubyTokenIds.length - 1; i++) {
+                for (uint256 i = 0; i <= redeemRubyBalance - 1; i++) {
                     IRubyPresale.transferFrom(address(this), address(0), _rubyTokenIds[i]);
-                    //then call node contract to redeem
+                    //then call node contract to redeem RedeemMint
                 }
             } else if (redeemDiamondBalance > 0 ) {
                 IDiamondPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= _diamondTokenIds.length - 1; i++) {
+                for (uint256 i = 0; i <= redeemDiamondBalance - 1; i++) {
                     IDiamondPresale.transferFrom(address(this), address(0), _diamondTokenIds[i]);
-                    //then call node contract to redeem
+                    //then call node contract to redeem RedeemMint
                 }
             }
         }
