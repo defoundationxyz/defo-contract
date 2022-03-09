@@ -2,31 +2,28 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import './interface/INode.sol';
 
 contract Redeem is Ownable{
     using SafeMath for uint;
 
     bool locked;
     bool redeemActive;
-    address private nodeAddress;
-    address private sapphireAddress;
-    address private rubyAddress;
-    address private diamondAddress;
+    INode nodeContract;
+    IERC721Enumerable sapphirePresale;
+    IERC721Enumerable rubyPresale;
+    IERC721Enumerable diamondPresale;
     uint256 private complianceEndTime;
     uint256 private complianceStartTime;
-
-    IERC721 ISapphirePresale = IERC721(sapphireAddress);
-    IERC721 IRubyPresale = IERC721(rubyAddress);
-    IERC721 IDiamondPresale = IERC721(diamondAddress);
     constructor(address _nodeAddress, address _sapphireAddress, address _rubyAddress, address _diamondAddress) {
         redeemActive = true;
-        nodeAddress = _nodeAddress;
-        sapphireAddress = _sapphireAddress;
-        rubyAddress = _rubyAddress;
-        diamondAddress = _diamondAddress;
+        nodeContract = INode(_nodeAddress);
+        sapphirePresale = IERC721Enumerable(_sapphireAddress);
+        rubyPresale = IERC721Enumerable(_rubyAddress);
+        diamondPresale = IERC721Enumerable(_diamondAddress);
     }
 
     modifier isActive() {
@@ -41,27 +38,15 @@ contract Redeem is Ownable{
         locked = false;
     }
 
-    modifier presaleCompliance(
-        uint256[] memory _sapphireTokenIds,
-        uint256[] memory _rubyTokenIds,
-        uint256[] memory _diamondTokenIds
-    ){
+
+    /// @dev removed ownership check since implementing OZ enumerable because input of token IDs is no longer needed
+    modifier presaleCompliance(){
         require (
-            ISapphirePresale.balanceOf(msg.sender) > 0 ||
-            IRubyPresale.balanceOf(msg.sender) > 0 ||
-            IDiamondPresale.balanceOf(msg.sender) > 0,
+            sapphirePresale.balanceOf(msg.sender) > 0 ||
+            rubyPresale.balanceOf(msg.sender) > 0 ||
+            diamondPresale.balanceOf(msg.sender) > 0,
             "You are not in possesion of any presale nodes"
         );
-
-        uint256 totalLength = (_sapphireTokenIds.length.add(_rubyTokenIds.length)).add(_diamondTokenIds.length);
-        for (uint256 i = 0; i <= totalLength - 1; i++) {
-            require (
-                ISapphirePresale.ownerOf(_sapphireTokenIds[i]) == msg.sender ||
-                IRubyPresale.ownerOf(_rubyTokenIds[i]) == msg.sender ||
-                IDiamondPresale.ownerOf(_diamondTokenIds[i]) == msg.sender ,
-                "Wrong wallet maybe?"
-            );
-        }
         _;
     }
 
@@ -78,46 +63,9 @@ contract Redeem is Ownable{
         _;
     }
 
-    function redeem(uint256[] memory _sapphireTokenIds, uint256[] memory _rubyTokenIds, uint256[] memory _diamondTokenIds)
-        public
-        isActive
-        nonReentrant
-        presaleCompliance(
-            _sapphireTokenIds,
-            _rubyTokenIds,
-            _diamondTokenIds
-        )
-        timeCompliance
-        {
-            uint256 redeemSapphireBalance = ISapphirePresale.balanceOf(msg.sender);
-            uint256 redeemRubyBalance = IRubyPresale.balanceOf(msg.sender);
-            uint256 redeemDiamondBalance = IDiamondPresale.balanceOf(msg.sender);
-
-            if (redeemSapphireBalance > 0 ) {
-                ISapphirePresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemSapphireBalance - 1; i++) {
-                    ISapphirePresale.transferFrom(address(this), address(0), _sapphireTokenIds[i]);
-                    //then call node contract to redeem RedeemMint
-                }
-            } else if (redeemRubyBalance > 0 ) {
-                IRubyPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemRubyBalance - 1; i++) {
-                    IRubyPresale.transferFrom(address(this), address(0), _rubyTokenIds[i]);
-                    //then call node contract to redeem RedeemMint
-                }
-            } else if (redeemDiamondBalance > 0 ) {
-                IDiamondPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemDiamondBalance - 1; i++) {
-                    IDiamondPresale.transferFrom(address(this), address(0), _diamondTokenIds[i]);
-                    //then call node contract to redeem RedeemMint
-                }
-            }
-        }
-    
-    /// add if to check if address was changed successfully
     function setNodeAddress(address newNodeAddress) public onlyOwner returns(address) {
-        nodeAddress = newNodeAddress;
-        return(nodeAddress);
+        nodeContract = INode(newNodeAddress);
+        return(address(nodeContract));
     }
 
     function startTimer() public onlyOwner returns(uint256, uint256) {
@@ -129,4 +77,48 @@ contract Redeem is Ownable{
     function flipActive() public onlyOwner {
         redeemActive = !redeemActive;
     }
+
+    function redeem()
+        public
+        isActive
+        nonReentrant
+        presaleCompliance
+        timeCompliance
+        {
+            uint256 redeemSapphireBalance = sapphirePresale.balanceOf(msg.sender);
+            uint256 redeemRubyBalance = rubyPresale.balanceOf(msg.sender);
+            uint256 redeemDiamondBalance = diamondPresale.balanceOf(msg.sender);
+
+            if (redeemSapphireBalance > 0 ) {
+                sapphirePresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= redeemSapphireBalance - 1; i++) {
+                    sapphirePresale.transferFrom(
+                        msg.sender,
+                        address(0),
+                        sapphirePresale.tokenOfOwnerByIndex(msg.sender, i) ///@dev change to enumerable index, as opposed to input index
+                    );
+                    nodeContract.RedeemMint(msg.sender);
+                }
+            } else if (redeemRubyBalance > 0 ) {
+                rubyPresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= redeemRubyBalance - 1; i++) {
+                    rubyPresale.transferFrom(
+                        msg.sender,
+                        address(0),
+                        rubyPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                    nodeContract.RedeemMint(msg.sender);
+                }
+            } else if (redeemDiamondBalance > 0 ) {
+                diamondPresale.setApprovalForAll(address(this), true);
+                for (uint256 i = 0; i <= redeemDiamondBalance - 1; i++) {
+                    diamondPresale.transferFrom(
+                        msg.sender,
+                        address(0),
+                        diamondPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                    nodeContract.RedeemMint(msg.sender);
+                }
+            }
+        }
 }

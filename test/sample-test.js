@@ -1,14 +1,29 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("Redeem", function () {
+describe("Access", function () {
+
+  beforeEach(async function () {
+    MockDai = await ethers.getContractFactory("MockDai")
+    MockSapphire = await ethers.getContractFactory("MockSapphire")
+    MockRuby = await ethers.getContractFactory("MockRuby")
+    MockDiamond = await ethers.getContractFactory("MockDiamond")
+
+    const [owner, acc1, acc2, ...acc] = await ethers.getSigners();
+
+    mockdai = await MockDai.deploy()
+    await mockdai.deployed()
+    mocksapphire = await MockSapphire.deploy()
+    await mocksapphire.deployed()
+    mockruby = await MockRuby.deploy()
+    await mockruby.deployed()
+    mockdiamond = await MockDiamond.deploy()
+    await mockdiamond.deployed()
+    
+  });
+
   it("Should return the new greeting once it's changed", async function () {
-    const Redeem = await ethers.getContractFactory("Redeem");
-    const redeem = await Redeem.deploy("Hello, world!");
-    await redeem.deployed();
-
-    //expect(await redeem.greet()).to.equal("Hello, world!");
-
+    
     //const setGreetingTx = await redeem.setGreeting("Hola, mundo!");
 
     // wait until the transaction is mined
