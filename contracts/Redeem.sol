@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
 import './interface/INode.sol';
 
-contract Redeem is Ownable, INode{
+contract Redeem is Ownable{
     using SafeMath for uint;
 
     bool locked;
@@ -98,7 +98,7 @@ contract Redeem is Ownable, INode{
                         address(0),
                         sapphirePresale.tokenOfOwnerByIndex(msg.sender, i) ///@dev change to enumerable index, as opposed to input index
                     );
-                    nodeContract.RedeemMint(nodeContract.NodeType.Ruby, msg.sender);
+                    nodeContract.RedeemMint(INode.NodeType.Sapphire, msg.sender);
                 }
             } else if (redeemRubyBalance > 0 ) {
                 rubyPresale.setApprovalForAll(address(this), true);
@@ -108,7 +108,7 @@ contract Redeem is Ownable, INode{
                         address(0),
                         rubyPresale.tokenOfOwnerByIndex(msg.sender, i)
                     );
-                    // nodeContract.RedeemMint(0, msg.sender);
+                    nodeContract.RedeemMint(INode.NodeType.Ruby, msg.sender);
                 }
             } else if (redeemDiamondBalance > 0 ) {
                 diamondPresale.setApprovalForAll(address(this), true);
@@ -118,7 +118,7 @@ contract Redeem is Ownable, INode{
                         address(0),
                         diamondPresale.tokenOfOwnerByIndex(msg.sender, i)
                     );
-                    // nodeContract.RedeemMint(2, msg.sender);
+                    nodeContract.RedeemMint(INode.NodeType.Diamond, msg.sender);
                 }
             }
         }

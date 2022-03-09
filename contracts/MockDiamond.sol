@@ -39,7 +39,7 @@ contract MockDiamond is ERC721Enumerable, Ownable{
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
-    function totalSupply() public view returns(uint256) {
+    function totalSupply() public view override returns(uint256) {
         return (supply.current());
     }
 }
