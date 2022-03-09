@@ -107,6 +107,18 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function _rewardTax(uint256 _tokenid) internal view returns (uint256) {}
 
+    function _mintNode(NodeType _type, address _to) internal returns (uint256) {
+        if (MaxNodes != 0) {
+            require(_tokenIdCounter.current() < MaxNodes, "Sold Out");
+        }
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(_to, tokenId);
+        TypeOf[tokenId] = _type;
+        LastReward[tokenId] = block.timestamp;
+        return tokenId;
+    }
+
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
     function _sendRewardTokens(uint256 _tokenid) internal {
         NodeType _type = TypeOf[_tokenid];
@@ -203,16 +215,10 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             "Payment Failed"
         );
         if (firstToCheck == NodeType.Ruby) {
-            uint256 tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
-            _safeMint(msg.sender, tokenId);
-            TypeOf[tokenId] = NodeType.Sapphire;
+            uint256 tokenId = _mintNode(NodeType.Sapphire, msg.sender);
             LastMaintained[tokenId] = block.timestamp;
         } else {
-            uint256 tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
-            _safeMint(msg.sender, tokenId);
-            TypeOf[tokenId] = NodeType.Diamond;
+            uint256 tokenId = _mintNode(NodeType.Diamond, msg.sender);
             LastMaintained[tokenId] = block.timestamp;
         }
     }
@@ -255,10 +261,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     // Public Functions
 
-    function RedeemMint(address to) public onlyRole(MINTER_ROLE) {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
+    function RedeemMint(NodeType _type, address _to)
+        public
+        onlyRole(MINTER_ROLE)
+    {
+        _mintNode(_type, _to);
     }
 
     /// @notice mint a new node
@@ -275,11 +282,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             "Insufficient USD"
         );
         _distributePayment(_type);
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(msg.sender, tokenId);
-        TypeOf[tokenId] = _type;
-        LastReward[tokenId] = block.timestamp;
+        _mintNode(_type, msg.sender);
     }
 
     function ClaimRewards(uint256 _tokenid) external {
