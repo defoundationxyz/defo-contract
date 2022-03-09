@@ -2,6 +2,8 @@
 pragma solidity ^0.8.0;
 
 interface INode {
+    enum NodeType{ Ruby, Sapphire, Diamond}
+
     function _distributePayment() external; 
 
     function _rewardTax(uint256 _tokenid) external view returns (uint256); 
@@ -22,7 +24,7 @@ interface INode {
 
     // Public Functions
 
-    function RedeemMint(address to) external; 
+    function RedeemMint(NodeType _type, address to) external; 
 
     /// @notice mint a new node
     function MintNode() external; 
