@@ -55,6 +55,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
     /// @dev probably will be changed to treasury or distrubitor contract
     address Treasury;
+    address RewardPool;
     address LimiterAddr;
     mapping(NodeType => uint256) public DefoPriceOf;
     mapping(NodeType => uint256) public DaiPriceOf;
@@ -87,7 +88,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         address _defoToken,
         address _paymentToken,
         address _treasury,
-        address _limiter
+        address _limiter,
+        address _rewardPool
     ) ERC721("Defo Node", "Defo Node") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, _redeemContract);
@@ -95,6 +97,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         PaymentToken = IERC20(_paymentToken);
         Treasury = _treasury;
         LimiterAddr = _limiter;
+        RewardPool = _rewardPool;
     }
 
     // internal functions
@@ -363,13 +366,35 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         public
         view
         returns (uint256 defoRewards, uint256 daiRewards)
-    {}
+    {
+        NodeType _type = TypeOf[_tokenid];
+        uint256 _rate = RewardRate[_type];
+        uint256 _lastTime = LastReward[_tokenid];
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        uint256 _rewardDefo = _passedDays *
+            ((_rate * DefoPriceOf[_type]) / 1000);
+        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+
+        uint256 taxRate = _rewardTax(_tokenid);
+        if (taxRate != 0) {
+            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+        }
+        return (_rewardDefo, _rewardDai);
+    }
 
     function checkPendingMaintenance(uint256 _tokenid)
         public
         view
         returns (uint256)
-    {}
+    {
+        NodeType _nodeType = TypeOf[_tokenid];
+        uint256 _fee = MaintenanceFee[_nodeType];
+        uint256 _lastTime = LastMaintained[_tokenid];
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        uint256 _amount = _passedDays * _fee;
+        return _amount;
+    }
 
     function getNodeIdsOf(address _user)
         public
