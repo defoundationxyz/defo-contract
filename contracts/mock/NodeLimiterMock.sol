@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract Limiter {
-    constructor(uint256 _timeLimit, address _taxCollector) {}
+    constructor() {}
 
     function transferLog(
         address to,

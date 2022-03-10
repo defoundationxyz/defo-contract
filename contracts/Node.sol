@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IERC20.sol";
 
-interface Limiter {
+interface ILimiter {
     function transferLog(
         address to,
         address from,
@@ -281,6 +281,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             PaymentToken.balanceOf(msg.sender) > StablePrice[_type],
             "Insufficient USD"
         );
+        DefoToken.transferFrom(msg.sender, address(this), DefoPrice[_type]);
+        PaymentToken.transferFrom(
+            msg.sender,
+            address(this),
+            StablePrice[_type]
+        );
         _distributePayment(_type);
         _mintNode(_type, msg.sender);
     }
@@ -426,6 +432,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
 
+    function setRewardRate(NodeType _type, uint256 _rate)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        RewardRate[_type] = _rate;
+    }
+
     function ChangePaymentToken(address _newToken)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
@@ -461,7 +474,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 tokenId
     ) internal override {
         require(!transferLock, "Transfer is forbidden");
-        Limiter limiter = Limiter(LimiterAddr);
+        ILimiter limiter = ILimiter(LimiterAddr);
         require(
             limiter.transferLog(to, from, tokenId),
             "Transfer is forbidden"
