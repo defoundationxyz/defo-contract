@@ -9,7 +9,7 @@ describe("Node Tests", function () {
     let addr3;
     let addrs;
     beforeEach(async function () {
-    await ethers.provider.send(
+    /*await ethers.provider.send(
             "hardhat_reset",
             [
                 {
@@ -19,7 +19,7 @@ describe("Node Tests", function () {
                     },
                 },
             ],
-        );
+        );*/
     mockToken = await ethers.getContractFactory("MockToken");
     mockLimiter = await ethers.getContractFactory("Limiter");
     node = await ethers.getContractFactory("DefoNode");
@@ -29,6 +29,8 @@ describe("Node Tests", function () {
     DAI = await mockToken.deploy();
     NodeInst = await node.deploy(owner.address, Token.address, DAI.address, owner.address, Limiter.address, owner.address);
     await Token.mint(addr1.address, "10000000000");
+    await Token.mint(owner.address, "10000000000000000000000000000");
+    await DAI.mint(owner.address, "10000000000000000000000000000");
     await Token.mint(addr1.address, "10000");
     await Token.mint(addr2.address, "10000");
 
@@ -60,7 +62,71 @@ describe("Node Tests", function () {
 
     });
 
+    it("Test maintain", async function () {
+        expect(await Token.connect(addr1).approve(NodeInst.address, "10000000000000")).ok;
+        expect(await DAI.connect(addr1).approve(NodeInst.address, "100000000000000000000000")).ok;
+        await DAI.mint(addr1.address, "100000000000000000000000");
+        expect(await NodeInst.SetNodePrice("0", "10" , "10")).to.ok;
+        expect(await NodeInst.SetNodePrice("1", "100" , "100")).to.ok;
+        expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;
+        expect(await NodeInst.setMaintenanceRate("0", "10" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("1", "100" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("2" , "1000")).to.ok;        
+        expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("190610");
 
+        for (let index = 0; index < 2000; index++) {
+            await network.provider.send("evm_increaseTime", [36000000])
+            await ethers.provider.send('evm_mine');
+        
+      }
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("8523940");
+        expect(await NodeInst.connect(addr1).Maintenance("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt("8523940");
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("1")).to.eq("85239400");
 
+        for (let index = 0; index < 2000; index++) {
+            await network.provider.send("evm_increaseTime", [36000000])
+            await ethers.provider.send('evm_mine');
+        
+      }
+        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("1")).to.lt("85239400");
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("2")).to.lt("852394000");
+    });
+
+    it("Test reward", async function () {
+        expect(await Token.connect(addr1).approve(NodeInst.address, "10000000000000")).ok;
+        expect(await DAI.connect(addr1).approve(NodeInst.address, "100000000000000000000000")).ok;
+        await DAI.mint(addr1.address, "100000000000000000000000");
+        expect(await NodeInst.SetNodePrice("0", "10" , "10")).to.ok;
+        expect(await NodeInst.SetNodePrice("1", "100" , "100")).to.ok;
+        expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;
+        expect(await NodeInst.setRewardRate("0", "100000" )).to.ok;
+        expect(await NodeInst.setRewardRate("1", "100000" )).to.ok;
+        expect(await NodeInst.setRewardRate("2", "100000")).to.ok;
+        expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
+        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+
+        for (let index = 0; index < 2000; index++) {
+            await network.provider.send("evm_increaseTime", [36000000000])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await Token.approve(NodeInst.address, "100000000000000000000000")).ok;
+        expect(await DAI.approve(NodeInst.address, "100000000000000000000000")).ok;        
+        /// expect revert 
+        //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+
+    });
   
+
 });

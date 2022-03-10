@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.4;
+
+import "hardhat/console.sol";
 // TODO OPTIMIZATION : find a cheaper library
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /// @dev we need enumerable for compundAll function
@@ -33,7 +35,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     mapping(NodeType => uint256) public DefoPrice;
     mapping(NodeType => uint256) public StablePrice;
     uint256 minDefoReward;
-    uint256 minDaiReward;
+    uint256 minDaiReward = 0;
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
     /**  @dev timestamp of last maintenance
@@ -57,8 +59,6 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     address Treasury;
     address RewardPool;
     address LimiterAddr;
-    mapping(NodeType => uint256) public DefoPriceOf;
-    mapping(NodeType => uint256) public DaiPriceOf;
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
@@ -125,9 +125,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _rewardDefo = _passedDays *
-            ((_rate * DefoPriceOf[_type]) / 1000);
-        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+        uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
+        uint256 _rewardDai = _passedDays *
+            ((_rate * StablePrice[_type]) / 1000);
         // we are only checking dai because defo could be used for _compounding
         require(
             _rewardDai > minDaiReward,
@@ -152,9 +152,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _rewardDefo = _passedDays *
-            ((_rate * DefoPriceOf[_type]) / 1000);
-        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+        uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
+        uint256 _rewardDai = _passedDays *
+            ((_rate * StablePrice[_type]) / 1000);
         // we are only checking dai because defo could be used for _compounding
         require(
             _rewardDai > minDaiReward,
@@ -175,8 +175,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
         (uint256 rewardDefo, ) = checkReward(_tokenid);
-        require(rewardDefo >= (DefoPriceOf[nodeType] * 2));
-        _sendRewardTokensWithOffset(_tokenid, (DefoPriceOf[nodeType] * 2));
+        require(rewardDefo >= (DefoPrice[nodeType] * 2));
+        _sendRewardTokensWithOffset(_tokenid, (DefoPrice[nodeType] * 2));
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
@@ -380,9 +380,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _rewardDefo = _passedDays *
-            ((_rate * DefoPriceOf[_type]) / 1000);
-        uint256 _rewardDai = _passedDays * ((_rate * DaiPriceOf[_type]) / 1000);
+        uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
+        uint256 _rewardDai = _passedDays *
+            ((_rate * StablePrice[_type]) / 1000);
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
@@ -437,6 +437,20 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         RewardRate[_type] = _rate;
+    }
+
+    function setMaintenanceRate(NodeType _type, uint256 _rate)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        MaintenanceFee[_type] = _rate;
+    }
+
+    function setMinDaiReward(uint256 _minReward)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        minDaiReward = _minReward;
     }
 
     function ChangePaymentToken(address _newToken)
