@@ -214,14 +214,14 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.gt("0");
         var before = await NodeInst.connect(addr1).checkPendingMaintenance("0")
-        expect(await NodeInst.connect(addr1).MaintenanceUpfront("0" , "30") ).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceUpfront("0" , "200") ).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt(before);
         for (let index = 0; index < 2000; index++) {
-            await network.provider.send("evm_increaseTime", [36000000])
+            await network.provider.send("evm_increaseTime", [3600])
             await ethers.provider.send('evm_mine');
         
       }
-        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.gt(before);
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
 
 
     });

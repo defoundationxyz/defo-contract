@@ -402,9 +402,15 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         NodeType _nodeType = TypeOf[_tokenid];
         uint256 _fee = MaintenanceFee[_nodeType];
         uint256 _lastTime = LastMaintained[_tokenid];
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _amount = _passedDays * _fee;
-        return _amount;
+        uint256 _passedDays;
+        if (_lastTime > block.timestamp) {
+            return 0;
+        } else {
+            _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+
+            uint256 _amount = _passedDays * _fee;
+            return _amount;
+        }
     }
 
     function getNodeIdsOf(address _user)
