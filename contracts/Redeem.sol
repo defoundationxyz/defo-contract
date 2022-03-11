@@ -91,35 +91,63 @@ contract Redeem is Ownable{
             uint256 redeemDiamondBalance = diamondPresale.balanceOf(msg.sender);
 
             if (redeemSapphireBalance > 0 ) {
-                sapphirePresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemSapphireBalance - 1; i++) {
-                    sapphirePresale.transferFrom(
-                        msg.sender,
-                        address(0),
-                        sapphirePresale.tokenOfOwnerByIndex(msg.sender, i) ///@dev change to enumerable index, as opposed to input index
-                    );
+
+                /// @dev had to separate burning and redeeming counting logic
+                /// this is the redeeming logic
+                for (uint256 i = 0; i < redeemSapphireBalance; i++) {
                     nodeContract.RedeemMint(INode.NodeType.Sapphire, msg.sender);
                 }
+
+                /// this is the burning logic
+                for (uint256 i = 0; i < redeemSapphireBalance - 1; i++) {
+                    sapphirePresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        sapphirePresale.tokenOfOwnerByIndex(msg.sender, i) ///@dev change to enumerable index, as opposed to input index
+                    );
+                }
+                sapphirePresale.transferFrom(
+                    msg.sender, address(0x000000000000000000000000000000000000dEaD),
+                    sapphirePresale.tokenOfOwnerByIndex(msg.sender, 0) 
+                );
+
             } else if (redeemRubyBalance > 0 ) {
-                rubyPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemRubyBalance - 1; i++) {
+                for (uint256 i = 0; i < redeemRubyBalance; i++) {
+                    nodeContract.RedeemMint(INode.NodeType.Ruby, msg.sender);
+
+                }
+
+                for (uint256 i = 0; i < redeemRubyBalance - 1; i++) {
                     rubyPresale.transferFrom(
                         msg.sender,
-                        address(0),
+                        address(0x000000000000000000000000000000000000dEaD),
                         rubyPresale.tokenOfOwnerByIndex(msg.sender, i)
                     );
-                    nodeContract.RedeemMint(INode.NodeType.Ruby, msg.sender);
                 }
+                rubyPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    rubyPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
+
             } else if (redeemDiamondBalance > 0 ) {
-                diamondPresale.setApprovalForAll(address(this), true);
-                for (uint256 i = 0; i <= redeemDiamondBalance - 1; i++) {
-                    diamondPresale.transferFrom(
-                        msg.sender,
-                        address(0),
-                        diamondPresale.tokenOfOwnerByIndex(msg.sender, i)
-                    );
+                for (uint256 i = 0; i < redeemDiamondBalance; i++) {
                     nodeContract.RedeemMint(INode.NodeType.Diamond, msg.sender);
                 }
+
+                for (uint256 i = 0; i < redeemDiamondBalance - 1; i++) {
+                    diamondPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        diamondPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                diamondPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    diamondPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
+
             }
         }
 }

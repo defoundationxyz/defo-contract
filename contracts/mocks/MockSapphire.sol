@@ -8,33 +8,30 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract MockRuby is ERC721Enumerable, Ownable{
+contract MockSapphire is ERC721Enumerable, Ownable{
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private supply;
 
-    uint256 rubyNodePrice = 720;
+
+    uint256 sapphireNodePrice = 540;
     string private baseURI;
 
     IERC20 DAIToken;
-    constructor(address DAI_address) ERC721("Defo MockRuby Node", "DmRN") {
+    constructor(address DAI_address) ERC721("Defo MockSapphire Node", "DmSN") {
         DAIToken = IERC20(DAI_address);
     }
-    function mintNodeBatch(uint256 _amount) public payable {
-        uint256 requiredPrice = rubyNodePrice * _amount;
+
+    function mintNode() public payable {
         require(
-           DAIToken.balanceOf(msg.sender) > requiredPrice,
+           DAIToken.balanceOf(msg.sender) > sapphireNodePrice,
            "Insuffucient DAI balance"
         );
 
-        DAIToken.transferFrom(msg.sender, address(this), requiredPrice);
-        for (uint256 i = 1; i <= _amount; i++) {
-            supply.increment();
-            _safeMint(msg.sender, supply.current());
-        }
-    }
-    function mintNode(uint256 _amount) public payable {
-        mintNodeBatch(_amount);
+        DAIToken.transferFrom(msg.sender, address(this), sapphireNodePrice);
+        supply.increment();
+        _safeMint(msg.sender, supply.current());
+    
     }
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;

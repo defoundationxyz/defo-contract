@@ -20,21 +20,16 @@ contract MockDiamond is ERC721Enumerable, Ownable{
     constructor(address DAI_address) ERC721("Defo MockDiamond Node", "DmDN") {
         DAIToken = IERC20(DAI_address);
     }
-    function mintNodeBatch(uint256 _amount) public payable {
-        uint256 requiredPrice = diamondNodePrice * _amount;
+    
+    function mintNode() public payable {
         require(
-           DAIToken.balanceOf(msg.sender) > requiredPrice,
-           "Insuffucient DAI balance"
-        );
-
-        DAIToken.transferFrom(msg.sender, address(this), requiredPrice);
-        for (uint256 i = 1; i <= _amount; i++) {
-            supply.increment();
-            _safeMint(msg.sender, supply.current());
-        }
-    }
-    function mintNode(uint256 _amount) public payable {
-        mintNodeBatch(_amount);
+            DAIToken.balanceOf(msg.sender) > diamondNodePrice,
+            "Insuffucient DAI balance"
+         );
+ 
+        DAIToken.transferFrom(msg.sender, address(this), diamondNodePrice);
+        supply.increment();
+        _safeMint(msg.sender, supply.current());
     }
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;

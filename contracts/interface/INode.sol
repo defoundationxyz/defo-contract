@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface INode {
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+interface INode is IERC721Enumerable {
     enum NodeType{ Ruby, Sapphire, Diamond}
 
     function _distributePayment() external; 
@@ -68,10 +69,6 @@ interface INode {
     function ToggleLock() external; 
 
     function TransferLock() external; 
-
-    // The following functions are overrides required by Solidity.
-
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
 
     /// @dev lock transfer
     function _transfer(address from, address to, uint256 tokenId) external; 

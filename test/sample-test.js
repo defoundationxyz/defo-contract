@@ -71,10 +71,23 @@ describe("RedeemFunctionality", function () {
 
   it("Should check if redeem functions correctly", async function () {
     // start timer
+    await redeem.startTimer()
     // mint dai
+    await mockdai.connect(acc1).mintTokens(acc1.address, "5000000000000000000000")
+    await mockdai.connect(acc1).approve(mocksapphire.address, "5000000000000000000000")
     // buy presale nft
+    await mocksapphire.connect(acc1).mintNode()
+    await mocksapphire.connect(acc1).mintNode()
+    await mocksapphire.connect(acc1).mintNode()
+  
     // redeem from redeem contract
-    // check balance of caller (acc2)
+    await mocksapphire.connect(acc1).setApprovalForAll(redeem.address, true)
+    await redeem.connect(acc1).redeem()
+    expect(await mocknode.balanceOf(acc1.address)).to.equal(3)
+
+    // check balance of caller (acc1)
+    console.log("Presale balance: ", await mocksapphire.balanceOf(acc1.address)) // must return 0
+    console.log("Node balance: ", await mocknode.balanceOf(acc1.address))
   });
 });
 
