@@ -242,7 +242,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
 
     function _maintenanceUpfront(uint256 _tokenid, uint256 _days) internal {
-        require(_days > 240, "must be less than 6 months");
+        require(_days <= 240, "must be less than 6 months");
         NodeType _nodeType = TypeOf[_tokenid];
         uint256 _fee = MaintenanceFee[_nodeType];
         uint256 _lastTime = LastMaintained[_tokenid];
@@ -343,6 +343,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function Compound(uint256 _tokenid) external {
         require(ownerOf(_tokenid) == msg.sender, "You don't own this node");
+        require(isActive(_tokenid), "Node is deactivated");
         _compound(_tokenid);
     }
 
@@ -351,6 +352,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         address account = msg.sender;
         uint256[] memory nodesOwned = getNodeIdsOf(account);
         for (uint256 index = 0; index < nodesOwned.length; index++) {
+            require(isActive(nodesOwned[index]), "Node is deactivated");
             _compound(nodesOwned[index]);
         }
     }
@@ -458,6 +460,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         PaymentToken = IERC20(_newToken);
+    }
+
+    function setUpgradeRequirements(NodeType _type, uint256 _rate)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        UpgradeRequirements[_type] = _rate;
     }
 
     function EmergencyMode() external onlyRole(DEFAULT_ADMIN_ROLE) {}
