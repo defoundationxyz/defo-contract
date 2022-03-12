@@ -23,11 +23,11 @@ contract MockRuby is ERC721Enumerable, Ownable{
 
     function mintNode() public payable {
         require(
-           DAIToken.balanceOf(msg.sender) > rubyNodePrice,
+           DAIToken.balanceOf(msg.sender) > rubyNodePrice * (10 ** 18),
            "Insuffucient DAI balance"
         );
 
-        DAIToken.transferFrom(msg.sender, address(this), rubyNodePrice);
+        DAIToken.transferFrom(msg.sender, address(this), rubyNodePrice * (10 ** 18));
         supply.increment();
         _safeMint(msg.sender, supply.current());
 

@@ -10,8 +10,8 @@ import './interface/INode.sol';
 contract Redeem is Ownable{
     using SafeMath for uint;
 
-    bool locked;
-    bool redeemActive;
+    bool private locked;
+    bool public redeemActive;
     INode nodeContract;
     IERC721Enumerable sapphirePresale;
     IERC721Enumerable rubyPresale;
@@ -51,14 +51,14 @@ contract Redeem is Ownable{
     }
 
     modifier timeCompliance() {
-        if (!(block.timestamp <= complianceEndTime && block.timestamp >= complianceStartTime)) {
+        if (!(block.timestamp >= complianceStartTime && block.timestamp <= complianceEndTime)) {
             redeemActive = false;
         }
 
         require (
-            block.timestamp <= complianceEndTime &&
-            block.timestamp >= complianceStartTime,
-            "Either too late or too early"
+            block.timestamp >= complianceStartTime &&
+            block.timestamp <= complianceEndTime,
+            "Either too early or too late"
         );
         _;
     }
@@ -66,19 +66,21 @@ contract Redeem is Ownable{
     function setNodeAddress(address newNodeAddress) public onlyOwner returns(address) {
         nodeContract = INode(newNodeAddress);
         return(address(nodeContract));
+
     }
 
     function startTimer() public onlyOwner returns(uint256, uint256) {
         complianceStartTime = block.timestamp;
         complianceEndTime = block.timestamp + 2 weeks;
         return(complianceStartTime, complianceEndTime);
+
     }
 
     function flipActive() public onlyOwner {
         redeemActive = !redeemActive;
     }
 
-    /// add an event?
+    /// @dev the redeeming and burning counting is separated by for loop
     function redeem()
         public
         isActive
@@ -86,37 +88,35 @@ contract Redeem is Ownable{
         presaleCompliance
         timeCompliance
         {
+
             uint256 redeemSapphireBalance = sapphirePresale.balanceOf(msg.sender);
             uint256 redeemRubyBalance = rubyPresale.balanceOf(msg.sender);
             uint256 redeemDiamondBalance = diamondPresale.balanceOf(msg.sender);
 
             if (redeemSapphireBalance > 0 ) {
-
-                /// @dev had to separate burning and redeeming counting logic
-                /// this is the redeeming logic
+                /// sapphire redeem
                 for (uint256 i = 0; i < redeemSapphireBalance; i++) {
                     nodeContract.RedeemMint(INode.NodeType.Sapphire, msg.sender);
                 }
-
                 /// this is the burning logic
                 for (uint256 i = 0; i < redeemSapphireBalance - 1; i++) {
                     sapphirePresale.transferFrom(
                         msg.sender,
                         address(0x000000000000000000000000000000000000dEaD),
-                        sapphirePresale.tokenOfOwnerByIndex(msg.sender, i) ///@dev change to enumerable index, as opposed to input index
+                        sapphirePresale.tokenOfOwnerByIndex(msg.sender, i)
                     );
                 }
                 sapphirePresale.transferFrom(
                     msg.sender, address(0x000000000000000000000000000000000000dEaD),
-                    sapphirePresale.tokenOfOwnerByIndex(msg.sender, 0) 
+                    sapphirePresale.tokenOfOwnerByIndex(msg.sender, 0)
                 );
-
-            } else if (redeemRubyBalance > 0 ) {
+            }
+            /// ruby redeem
+            if (redeemRubyBalance > 0 ) {
                 for (uint256 i = 0; i < redeemRubyBalance; i++) {
                     nodeContract.RedeemMint(INode.NodeType.Ruby, msg.sender);
 
                 }
-
                 for (uint256 i = 0; i < redeemRubyBalance - 1; i++) {
                     rubyPresale.transferFrom(
                         msg.sender,
@@ -129,12 +129,12 @@ contract Redeem is Ownable{
                     address(0x000000000000000000000000000000000000dEaD),
                     rubyPresale.tokenOfOwnerByIndex(msg.sender, 0)
                 );
-
-            } else if (redeemDiamondBalance > 0 ) {
+            }
+            /// diamond redeem
+            if (redeemDiamondBalance > 0 ) {
                 for (uint256 i = 0; i < redeemDiamondBalance; i++) {
                     nodeContract.RedeemMint(INode.NodeType.Diamond, msg.sender);
                 }
-
                 for (uint256 i = 0; i < redeemDiamondBalance - 1; i++) {
                     diamondPresale.transferFrom(
                         msg.sender,
@@ -147,7 +147,6 @@ contract Redeem is Ownable{
                     address(0x000000000000000000000000000000000000dEaD),
                     diamondPresale.tokenOfOwnerByIndex(msg.sender, 0)
                 );
-
             }
         }
 }
