@@ -38,6 +38,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     uint256 minDaiReward = 0;
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
+
+    mapping(uint256 => uint256) public claimedReward;
     /**  @dev timestamp of last maintenance
      *        if maintenance fee is paid upfront the timestamp could show a future time
      */
@@ -62,7 +64,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
-
+    address[] GenerousityList;
     /// @dev token per second
     // TODO OPTIMIZATION : Using structs for nodes could be better
     mapping(NodeType => uint256) public RewardRate;
@@ -101,11 +103,22 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
 
     // internal functions
+    function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
     function _distributePayment(NodeType _type) internal {}
 
-    function _rewardTax(uint256 _tokenid) internal view returns (uint256) {}
+    /// @dev values are random placeholder values for now
+    function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
+        uint256 diff = block.timestamp - LastReward[_tokenid];
+        if (diff < 2 weeks) {
+            return 500;
+        } else if (diff > 2 weeks && diff < 4 weeks) {
+            return 300;
+        } else {
+            return 0;
+        }
+    }
 
     function _mintNode(NodeType _type, address _to) internal returns (uint256) {
         if (MaxNodes != 0) {
@@ -126,22 +139,23 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        uint256 _rewardDai = _passedDays *
-            ((_rate * StablePrice[_type]) / 1000);
+        //uint256 _rewardDai = _passedDays *
+        //((_rate * StablePrice[_type]) / 1000);
         // we are only checking dai because defo could be used for _compounding
-        require(
+        /*require(
             _rewardDai > minDaiReward,
             "Reward is less than minimum allowed"
-        );
+        );*/
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
 
         DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
-        PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
+        claimedReward[_tokenid] = claimedReward[_tokenid] + _rewardDefo;
+        //PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
         LastReward[_tokenid] = block.timestamp;
     }
 
@@ -153,28 +167,29 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        uint256 _rewardDai = _passedDays *
-            ((_rate * StablePrice[_type]) / 1000);
+        /* uint256 _rewardDai = _passedDays *
+            ((_rate * StablePrice[_type]) / 1000);*/
         // we are only checking dai because defo could be used for _compounding
-        require(
+        /*require(
             _rewardDai > minDaiReward,
             "Reward is less than minimum allowed"
-        );
+        );*/
         /// right now we are taxing before compounding this could change
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
         _rewardDefo = _rewardDefo - _offset;
         DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
-        PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
+        claimedReward[_tokenid] = claimedReward[_tokenid] + _rewardDefo;
+        //PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
         LastReward[_tokenid] = block.timestamp;
     }
 
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
-        (uint256 rewardDefo, ) = checkReward(_tokenid);
+        uint256 rewardDefo = checkReward(_tokenid);
         require(rewardDefo >= (DefoPrice[nodeType] * 2));
         _sendRewardTokensWithOffset(_tokenid, (DefoPrice[nodeType] * 2));
         uint256 tokenId = _tokenIdCounter.current();
@@ -255,7 +270,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             "Not enough funds to pay"
         );
         PaymentToken.transferFrom(msg.sender, Treasury, _amount);
-        uint256 offset = 60 * 60 * 24 * _days;
+        uint256 offset = 1 days * _days;
         LastMaintained[_tokenid] = block.timestamp + offset;
     }
 
@@ -373,25 +388,32 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         return !(_passedDays > MaintenanceDays);
     }
 
+    /// @dev get the token value from lp
+    function getTokenValue() public view returns (uint256) {}
+
     function checkReward(uint256 _tokenid)
         public
         view
-        returns (uint256 defoRewards, uint256 daiRewards)
+        returns (
+            uint256 defoRewards /*, uint256 daiRewards*/
+        )
     {
         NodeType _type = TypeOf[_tokenid];
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        uint256 _rewardDai = _passedDays *
-            ((_rate * StablePrice[_type]) / 1000);
+        /*uint256 _rewardDai = _passedDays *
+            ((_rate * StablePrice[_type]) / 1000);*/
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            _rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
+            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
-        return (_rewardDefo, _rewardDai);
+        return (
+            _rewardDefo /*, _rewardDai*/
+        );
     }
 
     function checkPendingMaintenance(uint256 _tokenid)
@@ -431,11 +453,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // Owner Functions
     function SetNodePrice(
         NodeType _type,
-        uint256 _daiPrice,
+        /*uint256 _daiPrice,*/
         uint256 _defoPrice
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DefoPrice[_type] = _defoPrice;
-        StablePrice[_type] = _daiPrice;
+        /*StablePrice[_type] = _daiPrice;*/
     }
 
     function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
@@ -454,12 +476,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         MaintenanceFee[_type] = _rate;
     }
 
-    function setMinDaiReward(uint256 _minReward)
+    /*function setMinDaiReward(uint256 _minReward)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         minDaiReward = _minReward;
-    }
+    }*/
 
     function ChangePaymentToken(address _newToken)
         external
