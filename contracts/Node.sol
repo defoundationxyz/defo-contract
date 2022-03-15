@@ -109,7 +109,25 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
-    function _distributePayment(uint256 amount, bool isDefo) internal {}
+    function _distributePayment(uint256 _amount, bool _isDefo) internal {
+        uint256 amount = _amount;
+        uint256 reward = (amount * 550) / 1000;
+        uint256 treasury = (amount * 350) / 1000;
+        uint256 liquidity = (amount * 50) / 1000;
+        uint256 marketing = (amount * 25) / 1000;
+        uint256 team = (amount * 25) / 1000;
+        IERC20 Token;
+        if (_isDefo) {
+            Token = DefoToken;
+        } else {
+            Token = PaymentToken;
+        }
+        Token.transfer(RewardPool, reward);
+        Token.transfer(Marketing, marketing);
+        Token.transfer(Team, team);
+        Token.transfer(Treasury, treasury);
+        // TODO : add lp distrubition
+    }
 
     /// @dev values are random placeholder values for now
     function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
