@@ -61,6 +61,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     address Treasury;
     address RewardPool;
     address LimiterAddr;
+    address Team;
+    address Marketing;
+    address Donation;
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
@@ -106,15 +109,17 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
-    function _distributePayment(NodeType _type) internal {}
+    function _distributePayment(uint256 amount, bool isDefo) internal {}
 
     /// @dev values are random placeholder values for now
     function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
         uint256 diff = block.timestamp - LastReward[_tokenid];
-        if (diff < 2 weeks) {
-            return 500;
-        } else if (diff > 2 weeks && diff < 4 weeks) {
-            return 300;
+        if (diff < 1 weeks) {
+            return 400;
+        } else if (diff > 2 weeks && diff < 3 weeks) {
+            return 250;
+        } else if (diff > 3 weeks && diff < 4 weeks) {
+            return 150;
         } else {
             return 0;
         }
@@ -302,7 +307,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             address(this),
             StablePrice[_type]
         );
-        _distributePayment(_type);
+        _distributePayment(DefoPrice[_type], true);
+        _distributePayment(StablePrice[_type], false);
         _mintNode(_type, msg.sender);
     }
 
@@ -482,6 +488,42 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     {
         minDaiReward = _minReward;
     }*/
+
+    /// @dev could be optimized by using a map or enums right now like this for testing purposes
+    function changeRewardAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        RewardPool = _newAddress;
+    }
+
+    function changeLimiterAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        LimiterAddr = _newAddress;
+    }
+
+    function changeDonationAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        Donation = _newAddress;
+    }
+
+    function changeTeamAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        Team = _newAddress;
+    }
+
+    function changeMarketingAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        Marketing = _newAddress;
+    }
 
     function ChangePaymentToken(address _newToken)
         external
