@@ -64,6 +64,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     address Team;
     address Marketing;
     address Donation;
+    address Buyback;
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
@@ -106,26 +107,52 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     }
 
     // internal functions
+
+    /// @dev WIP
+    function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
+        uint256 rewardCount = checkReward(_tokenId) + claimedReward[_tokenId];
+        uint256 remainingReward;
+        uint256 actualReward;
+        NodeType tokenType = TypeOf[_tokenId];
+        uint256 typePrice = DefoPrice[tokenType];
+        uint256 firstMilestone = typePrice + (typePrice / 2);
+        if (rewardCount > firstMilestone) {
+            remainingReward = rewardCount - firstMilestone;
+            actualReward = firstMilestone;
+            while (remainingReward > typePrice) {
+                remainingReward = remainingReward - typePrice;
+                actualReward = actualReward + (((remainingReward) * 30) / 100);
+            }
+            return actualReward;
+        }
+        return rewardCount;
+    }
+
     function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
     function _distributePayment(uint256 _amount, bool _isDefo) internal {
         uint256 amount = _amount;
-        uint256 reward = (amount * 550) / 1000;
-        uint256 treasury = (amount * 350) / 1000;
+        uint256 reward = (amount * 900) / 1000;
+        uint256 treasury = (amount * 800) / 1000;
         uint256 liquidity = (amount * 50) / 1000;
         uint256 marketing = (amount * 25) / 1000;
         uint256 team = (amount * 25) / 1000;
+        uint256 buyback = (amount * 100) / 1000;
         IERC20 Token;
         if (_isDefo) {
+            treasury = 0;
+            buyback = 0;
             Token = DefoToken;
         } else {
-            Token = PaymentToken;
+            reward = 0;
+            buyback = (amount * 100) / 1000;
         }
         Token.transfer(RewardPool, reward);
         Token.transfer(Marketing, marketing);
         Token.transfer(Team, team);
         Token.transfer(Treasury, treasury);
+        Token.transfer(Buyback, buyback);
         // TODO : add lp distrubition
     }
 
@@ -162,13 +189,6 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        //uint256 _rewardDai = _passedDays *
-        //((_rate * StablePrice[_type]) / 1000);
-        // we are only checking dai because defo could be used for _compounding
-        /*require(
-            _rewardDai > minDaiReward,
-            "Reward is less than minimum allowed"
-        );*/
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
@@ -477,11 +497,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // Owner Functions
     function SetNodePrice(
         NodeType _type,
-        /*uint256 _daiPrice,*/
+        uint256 _daiPrice,
         uint256 _defoPrice
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DefoPrice[_type] = _defoPrice;
-        /*StablePrice[_type] = _daiPrice;*/
+        StablePrice[_type] = _daiPrice;
     }
 
     function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
@@ -541,6 +561,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         Marketing = _newAddress;
+    }
+
+    function changeBuybackAddress(address _newAddress)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        Buyback = _newAddress;
     }
 
     function ChangePaymentToken(address _newToken)
