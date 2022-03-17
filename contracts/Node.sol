@@ -32,10 +32,10 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     IERC20 PaymentToken;
     IERC20 DefoToken;
+    mapping(address => uint256) public DistTable;
     mapping(NodeType => uint256) public DefoPrice;
     mapping(NodeType => uint256) public StablePrice;
-    uint256 minDefoReward;
-    uint256 minDaiReward = 0;
+    uint256 minReward = 0;
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
 
@@ -57,6 +57,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         Fast,
         Generous
     }
+
     /// @dev probably will be changed to treasury or distrubitor contract
     address Treasury;
     address RewardPool;
@@ -123,22 +124,31 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
                 remainingReward = remainingReward - typePrice;
                 actualReward = actualReward + (((remainingReward) * 30) / 100);
             }
-            return actualReward;
+            return actualReward - claimedReward[_tokenId];
         }
-        return rewardCount;
+        return checkReward(_tokenId);
     }
 
     function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
+    // TODO : LP distribution
     function _distributePayment(uint256 _amount, bool _isDefo) internal {
         uint256 amount = _amount;
+        uint256 reward = (amount * DistTable[RewardPool]) / 1000;
+        uint256 treasury = (amount * DistTable[Treasury]) / 1000;
+        //        uint256 liquidity = (amount * DistTable[Liquidity]) / 1000;
+        uint256 marketing = (amount * DistTable[Marketing]) / 1000;
+        uint256 team = (amount * DistTable[Team]) / 1000;
+        uint256 buyback = (amount * DistTable[Buyback]) / 1000;
+        /*
         uint256 reward = (amount * 900) / 1000;
         uint256 treasury = (amount * 800) / 1000;
         uint256 liquidity = (amount * 50) / 1000;
         uint256 marketing = (amount * 25) / 1000;
         uint256 team = (amount * 25) / 1000;
         uint256 buyback = (amount * 100) / 1000;
+*/
         IERC20 Token;
         if (_isDefo) {
             treasury = 0;
@@ -210,18 +220,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        /* uint256 _rewardDai = _passedDays *
-            ((_rate * StablePrice[_type]) / 1000);*/
-        // we are only checking dai because defo could be used for _compounding
-        /*require(
-            _rewardDai > minDaiReward,
-            "Reward is less than minimum allowed"
-        );*/
+
         /// right now we are taxing before compounding this could change
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
         _rewardDefo = _rewardDefo - _offset;
         DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
@@ -267,11 +270,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         require(
             DefoToken.transferFrom(
                 msg.sender,
-                Treasury,
+                address(this),
                 UpgradeTax[firstToCheck]
             ),
             "Payment Failed"
         );
+
         if (firstToCheck == NodeType.Ruby) {
             uint256 tokenId = _mintNode(NodeType.Sapphire, msg.sender);
             LastMaintained[tokenId] = block.timestamp;
@@ -520,12 +524,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         MaintenanceFee[_type] = _rate;
     }
 
-    /*function setMinDaiReward(uint256 _minReward)
+    function setMinReward(uint256 _minReward)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        minDaiReward = _minReward;
-    }*/
+        minReward = _minReward;
+    }
 
     /// @dev could be optimized by using a map or enums right now like this for testing purposes
     function changeRewardAddress(address _newAddress)
@@ -575,6 +579,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         PaymentToken = IERC20(_newToken);
+    }
+
+    function setDistirbution(address _targetAddress, uint256 _ratio)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        DistTable[_targetAddress] = _ratio;
     }
 
     function setUpgradeRequirements(NodeType _type, uint256 _rate)
