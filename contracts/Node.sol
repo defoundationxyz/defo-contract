@@ -33,6 +33,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     IERC20 PaymentToken;
     IERC20 DefoToken;
     mapping(address => uint256) public DistTable;
+    uint256[] public RewardTaxTable;
     mapping(NodeType => uint256) public DefoPrice;
     mapping(NodeType => uint256) public StablePrice;
     uint256 minReward = 0;
@@ -122,7 +123,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             actualReward = firstMilestone;
             while (remainingReward > typePrice) {
                 remainingReward = remainingReward - typePrice;
-                actualReward = actualReward + (((remainingReward) * 30) / 100);
+                actualReward = actualReward + (((remainingReward) * 70) / 100);
             }
             return actualReward - claimedReward[_tokenId];
         }
@@ -166,17 +167,17 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         // TODO : add lp distrubition
     }
 
-    /// @dev values are random placeholder values for now
+    // reward rate changes depending on the time
     function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
         uint256 diff = block.timestamp - LastReward[_tokenid];
         if (diff < 1 weeks) {
-            return 400;
+            return RewardTaxTable[0];
         } else if (diff > 2 weeks && diff < 3 weeks) {
-            return 250;
+            return RewardTaxTable[1];
         } else if (diff > 3 weeks && diff < 4 weeks) {
-            return 150;
+            return RewardTaxTable[2];
         } else {
-            return 0;
+            return RewardTaxTable[3];
         }
     }
 
@@ -212,6 +213,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastReward[_tokenid] = block.timestamp;
     }
 
+    /// almost same as the sendRewardTokens function but mainly for compounding pay
     function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
         internal
     {
@@ -233,6 +235,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastReward[_tokenid] = block.timestamp;
     }
 
+    // TODO add stablecoin payment
+    // TODO add recursive compounding
+    // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
         uint256 rewardDefo = checkReward(_tokenid);
@@ -245,6 +250,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastMaintained[tokenId] = block.timestamp;
     }
 
+    // a fusion like node upgrade burns smaller nodes to create a bigger node , tapers would reset
     function _upgrade(uint256[] memory _tokenids) internal {
         require(_tokenids.length >= 2, "not enough nodes");
         NodeType firstToCheck = TypeOf[_tokenids[0]];
@@ -406,7 +412,19 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function Compound(uint256 _tokenid) external {
         require(ownerOf(_tokenid) == msg.sender, "You don't own this node");
+        NodeType _type = TypeOf[_tokenid];
+        require(
+            PaymentToken.balanceOf(msg.sender) > StablePrice[_type],
+            "Insufficient USD"
+        );
+        PaymentToken.transferFrom(
+            msg.sender,
+            address(this),
+            StablePrice[_type]
+        );
+
         require(isActive(_tokenid), "Node is deactivated");
+        _distributePayment(StablePrice[_type], false);
         _compound(_tokenid);
     }
 
@@ -586,6 +604,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         DistTable[_targetAddress] = _ratio;
+    }
+
+    function setRewardTax(uint256[] memory _rewardTaxTable)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        RewardTaxTable = _rewardTaxTable;
     }
 
     function setUpgradeRequirements(NodeType _type, uint256 _rate)
