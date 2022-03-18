@@ -126,7 +126,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
         expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
 
-        for (let index = 0; index < 2000; index++) {
+        for (let index = 0; index < 1; index++) {
             await network.provider.send("evm_increaseTime", [36000000000])
             await ethers.provider.send('evm_mine');
         
@@ -148,7 +148,8 @@ describe("Node Tests", function () {
         expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
         expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
         expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;             
+        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;   
+        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;        
         expect(await NodeInst.SetNodePrice("0", "10", "10")).to.ok;
         expect(await NodeInst.SetNodePrice("1", "100", "100" )).to.ok;
         expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;
@@ -188,6 +189,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
         expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
         expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;             
+        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;        
         expect(await NodeInst.SetNodePrice("0", "10", "10")).to.ok;
         expect(await NodeInst.SetNodePrice("1", "100", "100" )).to.ok;
         expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;

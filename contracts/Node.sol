@@ -115,6 +115,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 rewardCount = checkReward(_tokenId) + claimedReward[_tokenId];
         uint256 remainingReward;
         uint256 actualReward;
+        uint256 x = 0;
         NodeType tokenType = TypeOf[_tokenId];
         uint256 typePrice = DefoPrice[tokenType];
         uint256 firstMilestone = typePrice + (typePrice / 2);
@@ -122,6 +123,10 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             remainingReward = rewardCount - firstMilestone;
             actualReward = firstMilestone;
             while (remainingReward > typePrice) {
+                console.log("bing %d", x);
+                console.log("reward %d", remainingReward);
+                console.log("gas %d", gasleft());
+                x++;
                 remainingReward = remainingReward - typePrice;
                 actualReward = actualReward + (((remainingReward) * 70) / 100);
                 actualReward = actualReward + typePrice;
