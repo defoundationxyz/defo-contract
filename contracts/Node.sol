@@ -124,6 +124,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             while (remainingReward > typePrice) {
                 remainingReward = remainingReward - typePrice;
                 actualReward = actualReward + (((remainingReward) * 70) / 100);
+                actualReward = actualReward + typePrice;
             }
             return actualReward - claimedReward[_tokenId];
         }
@@ -158,6 +159,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         } else {
             reward = 0;
             buyback = (amount * 100) / 1000;
+            Token = PaymentToken;
         }
         Token.transfer(RewardPool, reward);
         Token.transfer(Marketing, marketing);
@@ -195,11 +197,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
     function _sendRewardTokens(uint256 _tokenid) internal {
-        NodeType _type = TypeOf[_tokenid];
+        /*NodeType _type = TypeOf[_tokenid];
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;*/
+        uint256 _rewardDefo = _taperCalculate(_tokenid);
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
@@ -217,16 +219,16 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
         internal
     {
-        NodeType _type = TypeOf[_tokenid];
+        /*NodeType _type = TypeOf[_tokenid];
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
+        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;*/
+        uint256 _rewardDefo = _taperCalculate(_tokenid);
 
-        /// right now we are taxing before compounding this could change
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
         _rewardDefo = _rewardDefo - _offset;
         DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
