@@ -123,9 +123,9 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             remainingReward = rewardCount - firstMilestone;
             actualReward = firstMilestone;
             while (remainingReward > typePrice) {
-                console.log("bing %d", x);
+                /*console.log("bing %d", x);
                 console.log("reward %d", remainingReward);
-                console.log("gas %d", gasleft());
+                console.log("gas %d", gasleft());*/
                 x++;
                 remainingReward = remainingReward - typePrice;
                 actualReward = actualReward + (((remainingReward) * 70) / 100);
@@ -202,10 +202,6 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
     function _sendRewardTokens(uint256 _tokenid) internal {
-        /*NodeType _type = TypeOf[_tokenid];
-        uint256 _rate = RewardRate[_type];
-        uint256 _lastTime = LastReward[_tokenid];
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;*/
         uint256 _rewardDefo = _taperCalculate(_tokenid);
 
         uint256 taxRate = _rewardTax(_tokenid);
@@ -224,10 +220,6 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function _sendRewardTokensWithOffset(uint256 _tokenid, uint256 _offset)
         internal
     {
-        /*NodeType _type = TypeOf[_tokenid];
-        uint256 _rate = RewardRate[_type];
-        uint256 _lastTime = LastReward[_tokenid];
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;*/
         uint256 _rewardDefo = _taperCalculate(_tokenid);
 
         uint256 taxRate = _rewardTax(_tokenid);
@@ -247,8 +239,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
-        uint256 rewardDefo = checkReward(_tokenid);
-        require(rewardDefo >= (DefoPrice[nodeType] * 2));
+        uint256 rewardDefo = _taperCalculate(_tokenid);
+        require(rewardDefo >= (DefoPrice[nodeType] * 2), "not enough rewards");
         _sendRewardTokensWithOffset(_tokenid, (DefoPrice[nodeType] * 2));
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
@@ -475,14 +467,14 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _rate = RewardRate[_type];
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
+        console.log("DAYS : %d ", _passedDays);
+
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        /*uint256 _rewardDai = _passedDays *
-            ((_rate * StablePrice[_type]) / 1000);*/
+        console.log("reward : %d ", _rewardDefo);
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
         return (
             _rewardDefo /*, _rewardDai*/
