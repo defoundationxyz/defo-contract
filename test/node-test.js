@@ -126,8 +126,8 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
         expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
 
-        for (let index = 0; index < 10; index++) {
-            await network.provider.send("evm_increaseTime", [86400])
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 365])
             await ethers.provider.send('evm_mine');
         
         } 
@@ -141,6 +141,38 @@ describe("Node Tests", function () {
 
     });
   
+
+    it("Test taper", async function () {
+        expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
+        expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
+        await DAI.mint(addr1.address,ethers.utils.parseEther( "10000000"));
+        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
+        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
+        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
+        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;        
+        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;
+        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
+        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
+        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
+        expect(await NodeInst.setRewardRate("0", "10" )).to.ok;
+        expect(await NodeInst.setRewardRate("1", "10" )).to.ok;
+        expect(await NodeInst.setRewardRate("2", "10")).to.ok;
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
+        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 365])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkReward("0"));
+
+    });
+  
+
     it("Test compound", async function () {
         expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
         expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
@@ -241,8 +273,8 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
-        for (let index = 0; index < 200; index++) {
-            await network.provider.send("evm_increaseTime", [360000])
+        for (let index = 0; index < 100; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
         
       }

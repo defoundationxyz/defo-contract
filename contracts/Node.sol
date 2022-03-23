@@ -110,28 +110,23 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     // internal functions
 
-    /// @dev WIP
+    /// calculates the reward taper with roi after 1.5x everytime roi achived rewards taper by %30
     function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
         uint256 rewardCount = checkReward(_tokenId) + claimedReward[_tokenId];
-        uint256 remainingReward;
         uint256 actualReward;
-        uint256 x = 0;
         NodeType tokenType = TypeOf[_tokenId];
         uint256 typePrice = DefoPrice[tokenType];
         uint256 firstMilestone = typePrice + (typePrice / 2);
         if (rewardCount > firstMilestone) {
-            remainingReward = rewardCount - firstMilestone;
+            rewardCount = rewardCount - firstMilestone;
             actualReward = firstMilestone;
-            while (remainingReward > typePrice) {
-                /*console.log("bing %d", x);
-                console.log("reward %d", remainingReward);
-                console.log("gas %d", gasleft());*/
-                x++;
-                remainingReward = remainingReward - typePrice;
-                actualReward = actualReward + (((remainingReward) * 70) / 100);
+            while (rewardCount > typePrice) {
                 actualReward = actualReward + typePrice;
+                rewardCount = rewardCount - typePrice;
+                rewardCount = (((rewardCount) * 70) / 100);
             }
-            return actualReward - claimedReward[_tokenId];
+            /// TODO : check for overflows
+            return actualReward + rewardCount - claimedReward[_tokenId];
         }
         return checkReward(_tokenId);
     }
@@ -207,12 +202,10 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-            //_rewardDai = (_rewardDai - ((taxRate * _rewardDai) / 1000));
         }
 
         DefoToken.transferFrom(Treasury, msg.sender, _rewardDefo);
         claimedReward[_tokenid] = claimedReward[_tokenid] + _rewardDefo;
-        //PaymentToken.transferFrom(Treasury, msg.sender, _rewardDai);
         LastReward[_tokenid] = block.timestamp;
     }
 
@@ -234,14 +227,14 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastReward[_tokenid] = block.timestamp;
     }
 
-    // TODO add stablecoin payment
     // TODO add recursive compounding
     // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
     function _compound(uint256 _tokenid) internal {
         NodeType nodeType = TypeOf[_tokenid];
         uint256 rewardDefo = _taperCalculate(_tokenid);
-        require(rewardDefo >= (DefoPrice[nodeType] * 2), "not enough rewards");
-        _sendRewardTokensWithOffset(_tokenid, (DefoPrice[nodeType] * 2));
+        require(rewardDefo >= (DefoPrice[nodeType]), "not enough rewards");
+        _sendRewardTokensWithOffset(_tokenid, (DefoPrice[nodeType]));
+
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
@@ -429,9 +422,16 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     function CompoundAll() external {
         require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
+
         address account = msg.sender;
         uint256[] memory nodesOwned = getNodeIdsOf(account);
+
         for (uint256 index = 0; index < nodesOwned.length; index++) {
+            require(
+                PaymentToken.balanceOf(msg.sender) >=
+                    StablePrice[TypeOf[nodesOwned[index]]],
+                "Insufficient USD"
+            );
             require(isActive(nodesOwned[index]), "Node is deactivated");
             _compound(nodesOwned[index]);
         }
@@ -479,6 +479,14 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         return (
             _rewardDefo /*, _rewardDai*/
         );
+    }
+
+    function checkTaperedReward(uint256 _tokenid)
+        public
+        view
+        returns (uint256)
+    {
+        return _taperCalculate(_tokenid);
     }
 
     function checkPendingMaintenance(uint256 _tokenid)
