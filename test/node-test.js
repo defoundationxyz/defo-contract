@@ -35,22 +35,25 @@ describe("Node Tests", function () {
     await Token.mint(addr2.address,ethers.utils.parseEther( "10000000"));
 
     await DAI.mint(addr1.address, ethers.utils.parseEther( "10000000"));
-    await DAI.mint(addr2.address, ethers.utils.parseEther( "10000000"));
-
+    await DAI.mint(addr2.address, ethers.utils.parseEther("10000000"));
+        
+    expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
+    expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
+    await DAI.mint(addr1.address,ethers.utils.parseEther( "10000000"));
+    expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
+    expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
+    expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
+    expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;        
+    expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;
+    expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
+    expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
+    expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
+    expect(await NodeInst.setRewardRate("0", "10" )).to.ok;
+    expect(await NodeInst.setRewardRate("1", "10" )).to.ok;
+    expect(await NodeInst.setRewardRate("2", "10")).to.ok;
     });
   
     it("Test minting nodes", async function () {
-        //var before = await Token.balanceOf(addr1.address);
-        //var beforeDAI = await DAI.balanceOf(addr1.address);
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;        
-        expect(await Token.connect(addr1).approve(NodeInst.address, "10000000000000")).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address , "10000000000000")).ok;
-        expect(await NodeInst.SetNodePrice("0", "10", "10")).to.ok;
-        expect(await NodeInst.SetNodePrice("1", "100", "100" )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
@@ -67,23 +70,13 @@ describe("Node Tests", function () {
     });
 
     it("Test maintain", async function () {
-        expect(await Token.connect(addr1).approve(NodeInst.address, "10000000000000")).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, "100000000000000000000000")).ok;
-        await DAI.mint(addr1.address, "100000000000000000000000");
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;             
-        expect(await NodeInst.SetNodePrice("0", "10", "10")).to.ok;
-        expect(await NodeInst.SetNodePrice("1", "100", "100" )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", "1000", "1000")).to.ok;
         expect(await NodeInst.setMaintenanceRate("0", "10" )).to.ok;
         expect(await NodeInst.setMaintenanceRate("1", "100" )).to.ok;
         expect(await NodeInst.setMaintenanceRate("2" , "1000")).to.ok;        
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
-        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.gt("0");
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
         var before = await NodeInst.connect(addr1).checkPendingMaintenance("0")
         for (let index = 0; index < 365; index++) {
             await network.provider.send("evm_increaseTime", [86400])
@@ -92,7 +85,7 @@ describe("Node Tests", function () {
       }
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.gt(before);
         expect(await NodeInst.connect(addr1).Maintenance("0")).to.ok;
-        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt(before);
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq(before);
 
 
         for (let index = 0; index < 365; index++) {
@@ -106,20 +99,7 @@ describe("Node Tests", function () {
     });
 
     it("Test reward", async function () {
-        expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        await DAI.mint(addr1.address,ethers.utils.parseEther( "10000000"));
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;        
-        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;
-        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
-        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.setRewardRate("0", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("1", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("2", "10")).to.ok;
+
         //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
@@ -143,21 +123,7 @@ describe("Node Tests", function () {
   
 
     it("Test taper", async function () {
-        expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        await DAI.mint(addr1.address,ethers.utils.parseEther( "10000000"));
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;        
-        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;
-        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
-        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.setRewardRate("0", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("1", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("2", "10")).to.ok;
-        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+  
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
@@ -174,21 +140,7 @@ describe("Node Tests", function () {
   
 
     it("Test compound", async function () {
-        expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        await DAI.mint(addr1.address, "100000000000000000000000");
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;   
-        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;        
-        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
-        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.setRewardRate("0", "100" )).to.ok;
-        expect(await NodeInst.setRewardRate("1", "100" )).to.ok;
-        expect(await NodeInst.setRewardRate("2", "100")).to.ok;
-        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+    
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
@@ -214,22 +166,7 @@ describe("Node Tests", function () {
     });
 
     it("Test compoundAll", async function () {
-            await Token.mint(owner.address,ethers.utils.parseEther( "100000000000000000000"));
-        expect(await Token.connect(addr1).approve(NodeInst.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")).ok;
-        //await DAI.mint(addr1.address, "100000000000000000000000");
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;             
-        expect(await NodeInst.setRewardTax(["500", "300", "100", "0"])).to.ok;        
-        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
-        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.setRewardRate("0", "100" )).to.ok;
-        expect(await NodeInst.setRewardRate("1", "100" )).to.ok;
-        expect(await NodeInst.setRewardRate("2", "100")).to.ok;
-        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+ 
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
@@ -256,19 +193,10 @@ describe("Node Tests", function () {
 
 
         it("Test upfront maintain", async function () {
-        expect(await Token.connect(addr1).approve(NodeInst.address,ethers.utils.parseEther( "100000000000000000000000"))).ok;
-        expect(await DAI.connect(addr1).approve(NodeInst.address, ethers.utils.parseEther( "100000000000000000000000"))).ok;
-            await DAI.mint(addr1.address, "100000000000000000000000");
-        expect(await NodeInst.changeDonationAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeTeamAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeMarketingAddress(owner.address)).to.ok;
-        expect(await NodeInst.changeBuybackAddress(owner.address)).to.ok;                 
-        expect(await NodeInst.SetNodePrice("0",  ethers.utils.parseEther("10"), ethers.utils.parseEther("10"))).to.ok;
-        expect(await NodeInst.SetNodePrice("1", ethers.utils.parseEther("100"), ethers.utils.parseEther("100") )).to.ok;
-        expect(await NodeInst.SetNodePrice("2", ethers.utils.parseEther("1000") , ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.setRewardRate("0", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("1", "10" )).to.ok;
-        expect(await NodeInst.setRewardRate("2", "10")).to.ok;    
+
+        expect(await NodeInst.setMaintenanceRate("0", "10" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("1", "100" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("2" , "1000")).to.ok;                    
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;

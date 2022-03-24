@@ -111,13 +111,17 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     // internal functions
 
     /// calculates the reward taper with roi after 1.5x everytime roi achived rewards taper by %30
+    /// could be more optimized
     function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
-        uint256 rewardCount = checkReward(_tokenId) + claimedReward[_tokenId];
+        uint256 rewardCount = checkReward(_tokenId) + claimedReward[_tokenId]; // get reward without taper
         uint256 actualReward;
         NodeType tokenType = TypeOf[_tokenId];
         uint256 typePrice = DefoPrice[tokenType];
         uint256 firstMilestone = typePrice + (typePrice / 2);
-        if (rewardCount > firstMilestone) {
+        if (
+            rewardCount > firstMilestone &&
+            ModifierOf[_tokenId] != NodeModif.Fast
+        ) {
             rewardCount = rewardCount - firstMilestone;
             actualReward = firstMilestone;
             while (rewardCount > typePrice) {
@@ -127,11 +131,14 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             }
             /// TODO : check for overflows
             return actualReward + rewardCount - claimedReward[_tokenId];
+        } else if (
+            rewardCount >= firstMilestone &&
+            ModifierOf[_tokenId] == NodeModif.Fast
+        ) {
+            return firstMilestone - claimedReward[_tokenId];
         }
         return checkReward(_tokenId);
     }
-
-    function _executeModifier() internal {}
 
     /// @dev sends the node payment to other wallets
     // TODO : LP distribution
@@ -192,6 +199,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         _safeMint(_to, tokenId);
         TypeOf[tokenId] = _type;
         LastReward[tokenId] = block.timestamp;
+        LastMaintained[tokenId] = block.timestamp;
         return tokenId;
     }
 
@@ -465,12 +473,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     {
         NodeType _type = TypeOf[_tokenid];
         uint256 _rate = RewardRate[_type];
+        if (ModifierOf[_tokenid] == NodeModif.Fast) {
+            _rate = _rate * 2;
+        }
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        console.log("DAYS : %d ", _passedDays);
 
         uint256 _rewardDefo = _passedDays * ((_rate * DefoPrice[_type]) / 1000);
-        console.log("reward : %d ", _rewardDefo);
 
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
@@ -502,7 +511,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
             return 0;
         } else {
             _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-
+            console.log("Maint Days : %d", _passedDays);
             uint256 _amount = _passedDays * _fee;
             return _amount;
         }
