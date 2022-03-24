@@ -2,15 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 //Make the conctract upgradeable
 
-contract Limiter is AccessControl {
-    address public owner;
+contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     address defoNode;
-    mapping(address => uint256) TransferLog;
+
 
     // minimum allowed time between transfers
     uint256 TimeLimit;
@@ -23,26 +22,35 @@ contract Limiter is AccessControl {
 
     //don't tax addresses like limiter , lp and null address
     mapping(address => bool) Whitelist;
-
     mapping(address => bool) Blocklist;
+    mapping(address => uint256) TransferLog;
+
+    uint256 userQuotaTimeframeIn;
+    uint256 userQuotaTimeframeOut;
+    uint256 timeframeWindow;
+    uint256 timeframeExpiration;
 
     constructor(uint256 _timeLimit, address _taxCollector, address _defoNodeAddress) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        owner = msg.sender;
         defoNode = _defoNodeAddress;
         TimeLimit = _timeLimit;
         TaxCollector = _taxCollector;
     }
 
+    // Have to get this from implementation pointer contract
     modifier onlyNode() {
-        require (
-            address(msg.sender) == defoNode, 
-            "Only Defo node contract can call this function"
-        );
+        /*require (
+            address(msg.sender) == defoNode,
+            "Only Defo node contract can call this function"); */
         _;
     }
 
+    // go over timeframe implementation again
     modifier checkTimeframe() {
+        uint256 currentTime = block.timestamp;
+        if (currentTime > timeframeWindow + timeframeExpiration) {
+            timeframeWindow = currentTime;
+        }
         _;
     }
 
@@ -53,32 +61,57 @@ contract Limiter is AccessControl {
         address from,
         address to,
         address origin
-
     ) {
         if (
-            origin != owner &&
-            to != owner) {
+            origin != owner() &&
+            to != owner()) {
                 require(
                     !Blocklist[sender] &&
                     !Blocklist[from] &&
                     !Blocklist[to] &&
                     !Blocklist[origin],
                     "Address is not permitted"
-
                 );
         }
         _;
     }
 
-    event UserLimiterBought ();
-    event UserLimiterSellOrLiquidityAdd ();
-    event UserLimiterLiquidityWithdrawal ();
-    event UserLimiterTransfer ();
+    event UserLimiterBought (
+        address indexed _sender,
+        address indexed _from,
+        address indexed _to
+    );
 
-    function beforeTokenTrasfer() external onlyNode checkTimeframe /*notDenied()*/ {}
+    event UserLimiterSellOrLiquidityAdd (
+        address indexed _sender,
+        address indexed _from,
+        address indexed _to
+    );
 
-    /// Use basis points for input
-    ///   i.e. if you want 2% input 200, 
+    event UserLimiterLiquidityWithdrawal (bool indexed _status);
+
+    event UserLimiterTransfer (
+        address indexed _sender,
+        address indexed _from,
+        address indexed _to
+    );
+
+    function beforeTokenTrasfer(
+        address _sender,
+        address _from,
+        address _to,
+        uint256 _amount
+    )
+        external
+        onlyNode
+        checkTimeframe
+        notDenied(_sender, _from, _to, tx.origin)
+        returns(bool) {
+
+    }
+
+    /// @notice Use basis points for input
+    ///   i.e. if you want 2% input 200,
     ///   if you want 20% input 2000
     function setTaxRate (uint256 newTaxRate) external onlyRole(DEFAULT_ADMIN_ROLE) {
         TaxRate = newTaxRate;
