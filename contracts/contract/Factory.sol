@@ -12,7 +12,6 @@ contract  Factory is IFactory, Ownable{
     address public override owner;
     address public override feeTo;
     address public override router;
-    address public override feeToSetter;
     
     mapping(address=>mapping(address => address)) public override getPair;
     address[] public override allPairs;
@@ -46,10 +45,6 @@ contract  Factory is IFactory, Ownable{
 
     function setFeeTo(address _feeTo) external override onlyOwner() {
         feeTo = _feeTo;
-    }
-
-    function setfeeToSetter(address _feeToSetter) external override onlyOwner(){
-        feeToSetter = _feeToSetter;
     }
 
     function setRouter(address _newRouter) external override onlyOwner(){
