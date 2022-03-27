@@ -2,14 +2,18 @@
 pragma solidity ^0.8.0;
 
 import "./interfaces/IERC20.sol";
+import "./interfaces/LPManager.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 
 //Make the conctract upgradeable
 
 contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
-    address defoNode;
-
+    address private defoNode;
+    address private DAIPool;
+    LPManager DefoLPManager;
 
     // minimum allowed time between transfers
     uint256 TimeLimit;
@@ -20,32 +24,36 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     //limiter must be pre-approved by taxed token
     address public TaxedToken;
 
-    //don't tax addresses like limiter , lp and null address
-    mapping(address => bool) Whitelist;
-    mapping(address => bool) Blocklist;
-    mapping(address => uint256) TransferLog;
+    mapping(address => bool) Whitelist; //Addresses that are excluded from observation
+    mapping(address => bool) Blocklist; //Denied Addresses
+    mapping(address => uint256) public TransferLog;
+    mapping(address => uint256) public tokensBought;
+    mapping(uint256 => mapping(address => uint256)) public tokensIn;
+    mapping(uint256 => mapping(address => uint256)) public tokensOut;
 
     uint256 userQuotaTimeframeIn;
     uint256 userQuotaTimeframeOut;
     uint256 timeframeWindow;
     uint256 timeframeExpiration;
 
-    constructor(uint256 _timeLimit, address _taxCollector, address _defoNodeAddress) {
+    
+
+    constructor(uint256 _timeLimit, address _taxCollector, address _defoNodeAddress, address _DAIPool, address _lpManager) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
         TimeLimit = _timeLimit;
         TaxCollector = _taxCollector;
+        DAIPool = _DAIPool;
+        DefoLPManager = LPManager(_lpManager);
     }
 
-    // Have to get this from implementation pointer contract
     modifier onlyNode() {
-        /*require (
+        require (
             address(msg.sender) == defoNode,
-            "Only Defo node contract can call this function"); */
+            "Only Defo node contract can call this function");
         _;
     }
 
-    // go over timeframe implementation again
     modifier checkTimeframe() {
         uint256 currentTime = block.timestamp;
         if (currentTime > timeframeWindow + timeframeExpiration) {
@@ -54,8 +62,6 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         _;
     }
 
-    //Can't get the `DEFAULT_ADMIN_ROLE` address from AccessControl so used owner variable
-    // Add Ownable
     modifier notDenied(
         address sender,
         address from,
@@ -76,7 +82,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         _;
     }
 
-    event UserLimiterBought (
+    event UserLimiterBuy (
         address indexed _sender,
         address indexed _from,
         address indexed _to
@@ -96,6 +102,15 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         address indexed _to
     );
 
+    function isPair(address _from, address _to)
+        private
+        view
+        returns(bool) {
+            if ((_from == DAIPool) && (_to == DAIPool)) {
+                return true;
+            }
+    }
+
     function beforeTokenTrasfer(
         address _sender,
         address _from,
@@ -107,7 +122,35 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         checkTimeframe
         notDenied(_sender, _from, _to, tx.origin)
         returns(bool) {
+            if (_from == _to) {
+                return true;
+            }
+            if ((_from == address(0)) || (_to == address(0))) {
+                return true;
+            }
 
+            require (
+                _to != DAIPool,
+                "Cannot directly send to the liquidity pool"
+            );
+            require (
+                _to != defoNode,
+                "Cannot send directly to the node contract"
+            );
+            require (
+                _to != address(this),
+                "Cannot send directly to this contract"
+            );
+
+            if (isPair(_from, _to)){
+                if(!Whitelist[_to]) {
+                    tokensBought[_to] += _amount;
+                    tokensIn[timeframeWindow];
+                }
+                emit UserLimiterBuy(_sender, _from, _to);
+            } else if (DefoLPManager.isRouter(_sender) && isPair(_from, _to)) {
+
+            }
     }
 
     /// @notice Use basis points for input
@@ -119,10 +162,6 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
 
     function setTaxCollector (address newTaxCollector) external onlyRole(DEFAULT_ADMIN_ROLE) {
         TaxCollector = newTaxCollector;
-    }
-
-    function setNodeAddress(address newNodeAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        defoNode = newNodeAddress;
     }
 
     function setToken(address _token) external onlyRole(DEFAULT_ADMIN_ROLE) {
