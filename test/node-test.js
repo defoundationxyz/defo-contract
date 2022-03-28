@@ -217,6 +217,56 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
 
 
+        });
+    
+       it("Test fast track modifier", async function () {
+
+        expect(await NodeInst.setMaintenanceRate("0", "10" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("1", "100" )).to.ok;
+        expect(await NodeInst.setMaintenanceRate("2" , "1000")).to.ok;                    
+        expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
+        for (let index = 0; index < 100; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
+            await ethers.provider.send('evm_mine');
+        
+      }
+        var before = await NodeInst.connect(addr1).checkPendingMaintenance("0")
+        expect(await NodeInst.connect(addr1).MaintenanceUpfront("0" , "200") ).to.ok;
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt(before);
+        for (let index = 0; index < 2000; index++) {
+            await network.provider.send("evm_increaseTime", [3600])
+            await ethers.provider.send('evm_mine');
+        
+      }
+        expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
+
+
     });
+
+
+    it("Test taper", async function () {
+  
+        expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
+        expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
+        expect(await NodeInst.setRewardRate("0", "1")).to.ok;
+        expect(await NodeInst.SetNodePrice("0", ethers.utils.parseEther("1000"), ethers.utils.parseEther("1000"))).to.ok;
+        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+
+        for (let index = 0; index < 2001; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
+            await ethers.provider.send('evm_mine');
+        
+        }
+        console.log(await NodeInst.checkTaperedReward("0"));
+        console.log(await NodeInst.connect(addr1).checkReward("0"));
+        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkReward("0"));
+
+    });
+  
+
 
 });
