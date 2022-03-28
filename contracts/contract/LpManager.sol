@@ -9,8 +9,9 @@ import "../interfaces/IJoeFactory.sol";
 import "../interfaces/IJoePair.sol";
 import "../interfaces/IJoeRouter02.sol";
 import "../interfaces/ILpManager.sol";
+import "./Universe.sol";
 
-contract  LpManager is Ownable, OwnerRecovery{
+contract  LpManager is Ownable, OwnerRecovery, Universe{
 
     using SafeERC20 for IERC20;
 
@@ -29,7 +30,7 @@ contract  LpManager is Ownable, OwnerRecovery{
     IERC20 private leftSide;
     IERC20 private rightSide;
 
-    uint256 MAX_INT = type(uint).max;
+    uint256 MAX_UINT256 = type(uint).max;
 
     modifier validAddress(address _one, address _two){
         require(_one != address(0));
@@ -37,7 +38,7 @@ contract  LpManager is Ownable, OwnerRecovery{
         _;
     }
 
-    constructor( address _router, address _fee, address[2] memory path) validAddress(_router, _fee){
+    constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router, _fee){
         router = IJoeRouter02(_router);
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
@@ -45,16 +46,16 @@ contract  LpManager is Ownable, OwnerRecovery{
         pairLiquidityTotalSupply = pair.totalSupply();
         updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
         // Left side should be main contract
-        //changeUniverseImplementation(address(leftSide));
+        changeUniverseImplementation(address(leftSide));
         shouldLiquify(true);
     
     } 
 
-    function afterTokenTransfer(address sender) external onlyUniverse returns (bool){
+    function afterTokenTransfer(address _sender) external onlyUniverse returns (bool){
         uint256 leftSideBalance = leftSide.balanceOf(address(this));
         bool shouldSwap = leftSideBalance >= swapTokensToLiquidityThreshold;
         if (shouldSwap && liquifyEnabled && pair.totalSupply() > 0 
-        && !isSwapping &&!isPair(sender) && !isRouter(sender)) 
+        && !isSwapping &&!isPair(_sender) && !isRouter(_sender)) 
         {
             // This prevents inside calls from triggering this function again (infinite loop)
             // It's ok for this function to be reentrant since it's protected by this check
@@ -62,16 +63,15 @@ contract  LpManager is Ownable, OwnerRecovery{
             // To prevent bigger sell impact we only sell in batches with the threshold as a limit
             uint256 totalLP = swapAndLiquify(swapTokensToLiquidityThreshold);
             uint256 totalLPRemaining = totalLP;
+            address owner = owner();
+            address _owner = owner();
 
-            for (uint256 i = 0; i < feeAddresses.length; i++) {
-                if ((feeAddresses.length - 1) == i) {
-                    // Send remaining LP tokens to the last address
-                    sendLPTokensTo(feeAddresses[i], totalLPRemaining);
-                } else {
-                    uint256 calculatedFee = (totalLP * feePercentages[i]) / 100;
-                    totalLPRemaining -= calculatedFee;
-                    sendLPTokensTo(feeAddresses[i], calculatedFee);
-                }
+            if(feeTo != address(0)){
+                uint256 calculatedFee = (totalLPRemaining * feePercentage) / 100;
+                totalLPRemaining -= calculatedFee;
+                sendLPTokensTo(feeTo, calculatedFee);
+            } else {
+                sendLPTokensTo(_owner, totalLPRemaining);
             }
             // Keep it healthy
             pair.sync();
@@ -165,6 +165,10 @@ contract  LpManager is Ownable, OwnerRecovery{
         swapTokensToLiquidityThreshold = _swapTokensToLiquidityThreshold;
     }
 
+    function setFeeTo(address _newFeeaddress) public onlyOwner {
+        feeTo = _newFeeaddress;
+    }
+
     //view functions
     function getRouter() external view returns (address) {
         return address(router);
@@ -190,10 +194,6 @@ contract  LpManager is Ownable, OwnerRecovery{
 
     function isRouter(address _router) public view returns (bool) {
         return _router == address(router);
-    }
-
-    function isLiquidityAdded() external view returns (bool) {
-         return pairLiquidityTotalSupply < pair.totalSupply();
     }
 
     function isLiquidityAdded() external view returns (bool) {
