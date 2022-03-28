@@ -7,6 +7,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /// @dev we need enumerable for compundAll function
 // TODO OPTIMIZATION : find a way to write compoundall system without enumerable
+// TODO : upgradeable
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -39,12 +40,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     uint256 minReward = 0;
     /// @dev timestamp of last claimed reward
     mapping(uint256 => uint256) public LastReward;
-
     mapping(uint256 => uint256) public claimedReward;
     /**  @dev timestamp of last maintenance
      *        if maintenance fee is paid upfront the timestamp could show a future time
      */
     mapping(uint256 => uint256) public LastMaintained;
+    mapping(address => uint256) public OmegaClaims;
+    mapping(address => uint256) public DeltaClaims;
     /// @dev minimum time required to claim rewards in seconds
     uint256 public RewardTime;
 
@@ -58,6 +60,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         Fast,
         Generous
     }
+    enum Booster {
+        None,
+        Delta,
+        Omega
+    }
 
     /// @dev probably will be changed to treasury or distrubitor contract
     address Treasury;
@@ -70,6 +77,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     mapping(uint256 => NodeType) public TypeOf;
     mapping(uint256 => NodeModif) public ModifierOf;
+    mapping(uint256 => Booster) public BoosterOf;
+
     address[] GenerousityList;
     /// @dev token per second
     // TODO OPTIMIZATION : Using structs for nodes could be better
@@ -255,52 +264,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastMaintained[tokenId] = block.timestamp;
     }
 
-    /*
-    // a fusion like node upgrade burns smaller nodes to create a bigger node , tapers would reset
-    function _upgrade(uint256[] memory _tokenids) internal {
-        require(_tokenids.length >= 2, "not enough nodes");
-        NodeType firstToCheck = TypeOf[_tokenids[0]];
-        require(
-            _tokenids.length == UpgradeRequirements[firstToCheck],
-            "Token amount is wrong"
-        );
-        require(firstToCheck != NodeType.Diamond, "Can't upgrade diamond");
-        for (uint256 index = 0; index < _tokenids.length; index++) {
-            require(
-                ownerOf(_tokenids[index]) == msg.sender,
-                "You don't own that token"
-            );
-            require(
-                firstToCheck == TypeOf[_tokenids[index]],
-                "Token types must be same"
-            );
-            /// @dev reward if any unclaimed rewards left
-            _sendRewardTokens(_tokenids[index]);
-
-            burn(_tokenids[index]);
-        }
-        require(
-            DefoToken.transferFrom(
-                msg.sender,
-                address(this),
-                UpgradeTax[firstToCheck]
-            ),
-            "Payment Failed"
-        );
-
-        if (firstToCheck == NodeType.Ruby) {
-            uint256 tokenId = _mintNode(NodeType.Sapphire, msg.sender);
-            LastMaintained[tokenId] = block.timestamp;
-        } else {
-            uint256 tokenId = _mintNode(NodeType.Diamond, msg.sender);
-            LastMaintained[tokenId] = block.timestamp;
-        }
-    }
-*/
     // TODO: Add grace period
     function _maintenance(uint256 _tokenid) internal {
         NodeType _nodeType = TypeOf[_tokenid];
         uint256 _fee = MaintenanceFee[_nodeType];
+        uint256 discountRate = _maintenanceDiscount(_tokenid);
+        _fee = _fee - ((discountRate * _fee) / 100);
         uint256 _lastTime = LastMaintained[_tokenid];
         require(_lastTime < block.timestamp, "upfront is paid already");
         // TODO TEST : check for possible calculation errors
@@ -319,6 +288,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         require(_days <= 240, "must be less than 6 months");
         NodeType _nodeType = TypeOf[_tokenid];
         uint256 _fee = MaintenanceFee[_nodeType];
+        uint256 discountRate = _maintenanceDiscount(_tokenid);
+        _fee = _fee - ((discountRate * _fee) / 100);
         uint256 _lastTime = LastMaintained[_tokenid];
         require(_lastTime < block.timestamp, "upfront is paid already");
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
@@ -333,6 +304,20 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         LastMaintained[_tokenid] = block.timestamp + offset;
     }
 
+    function _maintenanceDiscount(uint256 _tokenid)
+        internal
+        view
+        returns (uint256)
+    {
+        if (BoosterOf[_tokenid] == Booster.Omega) {
+            return 50;
+        } else if (BoosterOf[_tokenid] == Booster.Delta) {
+            return 25;
+        } else {
+            return 0;
+        }
+    }
+
     // Public Functions
 
     function RedeemMint(NodeType _type, address _to)
@@ -340,6 +325,41 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         onlyRole(MINTER_ROLE)
     {
         _mintNode(_type, _to);
+    }
+
+    function RedeemMintBooster(
+        NodeType _type,
+        Booster _booster,
+        address _to
+    ) public onlyRole(MINTER_ROLE) {
+        _mintNode(_type, _to);
+        if (_booster == Booster.Omega) {
+            OmegaClaims[_to] = OmegaClaims[_to] + 2;
+        } else {
+            DeltaClaims[_to] = DeltaClaims[_to] + 2;
+        }
+    }
+
+    /// TODO : add type restriction
+    function BoostNode(Booster _booster, uint256 _tokenid)
+        public
+        onlyNodeOwner(_tokenid)
+        onlyActive(_tokenid)
+    {
+        require(BoosterOf[_tokenid] == Booster.None, "Node is already boosted");
+        require(
+            OmegaClaims[msg.sender] > 0 || DeltaClaims[msg.sender] > 0,
+            "Not enough boost claims"
+        );
+        if (_booster == Booster.Omega) {
+            require(OmegaClaims[msg.sender] > 0, "Not enough boost claims");
+            BoosterOf[_tokenid] = Booster.Omega;
+            OmegaClaims[msg.sender] = OmegaClaims[msg.sender] - 1;
+        } else {
+            require(DeltaClaims[msg.sender] > 0, "Not enough boost claims");
+            BoosterOf[_tokenid] = Booster.Delta;
+            DeltaClaims[msg.sender] = DeltaClaims[msg.sender] - 1;
+        }
     }
 
     /// @notice mint a new node
@@ -491,6 +511,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         uint256 _rate = RewardRate[_type];
         if (ModifierOf[_tokenid] == NodeModif.Fast) {
             _rate = _rate * 2;
+        }
+        if (BoosterOf[_tokenid] == Booster.Omega) {
+            _rate = _rate * 2;
+        } else if (BoosterOf[_tokenid] == Booster.Delta) {
+            _rate = _rate + (((_rate * 20)) / 100);
         }
         uint256 _lastTime = LastReward[_tokenid];
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
