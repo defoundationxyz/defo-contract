@@ -14,6 +14,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     address private defoNode;
     address private DAIPool;
     LPManager DefoLPManager;
+    IERC20 DefoToken;
 
     // minimum allowed time between transfers
     uint256 TimeLimit;
@@ -35,16 +36,25 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     uint256 userQuotaTimeframeOut;
     uint256 timeframeWindow;
     uint256 timeframeExpiration;
+    uint256 maxPercentageVsTotalSupply = 50; //Max percentage of total supply a wallet can hold
 
     
 
-    constructor(uint256 _timeLimit, address _taxCollector, address _defoNodeAddress, address _DAIPool, address _lpManager) {
+    constructor(
+        uint256 _timeLimit, 
+        address _taxCollector, 
+        address _defoNodeAddress, 
+        address _DAIPool, 
+        address _lpManager,
+        address _defoToken
+    ) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
         TimeLimit = _timeLimit;
         TaxCollector = _taxCollector;
         DAIPool = _DAIPool;
         DefoLPManager = LPManager(_lpManager);
+        DefoToken = IERC20 (_defoToken);
     }
 
     modifier onlyNode() {
@@ -111,7 +121,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
             }
     }
 
-    function beforeTokenTrasfer(
+    function transferLog (
         address _sender,
         address _from,
         address _to,
@@ -122,6 +132,8 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         checkTimeframe
         notDenied(_sender, _from, _to, tx.origin)
         returns(bool) {
+            bool LPAddOrSell = false;
+
             if (_from == _to) {
                 return true;
             }
@@ -148,9 +160,76 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
                     tokensIn[timeframeWindow];
                 }
                 emit UserLimiterBuy(_sender, _from, _to);
-            } else if (DefoLPManager.isRouter(_sender) && isPair(_from, _to)) {
+            } else if (DefoLPManager.isRouter(_sender) && isPair(_to, _to)) {
+                LPAddOrSell = true;
+                if () {
 
+                } else {
+
+                }
+                emit UserLimiterSellOrLiquidityAdd(
+                    _sender,
+                    _from,
+                    _to
+                );
+            } else {
+                if (!isExcludedFromObs(_to)) {
+                    tokensIn[timeframeWindow][_to] += _amount;
+                }
+                if (!isExcludedFromObs(_from)) {
+                    tokensOut[timeframeWindow][_from] += _amount;
+                }
+                emit UserLimiterTransfer(
+                    _sender,
+                    _from,
+                    _to
+                );
             }
+
+            if (!Whitelist[_to]) {
+                require(
+                    getMaxPercentage() >= DefoToken.balanceOf(_to),
+                    "Cannot transfer to this wallet, must not exceed `getMaxPercentage()`"
+                );
+                require (
+
+                );
+            }
+    }
+
+    function getBoughtTokens(address _account) public view returns(uint256) {
+        return tokensBought
+    }
+
+    function getMaxPercentage() public view returns(uint256) {
+        return (DefoToken.totalSupply() * maxPercentageVsTotalSupply) / 10000;
+    }
+
+    function getTimeframeWindow() public view returns(uint256) {
+        return timeframeWindow;
+    }
+
+    function getTimeframeExpiration() public view returns(uint256) {
+        return timeframeExpiration;
+    }
+
+    function getTokensIn(address _account) public view returns(uint256) {
+        return userQuotaTimeframeIn - tokensIn[timeframeWinow][_account];
+    }
+
+    function getTokensOut(address _account) public view returns(uint256) {
+        return userQuotaTimeframeOut - tokensOut[timeframeWindow][_account];
+    }
+
+    function isWalletCompliant(address _wallet) public view returns(bool) {
+        return DefoToken.balanceOf(_wallet) >= getMaxPercentage();
+    }
+
+    function isExcludedfromObs(address _account) public view returns(bool) {
+        return Whitelist[_account] || 
+        DefoLPManager.isRouter(_account) ||
+        DefoLPManager.isRouter(_address) ||
+        DefiLPManager.isFeeReceiver(_account);
     }
 
     /// @notice Use basis points for input
@@ -158,6 +237,10 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     ///   if you want 20% input 2000
     function setTaxRate (uint256 newTaxRate) external onlyRole(DEFAULT_ADMIN_ROLE) {
         TaxRate = newTaxRate;
+    }
+
+    function setMaxPercentage(uint256 _nerPercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        maxPercentageVsTotalSupply = _newPercentage;
     }
 
     function setTaxCollector (address newTaxCollector) external onlyRole(DEFAULT_ADMIN_ROLE) {
