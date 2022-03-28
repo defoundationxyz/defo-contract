@@ -10,6 +10,8 @@ import "../interfaces/IJoePair.sol";
 import "../interfaces/IJoeRouter02.sol";
 import "../interfaces/ILpManager.sol";
 import "./Universe.sol";
+import "hardhat/console.sol";
+
 
 contract  LpManager is Ownable, OwnerRecovery, Universe{
 
@@ -32,13 +34,12 @@ contract  LpManager is Ownable, OwnerRecovery, Universe{
 
     uint256 MAX_UINT256 = type(uint).max;
 
-    modifier validAddress(address _one, address _two){
+    modifier validAddress(address _one){
         require(_one != address(0));
-        require(_two != address(0));
         _;
     }
 
-    constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router, _fee){
+    constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router){
         router = IJoeRouter02(_router);
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
@@ -63,15 +64,15 @@ contract  LpManager is Ownable, OwnerRecovery, Universe{
             // To prevent bigger sell impact we only sell in batches with the threshold as a limit
             uint256 totalLP = swapAndLiquify(swapTokensToLiquidityThreshold);
             uint256 totalLPRemaining = totalLP;
-            address owner = owner();
-            address _owner = owner();
+            // address _owner = owner();
+            // address owner = _owner;
 
             if(feeTo != address(0)){
                 uint256 calculatedFee = (totalLPRemaining * feePercentage) / 100;
                 totalLPRemaining -= calculatedFee;
                 sendLPTokensTo(feeTo, calculatedFee);
             } else {
-                sendLPTokensTo(_owner, totalLPRemaining);
+                sendLPTokensTo(_sender, totalLPRemaining);
             }
             // Keep it healthy
             pair.sync();
