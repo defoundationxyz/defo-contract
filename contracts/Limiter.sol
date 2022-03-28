@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "./interfaces/IERC20.sol";
 import "./interfaces/LPManager.sol";
@@ -11,6 +11,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 //Make the conctract upgradeable
 
 contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
+    error ExceedingWalletBalance();
+    error UnauthorizedDestination();
+
+
     address private defoNode;
     address private DAIPool;
     LPManager DefoLPManager;
@@ -198,7 +202,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
 
     function getBoughtTokens(address _account) public view returns(uint256) {
-        return tokensBought
+        return tokensBought[_account];
     }
 
     function getMaxPercentage() public view returns(uint256) {
@@ -229,7 +233,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         return Whitelist[_account] || 
         DefoLPManager.isRouter(_account) ||
         DefoLPManager.isRouter(_address) ||
-        DefiLPManager.isFeeReceiver(_account);
+        DefoLPManager.isFeeReceiver(_account);
     }
 
     /// @notice Use basis points for input
@@ -239,7 +243,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         TaxRate = newTaxRate;
     }
 
-    function setMaxPercentage(uint256 _nerPercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setMaxPercentage(uint256 _newPercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
         maxPercentageVsTotalSupply = _newPercentage;
     }
 
