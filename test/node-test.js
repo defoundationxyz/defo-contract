@@ -84,7 +84,7 @@ describe("Node Tests", function () {
         
       }
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.gt(before);
-        expect(await NodeInst.connect(addr1).Maintenance("0")).to.ok;
+        expect(await NodeInst.connect(addr1).Maintenance("0" , "0")).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq(before);
 
 
@@ -93,7 +93,7 @@ describe("Node Tests", function () {
             await ethers.provider.send('evm_mine');
         
       }
-        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceAll("0")).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("1")).to.lt("85239400");
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("2")).to.lt("852394000");
     });
@@ -104,7 +104,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
-        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkRawReward("0")).to.ok;
 
         for (let index = 0; index < 2; index++) {
             await network.provider.send("evm_increaseTime", [86400 * 365])
@@ -116,7 +116,7 @@ describe("Node Tests", function () {
         expect(await DAI.approve(NodeInst.address, "100000000000000000000000")).ok;        
         /// expect revert 
         //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
-        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceAll("0")).to.ok;
         expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
 
     });
@@ -127,14 +127,14 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
-        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkRawReward("0")).to.ok;
 
         for (let index = 0; index < 2; index++) {
             await network.provider.send("evm_increaseTime", [86400 * 365])
             await ethers.provider.send('evm_mine');
         
         } 
-        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkReward("0"));
+        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkRawReward("0"));
 
     });
   
@@ -144,7 +144,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
-        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkRawReward("0")).to.ok;
 
         for (let index = 0; index < 200; index++) {
             await network.provider.send("evm_increaseTime", [86400])
@@ -156,7 +156,7 @@ describe("Node Tests", function () {
         expect(await DAI.approve(NodeInst.address, "100000000000000000000000")).ok;        
 
         expect(await NodeInst.connect(addr1).balanceOf(addr1.address)).to.eq("3");
-        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceAll("0")).to.ok;
         //var before = await Token.balanceOf(addr1.address);
         //var beforeDAI = await DAI.balanceOf(addr1.address);
         expect(await NodeInst.connect(addr1).Compound("0")).to.ok;
@@ -170,7 +170,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("0")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("1")).to.ok;
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
-        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkRawReward("0")).to.ok;
 
         for (let index = 0; index < 2000; index++) {
             await network.provider.send("evm_increaseTime", [86400])
@@ -182,7 +182,7 @@ describe("Node Tests", function () {
         expect(await DAI.approve(NodeInst.address, "115792089237316195423570985008687907853269984665640564039457584007913129639935")).ok;        
 
         expect(await NodeInst.connect(addr1).balanceOf(addr1.address)).to.eq("3");
-        expect(await NodeInst.connect(addr1).MaintenanceAll()).to.ok;
+        expect(await NodeInst.connect(addr1).MaintenanceAll("0")).to.ok;
         //var before = await Token.balanceOf(addr1.address);
         //var beforeDAI = await DAI.balanceOf(addr1.address);
         expect(await NodeInst.connect(addr1).CompoundAll()).to.ok;
@@ -207,10 +207,10 @@ describe("Node Tests", function () {
         
       }
         var before = await NodeInst.connect(addr1).checkPendingMaintenance("0")
-        expect(await NodeInst.connect(addr1).MaintenanceUpfront("0" , "200") ).to.ok;
+        expect(await NodeInst.connect(addr1).Maintenance("0" , "200") ).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt(before);
-        for (let index = 0; index < 2000; index++) {
-            await network.provider.send("evm_increaseTime", [3600])
+        for (let index = 0; index < 100; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
         
       }
@@ -231,16 +231,16 @@ describe("Node Tests", function () {
         for (let index = 0; index < 100; index++) {
             await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
-        
-      }
-        var before = await NodeInst.connect(addr1).checkPendingMaintenance("0")
-        expect(await NodeInst.connect(addr1).MaintenanceUpfront("0" , "200") ).to.ok;
+        }
+           var before = await NodeInst.connect(addr1).
+               checkPendingMaintenance("0")
+        expect(await NodeInst.connect(addr1).Maintenance("0" , "200") ).to.ok;
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.lt(before);
-        for (let index = 0; index < 2000; index++) {
-            await network.provider.send("evm_increaseTime", [3600])
+        for (let index = 0; index < 100; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
-        
-      }
+        }
+           
         expect(await NodeInst.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
 
 
@@ -254,7 +254,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MintNode("2")).to.ok;
         expect(await NodeInst.setRewardRate("0", "1")).to.ok;
         expect(await NodeInst.SetNodePrice("0", ethers.utils.parseEther("1000"), ethers.utils.parseEther("1000"))).to.ok;
-        expect(await NodeInst.connect(addr1).checkReward("0")).to.ok;
+        expect(await NodeInst.connect(addr1).checkRawReward("0")).to.ok;
 
         for (let index = 0; index < 2001; index++) {
             await network.provider.send("evm_increaseTime", [86400])
@@ -262,8 +262,8 @@ describe("Node Tests", function () {
         
         }
         console.log(await NodeInst.checkTaperedReward("0"));
-        console.log(await NodeInst.connect(addr1).checkReward("0"));
-        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkReward("0"));
+        console.log(await NodeInst.connect(addr1).checkRawReward("0"));
+        expect(await NodeInst.checkTaperedReward("0")).to.lt(await NodeInst.checkRawReward("0"));
 
     });
   
