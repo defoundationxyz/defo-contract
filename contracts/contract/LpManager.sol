@@ -43,6 +43,7 @@ contract  LpManager is Ownable, Universe{
 
     constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router){
         router = IJoeRouter02(_router);
+        //console.log(router.factory());
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
         rightSide = IERC20(path[1]);
@@ -111,8 +112,9 @@ contract  LpManager is Ownable, Universe{
 
     function createPairWith(address[2] memory path) private returns (IJoePair) {
         IJoeFactory factory = IJoeFactory(router.factory());
+       // console.log(factory);
         address _pair;
-        address _currentPair = factory.getPair(path[0], path[1]);
+        address _currentPair = factory.createPair(path[0], path[1]);
         if (_currentPair != address(0)) {
             _pair = _currentPair;
         } else {

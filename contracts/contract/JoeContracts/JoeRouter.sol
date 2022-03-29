@@ -9,11 +9,12 @@ import "../../interfaces/IJoeFactory.sol";
 import "../../interfaces/IERC20.sol";
 import "../../interfaces/IWAVAX.sol";
 //import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 contract JoeRouter02 is IJoeRouter02 {
     using SafeMathJoe for uint256;
 
-    address public immutable override factory;
+    address public override factory;
     address public immutable override WAVAX;
 
     modifier ensure(uint256 deadline) {
@@ -24,6 +25,7 @@ contract JoeRouter02 is IJoeRouter02 {
     constructor(address _factory, address _WAVAX) public {
         factory = _factory;
         WAVAX = _WAVAX;
+        //console.log(factory);
     }
 
     receive() external payable {
