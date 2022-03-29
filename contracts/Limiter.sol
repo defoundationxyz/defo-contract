@@ -11,9 +11,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 //Make the conctract upgradeable
 
 contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
-    error ExceedingWalletBalance();
-    error UnauthorizedDestination();
-
+    error UnauthorizedDestination(address unauthorized); //common error
 
     address private defoNode;
     address private DAIPool;
@@ -125,6 +123,12 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
             }
     }
 
+
+    /// @notice This function is called before any token transfer
+    /// @param _sender the originator of the transfer
+    /// @param _from where the transfer is coming from
+    /// @param _to is the destination of the transfer
+    /// @param _amount is the amount being sent
     function transferLog (
         address _sender,
         address _from,
@@ -138,26 +142,32 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
         returns(bool) {
             bool LPAddOrSell = false;
 
+            /// Check for excluded & common unauthorized addresses 
             if (_from == _to) {
                 return true;
             }
             if ((_from == address(0)) || (_to == address(0))) {
                 return true;
             }
+            if (_to == DAIPool) {
+                revert UnauthorizedDestination(
+                    _to
+                );
+            }
+            if (_to == defoNode) {
+                revert UnauthorizedDestination( 
+                    _to
+                );
+            }
+            if (_to == address(this)){
+                revert UnauthorizedDestination(
+                    _to
+                );
+            }
 
-            require (
-                _to != DAIPool,
-                "Cannot directly send to the liquidity pool"
-            );
-            require (
-                _to != defoNode,
-                "Cannot send directly to the node contract"
-            );
-            require (
-                _to != address(this),
-                "Cannot send directly to this contract"
-            );
+//////////////////////////////////////////////////////////////////////////////////////////////            
 
+            ///Determine type of transfer and update variables
             if (isPair(_from, _to)){
                 if(!Whitelist[_to]) {
                     tokensBought[_to] += _amount;
@@ -166,7 +176,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
                 emit UserLimiterBuy(_sender, _from, _to);
             } else if (DefoLPManager.isRouter(_sender) && isPair(_to, _to)) {
                 LPAddOrSell = true;
-                if () {
+                if (1) {
 
                 } else {
 
@@ -177,10 +187,10 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
                     _to
                 );
             } else {
-                if (!isExcludedFromObs(_to)) {
+                if (!isExcludedfromObs(_to)) {
                     tokensIn[timeframeWindow][_to] += _amount;
                 }
-                if (!isExcludedFromObs(_from)) {
+                if (!isExcludedfromObs(_from)) {
                     tokensOut[timeframeWindow][_from] += _amount;
                 }
                 emit UserLimiterTransfer(
@@ -190,14 +200,23 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
                 );
             }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+            ///Execute Checks
             if (!Whitelist[_to]) {
                 require(
-                    getMaxPercentage() >= DefoToken.balanceOf(_to),
+                    getMaxPercentage() >= (DefoToken.balanceOf(_to) + _amount),
                     "Cannot transfer to this wallet, must not exceed `getMaxPercentage()`"
                 );
-                require (
+                // require (
 
-                );
+                // );
+            }
+
+            if(LPAddOrSell) {
+                
+            } else {
+
             }
     }
 
@@ -218,7 +237,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
 
     function getTokensIn(address _account) public view returns(uint256) {
-        return userQuotaTimeframeIn - tokensIn[timeframeWinow][_account];
+        return userQuotaTimeframeIn - tokensIn[timeframeWindow][_account];
     }
 
     function getTokensOut(address _account) public view returns(uint256) {
@@ -228,11 +247,15 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     function isWalletCompliant(address _wallet) public view returns(bool) {
         return DefoToken.balanceOf(_wallet) >= getMaxPercentage();
     }
+ 
+    // function getTransfersLeft(address _account ) external returns(uint256) {
+    //     return
+    // }
 
     function isExcludedfromObs(address _account) public view returns(bool) {
         return Whitelist[_account] || 
         DefoLPManager.isRouter(_account) ||
-        DefoLPManager.isRouter(_address) ||
+        DefoLPManager.isPair(_account) ||
         DefoLPManager.isFeeReceiver(_account);
     }
 
