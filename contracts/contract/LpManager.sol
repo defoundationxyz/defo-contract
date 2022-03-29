@@ -10,10 +10,12 @@ import "../interfaces/IJoePair.sol";
 import "../interfaces/IJoeRouter02.sol";
 import "../interfaces/ILpManager.sol";
 import "./Universe.sol";
+//import "./JoeContracts/JoeFactory.sol";
+//import "./JoeContracts/JoePair.sol";
 import "hardhat/console.sol";
 
 
-contract  LpManager is Ownable, OwnerRecovery, Universe{
+contract  LpManager is Ownable, Universe{
 
     using SafeERC20 for IERC20;
 
@@ -31,7 +33,7 @@ contract  LpManager is Ownable, OwnerRecovery, Universe{
     IJoePair private pair;
     IERC20 private leftSide;
     IERC20 private rightSide;
-
+    
     uint256 MAX_UINT256 = type(uint).max;
 
     modifier validAddress(address _one){

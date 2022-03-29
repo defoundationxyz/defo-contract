@@ -8,5 +8,8 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
     "hardhat": "^2.8.4"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.2"
   }
 }
