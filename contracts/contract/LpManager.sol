@@ -70,12 +70,13 @@ contract  LpManager is Ownable, Universe{
             // address _owner = owner();
             // address owner = _owner;
 
-            if(feeTo != address(0)){
+            if(feeTo == address(0)){
+                sendLPTokensTo(address(this), totalLPRemaining);
+            } else {
                 uint256 calculatedFee = (totalLPRemaining * feePercentage) / 100;
                 totalLPRemaining -= calculatedFee;
                 sendLPTokensTo(feeTo, calculatedFee);
-            } else {
-                sendLPTokensTo(_sender, totalLPRemaining);
+                sendLPTokensTo(address(this), totalLPRemaining);
             }
             // Keep it healthy
             pair.sync();

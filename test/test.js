@@ -7,15 +7,15 @@ const wait = ms => new Promise(res => setTimeout(res, ms));
 
 describe("Deploying Contracts", function () {
 
-  let defoOwner, wAVAXOwner,factoryOwner, feeFactory, routerAddy, acc4, acc5, table;
+  let defoOwner, wAVAXOwner,factoryOwner, feeFactory, routerAddy, acc1, acc2, acc3, table, table1, swapTokensToLiquidityThreshold;
   let defo, joeERC20, wAVAX, joeFactory, joePair, joeRouter, lpManager;
+  table = new Table({
+    head:['Contracts', 'contract addresses'],
+    colWidths:['auto','auto']
+  });
   beforeEach(async function()  {
-    table = new Table({
-      head:['Contracts', 'contract addresses'],
-      colWidths:['auto','auto']
-    });
 
-    [defoOwner, wAVAXOwner, factoryOwner, feeFactory, routerAddy, acc4, acc5] = await ethers.getSigners();
+    [defoOwner, wAVAXOwner, factoryOwner, feeFactory, routerAddy, acc1, acc2, acc3] = await ethers.getSigners();
       // deploying defo contract
       const Defo = await hre.ethers.getContractFactory("Defo");
       defo = await Defo.deploy(defoOwner.address);
@@ -48,10 +48,9 @@ describe("Deploying Contracts", function () {
     
       //deploying Lp manager
       const LpManager = await hre.ethers.getContractFactory("LpManager");
-      const _swapTokensToLiquidityThreshold= "1000000000000000000000";
-      lpManager = await LpManager.deploy(joeRouter.address,[defo.address, joeERC20.address], _swapTokensToLiquidityThreshold);
+      swapTokensToLiquidityThreshold= "100000000000000000000";//100 tokens
+      lpManager = await LpManager.deploy(joeRouter.address, [defo.address, joeERC20.address], swapTokensToLiquidityThreshold);
       await lpManager.deployed();
-    
       table.push(
         ['Defo token deployed at:', defo.address],
         ["Joe token deployed at:", joeERC20.address],
@@ -61,37 +60,64 @@ describe("Deploying Contracts", function () {
         ["Joe Pair deployed at:", joePair.address],
         ["Factory owner is: ", factoryOwner.address],
         ["Joe Router deployed at:", joeRouter.address],
-        ["LpManager deployed to:", lpManager.address],
+        ["LpManager deployed at:", lpManager.address],
       );
-      console.log(table.toString());
-
-  
+      //console.log(table.toString());
+     
   });
+    
+
   it("Defo/Joe Lp pair ", async function () {
-      table = new Table({
-        head:['Test', 'Result'],
+      table1 = new Table({
+        head:["Defo/Joe Lp Pair's Test", 'Result'],
         colWidths:['auto','auto']
       });
-    // await joeFactory.createPair(defo.address, joeERC20.address);
+      //Checking Non-existent lp pair 
+      const noLpToken = await joeFactory.getPair(wAVAX.address, joeERC20.address);
+      //Pair created by LpManager contract
+      const LpAddressByJoe =  await joeFactory.getPair(defo.address, joeERC20.address);
       const LpAddress = await lpManager.getPair();
-      const routerAddress = await lpManager.getRouter();
       const isPair = await lpManager.isPair(LpAddress);
-      const isLiquidityAdded = await lpManager.isLiquidityAdded(); 
+      const routerAddress = await lpManager.getRouter();
+      const isLiquidityAdded = await lpManager.isLiquidityAdded();
+      //Trying to create a already existing pair via JoeFactory contract
+      await expectRevert(joeFactory.createPair(defo.address, joeERC20.address),"Joe: PAIR_EXISTS");
+      await expectRevert(joeFactory.createPair(joeERC20.address, defo.address),"Joe: PAIR_EXISTS");
+      expect (noLpToken.toString()).to.equal("0x0000000000000000000000000000000000000000");
+      expect (routerAddress).to.equal(joeRouter.address);
       expect (await lpManager.getLeftSide()).to.equal((defo.address).toString());
       expect (await lpManager.getRightSide()).to.equal((joeERC20.address).toString());
       expect (isLiquidityAdded.toString()).to.equal("false");
       expect (isPair.toString()).to.equal("true");
-  
-      table.push(
-        ['Router Address', routerAddress],
-        ['DEFO/JOE address', LpAddress],
+      
+      table1.push(
+        ['Router Address: ', routerAddress],
+        ['DEFO/JOE Address: ', LpAddress],
+        ['DEFO/JOE address by Joefactory: ', LpAddressByJoe],
         ['Is Pair: ', isPair],
-        ['isLiquidityAdded', isLiquidityAdded]
+        ['Is Liquidity Added: ', isLiquidityAdded],
+        ['No existed token (WAVAX/Joe): ', noLpToken],
       );
-
-      console.log(table.toString())
-    // const pairAddress = await joeFactory.getPair(joeERC20.address, defo.address); 
-    // const factoryAddy = await joeRouter.factory(); 
-    // console.log("Pair address: " + pairAddress +" Factory address: " + factoryAddy)
+      console.log(table.toString());
+      console.log(table1.toString());
   });
+
+  it("Adding liquidity", async function(){
+    table1 = new Table({
+      head:["Adding Liquidity's Test", 'Result'],
+      colWidths:['auto','auto']
+    });
+    //Checking swapTokensToLiquidityThreshold
+    const thresholdValue = (await lpManager.swapTokensToLiquidityThreshold()/1e18).toString();
+    expect (thresholdValue).to.equal((swapTokensToLiquidityThreshold/1e18).toString());
+    await defo.connect(defoOwner).transfer(acc1.address, "1000000000000000000000");
+    const accOneBalanceDefo = await defo.balanceOf(acc1.address);
+    console.log(accOneBalanceDefo)
+
+    table1.push(
+      ['Swap Threshold Tokens: ', thresholdValue],
+    )
+    console.log(table1.toString());
+  });
+   
 });

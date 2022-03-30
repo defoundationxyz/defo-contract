@@ -6,7 +6,7 @@ import "hardhat/console.sol";
 
 //Sole purpose of testing lp manager
 contract Defo is ERC20{
-    uint256 public _totalSupply = 10000*18;
+    uint256 public _totalSupply = 10000*1e18;
     
     constructor(address _owner) ERC20("Defo Token","DEFO"){
         _mint(_owner, _totalSupply);
