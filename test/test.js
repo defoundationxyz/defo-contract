@@ -110,8 +110,10 @@ describe("Deploying Contracts", function () {
     //Checking swapTokensToLiquidityThreshold
     const thresholdValue = (await lpManager.swapTokensToLiquidityThreshold()/1e18).toString();
     expect (thresholdValue).to.equal((swapTokensToLiquidityThreshold/1e18).toString());
-    await defo.connect(defoOwner).transfer(acc1.address, "1000000000000000000000");
-    const accOneBalanceDefo = await defo.balanceOf(acc1.address);
+    const tokenAccOne = 1000000000000000000000;
+    await defo.connect(defoOwner).transfer(acc1.address, tokenAccOne);
+    const accOneBalanceDefo = (await defo.balanceOf(acc1.address))/1e18;
+    expect(accOneBalanceDefo.toString()).to.equal((tokenAccOne/1e18).toString())
     console.log(accOneBalanceDefo)
 
     table1.push(
