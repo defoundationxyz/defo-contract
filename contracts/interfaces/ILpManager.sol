@@ -10,7 +10,7 @@ import "./IJoePair.sol";
 import "hardhat/console.sol";
 
 
-interface LpManager {
+interface ILpManager {
 
     event SwapAndLiquify(uint256 indexed half, uint256 indexed initialBalance, uint256 indexed newRightBalance);
     event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
