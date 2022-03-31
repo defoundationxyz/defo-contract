@@ -22,7 +22,7 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
     mapping(address => bool) public Whitelist; //Addresses that are excluded from observation
     mapping(address => bool) public Blocklist; //Denied Addresses
     mapping(uint256 => mapping(address => uint256)) public tokensBought; //Tokens bought
-    mapping(uint256 => mapping(address => uint256)) public tokensSold; //Tokens sold
+    //mapping(uint256 => mapping(address => uint256)) public tokensSold; //Tokens sold
 
     uint256 internal currentTimeframeWindow; //The block number `timeframExpiration` is added to
     uint256 internal timeframeExpiration; //Amount of time that must pass between each buy
@@ -149,20 +149,22 @@ contract Limiter is AccessControlUpgradeable, OwnableUpgradeable {
             if (isPair(_from, _to)){
                 if(!Whitelist[_to]) {
                     tokensBought[currentTimeframeWindow][_to] += _amount;
-
-                    require (
-                        tokensBought[currentTimeframeWindow][_to] + _amount <= getMaxPercentage(),
-                        "Cannot buy anymore tokens during this timeframe"
-                    );
+                    
+                    if(!isExcludedFromObs(_to)){
+                        require (
+                            tokensBought[currentTimeframeWindow][_to] + _amount <= getMaxPercentage(),
+                            "Cannot buy anymore tokens during this timeframe"
+                        );
+                    }
                 }
                 emit UserLimiterBuy(_sender, _from, _to);
             } else if (DefoLPManager.isRouter(_sender) && isPair(_to, _to)) {
-                uint256 taxedAmount = (_amount * taxRate) / 10000;
+                /*uint256 taxedAmount = (_amount * taxRate) / 10000;
                 if (tokensBoughtBalanceAfterSellOrAdd >= 0) {
                     tokensBought[currentTimeframeWindow][_from] -= tokensBoughtBalanceAfterSellOrAdd;
                 } else {
                     tokensSold[currentTimeframeWindow][_from] -= tokensBoughtBalanceAfterSellOrAdd;
-                }
+                }*/
 
                 DefoToken.transferFrom(_from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
 
