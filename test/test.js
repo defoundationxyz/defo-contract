@@ -51,21 +51,27 @@ describe("Deploying Contracts", function () {
       swapTokensToLiquidityThreshold= "100000000000000000000";//100 tokens
       lpManager = await LpManager.deploy(joeRouter.address, [defo.address, joeERC20.address], swapTokensToLiquidityThreshold);
       await lpManager.deployed();
+      const uaddy = await lpManager.getUniverseImplementation();
       table.push(
         ['Defo token deployed at:', defo.address],
+        ["Defo owner is: ", defoOwner.address],
         ["Joe token deployed at:", joeERC20.address],
+        ["Joe owner is: ", defoOwner.address],
         ["WAVAX deployed at:", wAVAX.address],
         ["WAVAX owner is: ", wAVAXOwner.address],
         ["JoeFactory deployed at:", joeFactory.address],
         ["Joe Pair deployed at:", joePair.address],
         ["Factory owner is: ", factoryOwner.address],
         ["Joe Router deployed at:", joeRouter.address],
-        ["LpManager deployed at:", lpManager.address],
+        ["LpManager deployed at:", lpManager.address], 
+        ["Universal Implementation: ", uaddy],
       );
       //console.log(table.toString());
      
   });
-    
+  it("Contracts ", async function(){
+    console.log(table.toString());
+  })
 
   it("Defo/Joe Lp pair ", async function () {
       table1 = new Table({
@@ -89,35 +95,52 @@ describe("Deploying Contracts", function () {
       expect (await lpManager.getRightSide()).to.equal((joeERC20.address).toString());
       expect (isLiquidityAdded.toString()).to.equal("false");
       expect (isPair.toString()).to.equal("true");
+      const uaddy = await lpManager.getUniverseImplementation();
       
+      // const voidAddy = await voidSigner.address();
+      //const provider = await ethers.getDefaultProvider();
+      //const signer = await new ethers.VoidSigner( uaddy, provider);
+      await lpManager.connect(uaddy).afterTokenTransfer(acc1.address);
+     console.log(provider)
       table1.push(
         ['Router Address: ', routerAddress],
         ['DEFO/JOE Address: ', LpAddress],
         ['DEFO/JOE address by Joefactory: ', LpAddressByJoe],
         ['Is Pair: ', isPair],
         ['Is Liquidity Added: ', isLiquidityAdded],
-        ['No existed token (WAVAX/Joe): ', noLpToken],
-      );
-      console.log(table.toString());
+        ['No existed token (WAVAX/Joe): ', noLpToken],    
+        ["Universal Implementation: ", uaddy], 
+        );
       console.log(table1.toString());
   });
 
   it("Adding liquidity", async function(){
+    const uaddy = await lpManager.getUniverseImplementation();
     table1 = new Table({
       head:["Adding Liquidity's Test", 'Result'],
       colWidths:['auto','auto']
     });
+   
     //Checking swapTokensToLiquidityThreshold
     const thresholdValue = (await lpManager.swapTokensToLiquidityThreshold()/1e18).toString();
     expect (thresholdValue).to.equal((swapTokensToLiquidityThreshold/1e18).toString());
-    const tokenAccOne = 1000000000000000000000;
+    
+    const tokenAccOne = "1000000000000000000000";//1000 defoTokens
     await defo.connect(defoOwner).transfer(acc1.address, tokenAccOne);
-    const accOneBalanceDefo = (await defo.balanceOf(acc1.address))/1e18;
-    expect(accOneBalanceDefo.toString()).to.equal((tokenAccOne/1e18).toString())
-    console.log(accOneBalanceDefo)
-
+    const accOneBalanceDefo = (await defo.balanceOf(acc1.address)/1e18).toString();
+    expect (accOneBalanceDefo.toString()).to.equal((tokenAccOne/1e18).toString())
+    expect (await defo.connect(acc1).approve(lpManager.address, tokenAccOne)).to.ok;
+    //await lpManager.connect(acc1).afterTokenTransfer(acc1.address)
+    //current lp balance
+    // await lpManager.connect(uaddy).afterTokenTransfer(acc1.address)
+    //const provider = await ethers.getDefaultProvider()
+     const uaddy1 = await lpManager.getUniverseImplementation();
+    //const lpBalance = await lpManager.pairLiquidityTotalSupply();
+    console.log(uaddy1)
     table1.push(
       ['Swap Threshold Tokens: ', thresholdValue],
+      ['Account One Defo balance', tokenAccOne ],
+      ["Universal Implementation: ", uaddy], 
     )
     console.log(table1.toString());
   });
