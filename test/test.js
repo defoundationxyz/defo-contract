@@ -80,6 +80,7 @@ describe("Deploying Contracts", function () {
         head:["Defo/TT Lp Pair's Test", 'Result'],
         colWidths:['auto','auto']
       });
+      
       //deploying Lp manager
       const LpManager = await hre.ethers.getContractFactory("LpManager");
       swapTokensToLiquidityThreshold= "100000000000000000000";//100 tokens
@@ -128,13 +129,15 @@ describe("Deploying Contracts", function () {
       //const signer = await new ethers.VoidSigner( uaddy, provider);
       //await lpManager.connect(uaddy).afterTokenTransfer(acc1.address);
       // console.log(provider)
-      const liquidtyToken = "900000000000000000000";
+      const minimumToken = "900000000000000000000";
       //adding liquidity
+      //@notice @dev currently getting the err: Transaction reverted: function call to a non-contract account.
+      //Reminder for noRush, have checked all possible scenarios. No solution yet. Will work on it afterwards. 
       await joeRouter.connect(acc1).addLiquidity
       ( defo.address, testToken.address,
         liquidtyToken, liquidtyToken,
-        "0", "0",
-        acc1.address, "1648793543"
+        minimumToken, minimumToken,
+        acc1.address, "1648793543"// update this with current epoch
        )
 
       table1.push(
