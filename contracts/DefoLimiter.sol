@@ -57,109 +57,98 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
 
     modifier notDenied(
-        address sender,
         address from,
-        address to,
-        address origin
+        address to
     ) {
-        if (
-            origin != owner() &&
-            to != owner()) {
                 require(
-                    !Blocklist[sender] &&
                     !Blocklist[from] &&
-                    !Blocklist[to] &&
-                    !Blocklist[origin],
+                    !Blocklist[to],
                     "Address is not permitted"
                 );
-        }
         _;
     }
 
     event UserLimiterBuy (
-        address indexed _sender,
         address indexed _from,
         address indexed _to
     );
 
-    event UserLimiterSellOrLiquidityAdd (
-        address indexed _sender,
+    event UserLimiterSell (
         address indexed _from,
         address indexed _to
     );
-    function isPair(address _from, address _to)
+    function isPair(address _checkAddress)
         private
         view
         returns(bool) {
-            if ((_from == LPool) && (_to == LPool)) {
+            if (_checkAddress == LPool) {
                 return true;
             }
     }
 
     /// @notice This function is called before any token transfer
-    /// @param _sender the originator of the transfer
-    /// @param _from where the transfer is coming from
-    /// @param _to is the destination of the transfer
-    /// @param _amount is the amount being sent
+    /// @param from where the transfer is coming from
+    /// @param to is the destination of the transfer
+    /// @param amount is the amount being sent
     function transferLog (
-        address _sender,
-        address _from,
-        address _to,
-        uint256 _amount
+        address from,
+        address to,
+        uint256 amount
     )
         external
         onlyDefoToken
         checkTimeframe
-        notDenied(_sender, _from, _to, tx.origin)
+        notDenied(from, to)
         returns(bool) {
             //Check for excluded & common unauthorized addresses 
-            if (_from == _to) {
+            if (from == to) {
                 return true;
             }
-            if ((_from == address(0)) || (_to == address(0))) {
+            if (from == address(0) || (to == address(0))) {
                 return true;
             }
-            if (_to == LPool) {
-                revert UnauthorizedDestination(
-                    _to
-                );
-            }
-            if (_to == defoNode) {
+            // if (to == LPool) {
+            //     revert UnauthorizedDestination(
+            //         to
+            //     );
+            // }
+            if (to == defoNode) {
                 revert UnauthorizedDestination( 
-                    _to
+                    to
                 );
             }
-            if (_to == address(this)){
+            if (to == address(this)){
                 revert UnauthorizedDestination(
-                    _to
+                    to
                 );
             }        
 
             //Determine type of activity
-            if (isPair(_from, _to)){
-                if(!Whitelist[_to]) {
-                    tokensBought[currentTimeframeWindow][_to] += _amount;
+            if (isPair(from)){
+                if(!Whitelist[to]) {
+                    tokensBought[currentTimeframeWindow][to] += amount;
                     
-                    if(!isExcludedFromObs(_to)){
+                    if(!isExcludedFromObs(to)){
                         require (
-                            tokensBought[currentTimeframeWindow][_to] + _amount <= getMaxPercentage(),
+                            tokensBought[currentTimeframeWindow][to] + amount <= getMaxPercentage(),
                             "Cannot buy anymore tokens during this timeframe"
                         );
                     }
                 }
-                emit UserLimiterBuy(_sender, _from, _to);
-            } else if (DefoLPManager.isRouter(_sender) && isPair(_to, _to)) {
-                uint256 taxedAmount = (_amount * taxRate) / 10000;
+                emit UserLimiterBuy(
+                    from, 
+                    to
+                );
+            } else if (isPair(to)) {
+                uint256 taxedAmount = (amount * taxRate) / 10000;
     
-                DefoToken.transferFrom(_from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
+                DefoToken.transferFrom(from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
 
-                emit UserLimiterSellOrLiquidityAdd(
-                    _sender,
-                    _from,
-                    _to
+                emit UserLimiterSell(
+                    from,
+                    to
                 );
             }
-
             return true;
     }
 
