@@ -9,14 +9,11 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
     -need mock lp contracts
   -selling tokens
     -need mock router
-
 */  
 
 describe("DefoLimiter", function () {
   let owner, acc1, acc2, acc3;
-  let tokenAmount = 10000;
   let node, limiter, liqpool, router, defotoken;
-  const DecimalMultiplier = ethers.BigNumber.from("10").pow("18")
 
   beforeEach(async function () {
     [owner, acc1, acc2, acc3, ...accs] = await ethers.getSigners();
@@ -29,7 +26,6 @@ describe("DefoLimiter", function () {
     /// Check limiter constructor
     const Limiter = await ethers.getContractFactory("DefoLimiter");
     limiter = await Limiter.deploy(
-      1, 
       acc2.address,
       node.address
       );
@@ -49,29 +45,33 @@ describe("DefoLimiter", function () {
     const DefoToken = await ethers.getContractFactory("MockToken");
     defotoken = await DefoToken.connect(owner).deploy(limiter.address);
     await defotoken.deployed();
+    await defotoken.allowance(owner.address, limiter.address);
 
     //Set addresses in limiter contract
     await limiter.setTokenAddress(defotoken.address);
     await limiter.setLPAddress(defotoken.address); //Using defo token address so that minting acts as buying from a LP
-    //await limiter.setLPManager(liqpool.address)
+    await defotoken.allowance(owner.address, limiter.address);
   });
 
   it("Should add an address to the blocklist and try to call from that address", async function() {
     await limiter.editBlocklist(acc1.address, true);
     expect(await limiter.Blocklist(acc1.address)).to.equal(true);
 
-    await expectRevert(defotoken.connect(acc1).mint(acc1.address, tokenAmount), "Address is not permitted");
+    await expectRevert(defotoken.connect(acc1).mint(acc1.address, "10000"), "Address is not permitted");
   })
 
   it("Should buy some tokens outside of timeframe", async function() {
-    await defotoken.mint(owner.address, ethers.BigNumber.from("100000").mul(DecimalMultiplier)); //Mint all tokens to owner for total supply
-    //If you change this address from `owner.address` to any other address it works, but I want the "LP" to be the person who has totalSupply
+    await defotoken.mint(owner.address, "200000"); //Mint all tokens to owner for total supply
     await limiter.setLPAddress(acc1.address) //Set owner address as LP
 
     console.log("Owner balance before: ", await defotoken.balanceOf(owner.address))
+    console.log("Current expiration timeframe: ", await limiter.timeframeExpiration)
     
-    await defotoken.connect(owner).transfer(acc1.address, ethers.BigNumber.from("5").mul(DecimalMultiplier));
-    await expectRevert(defotoken.connect(owner).transfer(acc1.address, ethers.BigNumber.from(500)), "Cannot buy anymore tokens during this timeframe");
+    await defotoken.connect(owner).transfer(acc1.address, "2");
+    //await expectRevert(defotoken.connect(owner).transfer(acc1.address, "100000"), "Cannot buy anymore tokens during this timeframe");
+    //await defotoken.connect(owner).transfer(acc1.address, "2");
+    await network.provider.send("evm_increaseTime", [43200])
+    await ethers.provider.send('evm_mine');
 
     console.log("Owner Balance after: ", await defotoken.balanceOf(owner.address))
     console.log("ACC1 Balance: ", await defotoken.balanceOf(acc2.address))
@@ -79,9 +79,9 @@ describe("DefoLimiter", function () {
 
   // Implement BigNumber math so I can use expectRevert
   it("Should sell tokens from an account", async () => {
-    await defotoken.mint(acc1.address, ethers.BigNumber.from("5000000000000000000"))
+    await defotoken.mint(acc1.address, "5000000000000000000")
     await defotoken.connect(acc1).transfer(defotoken.address, "4");
 
-    console.log("Balance of Tax Collector: ", await defotoken.balanceOf(acc2.address)) // Should be "2000000000000000000", which is (4 * (10 ** 18)) / 2
+    expect (await defotoken.balanceOf(acc2.address)).to.equal("2000000000000000000")
   })
 });

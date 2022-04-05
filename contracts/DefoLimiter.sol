@@ -22,21 +22,28 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     mapping(address => bool) public Blocklist; //Denied Addresses
     mapping(uint256 => mapping(address => uint256)) public tokensBought; //Tokens bought
 
-    uint256 internal currentTimeframeWindow; //The block number `timeframExpiration` is added to
-    uint256 internal timeframeExpiration; //Amount of time that must pass between each buy
-    uint256 public maxPercentageVsTotalSupply = 50; //Max percentage of total supply a wallet can hold
-    uint256 public taxRate = 5000; //basis points
-    address public taxCollector;
-    uint256 constant DECIMAL_MULTIPLIER = 10 ** 18;
+    // The block number `timeframExpiration` is added to
+    uint256 internal currentTimeframeWindow;
+    
+    // Amount of time that must pass between each buy
+    uint256 internal timeframeExpiration = 6426; 
 
-    constructor(
-        uint256 _timeExpiration, 
+    //Max percentage of total supply a wallet can hold
+    uint256 public maxPercentageVsTotalSupply = 50; 
+
+    //basis points
+    uint256 public taxRate = 5000; 
+    uint256 public buyTaxAmount= 1000;
+    uint256 constant DECIMAL_MULTIPLIER = 10 ** 18;
+    bool public buyTaxActive = true;
+    address public taxCollector;
+
+    constructor( 
         address _taxCollector, 
         address _defoNodeAddress
     ) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
-        timeframeExpiration = _timeExpiration;
         taxCollector = _taxCollector;
     }
 
@@ -133,6 +140,10 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
                             tokensBought[currentTimeframeWindow][to] + amount <= getMaxPercentage(),
                             "Cannot buy anymore tokens during this timeframe"
                         );
+                        
+                        if (buyTaxActive) {
+                            DefoToken.transferFrom(from, taxCollector, (amount * buyTaxAmount) / 10000);
+                        }
                     }
                 }
                 emit UserLimiterBuy(
@@ -161,9 +172,12 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
         DefoLPManager.isPair(_account);
     }
 
-    /// @notice Use basis points for input
-    ///   i.e. if you want 2% input 200,
-    ///   if you want 20% input 2000
+    /**
+    @notice Use basis points for input
+    i.e. if you want 2% input 200,
+    if you want 20% input 2000 
+    
+    */
     function setTaxRate (uint256 newTaxRate) external onlyRole(DEFAULT_ADMIN_ROLE) {
         taxRate = newTaxRate;
     }
@@ -185,6 +199,13 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
     function setLPManager(address newLpManager) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DefoLPManager = ILpManager(newLpManager);
+    }
+
+    function flipBuyTaxState() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        buyTaxActive = !buyTaxActive;
+    }
+    function setBuyTaxAmount (uint256 newBuyTaxAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        buyTaxAmount = newBuyTaxAmount;
     }
 
     function editWhitelist(address _address, bool _allow)
