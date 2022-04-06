@@ -4,13 +4,14 @@ pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 // TODO OPTIMIZATION : find a cheaper library
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 /// @dev we need enumerable for compundAll function
 // TODO OPTIMIZATION : find a way to write compoundall system without enumerable
 // TODO : upgradeable
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./interfaces/IERC20.sol";
 
@@ -22,7 +23,13 @@ interface ILimiter {
     ) external returns (bool);
 }
 
-contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
+contract DefoNode is
+    Initializable,
+    ERC721Upgradeable,
+    ERC721EnumerableUpgradeable,
+    ERC721BurnableUpgradeable,
+    AccessControlUpgradeable
+{
     // TODO : add events
 
     using Counters for Counters.Counter;
@@ -65,8 +72,8 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     /// @dev a struct for keeping info and state about users
     struct UserData {
-        uint8 OmegaClaims; // Remaining Omega booster claims of the user
-        uint8 DeltaClaims; // Remaining Delta
+        mapping(uint8 => uint8) OmegaClaims; // Remaining Omega booster claims of the user
+        mapping(uint8 => uint8) DeltaClaims; // Remaining Delta
         bool blacklisted; // Whether the user is blacklisted or not
     }
 
@@ -108,14 +115,17 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         _;
     }
 
-    constructor(
+    function initialize(
         address _redeemContract,
         address _defoToken,
         address _paymentToken,
         address _treasury,
         address _limiter,
         address _rewardPool
-    ) ERC721("Defo Node", "Defo Node") {
+    ) public initializer {
+        __ERC721_init("Defo Node", "Defo Node");
+        __ERC721Enumerable_init();
+        __ERC721Burnable_init();
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, _redeemContract);
         DefoToken = IERC20(_defoToken);
@@ -137,10 +147,12 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     // internal functions
 
-    /// calculates the reward taper with roi after 1.5x everytime roi achived rewards taper by %30
+    /// calculates the reward taper with roi after 1x everytime roi achived rewards taper by %30
     /// could be more optimized
     /// always calculates rewards from 0
-    function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
+    function _taperCalculate(
+        uint256 _tokenId /*, bool _update*/
+    ) internal view returns (uint256) {
         Node memory node = NodeOf[_tokenId];
         NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[node.NodeType];
         uint256 rewardCount = checkRawReward(_tokenId) + node.claimedReward; // get reward without taper
@@ -248,18 +260,18 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
 
     // TODO : Compound without cashing out
     // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
-    function _compound(uint256 _tokenid) internal {
+    function _compound(uint256 _tokenid, uint8 _nodeType) internal {
         Node memory node = NodeOf[_tokenid];
-        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[node.NodeType];
+        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[_nodeType];
         uint256 rewardDefo = _taperCalculate(_tokenid);
         require(rewardDefo >= (nodeType.DefoPrice), "not enough rewards");
-        _sendRewardTokens(_tokenid, (nodeType.DefoPrice));
+        node.claimedReward = node.claimedReward + nodeType.DefoPrice;
 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
         Node memory newNode;
-        newNode.NodeType = node.NodeType;
+        newNode.NodeType = _nodeType;
         newNode.LastMaintained = uint32(block.timestamp);
         newNode.LastReward = uint32(block.timestamp);
         NodeOf[tokenId] = newNode;
@@ -318,14 +330,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         Booster _booster,
         address _to
     ) public onlyRole(MINTER_ROLE) {
-        UserData memory userData;
+        UserData storage userData = GetUserData[msg.sender];
         _mintNode(_type, _to);
         if (_booster == Booster.Omega) {
-            userData.OmegaClaims = userData.OmegaClaims + 2;
+            userData.OmegaClaims[_type] = userData.OmegaClaims[_type] + 2;
         } else {
-            userData.DeltaClaims = userData.DeltaClaims + 2;
+            userData.DeltaClaims[_type] = userData.DeltaClaims[_type] + 2;
         }
-        GetUserData[msg.sender] = userData;
     }
 
     // TODO : add type restriction
@@ -338,17 +349,28 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         require(node.Booster == Booster.None, "Node is already boosted");
         UserData storage userData = GetUserData[msg.sender];
         require(
-            userData.OmegaClaims > 0 || userData.DeltaClaims > 0,
+            userData.OmegaClaims[node.NodeType] > 0 ||
+                userData.DeltaClaims[node.NodeType] > 0,
             "Not enough boost claims"
         );
         if (_booster == Booster.Omega) {
-            require(userData.OmegaClaims > 0, "Not enough boost claims");
+            require(
+                userData.OmegaClaims[node.NodeType] > 0,
+                "Not enough boost claims"
+            );
             node.Booster = Booster.Omega;
-            userData.OmegaClaims = userData.OmegaClaims - 1;
+            userData.OmegaClaims[node.NodeType] =
+                userData.OmegaClaims[node.NodeType] -
+                1;
         } else {
-            require(userData.DeltaClaims > 0, "Not enough boost claims");
+            require(
+                userData.DeltaClaims[node.NodeType] > 0,
+                "Not enough boost claims"
+            );
             node.Booster = Booster.Delta;
-            userData.DeltaClaims = userData.DeltaClaims - 1;
+            userData.DeltaClaims[node.NodeType] =
+                userData.DeltaClaims[node.NodeType] -
+                1;
         }
     }
 
@@ -419,13 +441,13 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         }
     }
 
-    function Compound(uint256 _tokenid)
+    /// @notice creates a new node with the given type from unclaimed rewards
+    function Compound(uint256 _tokenid, uint8 _nodeType)
         external
         onlyNodeOwner(_tokenid)
         onlyActive(_tokenid)
     {
-        Node memory node = NodeOf[_tokenid];
-        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[node.NodeType];
+        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[_nodeType];
         require(
             PaymentToken.balanceOf(msg.sender) > nodeType.StablePrice,
             "Insufficient USD"
@@ -437,27 +459,39 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         );
 
         _distributePayment(nodeType.StablePrice, false);
-        _compound(_tokenid);
+        _compound(_tokenid, _nodeType);
     }
 
-    function CompoundAll() external {
+    /// @notice creates same type nodes from all the unclaimed rewards
+    function CompoundAll() external returns (uint256[] memory) {
         require(balanceOf(msg.sender) > 0, "User doesn't have any nodes");
 
         address account = msg.sender;
         uint256[] memory nodesOwned = getNodeIdsOf(account);
-
+        uint256[] memory compounded = new uint256[](nodesOwned.length);
+        uint256 counter;
         for (uint256 index = 0; index < nodesOwned.length; index++) {
             Node memory node = NodeOf[nodesOwned[index]];
             NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[
                 node.NodeType
             ];
-            require(
-                PaymentToken.balanceOf(msg.sender) >= nodeType.StablePrice,
-                "Insufficient USD"
-            );
-            require(isActive(nodesOwned[index]), "Node is deactivated");
-            _compound(nodesOwned[index]);
+            if (
+                (PaymentToken.balanceOf(msg.sender) >= nodeType.StablePrice) &&
+                (checkRawReward(nodesOwned[index]) >= nodeType.DefoPrice)
+            ) {
+                PaymentToken.transferFrom(
+                    msg.sender,
+                    address(this),
+                    nodeType.StablePrice
+                );
+                _distributePayment(nodeType.StablePrice, false);
+                require(isActive(nodesOwned[index]), "Node is deactivated");
+                _compound(nodesOwned[index], node.NodeType);
+                compounded[counter] = nodesOwned[index];
+                counter++;
+            }
         }
+        return compounded;
     }
 
     function AddModifier(uint256 _tokenid, NodeModif _modifier)
@@ -675,7 +709,11 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721, AccessControl, ERC721Enumerable)
+        override(
+            ERC721Upgradeable,
+            AccessControlUpgradeable,
+            ERC721EnumerableUpgradeable
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -700,7 +738,7 @@ contract DefoNode is ERC721, AccessControl, ERC721Enumerable, ERC721Burnable {
         address from,
         address to,
         uint256 tokenId
-    ) internal override(ERC721, ERC721Enumerable) {
+    ) internal override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 }

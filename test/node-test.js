@@ -27,7 +27,10 @@ describe("Node Tests", function () {
     Limiter = await mockLimiter.deploy();
     Token = await mockToken.deploy();
     DAI = await mockToken.deploy();
-    NodeInst = await node.deploy(owner.address, Token.address, DAI.address, owner.address, Limiter.address, owner.address);
+    NodeInst = await node.deploy();
+    await NodeInst.initialize(owner.address, Token.address, DAI.address, owner.address, Limiter.address, owner.address);
+
+        
     await Token.mint(addr1.address, ethers.utils.parseEther( "10000000"));
     await Token.mint(owner.address,ethers.utils.parseEther( "10000000"));
     await DAI.mint(owner.address, ethers.utils.parseEther( "10000000"));
@@ -159,7 +162,7 @@ describe("Node Tests", function () {
         expect(await NodeInst.connect(addr1).MaintenanceAll("0")).to.ok;
         //var before = await Token.balanceOf(addr1.address);
         //var beforeDAI = await DAI.balanceOf(addr1.address);
-        expect(await NodeInst.connect(addr1).Compound("0")).to.ok;
+        expect(await NodeInst.connect(addr1).Compound("0" , "0")).to.ok;
         expect(await NodeInst.connect(addr1).balanceOf(addr1.address)).to.eq("4");
         //expect(await Token.balanceOf(addr1.address)).to.gt(before);    
         //expect(await DAI.balanceOf(addr1.address)).to.gt(beforeDAI);
