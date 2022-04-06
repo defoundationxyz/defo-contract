@@ -7,7 +7,7 @@ import "hardhat/console.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 /// @dev we need enumerable for compundAll function
 // TODO OPTIMIZATION : find a way to write compoundall system without enumerable
-// TODO : upgradeable
+
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -43,9 +43,6 @@ contract DefoNode is
     mapping(address => uint256) public DistTable;
     uint256[] public RewardTaxTable;
     uint256 minReward = 0;
-    // TODO : remove
-    //    mapping(address => uint256) public OmegaClaims;
-    mapping(address => uint256) public DeltaClaims;
 
     /// @dev minimum time required to claim rewards in seconds
     uint256 public RewardTime;
@@ -258,7 +255,6 @@ contract DefoNode is
         node.LastReward = uint32(block.timestamp);
     }
 
-    // TODO : Compound without cashing out
     // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
     function _compound(uint256 _tokenid, uint8 _nodeType) internal {
         Node memory node = NodeOf[_tokenid];
@@ -339,7 +335,6 @@ contract DefoNode is
         }
     }
 
-    // TODO : add type restriction
     function BoostNode(Booster _booster, uint256 _tokenid)
         public
         onlyNodeOwner(_tokenid)
