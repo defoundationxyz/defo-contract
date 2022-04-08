@@ -22,10 +22,11 @@ contract  LpManager is Ownable, Universe{
     event SwapAndLiquify(uint256 indexed half, uint256 indexed initialBalance, uint256 indexed newRightBalance);
     event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
 
-    // Initial liquidity split settings
+    //Fee and treasury address to add
     address public feeTo;
-    uint256 public feePercentage = 3; //0.3%
-    bool private liquifyEnabled = false;
+    address public treasury;
+    uint256 public feePercentage;// = 3; //0.3%
+    bool public liquifyEnabled = false;
     bool private isSwapping = false;
     uint256 public swapTokensToLiquidityThreshold;
     uint256 public pairLiquidityTotalSupply;
@@ -36,14 +37,14 @@ contract  LpManager is Ownable, Universe{
     
     uint256 MAX_UINT256 = type(uint).max;
 
-    modifier validAddress(address _one){
+    modifier validAddress(address _one, address _two){
         require(_one != address(0));
         _;
     }
 
-    constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router){
+    constructor( address _router, address _treasury ,address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router, _treasury){
+        treasury = _treasury;
         router = IJoeRouter02(_router);
-        //console.log(router.factory());
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
         rightSide = IERC20(path[1]);
@@ -71,12 +72,12 @@ contract  LpManager is Ownable, Universe{
             // address owner = _owner;
 
             if(feeTo == address(0)){
-                sendLPTokensTo(address(this), totalLPRemaining);
+                sendLPTokensTo(treasury, totalLPRemaining);
             } else {
                 uint256 calculatedFee = (totalLPRemaining * feePercentage) / 100;
                 totalLPRemaining -= calculatedFee;
                 sendLPTokensTo(feeTo, calculatedFee);
-                sendLPTokensTo(address(this), totalLPRemaining);
+                sendLPTokensTo(treasury, totalLPRemaining);
             }
             // Keep it healthy
             pair.sync();
@@ -171,26 +172,53 @@ contract  LpManager is Ownable, Universe{
         swapTokensToLiquidityThreshold = _swapTokensToLiquidityThreshold;
     }
 
+    /*@notice in case, we decide to make the LP with avax in near future
+    */
+    function recoverLostAVAX() external onlyOwner {
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    /*@notice will recovery both dai and defo
+    */
+    function recoverLostTokens(address _token, address _to, uint256 _amount ) external onlyOwner {
+        IERC20(_token).transfer(_to, _amount);
+    }
+
+    function setTreasury(address _newTreasury) public onlyOwner{
+        treasury = _newTreasury;
+    }
     function setFeeTo(address _newFeeaddress) public onlyOwner {
         feeTo = _newFeeaddress;
     }
 
+    /*Fee percentage set by owner only. Fee should be in the following pattery as it divide by 100
+        3/100 = 0.03,
+        30/100 = 0.3,
+        300/100 =3  
+    */
+    function setFeePercentage(uint256 _newFeePercent) public onlyOwner{
+        feePercentage = _newFeePercent;
+    }
+
     //view functions
     function getRouter() external view returns (address) {
-        return address(router);
+        return address(router); 
     }
 
     function getPair() external view returns (address) {
         return address(pair);
     }
     
+    /*@notice Should be DEFO
+    */
     function getLeftSide() external view returns (address) {
-        // Should be UNIV
+    
         return address(leftSide);
     }
 
+    /*@notice Should be DAI
+    */
     function getRightSide() external view returns (address) {
-        // Should be MIM
         return address(rightSide);
     }
 
@@ -198,6 +226,8 @@ contract  LpManager is Ownable, Universe{
         return _pair == address(pair);
     }
 
+    /*@notice Should be TraderJoe's router
+    */
     function isRouter(address _router) public view returns (bool) {
         return _router == address(router);
     }

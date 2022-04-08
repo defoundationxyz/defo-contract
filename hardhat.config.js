@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require('dotenv').config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -22,6 +23,12 @@ module.exports = {
       gas : "auto",
       gasPrice: "auto"
     },
+    // avalancheTest: {
+    //   url: 'https://api.avax-test.network/ext/bc/C/rpc',
+    //   gasPrice: "auto",
+    //   chainId: 43113,
+    //   accounts: []
+    // },
   },
   solidity: {
     compilers: [

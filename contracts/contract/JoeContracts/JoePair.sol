@@ -242,4 +242,9 @@ contract JoePair is JoeERC20 {
             reserve1
         );
     }
+
+    function setOwner(address _newOwner) external {
+        require(msg.sender == factory, "Invalid address");
+        factory = _newOwner;
+    }
 }
