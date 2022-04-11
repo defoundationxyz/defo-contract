@@ -232,8 +232,17 @@ contract  LpManager is Ownable, Universe{
         return _router == address(router);
     }
 
+    function getSupply() external view returns (uint256) {
+        return pair.totalSupply();
+    }
+
     function isLiquidityAdded() external view returns (bool) {
         return pairLiquidityTotalSupply > pair.totalSupply();
+    }
+
+    function checkBalance() external view returns (uint256){
+        uint256 balance = pair.balanceOf(msg.sender);
+        return balance;
     }
 
 }

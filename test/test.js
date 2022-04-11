@@ -1,3 +1,4 @@
+// This test is outdated. Updated test is in test_router.js file
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { expectRevert } = require('@openzeppelin/test-helpers');
@@ -14,7 +15,7 @@ describe("Deploying Contracts", function () {
   });
   beforeEach(async function()  {
 
-    [defoOwner, wAVAXOwner, factoryOwner, feeFactory, routerAddy, testTokenOwner, acc1, acc2, acc3] = await ethers.getSigners();
+    [defoOwner, wAVAXOwner, factoryOwner, feeFactory, routerAddy, testTokenOwner, treasury, acc1, acc2, acc3] = await ethers.getSigners();
       // deploying defo contract
       const Defo = await hre.ethers.getContractFactory("Defo");
       defo = await Defo.deploy(defoOwner.address);
@@ -46,7 +47,7 @@ describe("Deploying Contracts", function () {
       //deploying Lp manager
       const LpManager = await hre.ethers.getContractFactory("LpManager");
       swapTokensToLiquidityThreshold= "100000000000000000000";//100 tokens
-      lpManager = await LpManager.deploy(joeRouter.address, [defo.address, testToken.address], swapTokensToLiquidityThreshold);
+      lpManager = await LpManager.deploy(joeRouter.address, treasury.address, [defo.address, testToken.address], swapTokensToLiquidityThreshold);
       //This address should be equal to 
       const uaddy = await lpManager.getUniverseImplementation();
     

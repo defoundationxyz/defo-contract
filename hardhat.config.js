@@ -19,16 +19,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  */
 module.exports = {
   networks:{
-    hardhat:{
-      gas : "auto",
-      gasPrice: "auto"
+    hardhat: {
+      chainId: 43114,
+      gasPrice: 225000000000,
+      forking: {
+          url: "https://api.avax.network/ext/bc/C/rpc",
+          enabled: true,
+          blockNumber: 2975762,
+      },
     },
-    // avalancheTest: {
-    //   url: 'https://api.avax-test.network/ext/bc/C/rpc',
-    //   gasPrice: "auto",
-    //   chainId: 43113,
-    //   accounts: []
-    // },
   },
   solidity: {
     compilers: [
