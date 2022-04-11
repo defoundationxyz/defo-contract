@@ -21,12 +21,13 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     mapping(address => bool) public Whitelist; //Addresses that are excluded from observation
     mapping(address => bool) public Blocklist; //Denied Addresses
     mapping(uint256 => mapping(address => uint256)) public tokensBought; //Tokens bought
+    mapping (address => bool) public unauthorizedAddresses;
 
     // The block number `timeframExpiration` is added to
     uint256 internal currentTimeframeWindow;
     
     // Amount of time that must pass between each buy
-    uint256 internal timeframeExpiration = 6426; 
+    uint256 public timeframeExpiration = 6426; 
 
     //Max percentage of total supply a wallet can hold
     uint256 public maxPercentageVsTotalSupply = 50; 
@@ -108,27 +109,9 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
         notDenied(from, to)
         returns(bool) {
             //Check for excluded & common unauthorized addresses 
-            if (from == to) {
-                return true;
+            if (unauthorizedAddresses[to] == true) {
+                revert UnauthorizedDestination(to);
             }
-            if (from == address(0) || (to == address(0))) {
-                return true;
-            }
-            // if (to == LPool) {
-            //     revert UnauthorizedDestination(
-            //         to
-            //     );
-            // }
-            if (to == defoNode) {
-                revert UnauthorizedDestination( 
-                    to
-                );
-            }
-            if (to == address(this)){
-                revert UnauthorizedDestination(
-                    to
-                );
-            }        
 
             //Determine type of activity
             if (isPair(from)){
@@ -176,7 +159,6 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     @notice Use basis points for input
     i.e. if you want 2% input 200,
     if you want 20% input 2000 
-    
     */
     function setTaxRate (uint256 newTaxRate) external onlyRole(DEFAULT_ADMIN_ROLE) {
         taxRate = newTaxRate;
@@ -199,6 +181,10 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
     function setLPManager(address newLpManager) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DefoLPManager = ILpManager(newLpManager);
+    }
+
+    function setTimeframeExpiration(uint256 newTimeframeExpiration) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        timeframeExpiration = newTimeframeExpiration;
     }
 
     function flipBuyTaxState() external onlyRole(DEFAULT_ADMIN_ROLE) {

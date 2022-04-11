@@ -12,19 +12,19 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
 */  
 
 describe("DefoLimiter", function () {
-  let owner, acc1, acc2, acc3;
-  let node, limiter, liqpool, router, defotoken;
+  var owner, acc1, acc2, acc3;
+  var node, limiter, liqpool, router, defotoken;
 
   beforeEach(async function () {
     [owner, acc1, acc2, acc3, ...accs] = await ethers.getSigners();
 
     //Mock Node Deployment
-    const Node = await ethers.getContractFactory("MockNode");
+    var Node = await ethers.getContractFactory("MockNode");
     node = await Node.deploy();
     await node.deployed();
 
     /// Check limiter constructor
-    const Limiter = await ethers.getContractFactory("DefoLimiter");
+    var Limiter = await ethers.getContractFactory("DefoLimiter");
     limiter = await Limiter.deploy(
       acc2.address,
       node.address
@@ -32,17 +32,17 @@ describe("DefoLimiter", function () {
     await limiter.deployed();
 
     //Mock LP Deployment
-    const LiqPool = await ethers.getContractFactory("MockLiqPool");
+    var LiqPool = await ethers.getContractFactory("MockLiqPool");
     liqpool = await LiqPool.deploy();
     await liqpool.deployed();
     
     //Mock Router Deployment
-    const Router = await ethers.getContractFactory("MockRouter");
+    var Router = await ethers.getContractFactory("MockRouter");
     router = await Router.deploy();
     await router.deployed();
 
     //Mock Defo Token Deployment
-    const DefoToken = await ethers.getContractFactory("MockToken");
+    var DefoToken = await ethers.getContractFactory("MockToken");
     defotoken = await DefoToken.connect(owner).deploy(limiter.address);
     await defotoken.deployed();
     await defotoken.allowance(owner.address, limiter.address);
@@ -62,12 +62,12 @@ describe("DefoLimiter", function () {
 
   it("Should buy some tokens outside of timeframe", async function() {
     await defotoken.mint(owner.address, "200000"); //Mint all tokens to owner for total supply
-    await limiter.setLPAddress(acc1.address) //Set owner address as LP
+    await limiter.setLPAddress(owner.address) //Set owner address as LP
 
     console.log("Owner balance before: ", await defotoken.balanceOf(owner.address))
-    console.log("Current expiration timeframe: ", await limiter.timeframeExpiration)
+    console.log("Current expiration timeframe: ", await limiter.timeframeExpiration())
     
-    await defotoken.connect(owner).transfer(acc1.address, "2");
+    await defotoken.connect(owner).transfer(acc1.address, "1");
     //await expectRevert(defotoken.connect(owner).transfer(acc1.address, "100000"), "Cannot buy anymore tokens during this timeframe");
     //await defotoken.connect(owner).transfer(acc1.address, "2");
     await network.provider.send("evm_increaseTime", [43200])
