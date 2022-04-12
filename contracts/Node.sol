@@ -46,9 +46,10 @@ contract DefoNode is
 
     /// @dev minimum time required to claim rewards in seconds
     uint256 public RewardTime;
-
+    uint8 public MintLimitHours;
     /// @dev Main node struct packed for efficency
     struct Node {
+        uint32 MintTime; // timestamp of the mint time
         uint32 LastReward; // timestamp of last reward claim
         uint32 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
         uint8 NodeType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
@@ -61,8 +62,11 @@ contract DefoNode is
 
     /// @dev A struct for keeping info about node types
     struct NodeTypeMetadata {
+        uint32 LastMint; // last mint timestamp
         uint16 MaintenanceFee; // Maintenance fee for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
         uint16 RewardRate; // Reward rate  for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
+        uint8 DailyLimit; // global mint limit for a node type
+        uint8 MintCount; // mint count resets every MintLimitHours hours
         uint256 DefoPrice; // Required Defo tokens while minting
         uint256 StablePrice; // Required StableCoin tokens while minting
     }
@@ -139,6 +143,16 @@ contract DefoNode is
 
     modifier onlyActive(uint256 _tokenId) {
         require(isActive(_tokenId), "Node is deactivated");
+        _;
+    }
+
+    modifier mintTimeLimit(uint8 _nodeType) {
+        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[_nodeType];
+        require(
+            block.timestamp - nodeType.LastMint >= 1 hours * MintLimitHours ||
+                nodeType.MintCount <= nodeType.DailyLimit,
+            "Node mint restriction"
+        );
         _;
     }
 
@@ -256,9 +270,12 @@ contract DefoNode is
     }
 
     // node compounding function creates a node from unclaimed rewards , only creates same type of the compounded node
-    function _compound(uint256 _tokenid, uint8 _nodeType) internal {
+    function _compound(uint256 _tokenid, uint8 _nodeType)
+        internal
+        mintTimeLimit(_nodeType)
+    {
         Node memory node = NodeOf[_tokenid];
-        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[_nodeType];
+        NodeTypeMetadata storage nodeType = GetNodeTypeMetadata[_nodeType];
         uint256 rewardDefo = _taperCalculate(_tokenid);
         require(rewardDefo >= (nodeType.DefoPrice), "not enough rewards");
         node.claimedReward = node.claimedReward + nodeType.DefoPrice;
@@ -271,6 +288,12 @@ contract DefoNode is
         newNode.LastMaintained = uint32(block.timestamp);
         newNode.LastReward = uint32(block.timestamp);
         NodeOf[tokenId] = newNode;
+        if (block.timestamp - nodeType.LastMint >= 1 hours * MintLimitHours) {
+            nodeType.LastMint = uint32(block.timestamp);
+            nodeType.MintCount = 0;
+        } else {
+            nodeType.MintCount = nodeType.MintCount + 1;
+        }
     }
 
     // TODO: Add grace period
@@ -370,11 +393,11 @@ contract DefoNode is
     }
 
     /// @notice mint a new node
-    function MintNode(uint8 _type) external SaleLock {
+    function MintNode(uint8 _type) external SaleLock mintTimeLimit(_type) {
         if (MaxNodes != 0) {
             require(_tokenIdCounter.current() < MaxNodes, "Sold Out");
         }
-        NodeTypeMetadata memory nodeType = GetNodeTypeMetadata[_type];
+        NodeTypeMetadata storage nodeType = GetNodeTypeMetadata[_type];
         require(
             DefoToken.balanceOf(msg.sender) > nodeType.DefoPrice,
             "Insufficient Defo"
@@ -392,6 +415,12 @@ contract DefoNode is
         _distributePayment(nodeType.DefoPrice, true);
         _distributePayment(nodeType.StablePrice, false);
         _mintNode(_type, msg.sender);
+        if (block.timestamp - nodeType.LastMint >= 1 hours * MintLimitHours) {
+            nodeType.LastMint = uint32(block.timestamp);
+            nodeType.MintCount = 0;
+        } else {
+            nodeType.MintCount = nodeType.MintCount + 1;
+        }
     }
 
     function ClaimRewards(uint256 _tokenid)
@@ -588,34 +617,42 @@ contract DefoNode is
     }
 
     // Owner Functions
-    function SetNodePrice(
-        uint8 _type,
-        uint256 _daiPrice,
-        uint256 _defoPrice
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        NodeTypeMetadata storage nodeType = GetNodeTypeMetadata[_type];
-        nodeType.DefoPrice = _defoPrice;
-        nodeType.StablePrice = _daiPrice;
-    }
-
-    function SetTax() external onlyRole(DEFAULT_ADMIN_ROLE) {}
-
-    function setRewardRate(uint8 _type, uint256 _rate)
+    // TODO: set input to  NodeTypeMetadata struct
+    /// @notice function for creating a new node type or changing a node type settings settings should sent as an array with a spesific order
+    /// @dev required order is : [DefoPrice , StablePrice , MaintenanceFee , RewardRate , DailyLimit ]
+    function setNodeSettings(uint8 _type, uint256[] calldata _settingsArray)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
+        require(
+            _settingsArray.length >= 5,
+            "Settings array length must be greater than 5"
+        );
         NodeTypeMetadata storage nodeType = GetNodeTypeMetadata[_type];
-        nodeType.MaintenanceFee = uint16(_rate);
-
-        nodeType.RewardRate = uint16(_rate);
+        nodeType.DefoPrice = _settingsArray[0];
+        nodeType.StablePrice = _settingsArray[1];
+        nodeType.MaintenanceFee = uint16(_settingsArray[2]);
+        nodeType.RewardRate = uint16(_settingsArray[3]);
+        nodeType.DailyLimit = uint8(_settingsArray[4]);
     }
 
-    function setMaintenanceRate(uint8 _type, uint256 _rate)
+    /// @notice function for setting distribution addresses
+    /// @dev required order is : [RewardPool , LimiterAddr , Donation , Team , Marketing ,  Buyback]
+    function setAddresses(address[] calldata _addressArray)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        NodeTypeMetadata storage nodeType = GetNodeTypeMetadata[_type];
-        nodeType.MaintenanceFee = uint16(_rate);
+        require(
+            _addressArray.length >= 6,
+            "Settings array length must be greater than 5"
+        );
+
+        RewardPool = _addressArray[0];
+        LimiterAddr = _addressArray[1];
+        Donation = _addressArray[2];
+        Team = _addressArray[3];
+        Marketing = _addressArray[4];
+        Buyback = _addressArray[5];
     }
 
     function setMinReward(uint256 _minReward)
@@ -625,47 +662,11 @@ contract DefoNode is
         minReward = _minReward;
     }
 
-    /// @dev could be optimized by using a map or enums right now like this for testing purposes
-    function changeRewardAddress(address _newAddress)
+    function setMintLimitHours(uint8 _MintLimitHours)
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        RewardPool = _newAddress;
-    }
-
-    function changeLimiterAddress(address _newAddress)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        LimiterAddr = _newAddress;
-    }
-
-    function changeDonationAddress(address _newAddress)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        Donation = _newAddress;
-    }
-
-    function changeTeamAddress(address _newAddress)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        Team = _newAddress;
-    }
-
-    function changeMarketingAddress(address _newAddress)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        Marketing = _newAddress;
-    }
-
-    function changeBuybackAddress(address _newAddress)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        Buyback = _newAddress;
+        MintLimitHours = _MintLimitHours;
     }
 
     function ChangePaymentToken(address _newToken)
