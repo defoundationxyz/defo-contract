@@ -31,7 +31,7 @@ describe("Deploying Contracts", function () {
     
     // deploying defo contract
     const Defo = await hre.ethers.getContractFactory("Defo");
-    defo = await Defo.deploy(defoOwner.address);
+    defo = await Defo.deploy();
 
     //deploying testToken contract
     const TestToken = await hre.ethers.getContractFactory("TestToken");
@@ -49,6 +49,10 @@ describe("Deploying Contracts", function () {
     //This address should be equal to 
     const uaddy = await lpManager.getUniverseImplementation();
     
+    //set setLiquidityPoolManager with Lp manager address
+    await defo.setLiquidityPoolManager(lpManager.address);
+    const lpManagerViaDefo = await defo.lpPoolManager();
+   
     table.push(
         ['Defo token deployed at:', defo.address],
         ["Defo owner is: ", defoOwner.address],
@@ -59,6 +63,8 @@ describe("Deploying Contracts", function () {
         ["LpManager deployed at:", lpManager.address],
         ["Lp address: ", defoTtAddress],
         ["Universal Implementation: ", uaddy],
+        ["Router address: ", routerAddress],
+        ["Lp Manager By defo", lpManagerViaDefo],
       );
     });
 
@@ -100,47 +106,52 @@ describe("Deploying Contracts", function () {
 
     //Transfering and approving defo
     await defo.connect(defoOwner).transfer(acc1.address, tokenAccOneDecimals);
-    const accOneBalanceDefo = (await defo.balanceOf(acc1.address)/1e18);
-    expect (accOneBalanceDefo.toString()).to.equal((tokenAccOneDecimals/1e18).toString()).to.ok;
+    const accOneBalanceDefo = ethers.utils.formatUnits (await defo.balanceOf(acc1.address), 18);
+    expect (accOneBalanceDefo.toString()).to.equal(ethers.utils.formatUnits (tokenAccOneDecimals, 18).toString()).to.ok;
     await defo.connect(acc1).approve(routerAddress, tokenAccOneDecimals);
 
     //transfering TT
     await testToken.connect(testTokenOwner).transfer(acc1.address, tokenAccOneDecimals);
-    const accOneBalanceTT = (await testToken.balanceOf(acc1.address)/1e18);
-    expect (accOneBalanceTT.toString()).to.equal((tokenAccOneDecimals/1e18).toString()).to.ok;
+    const accOneBalanceTT = ethers.utils.formatUnits (await testToken.balanceOf(acc1.address), 18);
+    expect (accOneBalanceTT.toString()).to.equal(ethers.utils.formatUnits (tokenAccOneDecimals, 18).toString()).to.ok;
     await testToken.connect(acc1).approve(routerAddress, tokenAccOneDecimals);
     
     //adding liquidity
-    const liquidtyToken = "900000000000000000000" //1000 tokens
-    const minimumToken =  "890000000000000000000"; //990 tokens
+    const liquidtyToken = "500000000000000000000" //1000 tokens
+    const minimumToken =  "480000000000000000000"; //990 tokens
     await routerContract.connect(acc1).addLiquidity
     ( defo.address, testToken.address,
-    liquidtyToken, liquidtyToken,
+        liquidtyToken, liquidtyToken,
     minimumToken, minimumToken,
-    acc1.address, "1649646004"// update this with current epoch
+    acc1.address, "1649821101"// update this with current epoch
     )
     
-    //checking Acc1 lp balance
-    const lpBalance = await lpManager.connect(acc1).checkBalance();
-    const balance = ethers.utils.formatUnits(lpBalance, 18);
+    //checking Acc1 lp, defo and test token balance
+    const lpBalance = ethers.utils.formatUnits(await lpManager.connect(acc1).checkBalance(), 18);
+    const accOneBalanceDefoAfter = ethers.utils.formatUnits (await defo.balanceOf(acc1.address), 18);
+    const accOneBalanceTTAfter = ethers.utils.formatUnits (await testToken.balanceOf(acc1.address), 18);
+    const rewardPoolBalance = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
 
     //Checking total Lp minted
     const lpLiquidity = await lpManager.getSupply();
     const lpLiquidityBalance = ethers.utils.formatUnits(lpLiquidity, 18);
-    //const isLiquidityAddedAfter = await lpManager.isLiquidityAdded();
-    console.log(lpLiquidityBalance)
-      table.push(
-         ['DEFO/TestToken Address: ', lpAddress],
-         ["LpAdd Joe Factory check: ", checkBool],
-         ['No existed token (WAVAX/defo): ', nonExistentAdd],
-         ['Is Liquidity Added status before: ', isLiquidityAddedBefore],
-         ['Account 1 Defo balance: ', accOneBalanceDefo ],
-         ['Account 1 TT balance: ', accOneBalanceTT ],
-         ['Lp Balance account 1: ', balance ],
-         ['Liquidity balance: ', lpLiquidityBalance],
-        );
-    //     // const fact = await joeRouter.factory();
-    //     // console.log(fact)
-       console.log(table.toString());
+
+    table.push(
+        ['DEFO/TestToken Address: ', lpAddress],
+        ["LpAdd Joe Factory check: ", checkBool],
+        ['No existed token (WAVAX/defo): ', nonExistentAdd],
+        ['Is Liquidity Added status before: ', isLiquidityAddedBefore],
+        ['Account 1 Defo balance: ', accOneBalanceDefo ],
+        ['Account 1 TT balance: ', accOneBalanceTT ],
+        ['Lp Balance account 1: ', lpBalance ],
+        ['Liquidity balance: ', lpLiquidityBalance],
+        ['Account 1 Defo balance after: ', accOneBalanceDefoAfter ],
+        ['Account 1 TT balance after: ', accOneBalanceTTAfter ],
+        ['Reward pool balance', rewardPoolBalance],
+    );
+
+    console.log(table.toString());
   });
 });
+
+//10000000
