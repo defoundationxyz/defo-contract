@@ -11,10 +11,12 @@ import "hardhat/console.sol";
 //Sole purpose of testing lp manager
 contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplementationPoint{
     mapping(address => uint256) private _balances;
-    uint256 public _totalSupply = 10000*1e18;
+    mapping (address=>bool) isExemptFee;
+    uint256 public _totalSupply = 20000*1e18;
     
     constructor() ERC20("Defo Token","DEFO"){
         _mint(owner(), _totalSupply);
+        isExemptFee[owner()] = true;
     }
 
     /**
@@ -43,18 +45,19 @@ contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplemen
         bool sellCondition = lpPoolManager.checkSelling(to);
             //   uint256 feeAmount = lpPoolManager.calculateSellTax( from, amount);
             //   console.log(sellCondition, feeAmount);
-        if(sellCondition){
-            uint256 feeAmount = lpPoolManager.calculateSellTax(from, to, amount);
-            address rewardPool = lpPoolManager.getRewardAddress();
-            _balances[rewardPool] += feeAmount;
-        }
-        _transfer(from, to, amount);
+        uint amountRecived = isExemptFee[from] ? amount : _takeFee(from, to, amount);
+        uint _amount = sellCondition ? amountRecived : amount;
+        _transfer(from, to, _amount);
         return true;
+        
     }
 
-    // function _basicTransfer(address _from, address _to, uint256 _amount) internal returns (bool){
-    //     _transfer(_from, _to, _amount);
-    //     return true;
-    // }
-
+    function _takeFee(address _from, address _to, uint256 _amount) internal returns (uint256){
+        address rewardPool = lpPoolManager.getRewardAddress();
+        uint256 feeAmount = lpPoolManager.calculateSellTax(_from, _to, _amount);
+        //_balances[rewardPool] = _balances[rewardPool] + feeAmount;
+        console.log("Fee is: " , feeAmount);     
+        _transfer(_from, rewardPool, feeAmount);
+        return _amount - feeAmount;
+    }
 }

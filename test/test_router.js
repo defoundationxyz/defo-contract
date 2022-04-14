@@ -65,6 +65,7 @@ describe("Deploying Contracts", function () {
         ["Universal Implementation: ", uaddy],
         ["Router address: ", routerAddress],
         ["Lp Manager By defo", lpManagerViaDefo],
+        ["reward pool address: ", treasury.address],
       );
     });
 
@@ -102,7 +103,7 @@ describe("Deploying Contracts", function () {
     expect (thresholdValue).to.equal((swapTokensToLiquidityThreshold/1e18).toString());
       
     //transfering defo and test token to acc1 
-    const tokenAccOneDecimals = "1000000000000000000000"; //1000 tokens
+    const tokenAccOneDecimals = "2000000000000000000000"; //2000 tokens
 
     //Transfering and approving defo
     await defo.connect(defoOwner).transfer(acc1.address, tokenAccOneDecimals);
@@ -116,25 +117,39 @@ describe("Deploying Contracts", function () {
     expect (accOneBalanceTT.toString()).to.equal(ethers.utils.formatUnits (tokenAccOneDecimals, 18).toString()).to.ok;
     await testToken.connect(acc1).approve(routerAddress, tokenAccOneDecimals);
     
+    //checking reward pool balance
+    const rewardPoolBalanceBeforeLP = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
+    
     //adding liquidity
-    const liquidtyToken = "500000000000000000000" //1000 tokens
-    const minimumToken =  "480000000000000000000"; //990 tokens
+    const liquidtyToken = "1000000000000000000000" //1000 tokens
+    const minimumToken =  "980000000000000000000"; //480 tokens
     await routerContract.connect(acc1).addLiquidity
     ( defo.address, testToken.address,
         liquidtyToken, liquidtyToken,
-    minimumToken, minimumToken,
-    acc1.address, "1649821101"// update this with current epoch
+        minimumToken, minimumToken,
+    acc1.address, "1649910829447"// update this with current epoch
     )
     
     //checking Acc1 lp, defo and test token balance
     const lpBalance = ethers.utils.formatUnits(await lpManager.connect(acc1).checkBalance(), 18);
     const accOneBalanceDefoAfter = ethers.utils.formatUnits (await defo.balanceOf(acc1.address), 18);
     const accOneBalanceTTAfter = ethers.utils.formatUnits (await testToken.balanceOf(acc1.address), 18);
-    const rewardPoolBalance = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
+    const rewardPoolBalanceAfterLP = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
 
     //Checking total Lp minted
-    const lpLiquidity = await lpManager.getSupply();
-    const lpLiquidityBalance = ethers.utils.formatUnits(lpLiquidity, 18);
+    const lpLiquidityBalance = ethers.utils.formatUnits(await lpManager.getSupply(), 18);
+
+    //swapping token
+    const amountToSwap = "100000000000000000000"; //100
+    await routerContract.connect(acc1).swapExactTokensForTokens(
+      amountToSwap, "0", [  defo.address, testToken.address], 
+      acc1.address, "1649910829447"
+    );
+
+    //checking balance after swapping
+    const accOneDefoBalanceAfterSwapping = ethers.utils.formatUnits (await defo.balanceOf(acc1.address), 18);
+    const accOneTTBalanceAfterSwapping = ethers.utils.formatUnits (await testToken.balanceOf(acc1.address), 18);
+    const rewardPoolBalanceAfter = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
 
     table.push(
         ['DEFO/TestToken Address: ', lpAddress],
@@ -143,15 +158,93 @@ describe("Deploying Contracts", function () {
         ['Is Liquidity Added status before: ', isLiquidityAddedBefore],
         ['Account 1 Defo balance: ', accOneBalanceDefo ],
         ['Account 1 TT balance: ', accOneBalanceTT ],
-        ['Lp Balance account 1: ', lpBalance ],
-        ['Liquidity balance: ', lpLiquidityBalance],
-        ['Account 1 Defo balance after: ', accOneBalanceDefoAfter ],
-        ['Account 1 TT balance after: ', accOneBalanceTTAfter ],
-        ['Reward pool balance', rewardPoolBalance],
+        ["Rewards balance before adding LP: ", rewardPoolBalanceBeforeLP],
+        ['Lp Balance Account 1: ', lpBalance ],
+        ['Total LP minted: ', lpLiquidityBalance],
+        ['Account 1 Defo balance after adding LP: ', accOneBalanceDefoAfter ],
+        ['Account 1 TT balance after adding LP: ', accOneBalanceTTAfter ],
+        ['Reward pool balance after lp & before swap', rewardPoolBalanceAfterLP],
+        ['Acc1 defo bal after swap: ', accOneDefoBalanceAfterSwapping],
+        ['Acc1 TT bal after swap: ', accOneTTBalanceAfterSwapping],
+        ['Reward Pool balance after swap: ', rewardPoolBalanceAfter],
     );
+    console.log(table.toString());
+  });
+
+  it('Fee exempt Owner', async function(){
+    table = new Table({
+      head:["Fee Exempt Test", 'Result'],
+      colWidths:['auto','auto']
+      }); 
+
+    //checking reward pool balance before adding LP
+    const rewardPoolBalanceBefore = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
+
+    //transfering token test token to defo owner
+    const tokenAccOneDecimals = "2000000000000000000000" //2000 tokens
+    await testToken.connect(testTokenOwner).transfer(defoOwner.address, tokenAccOneDecimals);
+    const accBalanceTT = ethers.utils.formatUnits (await testToken.balanceOf(defoOwner.address), 18);
+    expect (accBalanceTT.toString()).to.equal(ethers.utils.formatUnits (tokenAccOneDecimals, 18).toString()).to.ok;
+    await testToken.connect(defoOwner).approve(routerAddress, tokenAccOneDecimals);
+
+    //approving defo tokem
+    const accBalanceDefo = ethers.utils.formatUnits (await defo.balanceOf(defoOwner.address), 18);
+    await defo.connect(defoOwner).approve(routerAddress, tokenAccOneDecimals);
+    
+    //@notice there should be no sell tax when Defo owner adding Liquidity
+    //adding liquidity from owner - should be no 50% sell tax. 
+    const liquidtyToken = "1000000000000000000000" //1000 tokens
+    const minimumToken =  "980000000000000000000"; //980 tokens
+    await routerContract.connect(defoOwner).addLiquidity
+    ( defo.address, testToken.address,
+        liquidtyToken, liquidtyToken,
+    minimumToken, minimumToken,
+    defoOwner.address, "1649882610"// update this with current epoch
+    );
+
+    //Checking total Lp minted
+    const lpLiquidityBalance = ethers.utils.formatUnits(await lpManager.getSupply(), 18);
+    
+    //Defo(owner) balance after and before swapping
+    const accBalanceDefoBefore = ethers.utils.formatUnits (await defo.balanceOf(defoOwner.address), 18);
+    //TT(defoowner) balance after and before swapping
+    const accBalanceTTBefore = ethers.utils.formatUnits (await testToken.balanceOf(defoOwner.address), 18);
+    
+    //swapping token by the defo owner
+    const amountToSwap = "500000000000000000000";//500
+    await routerContract.connect(defoOwner).swapExactTokensForTokens(
+      amountToSwap, "0", [defo.address, testToken.address], 
+      defoOwner.address, "1649882610"
+    );
+
+    //checking reward pool balance after Swapping - should be 0
+    const rewardPoolBalanceAfterSwapping = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18);
+    
+    //Defo(owner) balance after swapping
+    const accBalanceDefoAfter = ethers.utils.formatUnits (await defo.balanceOf(defoOwner.address), 18);
+    //TT(defoowner) balance after swapping
+    const accBalanceTTAfter = ethers.utils.formatUnits (await testToken.balanceOf(defoOwner.address), 18);
+    
+    //@notice there should be a 50% sell tax when selling token by user other than defo owner
+    
+    //check reward pool balance after adding lp. Should be zero
+    const rewardPoolBalanceAfter = ethers.utils.formatUnits(await defo.balanceOf(treasury.address), 18 );
+
+    table.push(
+      ["Test token balance: ", accBalanceTT],
+      ["Defo token balance: ", accBalanceDefo],
+      ["Reward pool balance before adding lp: ", rewardPoolBalanceBefore],
+      ['Total LP minted: ', lpLiquidityBalance],
+      ["Reward pool balance After adding lp: ", rewardPoolBalanceAfter],
+      ["Owner's TT balance before swapping: ", accBalanceTTBefore],
+      ["Owner's defo balance before swapping: ", accBalanceDefoBefore],
+      ["Owner's TT balance after swapping: ", accBalanceTTAfter],
+      ["Owner's defo balance after swapping: ", accBalanceDefoAfter],
+      ["Reward pool balance After swapping:", rewardPoolBalanceAfterSwapping],
+    )
 
     console.log(table.toString());
   });
 });
 
-//10000000
+//1000.000000000000000000

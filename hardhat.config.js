@@ -25,7 +25,7 @@ module.exports = {
       forking: {
           url: "https://api.avax.network/ext/bc/C/rpc",
           enabled: true,
-          blockNumber: 2975762,
+          blockNumber: 8528605,
       },
     },
   },
