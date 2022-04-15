@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-interface ILiquidityPoolManager {
+interface ILPManager {
     function owner() external view returns (address);
 
     function getRouter() external view returns (address);

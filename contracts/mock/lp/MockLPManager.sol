@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./MockOwnerRecovery.sol";
-import "./interfaces/IJoeFactory.sol";
-import "./interfaces/IJoePair.sol";
-import "./interfaces/IJoeRouter02.sol";
-import "./interfaces/ILPManager.sol";
-import "./MockUniverse.sol";
+import "../tokens/MockOwnerRecovery.sol";
+import "../interfaces/IJoeFactory.sol";
+import "../interfaces/IJoePair.sol";
+import "../interfaces/IJoeRouter02.sol";
+import "../interfaces/ILPManager.sol";
+import "../MockUniverse.sol";
 import "hardhat/console.sol";
 
 
@@ -38,14 +38,14 @@ contract MockLPManager is Ownable, Universe {
         _;
     }
 
-    constructor( address _router, address[2] memory path, uint256 _swapTokensToLiquidityThreshold ) validAddress(_router){
+    constructor( address _router, address[2] memory path /*uint256 _swapTokensToLiquidityThreshold*/ ) validAddress(_router){
         router = IJoeRouter02(_router);
         //console.log(router.factory());
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
         rightSide = IERC20(path[1]);
         pairLiquidityTotalSupply = pair.totalSupply();
-        updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
+        //updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
         // Left side should be main contract
         changeUniverseImplementation(address(leftSide));
         shouldLiquify(true);
@@ -153,8 +153,8 @@ contract MockLPManager is Ownable, Universe {
         // Gas optimization - Approval
         // There is no risk in giving unlimited allowance to the router
         // As long as it's a trusted one
-        leftSide.safeApprove(address(router), (active ? MAX_UINT256 : 0));
-        rightSide.safeApprove(address(router), (active ? MAX_UINT256 : 0));
+        leftSide.approve(address(router), (active ? MAX_UINT256 : 0));
+        rightSide.approve(address(router), (active ? MAX_UINT256 : 0));
     }
 
     function shouldLiquify(bool _liquifyEnabled) public onlyOwner {

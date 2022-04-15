@@ -23,7 +23,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     mapping(uint256 => mapping(address => uint256)) public tokensBought; //Tokens bought
     mapping (address => bool) public unauthorizedAddresses;
 
-    // The block number `timeframExpiration` is added to
+    // The block number `timeframeExpiration` is added to
     uint256 internal currentTimeframeWindow;
     
     // Amount of time that must pass between each buy

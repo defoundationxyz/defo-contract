@@ -13,10 +13,28 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
 
 describe("DefoLimiter", function () {
   var owner, acc1, acc2, acc3;
-  var node, limiter, liqpool, router, defotoken;
+  var node, 
+      limiter, 
+      liqpool, 
+      lpmanager, 
+      router, 
+      defotoken, 
+      mockdai, 
+      mockpair, 
+      mockfactory, 
+      wavax;
 
   beforeEach(async function () {
     [owner, acc1, acc2, acc3, ...accs] = await ethers.getSigners();
+
+    await ethers.provider.send("hardhat_reset",[{
+      forking: {
+          jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
+          blockNumber: 2975762,
+        },
+      },
+      ],
+    );
 
     //Mock Node Deployment
     var Node = await ethers.getContractFactory("MockNode");
@@ -35,11 +53,6 @@ describe("DefoLimiter", function () {
     var LiqPool = await ethers.getContractFactory("MockLiqPool");
     liqpool = await LiqPool.deploy();
     await liqpool.deployed();
-    
-    //Mock Router Deployment
-    var Router = await ethers.getContractFactory("MockRouter");
-    router = await Router.deploy();
-    await router.deployed();
 
     //Mock Defo Token Deployment
     var DefoToken = await ethers.getContractFactory("MockToken");
@@ -47,9 +60,43 @@ describe("DefoLimiter", function () {
     await defotoken.deployed();
     await defotoken.allowance(owner.address, limiter.address);
 
+    //Mock DAI Deployment
+    var MockDAI = await ethers.getContractFactory("MockDAI");
+    mockdai = await MockDAI.connect(owner).deploy();
+    await mockdai.deployed();
+
+    //WAVAX Deployment
+    var WAVAX = await ethers.getContractFactory("WAVAX");
+    wavax = await WAVAX.connect(owner).deploy(owner.address);
+    await wavax.deployed();
+
+    //Mock LP Factory Deployment
+    var MockFactory = await ethers.getContractFactory("MockFactory");
+    mockfactory = await MockFactory.connect(owner).deploy(owner.address);
+    await mockfactory.deployed();
+
+    //Mock LP Pair Deployment
+    var MockPair = await ethers.getContractFactory("JoePair");
+    mockpair = await MockPair.connect(owner).deploy();
+    await mockpair.deployed();
+
+    //Mock Router Deployment
+    var Router = await ethers.getContractFactory("JoeRouter02");
+    router = await Router.deploy(mockfactory.address, wavax.address);
+    await router.deployed();
+
+    //Mock LP Manager Deployment
+    var LPManager = await ethers.getContractFactory("MockLPManager");
+    lpmanager = await LPManager.connect(owner).deploy(
+      router.address,
+      [mockdai.address, defotoken.address]
+    );
+    await lpmanager.deployed();
+
     //Set addresses in limiter contract
     await limiter.setTokenAddress(defotoken.address);
     await limiter.setLPAddress(defotoken.address); //Using defo token address so that minting acts as buying from a LP
+    await limiter.setLPManager(lpmanager.address);
     await defotoken.allowance(owner.address, limiter.address);
   });
 
@@ -66,18 +113,19 @@ describe("DefoLimiter", function () {
 
     console.log("Owner balance before: ", await defotoken.balanceOf(owner.address))
     console.log("Current expiration timeframe: ", await limiter.timeframeExpiration())
+    // console.log(await defotoken.connect(owner).transfer(acc1.address, "1", {
+    //   gasPrice: 156470235
+    // }));
     
     await defotoken.connect(owner).transfer(acc1.address, "1");
-    //await expectRevert(defotoken.connect(owner).transfer(acc1.address, "100000"), "Cannot buy anymore tokens during this timeframe");
-    //await defotoken.connect(owner).transfer(acc1.address, "2");
-    await network.provider.send("evm_increaseTime", [43200])
-    await ethers.provider.send('evm_mine');
+    await expectRevert(defotoken.connect(owner).transfer(acc1.address, "100000"), "Cannot buy anymore tokens during this timeframe");
+    //await network.provider.send("evm_increaseTime", [43200]);
+    //await ethers.provider.send('evm_mine');
 
     console.log("Owner Balance after: ", await defotoken.balanceOf(owner.address))
     console.log("ACC1 Balance: ", await defotoken.balanceOf(acc2.address))
   })
 
-  // Implement BigNumber math so I can use expectRevert
   it("Should sell tokens from an account", async () => {
     await defotoken.mint(acc1.address, "5000000000000000000")
     await defotoken.connect(acc1).transfer(defotoken.address, "4");
