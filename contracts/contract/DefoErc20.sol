@@ -35,11 +35,16 @@ contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplemen
      * - the caller must have allowance for ``from``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(
+
+    /* Sell tax is on hold as of now as discussed with team.
+    *    Will be implementing tax based on reward instead.
+    *   To test these functions change the name from transferFromSellTax to transferFrom
+    */ 
+    function transferFromSellTax(
         address from,
         address to,
         uint256 amount
-    ) public virtual override returns (bool) {
+    ) public virtual returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, amount);
         bool sellCondition = lpPoolManager.checkSelling(to);

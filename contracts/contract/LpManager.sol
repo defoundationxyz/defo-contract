@@ -110,28 +110,28 @@ contract  LpManager is Ownable, OwnerRecovery, Universe{
     //     return true;
     // }
 
-    // Magical function that adds liquidity effortlessly
-    function swapAndLiquify(uint256 tokens) private returns (uint256) {
-        uint256 half = tokens / 2;
-        uint256 initialRightBalance = rightSide.balanceOf(address(this));
+    // // Magical function that adds liquidity effortlessly
+    // function swapAndLiquify(uint256 tokens) private returns (uint256) {
+    //     uint256 half = tokens / 2;
+    //     uint256 initialRightBalance = rightSide.balanceOf(address(this));
 
-        swapLeftSideForRightSide(half);
+    //     swapLeftSideForRightSide(half);
 
-        uint256 newRightBalance = rightSide.balanceOf(address(this)) -
-            initialRightBalance;
+    //     uint256 newRightBalance = rightSide.balanceOf(address(this)) -
+    //         initialRightBalance;
 
-        addLiquidityToken(half, newRightBalance);
+    //     addLiquidityToken(half, newRightBalance);
 
-        emit SwapAndLiquify(half, initialRightBalance, newRightBalance);
+    //     emit SwapAndLiquify(half, initialRightBalance, newRightBalance);
 
-        // Return the number of LP tokens this contract have
-        return pair.balanceOf(address(this));
-    }
+    //     // Return the number of LP tokens this contract have
+    //     return pair.balanceOf(address(this));
+    // }
 
-    // Transfer LP tokens conveniently
-    function sendLPTokensTo(address to, uint256 tokens) private {
-        pair.transfer(to, tokens);
-    }
+    // // Transfer LP tokens conveniently
+    // function sendLPTokensTo(address to, uint256 tokens) private {
+    //     pair.transfer(to, tokens);
+    // }
 
     function createPairWith(address[2] memory path) private returns (IJoePair) {
         IJoeFactory factory = IJoeFactory(router.factory());
@@ -146,32 +146,32 @@ contract  LpManager is Ownable, OwnerRecovery, Universe{
         return IJoePair(_pair);
     }
 
-    function swapLeftSideForRightSide(uint256 tokenAmount) private {
-        address[] memory path = new address[](2);
-        path[0] = address(leftSide);
-        path[1] = address(rightSide);
+    // function swapLeftSideForRightSide(uint256 tokenAmount) private {
+    //     address[] memory path = new address[](2);
+    //     path[0] = address(leftSide);
+    //     path[1] = address(rightSide);
 
-        router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-            tokenAmount,
-            0, // Accept any amount
-            path,
-            address(this),
-            block.timestamp
-        );
-    }
+    //     router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+    //         tokenAmount,
+    //         0, // Accept any amount
+    //         path,
+    //         address(this),
+    //         block.timestamp
+    //     );
+    // }
 
-    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
-        router.addLiquidity(
-            address(leftSide),
-            address(rightSide),
-            leftAmount,
-            rightAmount,
-            0, // Slippage is unavoidable
-            0, // Slippage is unavoidable
-            address(this),
-            block.timestamp
-        );
-    }
+    // function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
+    //     router.addLiquidity(
+    //         address(leftSide),
+    //         address(rightSide),
+    //         leftAmount,
+    //         rightAmount,
+    //         0, // Slippage is unavoidable
+    //         0, // Slippage is unavoidable
+    //         address(this),
+    //         block.timestamp
+    //     );
+    // }
 
     //owner function
     function setAllowance(bool active) public onlyOwner {
