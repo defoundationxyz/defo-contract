@@ -27,4 +27,10 @@ module.exports = {
       }
     }
   },
+  networks: {
+    ganache: {
+      url: "HTTP://127.0.0.1:7545",
+      accounts: ["88ea8fa1a68d36da48826e517a098fb95e013c4c0960a9017e618cbc6ef22ccd"]
+    }
+  }
 };
