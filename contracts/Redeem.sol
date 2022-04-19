@@ -10,12 +10,20 @@ import './interface/INode.sol';
 contract Redeem is Ownable{
     using SafeMath for uint;
 
-    bool private locked;
-    bool public redeemActive;
-    INode nodeContract;
+    ///Presale contract addresses
     IERC721Enumerable sapphirePresale;
     IERC721Enumerable rubyPresale;
     IERC721Enumerable diamondPresale;
+    IERC721Enumerable diamondDeltaPresale;
+    IERC721Enumerable diamondOmegaPresale;
+    IERC721Enumerable rubyDeltaPresale;
+    IERC721Enumerable rubyOmegaPresale;
+    IERC721Enumerable sapphireDeltaPresale;
+    IERC721Enumerable sapphireOmegaPresale;
+
+    bool private locked;
+    bool public redeemActive;
+    INode nodeContract;
     uint256 private complianceEndTime;
     uint256 private complianceStartTime;
     constructor(address _nodeAddress, address _sapphireAddress, address _rubyAddress, address _diamondAddress) {
@@ -147,6 +155,37 @@ contract Redeem is Ownable{
                     address(0x000000000000000000000000000000000000dEaD),
                     diamondPresale.tokenOfOwnerByIndex(msg.sender, 0)
                 );
+            }
+        }
+
+        function secondPresaleRedeem()
+        public
+        isActive
+        nonReentrant
+        presaleCompliance
+        timeCompliance {
+            if () {
+
+            }
+            
+            if () {
+
+            }
+            
+            if () {
+
+            }
+            
+            if () {
+
+            }
+            
+            if () {
+
+            } 
+            
+            if () {
+
             }
         }
 }
