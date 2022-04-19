@@ -13,6 +13,7 @@ pragma solidity ^0.8.4;
 import "../interfaces/IERC721Enumerable.sol";
 import "../libraries/LibDiamond.sol";
 import "../libraries/LibERC721EnumerableStorage.sol";
+import "../libraries/LibERC721.sol";
 
 /**
  * @dev This implements an optional extension of {ERC721} defined in the EIP that adds
@@ -26,6 +27,7 @@ contract ERC721EnumerableFacet {
 
         LibERC721EnumerableStorage.DiamondStorage
             storage ds = LibERC721EnumerableStorage.diamondStorage();
+        require(!ds.init, "already initialized");
         ds.erc721 = IERC721(erc721); //erc721-enumerable
     }
 
@@ -90,9 +92,7 @@ contract ERC721EnumerableFacet {
         address to,
         uint256 tokenId
     ) internal virtual {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
-        //super._beforeTokenTransfer(from, to, tokenId);
+        LibERC721._beforeTokenTransfer(from, to, tokenId);
 
         if (from == address(0)) {
             _addTokenToAllTokensEnumeration(tokenId);

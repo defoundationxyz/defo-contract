@@ -14,6 +14,7 @@ library LibERC721EnumerableStorage {
         uint256[] _allTokens;
         // Mapping from token id to position in the allTokens array
         mapping(uint256 => uint256) _allTokensIndex;
+        bool init;
     }
 
     // Returns the struct from a specified position in contract storage
