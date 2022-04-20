@@ -46,7 +46,7 @@ contract DefoLimiter is
     function initialize( 
         address _taxCollector, 
         address _defoNodeAddress
-    ) {
+    ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
         taxCollector = _taxCollector;
