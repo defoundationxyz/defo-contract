@@ -11,45 +11,45 @@ import "../libraries/LibMeta.sol";
 
 contract OwnerFacet {
     // Owner Functions
-    // TODO: set input to  GemTypeMetadata struct
-    /// @notice function for creating a new gem type or changing a gem type settings settings should sent as an array with a spesific order
-    /// @dev required order is : [DefoPrice , StablePrice , MaintenanceFee , RewardRate , DailyLimit ]
+
     modifier onlyOwner() {
         require(LibMeta.msgSender() == LibDiamond.contractOwner());
         _;
     }
 
-    function setGemSettings(uint8 _type, uint256[] calldata _settingsArray)
-        external
-        onlyOwner
-    {
-        require(
-            _settingsArray.length >= 5,
-            "Settings array length must be greater than 5"
-        );
+    /// @notice function for creating a new gem type or changing a gem type settings
+    function setGemSettings(
+        uint8 _type,
+        LibGem.GemTypeMetadata calldata _gemData
+    ) external onlyOwner {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.GemTypeMetadata storage gemType = ds.GetGemTypeMetadata[_type];
-        gemType.DefoPrice = _settingsArray[0];
-        gemType.StablePrice = _settingsArray[1];
-        gemType.MaintenanceFee = uint16(_settingsArray[2]);
-        gemType.RewardRate = uint16(_settingsArray[3]);
-        gemType.DailyLimit = uint8(_settingsArray[4]);
+        ds.GetGemTypeMetadata[_type] = _gemData;
     }
 
-    /// @notice function for setting distribution addresses
-    /// @dev required order is : [RewardPool , LimiterAddr , Donation , Team , Marketing ,  Buyback]
-    function setAddresses(address[] calldata _addressArray) external onlyOwner {
-        require(
-            _addressArray.length >= 6,
-            "Settings array length must be greater than 5"
-        );
+    /// @notice functions for setting distribution addresses
+    function setAddressRewardPool(address _newAddress) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.RewardPool = _addressArray[0];
-        metads.LimiterAddr = _addressArray[1];
-        metads.Donation = _addressArray[2];
-        metads.Team = _addressArray[3];
-        metads.Marketing = _addressArray[4];
-        metads.Buyback = _addressArray[5];
+        metads.RewardPool = _newAddress;
+    }
+
+    function setAddressDonation(address _newAddress) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Donation = _newAddress;
+    }
+
+    function setAddressTeam(address _newAddress) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Team = _newAddress;
+    }
+
+    function setAddressMarketing(address _newAddress) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Marketing = _newAddress;
+    }
+
+    function setAddressBuyback(address _newAddress) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Buyback = _newAddress;
     }
 
     function setMinReward(uint256 _minReward) external onlyOwner {

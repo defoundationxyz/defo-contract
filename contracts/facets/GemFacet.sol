@@ -12,6 +12,10 @@ import "../libraries/LibERC721Enumerable.sol";
 /// @author jvoljvolizka
 /// @notice Main yield gem functionality facet
 
+/// TODO: getters
+/// TODO: vault stuff
+/// TODO: Node Limiter stuff
+
 contract GemFacet {
     using Counters for Counters.Counter;
     modifier SaleLock() {
@@ -28,7 +32,7 @@ contract GemFacet {
     }
 
     modifier onlyActive(uint256 _tokenId) {
-        require(isActive(_tokenId), "Gem is deactivated");
+        require(LibGem.isActive(_tokenId), "Gem is deactivated");
         _;
     }
 
@@ -46,34 +50,6 @@ contract GemFacet {
     }
 
     // internal functions
-
-    /// calculates the reward taper with roi after 1x everytime roi achived rewards taper by %30
-    /// could be more optimized
-    /// always calculates rewards from 0
-    function _taperCalculate(
-        uint256 _tokenId /*, bool _update*/
-    ) internal view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenId];
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[
-            gem.GemType
-        ];
-        uint256 rewardCount = checkRawReward(_tokenId) + gem.claimedReward; // get reward without taper
-        uint256 actualReward = 0;
-
-        uint256 typePrice = gemType.DefoPrice;
-        uint256 fastMilestone = typePrice + (typePrice / 2); // 1.5x roi for degen modif
-        if (rewardCount > typePrice) {
-            while (rewardCount > typePrice) {
-                rewardCount = rewardCount - typePrice;
-                actualReward = actualReward + typePrice;
-                rewardCount = (((rewardCount) * 80) / 100);
-            }
-            /// TODO : check for overflows
-            return actualReward + rewardCount - gem.claimedReward;
-        }
-        return checkRawReward(_tokenId) - gem.claimedReward; // if less than roi don't taper
-    }
 
     /// @dev sends the gem payment to other wallets
     // TODO : LP distribution
@@ -113,23 +89,6 @@ contract GemFacet {
         // TODO : add lp distrubition
     }
 
-    // reward rate changes depending on the time
-    function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        uint32 diff = uint32(block.timestamp) - gem.LastReward;
-        if (diff < 1 weeks) {
-            return metads.RewardTaxTable[0];
-        } else if (diff > 2 weeks && diff < 3 weeks) {
-            return metads.RewardTaxTable[1];
-        } else if (diff > 3 weeks && diff < 4 weeks) {
-            return metads.RewardTaxTable[2];
-        } else {
-            return metads.RewardTaxTable[3];
-        }
-    }
-
     function _mintGem(uint8 _type, address _to) internal returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
@@ -155,9 +114,9 @@ contract GemFacet {
     function _sendRewardTokens(uint256 _tokenid, uint256 _offset) internal {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        uint256 _rewardDefo = _taperCalculate(_tokenid);
+        uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
 
-        uint256 taxRate = _rewardTax(_tokenid);
+        uint256 taxRate = LibGem._rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
         }
@@ -180,7 +139,7 @@ contract GemFacet {
         LibGem.GemTypeMetadata storage gemType = ds.GetGemTypeMetadata[
             _gemType
         ];
-        uint256 rewardDefo = _taperCalculate(_tokenid);
+        uint256 rewardDefo = LibGem._taperCalculate(_tokenid);
         require(rewardDefo >= (gemType.DefoPrice), "not enough rewards");
         gem.claimedReward = gem.claimedReward + gemType.DefoPrice;
 
@@ -455,58 +414,16 @@ contract GemFacet {
         return compounded;
     }
 */
-    // View Functions
-    function isActive(uint256 _tokenid) public view returns (bool) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        uint256 _lastTime = gem.LastMaintained;
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-
-        return !(_passedDays > metads.MaintenanceDays);
-    }
 
     /// @dev get the token value from lp
     function getTokenValue() public view returns (uint256) {}
-
-    // TODO: change location
-    function checkRawReward(uint256 _tokenid)
-        internal
-        view
-        returns (uint256 defoRewards)
-    {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[
-            gem.GemType
-        ];
-
-        uint256 _rate = gemType.RewardRate;
-        if (gem.Booster == LibGem.Booster.Omega) {
-            _rate = _rate * 2;
-        } else if (gem.Booster == LibGem.Booster.Delta) {
-            _rate = _rate + (((_rate * 20)) / 100);
-        }
-
-        uint256 _lastTime = gem.LastReward;
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-
-        uint256 _rewardDefo = _passedDays *
-            ((_rate * gemType.DefoPrice) / 1000);
-        uint256 taxRate = _rewardTax(_tokenid);
-        if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-        }
-        return (_rewardDefo);
-    }
 
     function checkTaperedReward(uint256 _tokenid)
         public
         view
         returns (uint256)
     {
-        return _taperCalculate(_tokenid);
+        return LibGem._taperCalculate(_tokenid);
     }
 
     function checkPendingMaintenance(uint256 _tokenid)
