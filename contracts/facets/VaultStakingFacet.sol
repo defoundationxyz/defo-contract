@@ -31,6 +31,7 @@ contract VaultStakingFacet {
         onlyActive(_tokenId)
     {
         LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
         uint256 _pendingRewards = LibGem._taperCalculate(_tokenId);
@@ -38,6 +39,11 @@ contract VaultStakingFacet {
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
         gem.claimedReward = gem.claimedReward + amount;
         ds.StakedAmount[LibMeta.msgSender()] = amount;
+        metads.DefoToken.transferFrom(
+            LibMeta.msgSender(),
+            metads.Vault,
+            amount
+        );
     }
 
     function showStakedAmount() public view returns (uint256) {
@@ -46,12 +52,19 @@ contract VaultStakingFacet {
         return ds.StakedAmount[LibMeta.msgSender()];
     }
 
-    // TODO: add transfer
     function unstakeTokens(uint256 amount) public {
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         address user = LibMeta.msgSender();
         require(ds.StakedAmount[user] >= amount, "Not enough staked tokens");
         ds.StakedAmount[user] = ds.StakedAmount[user] - amount;
+        uint256 taxed = (amount * 10) / 100;
+        metads.DefoToken.transferFrom(
+            metads.Vault,
+            LibMeta.msgSender(),
+            amount - taxed
+        );
+        metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
     }
 }

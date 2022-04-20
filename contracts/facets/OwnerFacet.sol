@@ -52,6 +52,11 @@ contract OwnerFacet {
         metads.Buyback = _newAddress;
     }
 
+    function setAddressVault(address _newAddress) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Vault = _newAddress;
+    }
+
     function setMinReward(uint256 _minReward) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.MinReward = _minReward;

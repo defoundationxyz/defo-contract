@@ -68,6 +68,7 @@ library LibMeta {
         address Marketing;
         address Donation;
         address Buyback;
+        address Vault;
         address[] GenerousityList;
         /// @dev if it's 0 users can create unlimited nodes
         uint256 MaxGems;
