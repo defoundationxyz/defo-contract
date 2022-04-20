@@ -27,7 +27,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     uint256 internal currentTimeframeWindow;
     
     // Amount of time that must pass between each buy
-    uint256 public timeframeExpiration = 6426; 
+    uint256 public timeframeExpiration = 1 days; 
 
     //Max percentage of total supply a wallet can hold
     uint256 public maxPercentageVsTotalSupply = 50; 
@@ -57,7 +57,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     }
 
     modifier checkTimeframe() {
-        uint256 currentTime = block.number;
+        uint256 currentTime = block.timestamp;
         if (currentTime > currentTimeframeWindow + timeframeExpiration) {
             currentTimeframeWindow = currentTime;
         }
