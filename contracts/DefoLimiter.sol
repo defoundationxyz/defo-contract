@@ -10,7 +10,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 //Make the conctract upgradeable
 
-contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
+contract DefoLimiter is 
+    AccessControlUpgradeable, 
+    OwnableUpgradeable, 
+    Initializable {
+    
     error UnauthorizedDestination(address unauthorized); //common error
 
     address private defoNode;
@@ -39,7 +43,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable {
     bool public buyTaxActive = true;
     address public taxCollector;
 
-    constructor( 
+    function initialize( 
         address _taxCollector, 
         address _defoNodeAddress
     ) {
