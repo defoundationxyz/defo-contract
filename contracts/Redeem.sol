@@ -21,17 +21,36 @@ contract Redeem is Ownable{
     IERC721Enumerable sapphireDeltaPresale;
     IERC721Enumerable sapphireOmegaPresale;
 
+    INode nodeContract;
     bool private locked;
     bool public redeemActive;
-    INode nodeContract;
     uint256 private complianceEndTime;
     uint256 private complianceStartTime;
-    constructor(address _nodeAddress, address _sapphireAddress, address _rubyAddress, address _diamondAddress) {
+
+    constructor(
+        address _nodeAddress,
+        address _sapphireAddress,
+        address _rubyAddress,
+        address _diamondAddress,
+        address _sapphireDeltaPresale,
+        address _sapphireOmegaPresale,
+        address _rubyDeltaPresale,
+        address _rubyOmegaPresale,
+        address _diamondDeltaPresale,
+        address _diamondOmegaPresale
+        
+    ) {
         redeemActive = true;
         nodeContract = INode(_nodeAddress);
         sapphirePresale = IERC721Enumerable(_sapphireAddress);
         rubyPresale = IERC721Enumerable(_rubyAddress);
         diamondPresale = IERC721Enumerable(_diamondAddress);
+        sapphireDeltaPresale = IERC721Enumerable(_sapphireDeltaPresale);
+        sapphireOmegaPresale = IERC721Enumerable(_sapphireOmegaPresale);
+        rubyDeltaPresale = IERC721Enumerable(_rubyDeltaPresale);
+        rubyOmegaPresale = IERC721Enumerable(_rubyOmegaPresale);
+        diamondDeltaPresale = IERC721Enumerable(_diamondDeltaPresale);
+        diamondOmegaPresale = IERC721Enumerable(_diamondOmegaPresale);
     }
 
     modifier isActive() {
@@ -104,7 +123,7 @@ contract Redeem is Ownable{
             if (redeemSapphireBalance > 0 ) {
                 /// sapphire redeem
                 for (uint256 i = 0; i < redeemSapphireBalance; i++) {
-                    nodeContract.RedeemMint(INode.NodeType.Sapphire, msg.sender);
+                    nodeContract.RedeemMint(1, msg.sender);
                 }
                 /// this is the burning logic
                 for (uint256 i = 0; i < redeemSapphireBalance - 1; i++) {
@@ -122,7 +141,7 @@ contract Redeem is Ownable{
             /// ruby redeem
             if (redeemRubyBalance > 0 ) {
                 for (uint256 i = 0; i < redeemRubyBalance; i++) {
-                    nodeContract.RedeemMint(INode.NodeType.Ruby, msg.sender);
+                    nodeContract.RedeemMint(0, msg.sender);
 
                 }
                 for (uint256 i = 0; i < redeemRubyBalance - 1; i++) {
@@ -141,7 +160,7 @@ contract Redeem is Ownable{
             /// diamond redeem
             if (redeemDiamondBalance > 0 ) {
                 for (uint256 i = 0; i < redeemDiamondBalance; i++) {
-                    nodeContract.RedeemMint(INode.NodeType.Diamond, msg.sender);
+                    nodeContract.RedeemMint(2, msg.sender);
                 }
                 for (uint256 i = 0; i < redeemDiamondBalance - 1; i++) {
                     diamondPresale.transferFrom(
@@ -164,28 +183,125 @@ contract Redeem is Ownable{
         nonReentrant
         presaleCompliance
         timeCompliance {
-            if () {
+            uint256 redeemSapphireDeltaBalance = sapphireDeltaPresale.balanceOf(msg.sender);
+            uint256 redeemSapphireOmegaBalance = sapphireOmegaPresale.balanceOf(msg.sender);
+            uint256 redeemRubyDeltaBalance = rubyDeltaPresale.balanceOf(msg.sender);
+            uint256 redeemRubyOmegaBalance = rubyOmegaPresale.balanceOf(msg.sender);
+            uint256 redeemDiamondDeltaBalance = diamondDeltaPresale.balanceOf(msg.sender);
+            uint256 redeemDiamondOmegaBalance = diamondOmegaPresale.balanceOf(msg.sender);
 
+            if (redeemSapphireDeltaBalance > 0) {
+                for (uint256 i = 0; i < redeemSapphireDeltaBalance; i++) {
+                    nodeContract.RedeemMintBooster(1, INode.Booster.Delta, msg.sender);
+                }
+
+                for (uint256 i = 0; i < redeemSapphireDeltaBalance - 1; i++) {
+                    sapphireDeltaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        sapphireDeltaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                sapphireDeltaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    sapphireDeltaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
             }
             
-            if () {
+            if (redeemSapphireOmegaBalance > 0) {
+                for (uint256 i = 0; i < redeemSapphireOmegaBalance; i++) {
+                    nodeContract.RedeemMintBooster(1, INode.Booster.Omega, msg.sender);
+                }
 
+                for (uint256 i = 0; i < redeemSapphireOmegaBalance - 1; i++) {
+                    sapphireOmegaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        sapphireOmegaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                sapphireOmegaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    sapphireOmegaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
             }
             
-            if () {
+            if (redeemRubyDeltaBalance > 0) {
+                for (uint256 i = 0; i < redeemRubyDeltaBalance; i++) {
+                    nodeContract.RedeemMintBooster(0, INode.Booster.Delta, msg.sender);
+                }
 
+                for (uint256 i = 0; i < redeemRubyDeltaBalance - 1; i++) {
+                    rubyDeltaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        rubyDeltaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                rubyDeltaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    rubyDeltaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
             }
             
-            if () {
+            if (redeemRubyOmegaBalance > 0) {
+                for (uint256 i = 0; i < redeemRubyOmegaBalance; i++) {
+                    nodeContract.RedeemMintBooster(0, INode.Booster.Omega, msg.sender);
+                }
 
+                for (uint256 i = 0; i < redeemRubyOmegaBalance - 1; i++) {
+                rubyOmegaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        rubyOmegaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                rubyOmegaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    rubyOmegaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
             }
-            
-            if () {
 
-            } 
-            
-            if () {
+            if (redeemDiamondDeltaBalance > 0) {
+                for (uint256 i = 0; i < redeemDiamondDeltaBalance; i++) {
+                    nodeContract.RedeemMintBooster(2, INode.Booster.Delta, msg.sender);
+                }
 
+                for (uint256 i = 0; i < redeemDiamondDeltaBalance - 1; i++) {
+                    diamondDeltaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        diamondDeltaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                diamondDeltaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    diamondDeltaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
+            }
+
+            if (redeemDiamondOmegaBalance > 0) {
+                for (uint256 i = 0; i < redeemDiamondOmegaBalance; i++) {
+                    nodeContract.RedeemMintBooster(2, INode.Booster.Omega, msg.sender);
+                }
+
+                for (uint256 i = 0; i < redeemDiamondOmegaBalance - 1; i++) {
+                    diamondOmegaPresale.transferFrom(
+                        msg.sender,
+                        address(0x000000000000000000000000000000000000dEaD),
+                        diamondOmegaPresale.tokenOfOwnerByIndex(msg.sender, i)
+                    );
+                }
+                diamondOmegaPresale.transferFrom(
+                    msg.sender,
+                    address(0x000000000000000000000000000000000000dEaD),
+                    diamondOmegaPresale.tokenOfOwnerByIndex(msg.sender, 0)
+                );
             }
         }
 }
