@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 import "../interfaces/IERC721.sol";
 
-library LibERC721EnumerableStorage {
+library LibERC721Enumerable {
     struct DiamondStorage {
         IERC721 erc721;
         // Mapping from owner to list of owned token IDs
@@ -15,6 +15,22 @@ library LibERC721EnumerableStorage {
         // Mapping from token id to position in the allTokens array
         mapping(uint256 => uint256) _allTokensIndex;
         bool init;
+    }
+
+    /**
+     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
+     */
+    function _tokenOfOwnerByIndex(address owner, uint256 index)
+        internal
+        view
+        returns (uint256)
+    {
+        DiamondStorage storage ds = diamondStorage();
+        require(
+            index < ds.erc721.balanceOf(owner),
+            "ERC721Enumerable: owner index out of bounds"
+        );
+        return ds._ownedTokens[owner][index];
     }
 
     // Returns the struct from a specified position in contract storage
@@ -29,7 +45,7 @@ library LibERC721EnumerableStorage {
         // done here or other schemes can be used such as this:
         // bytes32 storagePosition = keccak256(abi.encodePacked(ERC1155.interfaceId, ERC1155.name, address(this)));
         bytes32 storagePosition = keccak256(
-            "diamond.storage.LibERC721EnumerableStorage"
+            "diamond.storage.LibERC721Enumerable"
         );
         // Set the position of our struct in contract storage
         assembly {

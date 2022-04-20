@@ -112,6 +112,15 @@ library LibERC721 {
         }
     }
 
+    function _balanceOf(address owner) internal view returns (uint256) {
+        LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
+        require(
+            owner != address(0),
+            "ERC721: address zero is not a valid owner"
+        );
+        return ds._balances[owner];
+    }
+
     /**
      * @dev See {IERC721-ownerOf}.
      */

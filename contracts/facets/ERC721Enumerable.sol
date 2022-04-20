@@ -12,7 +12,7 @@ pragma solidity ^0.8.4;
 
 import "../interfaces/IERC721Enumerable.sol";
 import "../libraries/LibDiamond.sol";
-import "../libraries/LibERC721EnumerableStorage.sol";
+import "../libraries/LibERC721Enumerable.sol";
 import "../libraries/LibERC721.sol";
 
 /**
@@ -25,8 +25,8 @@ contract ERC721EnumerableFacet {
         LibDiamond.DiamondStorage storage dsMain = LibDiamond.diamondStorage();
         dsMain.supportedInterfaces[type(IERC721Enumerable).interfaceId] = true; //erc721-enumerable
 
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         require(!ds.init, "already initialized");
         ds.erc721 = IERC721(erc721); //erc721-enumerable
     }
@@ -40,21 +40,15 @@ contract ERC721EnumerableFacet {
         virtual
         returns (uint256)
     {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
-        require(
-            index < ds.erc721.balanceOf(owner),
-            "ERC721Enumerable: owner index out of bounds"
-        );
-        return ds._ownedTokens[owner][index];
+        return LibERC721Enumerable._tokenOfOwnerByIndex(owner, index);
     }
 
     /**
      * @dev See {IERC721Enumerable-totalSupply}.
      */
     function totalSupply() public view virtual returns (uint256) {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         return ds._allTokens.length;
     }
 
@@ -66,8 +60,8 @@ contract ERC721EnumerableFacet {
             index < ERC721EnumerableFacet.totalSupply(),
             "ERC721Enumerable: global index out of bounds"
         );
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         return ds._allTokens[index];
     }
 
@@ -112,8 +106,8 @@ contract ERC721EnumerableFacet {
      * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
      */
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         uint256 length = ds.erc721.balanceOf(to);
         ds._ownedTokens[to][length] = tokenId;
         ds._ownedTokensIndex[tokenId] = length;
@@ -124,8 +118,8 @@ contract ERC721EnumerableFacet {
      * @param tokenId uint256 ID of the token to be added to the tokens list
      */
     function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         ds._allTokensIndex[tokenId] = ds._allTokens.length;
         ds._allTokens.push(tokenId);
     }
@@ -141,8 +135,8 @@ contract ERC721EnumerableFacet {
     function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId)
         private
     {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
@@ -168,8 +162,8 @@ contract ERC721EnumerableFacet {
      * @param tokenId uint256 ID of the token to be removed from the tokens list
      */
     function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
-        LibERC721EnumerableStorage.DiamondStorage
-            storage ds = LibERC721EnumerableStorage.diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
+            .diamondStorage();
         // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 

@@ -42,12 +42,7 @@ contract ERC721Facet {
      * @dev See {IERC721-balanceOf}.
      */
     function balanceOf(address owner) public view virtual returns (uint256) {
-        LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
-        require(
-            owner != address(0),
-            "ERC721: address zero is not a valid owner"
-        );
-        return ds._balances[owner];
+        return LibERC721._balanceOf(owner);
     }
 
     /**
