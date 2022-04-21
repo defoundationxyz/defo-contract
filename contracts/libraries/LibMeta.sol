@@ -52,10 +52,14 @@ library LibMeta {
     struct DiamondStorage {
         /// TODO: reorganize variable order
         uint256 MaintenanceDays;
+        uint256 TreasuryDefoRate;
+        uint256 TreasuryDaiRate;
+        uint256 CharityRate;
+        uint256 RewardPoolDefoRate;
+        uint256 TeamDaiRate;
         Counters.Counter _tokenIdCounter;
         IERC20 PaymentToken;
         IERC20 DefoToken;
-        mapping(address => uint256) DistTable;
         uint256[] RewardTaxTable;
         uint256 MinReward;
         uint256 RewardTime;
@@ -65,11 +69,8 @@ library LibMeta {
         address RewardPool;
         address LimiterAddr;
         address Team;
-        address Marketing;
         address Donation;
-        address Buyback;
         address Vault;
-        address[] GenerousityList;
         /// @dev if it's 0 users can create unlimited nodes
         uint256 MaxGems;
         /// @dev sale lock

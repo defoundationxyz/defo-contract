@@ -35,6 +35,8 @@ library LibGem {
     struct DiamondStorage {
         mapping(uint256 => Gem) GemOf; // tokenid -> node struct mapping
         mapping(uint8 => GemTypeMetadata) GetGemTypeMetadata; // node type id -> metadata mapping
+        address MinterAddr;
+        uint256 taperRate; // if it's %20 this value should be 80
     }
 
     /// calculates the reward taper with roi after 1x everytime roi achived rewards taper by %20
@@ -54,7 +56,7 @@ library LibGem {
             while (rewardCount > typePrice) {
                 rewardCount = rewardCount - typePrice;
                 actualReward = actualReward + typePrice;
-                rewardCount = (((rewardCount) * 80) / 100);
+                rewardCount = (((rewardCount) * ds.taperRate) / 100);
             }
             /// TODO : check for overflows
             return actualReward + rewardCount - gem.claimedReward;
@@ -62,7 +64,6 @@ library LibGem {
         return _checkRawReward(_tokenId) - gem.claimedReward; // if less than roi don't taper
     }
 
-    // TODO: change location
     function _checkRawReward(uint256 _tokenid)
         internal
         view
@@ -111,7 +112,7 @@ library LibGem {
     }
 
     // View Functions
-    function isActive(uint256 _tokenid) public view returns (bool) {
+    function _isActive(uint256 _tokenid) internal view returns (bool) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];

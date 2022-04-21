@@ -26,7 +26,6 @@ contract ERC721Facet {
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-    /// TODO: add 721 metadata
     function initialize(string memory name_, string memory symbol_) public {
         LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
         LibDiamond.enforceIsContractOwner();
@@ -87,9 +86,10 @@ contract ERC721Facet {
      * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
      * by default, can be overridden in child contracts.
      */
-    // TODO : edit for defo
+
     function _baseURI() internal view virtual returns (string memory) {
-        return "";
+        LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
+        return ds.baseURI;
     }
 
     /**

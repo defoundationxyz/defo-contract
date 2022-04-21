@@ -254,7 +254,6 @@ contract DefoNode is
     }
 
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
-    // TODO : remove tax functions from base node contract
     function _sendRewardTokens(uint256 _tokenid, uint256 _offset) internal {
         uint256 _rewardDefo = _taperCalculate(_tokenid);
 

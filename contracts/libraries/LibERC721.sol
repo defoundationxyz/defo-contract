@@ -2,6 +2,15 @@
 pragma solidity ^0.8.4;
 
 import "../interfaces/IERC721Receiver.sol";
+import "./LibERC721Enumerable.sol";
+
+interface ILimiter {
+    function transferLimit(
+        address to,
+        address from,
+        uint256 tokenid
+    ) external;
+}
 
 library LibERC721 {
     struct DiamondStorage {
@@ -17,6 +26,8 @@ library LibERC721 {
         mapping(uint256 => address) _tokenApprovals;
         // Mapping from owner to operator approvals
         mapping(address => mapping(address => bool)) _operatorApprovals;
+        string baseURI;
+        address Limiter;
         bool init;
     }
 
@@ -297,7 +308,7 @@ library LibERC721 {
         require(to != address(0), "ERC721: transfer to the zero address");
         DiamondStorage storage ds = diamondStorage();
         _beforeTokenTransfer(from, to, tokenId);
-
+        LibERC721Enumerable._beforeTokenTransfer(from, to, tokenId);
         // Clear approvals from the previous owner
         _approve(address(0), tokenId);
 
@@ -355,7 +366,13 @@ library LibERC721 {
         address from,
         address to,
         uint256 tokenId
-    ) internal {}
+    ) internal {
+        DiamondStorage storage ds = diamondStorage();
+        if (ds.Limiter != address(0)) {
+            ILimiter limiter = ILimiter(ds.Limiter);
+            limiter.transferLimit(from, to, tokenId);
+        }
+    }
 
     /**
      * @dev Hook that is called after any transfer of tokens. This includes

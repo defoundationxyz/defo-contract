@@ -17,6 +17,26 @@ contract OwnerFacet {
         _;
     }
 
+    function initialize(
+        address _redeemContract,
+        address _defoToken,
+        address _paymentToken,
+        address _treasury,
+        address _limiter,
+        address _rewardPool,
+        address _donation
+    ) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
+        gemds.MinterAddr = _redeemContract;
+        metads.DefoToken = IERC20(_defoToken);
+        metads.PaymentToken = IERC20(_paymentToken);
+        metads.Treasury = _treasury;
+        metads.LimiterAddr = _limiter;
+        metads.RewardPool = _rewardPool;
+        metads.Donation = _donation;
+    }
+
     /// @notice function for creating a new gem type or changing a gem type settings
     function setGemSettings(
         uint8 _type,
@@ -27,34 +47,57 @@ contract OwnerFacet {
     }
 
     /// @notice functions for setting distribution addresses
-    function setAddressRewardPool(address _newAddress) external onlyOwner {
+    function setAddressAndDistTreasury(address _newAddress, uint256 _daiRate)
+        external
+        onlyOwner
+    {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Treasury = _newAddress;
+        metads.TreasuryDaiRate = _daiRate;
+    }
+
+    function setAddressAndDistRewardPool(address _newAddress, uint256 _defoRate)
+        external
+        onlyOwner
+    {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.RewardPool = _newAddress;
+        metads.RewardPoolDefoRate = _defoRate;
     }
 
-    function setAddressDonation(address _newAddress) external onlyOwner {
+    function setAddressDonation(address _newAddress, uint256 _rate)
+        external
+        onlyOwner
+    {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Donation = _newAddress;
+        metads.CharityRate = _rate;
     }
 
-    function setAddressTeam(address _newAddress) external onlyOwner {
+    function setAddressAndDistTeam(
+        address _newAddress,
+        uint256 _daiRate,
+        uint256 _defoRate
+    ) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Team = _newAddress;
-    }
-
-    function setAddressMarketing(address _newAddress) external onlyOwner {
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.Marketing = _newAddress;
-    }
-
-    function setAddressBuyback(address _newAddress) external onlyOwner {
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.Buyback = _newAddress;
+        metads.TreasuryDefoRate = _defoRate;
+        metads.TreasuryDaiRate = _daiRate;
     }
 
     function setAddressVault(address _newAddress) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Vault = _newAddress;
+    }
+
+    function setBaseURI(string calldata _newBaseURI) external onlyOwner {
+        LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
+        ds.baseURI = _newBaseURI;
+    }
+
+    function setMinterAddress(address _newMinterAddress) external onlyOwner {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        ds.MinterAddr = _newMinterAddress;
     }
 
     function setMinReward(uint256 _minReward) external onlyOwner {
@@ -72,12 +115,9 @@ contract OwnerFacet {
         metads.PaymentToken = IERC20(_newToken);
     }
 
-    function setDistirbution(address _targetAddress, uint256 _ratio)
-        external
-        onlyOwner
-    {
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.DistTable[_targetAddress] = _ratio;
+    function setTaperRate(uint256 _rate) external onlyOwner {
+        LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
+        gemds.taperRate = _rate;
     }
 
     function setRewardTax(uint256[] memory _rewardTaxTable) external onlyOwner {

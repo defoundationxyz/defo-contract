@@ -14,10 +14,6 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165 {
     ////////////////////////////////////////////////////////////////////
     /// These functions are expected to be called frequently by tools.
     //
-    // struct Facet {
-    //     address facetAddress;
-    //     bytes4[] functionSelectors;
-    // }
 
     /// @notice Gets all facets and their selectors.
     /// @return facets_ Facet

@@ -7,10 +7,12 @@ library LibUser {
     struct UserData {
         mapping(uint8 => uint8) OmegaClaims; // Remaining Omega booster claims of the user
         mapping(uint8 => uint8) DeltaClaims; // Remaining Delta
+        uint256 charityContribution;
         bool blacklisted; // Whether the user is blacklisted or not
     }
 
     struct DiamondStorage {
+        address[] users;
         mapping(address => UserData) GetUserData; // user address -> UserData struct mapping
     }
 

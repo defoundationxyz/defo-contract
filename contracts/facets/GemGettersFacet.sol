@@ -7,7 +7,7 @@ import "../libraries/LibGem.sol";
 import "../libraries/LibUser.sol";
 import "../libraries/LibMeta.sol";
 
-contract Getters {
+contract GettersFacet {
     function GemOf(uint256 _tokenId) external view returns (LibGem.Gem memory) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];

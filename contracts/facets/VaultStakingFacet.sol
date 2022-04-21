@@ -21,7 +21,7 @@ contract VaultStakingFacet {
     }
 
     modifier onlyActive(uint256 _tokenId) {
-        require(LibGem.isActive(_tokenId), "Gem is deactivated");
+        require(LibGem._isActive(_tokenId), "Gem is deactivated");
         _;
     }
 

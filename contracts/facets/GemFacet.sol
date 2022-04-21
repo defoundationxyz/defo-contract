@@ -12,10 +12,6 @@ import "../libraries/LibERC721Enumerable.sol";
 /// @author jvoljvolizka
 /// @notice Main yield gem functionality facet
 
-/// TODO: getters
-/// TODO: vault stuff
-/// TODO: Node Limiter stuff
-
 contract GemFacet {
     using Counters for Counters.Counter;
     modifier SaleLock() {
@@ -23,16 +19,27 @@ contract GemFacet {
         require(!metads.Lock, "Sale is Locked");
         _;
     }
-    modifier onlyGemOwner(uint256 _tokenId) {
+
+    modifier onlyMinter() {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         require(
-            LibERC721._ownerOf(_tokenId) == LibERC721.msgSender(),
+            ds.MinterAddr == LibMeta.msgSender(),
+            "Only from Redemption contract"
+        );
+
+        _;
+    }
+    modifier onlyGemOwner(uint256 _tokenId) {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        require(
+            LibERC721._ownerOf(_tokenId) == LibMeta.msgSender(),
             "You don't own this gem"
         );
         _;
     }
 
     modifier onlyActive(uint256 _tokenId) {
-        require(LibGem.isActive(_tokenId), "Gem is deactivated");
+        require(LibGem._isActive(_tokenId), "Gem is deactivated");
         _;
     }
 
@@ -53,45 +60,36 @@ contract GemFacet {
 
     /// @dev sends the gem payment to other wallets
     // TODO : LP distribution
+
     function _distributePayment(uint256 _amount, bool _isDefo) internal {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 amount = _amount;
-        uint256 reward = (amount * metads.DistTable[metads.RewardPool]) / 1000;
-        uint256 treasury = (amount * metads.DistTable[metads.Treasury]) / 1000;
-        //        uint256 liquidity = (amount * DistTable[Liquidity]) / 1000;
-        uint256 marketing = (amount * metads.DistTable[metads.Marketing]) /
-            1000;
-        uint256 team = (amount * metads.DistTable[metads.Team]) / 1000;
-        uint256 buyback = (amount * metads.DistTable[metads.Buyback]) / 1000;
-        /*
-        uint256 reward = (amount * 900) / 1000;
-        uint256 treasury = (amount * 800) / 1000;
-        uint256 liquidity = (amount * 50) / 1000;
-        uint256 marketing = (amount * 25) / 1000;
-        uint256 team = (amount * 25) / 1000;
-        uint256 buyback = (amount * 100) / 1000;
-*/
+
         IERC20 Token;
+        /// defo : %75 reward , %25 liq
         if (_isDefo) {
-            treasury = 0;
-            buyback = 0;
+            uint256 reward = (amount * metads.TreasuryDefoRate) / 1000;
             Token = metads.DefoToken;
+            Token.transfer(metads.RewardPool, reward);
         } else {
-            reward = 0;
-            buyback = (amount * 100) / 1000;
+            /// dai %67.5 tres , %25 liq , %7.5 core team
+            uint256 treasury = (amount * metads.TreasuryDaiRate) / 1000;
+            uint256 team = (amount * metads.TeamDaiRate) / 1000;
             Token = metads.PaymentToken;
+            Token.transfer(metads.Team, team);
+            Token.transfer(metads.Treasury, treasury);
         }
-        Token.transfer(metads.RewardPool, reward);
-        Token.transfer(metads.Marketing, marketing);
-        Token.transfer(metads.Team, team);
-        Token.transfer(metads.Treasury, treasury);
-        Token.transfer(metads.Buyback, buyback);
+
         // TODO : add lp distrubition
     }
 
     function _mintGem(uint8 _type, address _to) internal returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        if (LibERC721._balanceOf(LibMeta.msgSender()) == 0) {
+            userds.users.push(LibMeta.msgSender());
+        }
         if (metads.MaxGems != 0) {
             require(
                 metads._tokenIdCounter.current() < metads.MaxGems,
@@ -110,21 +108,32 @@ contract GemFacet {
     }
 
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
-    // TODO : remove tax functions from base gem contract
+
     function _sendRewardTokens(uint256 _tokenid, uint256 _offset) internal {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
-
+        LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         uint256 taxRate = LibGem._rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
         }
         _rewardDefo = _rewardDefo - _offset;
         require(_rewardDefo > metads.MinReward, "Less than min reward");
-        metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
+
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
+        uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
+        _rewardDefo = _rewardDefo - charityAmount;
         gem.claimedReward = gem.claimedReward + _rewardDefo;
+
+        metads.DefoToken.transferFrom(
+            metads.Treasury,
+            metads.Donation,
+            charityAmount
+        );
+        user.charityContribution = user.charityContribution + charityAmount;
+        metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
         gem.LastReward = uint32(block.timestamp);
     }
 
@@ -207,27 +216,28 @@ contract GemFacet {
     }
 
     // Public Functions
-    //TODO : access control for diamond
-    /*
-    function RedeemMint(uint8 _type, address _to) public onlyRole(MINTER_ROLE) {
+    //TODO : add random claim
+
+    function RedeemMint(uint8 _type, address _to) public onlyMinter {
         _mintGem(_type, _to);
     }
 
     // TODO : check claims
     function RedeemMintBooster(
         uint8 _type,
-        Booster _booster,
+        LibGem.Booster _booster,
         address _to
-    ) public onlyRole(MINTER_ROLE) {
-        UserData storage userData = GetUserData[msg.sender];
+    ) public onlyMinter {
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage userData = userds.GetUserData[msg.sender];
         _mintGem(_type, _to);
-        if (_booster == Booster.Omega) {
+        if (_booster == LibGem.Booster.Omega) {
             userData.OmegaClaims[_type] = userData.OmegaClaims[_type] + 2;
         } else {
             userData.DeltaClaims[_type] = userData.DeltaClaims[_type] + 2;
         }
     }
-*/
+
     function BoostGem(LibGem.Booster _booster, uint256 _tokenid)
         public
         onlyGemOwner(_tokenid)
@@ -416,7 +426,15 @@ contract GemFacet {
 */
 
     /// @dev get the token value from lp
-    function getTokenValue() public view returns (uint256) {}
+
+    // View Functions
+    function isActive(uint256 _tokenid) public view returns (bool) {
+        return LibGem._isActive(_tokenid);
+    }
+
+    function checkRawReward(uint256 _tokenid) public view returns (uint256) {
+        return LibGem._checkRawReward(_tokenid);
+    }
 
     function checkTaperedReward(uint256 _tokenid)
         public
