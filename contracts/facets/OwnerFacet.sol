@@ -101,7 +101,7 @@ contract OwnerFacet {
     }
 
     function setLimiterAddress(address _newLimiterAddress) external onlyOwner {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
         ds.Limiter = _newLimiterAddress;
     }
 

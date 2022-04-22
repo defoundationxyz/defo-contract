@@ -21,6 +21,7 @@ describe("Node Tests", function () {
   let VaultStakingFacet
   let GettersFacet
   let OwnerFacet
+  let NodeLimiterFacet
   let tx
   let receipt
   let result
@@ -42,7 +43,8 @@ describe("Node Tests", function () {
         ERC721EnumerableFacet = await ethers.getContractAt('ERC721EnumerableFacet', diamondAddress);
         GemFacet = await ethers.getContractAt('GemFacet', diamondAddress);
         VaultStakingFacet = await ethers.getContractAt('VaultStakingFacet', diamondAddress);
-        GettersFacet = await ethers.getContractAt('GettersFacet', diamondAddress);
+      GettersFacet = await ethers.getContractAt('GettersFacet', diamondAddress);
+      NodeLimiterFacet = await ethers.getContractAt('NodeLimiterFacet', diamondAddress);
     [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
 
     Token = await mockToken.deploy();
@@ -118,7 +120,13 @@ describe("Node Tests", function () {
         expect(await GemFacet.RedeemMint("0", addr1.address)).to.ok;
         expect(await GemFacet.connect(addr1).BoostGem("2", "0")).to.ok;
         expect(await GemFacet.connect(addr1).BoostGem("2", "1")).to.ok;
-        await expect(GemFacet.connect(addr1).BoostGem("2", "1")).to.be.reverted 
+      await expect(GemFacet.connect(addr1).BoostGem("2", "1")).to.be.reverted 
+      
+        expect(await GemFacet.RedeemMintBooster("0" , "1", addr1.address)).to.ok;
+        expect(await GemFacet.RedeemMint("0", addr1.address)).to.ok;
+        expect(await GemFacet.connect(addr1).BoostGem("1", "2")).to.ok;
+        expect(await GemFacet.connect(addr1).BoostGem("1", "3")).to.ok;
+        await expect(GemFacet.connect(addr1).BoostGem("1", "3")).to.be.reverted 
 
     });
   
@@ -207,6 +215,41 @@ describe("Node Tests", function () {
 
     });
   
+      it("Test vault", async function () {
+
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
+
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 365])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await OwnerFacet.setAddressVault(addr2.address)).to.ok;
+        expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;     
+          
+        expect(await Token.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;   
+        /// expect revert 
+        //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2", "0")).to.ok;
+        let pendingReward = await GemFacet.checkTaperedReward("0");
+        expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq("0");
+        expect(await VaultStakingFacet.connect(addr1).addToVault("0", pendingReward)).to.ok;
+        expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(pendingReward);
+        expect(await VaultStakingFacet.connect(addr1).unstakeTokens(pendingReward)).to.ok;
+        expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(0);
+        expect(await GemFacet.checkTaperedReward("0")).to.eq("0")
+
+    });
+  
     it("Test reward tax", async function () {
 
         //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
@@ -291,15 +334,13 @@ describe("Node Tests", function () {
 
     });
   
-  it.only("Test Node limiter", async function () {
+  it("Test Node limiter", async function () {
 
     expect(await OwnerFacet.ToggleTransferLock())
-    
     expect(await OwnerFacet.setLimiterAddress(diamondAddress))
+    expect(await NodeLimiterFacet.addToWhitelist("0x0000000000000000000000000000000000000000"))
     expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
     await expect(ERC721Facet.connect(addr1)["safeTransferFrom(address,address,uint256)"](addr1.address, addr2.address, 0)).to.be.reverted 
-
-
   });
 
     it("Test getGemIdsOf ", async function () {
@@ -476,7 +517,7 @@ describe("Node Tests", function () {
       DefoPrice: ethers.utils.parseEther("1000"),
       StablePrice :  ethers.utils.parseEther("1000")
     }
-        
+        expect(await OwnerFacet.setTaperRate("80")).to.ok; 
         expect(await OwnerFacet.setGemSettings("0", saphireGem)).to.ok;
         expect(await OwnerFacet.setGemSettings("1", rubyGem)).to.ok;
         expect(await OwnerFacet.setGemSettings("2", diamondGem)).to.ok;

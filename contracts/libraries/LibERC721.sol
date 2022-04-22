@@ -370,7 +370,6 @@ library LibERC721 {
     ) internal {
         DiamondStorage storage ds = diamondStorage();
         if (ds.Limiter != address(0)) {
-            console.log("boop");
             ILimiter limiter = ILimiter(ds.Limiter);
             limiter.transferLimit(from, to, tokenId);
         }

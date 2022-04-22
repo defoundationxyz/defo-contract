@@ -37,7 +37,6 @@ library LibGem {
         mapping(uint256 => Gem) GemOf; // tokenid -> node struct mapping
         mapping(uint8 => GemTypeMetadata) GetGemTypeMetadata; // node type id -> metadata mapping
         address MinterAddr;
-        address Limiter;
         uint256 taperRate; // if it's %20 this value should be 80
     }
 
