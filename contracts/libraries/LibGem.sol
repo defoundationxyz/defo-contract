@@ -10,6 +10,7 @@ library LibGem {
         Delta,
         Omega
     }
+
     struct Gem {
         uint32 MintTime; // timestamp of the mint time
         uint32 LastReward; // timestamp of last reward claim
@@ -17,7 +18,7 @@ library LibGem {
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         /// @dev i'm not sure if enums are packed as uint8 in here
-        Booster Booster; // Node Boosyer 0 -> None , 1 -> Delta , 2 -> Omega
+        Booster Booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
         uint256 claimedReward; // previously claimed rewards
     }
 
@@ -36,6 +37,7 @@ library LibGem {
         mapping(uint256 => Gem) GemOf; // tokenid -> node struct mapping
         mapping(uint8 => GemTypeMetadata) GetGemTypeMetadata; // node type id -> metadata mapping
         address MinterAddr;
+        address Limiter;
         uint256 taperRate; // if it's %20 this value should be 80
     }
 

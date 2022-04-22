@@ -1,5 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+//const { BigNumber } = require("ethers");;
 const {
   getSelectors,
   FacetCutAction,
@@ -48,8 +49,8 @@ describe("Node Tests", function () {
     DAI = await mockToken.deploy();
 
     expect(await OwnerFacet.initialize(owner.address, Token.address, DAI.address, owner.address, diamondAddress, owner.address, owner.address)).to.ok;
-        
-        
+    expect(await ERC721Facet.initialize("Defo Node" , "DFN")).to.ok;
+      
     await Token.mint(addr1.address, ethers.utils.parseEther( "10000000"));
     await Token.mint(owner.address,ethers.utils.parseEther( "10000000"));
     await DAI.mint(owner.address, ethers.utils.parseEther( "10000000"));
@@ -112,6 +113,15 @@ describe("Node Tests", function () {
 
     });
 
+    it("Test redeem Booster", async function () {
+        expect(await GemFacet.RedeemMintBooster("0" , "2", addr1.address)).to.ok;
+        expect(await GemFacet.RedeemMint("0", addr1.address)).to.ok;
+        expect(await GemFacet.connect(addr1).BoostGem("2", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).BoostGem("2", "1")).to.ok;
+        await expect(GemFacet.connect(addr1).BoostGem("2", "1")).to.be.reverted 
+
+    });
+  
     it("Test maintain", async function () {
             const saphireGem = {
       LastMint: "0",
@@ -165,7 +175,9 @@ describe("Node Tests", function () {
             await ethers.provider.send('evm_mine');
         
       }
-        expect(await GemFacet.connect(addr1).MaintenanceAll("0")).to.ok;
+      expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+      expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+      expect(await GemFacet.connect(addr1).Maintenance("2" , "0")).to.ok;
         expect(await GemFacet.connect(addr1).checkPendingMaintenance("1")).to.lt("85239400");
         expect(await GemFacet.connect(addr1).checkPendingMaintenance("2")).to.lt("852394000");
     });
@@ -188,12 +200,72 @@ describe("Node Tests", function () {
         expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;        
         /// expect revert 
         //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
-        expect(await GemFacet.connect(addr1).MaintenanceAll("0")).to.ok;
+              expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2" , "0")).to.ok;
         expect(await GemFacet.connect(addr1).ClaimRewards("0")).to.ok;
 
     });
   
+    it("Test reward tax", async function () {
 
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
+
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 2])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;        
+        /// expect revert 
+        //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2", "0")).to.ok;
+        let rewardBeforeTax = await GemFacet.checkTaperedReward("0");
+        expect(await GemFacet.connect(addr1).checkTaxedReward("0")).to.lt(rewardBeforeTax);
+        expect(await GemFacet.connect(addr1).ClaimRewards("0")).to.ok;
+
+    });
+  
+  it("Test mintlimit", async function () {
+            const saphireGem = {
+      LastMint: "0",
+      MaintenanceFee: "0",
+      RewardRate: "10",
+      DailyLimit: "3",
+      MintCount: "0",
+      DefoPrice: ethers.utils.parseEther("10"),
+      StablePrice : ethers.utils.parseEther("10")
+            }
+    expect(await OwnerFacet.setGemSettings("0", saphireGem)).to.ok;
+    expect(await OwnerFacet.setMintLimitHours("7")).to.ok;
+    
+        for (let index = 0; index < 3; index++) {
+          expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        }
+        await expect(GemFacet.connect(addr1).MintGem("0")).to.be.reverted 
+        await network.provider.send("evm_increaseTime", [3600 * 7])
+        await ethers.provider.send('evm_mine');
+    
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        //expect(await Token.balanceOf(addr1.address)).to.eq(before - 1110);    
+        //expect(await DAI.balanceOf(addr1.address)).to.eq(beforeDAI- 1110);
+    });
+  
+    it("Test gemGetter", async function () {
+        expect(await GettersFacet.GemOf("0")).to.ok;
+        expect(await GettersFacet.GetGemTypeMetadata("0")).to.ok;
+    });
+  
+
+  
     it("Test taper", async function () {
   
         expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
@@ -210,7 +282,55 @@ describe("Node Tests", function () {
 
     });
   
+    it("Test isActive", async function () {
+  
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).isActive("0")).to.eq(true);
 
+    });
+  
+  it.only("Test Node limiter", async function () {
+
+    expect(await OwnerFacet.ToggleTransferLock())
+    
+    expect(await OwnerFacet.setLimiterAddress(diamondAddress))
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+    await expect(ERC721Facet.connect(addr1)["safeTransferFrom(address,address,uint256)"](addr1.address, addr2.address, 0)).to.be.reverted 
+
+
+  });
+
+    it("Test getGemIdsOf ", async function () {
+  
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+    let ids = await GemFacet.connect(addr1).getGemIdsOf(addr1.address)
+    let expected = [ethers.BigNumber.from("0"), ethers.BigNumber.from("1"), ethers.BigNumber.from("2")];
+        for (let index = 0; index < ids.length; index++) {
+          const element = ids[index];
+          expect(ids[index]).to.eq(expected[index]);
+        }
+      
+  });
+  
+   // TODO: please
+    /*it("Test getGemIdsOfWithType", async function () {
+  
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+    expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+    expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+    let ids = await GemFacet.connect(addr1).getGemIdsOfWithType(addr1.address , "0")
+    let expected = [ethers.BigNumber.from("0"), ethers.BigNumber.from("1")];
+        for (let index = 0; index < ids.length; index++) {
+          const element = ids[index];
+          expect(ids[index]).to.eq(expected[index]);
+        }
+      
+    });
+    */
     it("Test compound", async function () {
     
         expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
@@ -228,7 +348,9 @@ describe("Node Tests", function () {
         expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;        
 
         expect(await ERC721Facet.connect(addr1).balanceOf(addr1.address)).to.eq("3");
-        expect(await GemFacet.connect(addr1).MaintenanceAll("0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2" , "0")).to.ok;
         //var before = await Token.balanceOf(addr1.address);
         //var beforeDAI = await DAI.balanceOf(addr1.address);
         expect(await GemFacet.connect(addr1).Compound("0" , "0")).to.ok;

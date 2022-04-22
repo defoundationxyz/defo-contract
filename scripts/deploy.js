@@ -35,7 +35,7 @@ async function deployDiamond () {
     'DiamondLoupeFacet',
     'OwnershipFacet',
     'ERC721Facet',
-    'ERC721EnumerableFacet',
+    //'ERC721EnumerableFacet',
     'GemFacet',
     'VaultStakingFacet',
     'GettersFacet',

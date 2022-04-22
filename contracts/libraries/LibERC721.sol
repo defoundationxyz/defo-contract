@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "../interfaces/IERC721Receiver.sol";
 import "./LibERC721Enumerable.sol";
+import "hardhat/console.sol";
 
 interface ILimiter {
     function transferLimit(
@@ -308,7 +309,7 @@ library LibERC721 {
         require(to != address(0), "ERC721: transfer to the zero address");
         DiamondStorage storage ds = diamondStorage();
         _beforeTokenTransfer(from, to, tokenId);
-        LibERC721Enumerable._beforeTokenTransfer(from, to, tokenId);
+
         // Clear approvals from the previous owner
         _approve(address(0), tokenId);
 
@@ -369,9 +370,11 @@ library LibERC721 {
     ) internal {
         DiamondStorage storage ds = diamondStorage();
         if (ds.Limiter != address(0)) {
+            console.log("boop");
             ILimiter limiter = ILimiter(ds.Limiter);
             limiter.transferLimit(from, to, tokenId);
         }
+        LibERC721Enumerable._beforeTokenTransfer(from, to, tokenId);
     }
 
     /**

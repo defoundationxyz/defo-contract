@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 import "../interfaces/IERC721.sol";
+import "./LibERC721.sol";
 
 library LibERC721Enumerable {
     struct DiamondStorage {
@@ -47,7 +48,7 @@ library LibERC721Enumerable {
     {
         DiamondStorage storage ds = diamondStorage();
         require(
-            index < ds.erc721.balanceOf(owner),
+            index < LibERC721._balanceOf(owner),
             "ERC721Enumerable: owner index out of bounds"
         );
         return ds._ownedTokens[owner][index];
@@ -94,7 +95,7 @@ library LibERC721Enumerable {
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
         LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
             .diamondStorage();
-        uint256 length = ds.erc721.balanceOf(to);
+        uint256 length = LibERC721._balanceOf(to);
         ds._ownedTokens[to][length] = tokenId;
         ds._ownedTokensIndex[tokenId] = length;
     }
@@ -126,7 +127,7 @@ library LibERC721Enumerable {
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
-        uint256 lastTokenIndex = ds.erc721.balanceOf(from) - 1;
+        uint256 lastTokenIndex = LibERC721._balanceOf(from) - 1;
         uint256 tokenIndex = ds._ownedTokensIndex[tokenId];
 
         // When the token to delete is the last token, the swap operation is unnecessary

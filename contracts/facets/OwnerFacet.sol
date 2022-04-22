@@ -100,6 +100,11 @@ contract OwnerFacet {
         ds.MinterAddr = _newMinterAddress;
     }
 
+    function setLimiterAddress(address _newLimiterAddress) external onlyOwner {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        ds.Limiter = _newLimiterAddress;
+    }
+
     function setMinReward(uint256 _minReward) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.MinReward = _minReward;
