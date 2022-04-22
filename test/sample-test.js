@@ -223,3 +223,19 @@ describe("RedeemAccess", function () {
     
   });
 });
+
+describe ("RedeemFunctionality2", function () {
+  let owner;
+  let acc1;
+  let acc2;
+  let acc3;
+  let acc;
+
+  beforeEach(async function() {
+
+  });
+
+  it("", function () {
+
+  });
+});
