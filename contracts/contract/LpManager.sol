@@ -45,41 +45,101 @@ contract  LpManager is Ownable, OwnerRecovery{
         _;
     }
 
-    constructor( address _router, address _rewardPool ,address[2] memory path /*, uint256 _swapTokensToLiquidityThreshold*/ ) validAddress(_router, _rewardPool){
+    constructor( address _router, address _rewardPool ,address[2] memory path , uint256 _swapTokensToLiquidityThreshold ) validAddress(_router, _rewardPool){
         rewardPool = _rewardPool;
         router = IJoeRouter02(_router);
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
         rightSide = IERC20(path[1]);
         pairLiquidityTotalSupply = pair.totalSupply();
-        //updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
-        // Left side should be main contract
+        updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
+        // Left side should be Defo
         //changeUniverseImplementation(address(leftSide));
         shouldLiquify(true);
     
     }
 
-    /* @notice @dev 
-    // Not implementing this function, business requirement changes
-    */
-    function calculateSellTax(address spender, address receiver, uint256 amount) external view validAddress(spender, receiver) returns (uint256){
-        uint spenderBalance = leftSide.balanceOf(spender);
-        require(spenderBalance >= amount, "Insuifficent balance");
-        //bool isSell = receiver == address(0) || receiver == pairAddress || receiver == routerAddress;
-        uint256 feeAmount = (amount*sellTaxPercentage)/100;
-        return feeAmount;
-        
+    function afterTokenTransfer(address sender) external returns (bool) {
+        uint256 leftSideBalance = leftSide.balanceOf(address(this));
+        bool shouldSwap = leftSideBalance >= swapTokensToLiquidityThreshold;
+        if (
+            shouldSwap &&liquifyEnabled && pair.totalSupply() > 0 &&
+            !isSwapping && !isPair(sender) &&!isRouter(sender) ) 
+            {
+                // This prevents inside calls from triggering this function again (infinite loop)
+                // It's ok for this function to be reentrant since it's protected by this check
+                isSwapping = true;
+
+                // To prevent bigger sell impact we only sell in batches with the threshold as a limit
+                uint256 totalLP = swapAndLiquify(swapTokensToLiquidityThreshold);
+                uint256 totalLPRemaining = totalLP;
+
+                if(feeTo != address(0)){
+                    uint256 calculatedFee = (totalLPRemaining * feePercentage)/100;
+                    totalLPRemaining -= calculatedFee;
+                    pair.transfer(feeTo, calculatedFee);
+                } 
+                //given owner of this address is where we sending lp tokens.
+                pair.transfer(owner(), totalLPRemaining);
+                // Keep it healthy
+                pair.sync();
+
+                // This prevents inside calls from triggering this function again (infinite loop)
+                isSwapping = false;
+            }
+         // Always update liquidity total supply
+        pairLiquidityTotalSupply = pair.totalSupply();
+
+        return true;
     }
 
-    /* @notice @dev 
-    // Not implementing this function, business requirement changes
-    */
-    function checkSelling(address receiver) external view returns (bool){
-        //saving gas
-        address pairAddress = address(pair);
-        address routerAddress = address(router);
-        bool isSell = receiver == address(0) || receiver == pairAddress || receiver == routerAddress;
-        return isSell;
+    // Transfer LP tokens conveniently
+    function sendLPTokensTo(address to, uint256 tokens) private {
+        pair.transfer(to, tokens);
+    }
+
+    // Function that adds liquidity with single assest: Defo
+    function swapAndLiquify(uint256 tokens) private returns (uint256) {
+        uint256 half = tokens / 2;
+        uint256 initialRightBalance = rightSide.balanceOf(address(this));
+
+        swapForRightSide(half);
+
+        uint256 newRightBalance = rightSide.balanceOf(address(this)) -
+            initialRightBalance;
+
+        addLiquidityToken(half, newRightBalance);
+
+        emit SwapAndLiquify(half, initialRightBalance, newRightBalance);
+
+        // Return the number of LP tokens this contract have
+        return pair.balanceOf(address(this));
+    }
+
+    function swapForRightSide(uint256 tokenAmount) private {
+    address[] memory path = new address[](2);
+    path[0] = address(leftSide);
+    path[1] = address(rightSide);
+    router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        tokenAmount,
+        0, // Accept any amount
+        path,
+        address(this),
+        block.timestamp
+        );
+    }
+
+    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
+        router.addLiquidity(
+            address(leftSide),
+            address(rightSide),
+            leftAmount,
+            rightAmount,
+            0, // Slippage is unavoidable
+            0, // Slippage is unavoidable
+            address(this),
+            block.timestamp
+        );
     }
 
     function createPairWith(address[2] memory path) private returns (IJoePair) {
@@ -110,28 +170,17 @@ contract  LpManager is Ownable, OwnerRecovery{
         setAllowance(_liquifyEnabled);
     }
 
-    // function updateSwapTokensToLiquidityThreshold(uint256 _swapTokensToLiquidityThreshold) public onlyOwner {
-    //     require(_swapTokensToLiquidityThreshold > 0,
-    //         "LiquidityPoolManager: Number of coins to swap to liquidity must be defined");
-    //     swapTokensToLiquidityThreshold = _swapTokensToLiquidityThreshold;
-    // }
+    function updateSwapTokensToLiquidityThreshold(uint256 _swapTokensToLiquidityThreshold) public onlyOwner {
+        require(_swapTokensToLiquidityThreshold > 0,
+            "LiquidityPoolManager: Number of coins to swap to liquidity must be defined");
+        swapTokensToLiquidityThreshold = _swapTokensToLiquidityThreshold;
+    }
 
     function setRewardAddress(address _newRewardPool) public onlyOwner{
         rewardPool = _newRewardPool;
     }
     function setFeeTo(address _newFeeaddress) public onlyOwner {
         feeTo = _newFeeaddress;
-    }
-
-    /*  @notice @dev 
-        Not implementing this function, business requirement changes
-        Fee percentage set by owner only. Fee should be in the following pattery as it divide by 100
-        3/100 = 0.03,
-        30/100 = 0.3,
-        300/100 =3  
-    */
-    function setSellTax (uint256 _newSellPercent) public onlyOwner{
-        feePercentage = _newSellPercent;
     }
 
     //view functions
@@ -150,7 +199,6 @@ contract  LpManager is Ownable, OwnerRecovery{
     /*@notice Should be DEFO
     */
     function getLeftSide() external view returns (address) {
-    
         return address(leftSide);
     }
 
@@ -180,6 +228,19 @@ contract  LpManager is Ownable, OwnerRecovery{
 
     function isLiquidityAdded() external view returns (bool) {
         return pairLiquidityTotalSupply > pair.totalSupply();
+    }
+
+    //@notice Below functions are to test the stablisier
+    function getReserver0() external view returns(uint112 reserve0){
+        uint256 reserve1;
+        uint256 time;
+        (reserve0, reserve1, time) = pair.getReserves();
+    }
+
+    function getReserver1() external view returns(uint112 reserve1){
+        uint256 reserve0;
+        uint256 time;
+        (reserve0, reserve1, time) = pair.getReserves();
     }
 
     function checkBalance() external view returns (uint256){

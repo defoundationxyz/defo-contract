@@ -28,5 +28,5 @@ interface ILpManager {
 
     function calculateSellTax(address from, address to, uint256 amount) external view returns(uint256);
 
-    function checkSelling(address receiver) external view returns (bool);
+    function sellCondition(address receiver) external view returns (bool);
 }
