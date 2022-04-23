@@ -2,25 +2,25 @@
 pragma solidity ^0.8.4;
 
 import "./interfaces/ILpManager.sol";
+import "./interfaces/IGemGettersFacet.sol";
+import "./interfaces/IGemFacet.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-
-//Make the conctract upgradeable
-
-contract DefoLimiter is 
-    AccessControlUpgradeable, 
-    OwnableUpgradeable, 
-    Initializable {
+contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
     
     error UnauthorizedDestination(address unauthorized); //common error
 
     address private defoNode;
     address private LPool;
+    address diamondAddress;
     ILpManager DefoLPManager;
+    IGemFacet GemFacet = IGemFacet(diamondAddress);
+    IGettersFacet GemGetters = IGettersFacet(diamondAddress);
     IERC20 DefoToken;
+
 
     mapping(address => bool) public Whitelist; //Addresses that are excluded from observation
     mapping(address => bool) public Blocklist; //Denied Addresses
@@ -45,11 +45,13 @@ contract DefoLimiter is
 
     function initialize( 
         address _taxCollector, 
-        address _defoNodeAddress
+        address _defoNodeAddress,
+        address _diamondAddress
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
         taxCollector = _taxCollector;
+        diamondAddress = _diamondAddress;
     }
 
     //have to get this from upgradeable
@@ -118,7 +120,7 @@ contract DefoLimiter is
             }
 
             //Determine type of activity
-            if (isPair(from)){
+            /*if (isPair(from)){
                 if(!Whitelist[to]) {
                     tokensBought[currentTimeframeWindow][to] += amount;
                     
@@ -137,7 +139,13 @@ contract DefoLimiter is
                     from, 
                     to
                 );
-            } else if (isPair(to)) {
+            } else*/ if (isPair(to)) {
+                uint256[] memory gemIds = GemFacet.getGemIdsOf(from);
+                for (uint256 i = 0; i < gemIds.length; i++) {
+                    uint8 gemType = GemGetters.GemOf(gemIds[i])/*.GemType*/;
+                    //require(, "Cannot sell more than amount of rewards per week");
+
+                }
                 uint256 taxedAmount = (amount * taxRate) / 10000;
     
                 DefoToken.transferFrom(from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
@@ -185,6 +193,10 @@ contract DefoLimiter is
     }
     function setLPManager(address newLpManager) external onlyRole(DEFAULT_ADMIN_ROLE) {
         DefoLPManager = ILpManager(newLpManager);
+    }
+
+    function setDiamond(address _newDiamond) public onlyRole(DEFAULT_ADMIN_ROLE) {
+       GemGetters = IGettersFacet(_newDiamond);
     }
 
     function setTimeframeExpiration(uint256 newTimeframeExpiration) external onlyRole(DEFAULT_ADMIN_ROLE) {
