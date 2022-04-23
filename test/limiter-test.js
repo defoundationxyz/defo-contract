@@ -21,7 +21,8 @@ describe("DefoLimiter", function () {
       defotoken, 
       mockdai, 
       mockpair, 
-      mockfactory, 
+      mockfactory,
+      mockgemhybridfacet, 
       wavax;
 
   beforeEach(async function () {
@@ -41,13 +42,20 @@ describe("DefoLimiter", function () {
     node = await Node.deploy();
     await node.deployed();
 
+    //Mock Facet Deployjment
+    var MockGemHybridFacet = await ethers.getContractFactory("MockGemHybridFacet")
+    mockgemhybridfacet = await MockGemHybridFacet.deploy()
+    await mockgemhybridfacet.deployed()
+
     /// Check limiter constructor
     var Limiter = await ethers.getContractFactory("DefoLimiter");
-    limiter = await Limiter.deploy(
-      acc2.address,
-      node.address
-      );
+    limiter = await Limiter.deploy();
     await limiter.deployed();
+    limiter.initialize(
+      node.address,
+      acc2.address,
+      mockgemhybridfacet.address
+    )
 
     //Mock LP Deployment
     var LiqPool = await ethers.getContractFactory("MockLiqPool");
@@ -107,7 +115,8 @@ describe("DefoLimiter", function () {
     await expectRevert(defotoken.connect(acc1).mint(acc1.address, "10000"), "Address is not permitted");
   })
 
-  it("Should buy some tokens outside of timeframe", async function() {
+  
+  /*it("Should buy some tokens outside of timeframe", async function() {
     await defotoken.mint(owner.address, "200000"); //Mint all tokens to owner for total supply
     await limiter.setLPAddress(owner.address) //Set owner address as LP
 
@@ -124,12 +133,15 @@ describe("DefoLimiter", function () {
 
     console.log("Owner Balance after: ", await defotoken.balanceOf(owner.address))
     console.log("ACC1 Balance: ", await defotoken.balanceOf(acc2.address))
-  })
+  }) */
 
   it("Should sell tokens from an account", async () => {
     await defotoken.mint(acc1.address, "5000000000000000000")
     await defotoken.connect(acc1).transfer(defotoken.address, "4");
 
-    expect (await defotoken.balanceOf(acc2.address)).to.equal("2000000000000000000")
+    await expectRevert(
+      defotoken.connect(acc1).transfer(defotoken.address, "4"), 
+      "Cannot sell more than amount of rewards per week"
+    )
   })
 });

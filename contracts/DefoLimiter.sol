@@ -2,8 +2,7 @@
 pragma solidity ^0.8.4;
 
 import "./interfaces/ILpManager.sol";
-import "./interfaces/IGemGettersFacet.sol";
-import "./interfaces/IGemFacet.sol";
+import "./interfaces/IGemHybrid.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -17,8 +16,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
     address private LPool;
     address diamondAddress;
     ILpManager DefoLPManager;
-    IGemFacet GemFacet = IGemFacet(diamondAddress);
-    IGettersFacet GemGetters = IGettersFacet(diamondAddress);
+    IGemHybrid GemHybrid = IGemHybrid(diamondAddress);
     IERC20 DefoToken;
 
 
@@ -119,31 +117,13 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
                 revert UnauthorizedDestination(to);
             }
 
-            //Determine type of activity
-            /*if (isPair(from)){
-                if(!Whitelist[to]) {
-                    tokensBought[currentTimeframeWindow][to] += amount;
-                    
-                    if(!isExcludedFromObs(to)){
-                        require (
-                            tokensBought[currentTimeframeWindow][to] + amount <= getMaxPercentage(),
-                            "Cannot buy anymore tokens during this timeframe"
-                        );
-                        
-                        if (buyTaxActive) {
-                            DefoToken.transferFrom(from, taxCollector, (amount * buyTaxAmount) / 10000);
-                        }
-                    }
-                }
-                emit UserLimiterBuy(
-                    from, 
-                    to
-                );
-            } else*/ if (isPair(to)) {
-                uint256[] memory gemIds = GemFacet.getGemIdsOf(from);
+            if (isPair(to)) {
+                uint256[] memory gemIds = GemHybrid.getGemIdsOf(from);
+                require(gemIds.length > 0);
                 for (uint256 i = 0; i < gemIds.length; i++) {
-                    uint8 gemType = GemGetters.GemOf(gemIds[i])/*.GemType*/;
-                    //require(, "Cannot sell more than amount of rewards per week");
+                    uint8 gemType = GemHybrid.GemOf(gemIds[i]).GemType;
+                    uint16 gemReward = GemHybrid.GetGemTypeMetadata(gemType).RewardRate;
+                    require(amount <= gemReward, "Cannot sell more than amount of rewards per week");
 
                 }
                 uint256 taxedAmount = (amount * taxRate) / 10000;
@@ -196,7 +176,7 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
     }
 
     function setDiamond(address _newDiamond) public onlyRole(DEFAULT_ADMIN_ROLE) {
-       GemGetters = IGettersFacet(_newDiamond);
+       GemHybrid = IGemHybrid(_newDiamond);
     }
 
     function setTimeframeExpiration(uint256 newTimeframeExpiration) external onlyRole(DEFAULT_ADMIN_ROLE) {
