@@ -38,7 +38,6 @@ contract Redeem is Ownable{
         address _rubyOmegaPresale,
         address _diamondDeltaPresale,
         address _diamondOmegaPresale
-        
     ) {
         redeemActive = true;
         nodeContract = INode(_nodeAddress);
@@ -65,14 +64,25 @@ contract Redeem is Ownable{
         locked = false;
     }
 
-
-    /// @dev removed ownership check since implementing OZ enumerable because input of token IDs is no longer needed
     modifier presaleCompliance(){
         require (
             sapphirePresale.balanceOf(msg.sender) > 0 ||
             rubyPresale.balanceOf(msg.sender) > 0 ||
             diamondPresale.balanceOf(msg.sender) > 0,
             "You are not in possesion of any presale nodes"
+        );
+        _;
+    }
+
+    modifier secondPresaleCompliance(){
+        require (
+            sapphireDeltaPresale.balanceOf(msg.sender) > 0 ||
+            sapphireOmegaPresale.balanceOf(msg.sender) > 0 ||
+            rubyDeltaPresale.balanceOf(msg.sender) > 0 ||
+            rubyOmegaPresale.balanceOf(msg.sender) > 0 ||
+            diamondDeltaPresale.balanceOf(msg.sender) > 0 ||
+            diamondOmegaPresale.balanceOf(msg.sender) > 0,
+            "You are not in possesion of any second presale nodes"
         );
         _;
     }
@@ -181,7 +191,7 @@ contract Redeem is Ownable{
         public
         isActive
         nonReentrant
-        presaleCompliance
+        secondPresaleCompliance
         timeCompliance {
             uint256 redeemSapphireDeltaBalance = sapphireDeltaPresale.balanceOf(msg.sender);
             uint256 redeemSapphireOmegaBalance = sapphireOmegaPresale.balanceOf(msg.sender);

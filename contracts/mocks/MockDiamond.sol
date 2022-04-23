@@ -22,12 +22,12 @@ contract MockDiamond is ERC721Enumerable, Ownable{
     }
     
     function mintNode() public payable {
-        require(
-            DAIToken.balanceOf(msg.sender) > diamondNodePrice,
-            "Insuffucient DAI balance"
-         );
+        // require(
+        //     DAIToken.balanceOf(msg.sender) > diamondNodePrice,
+        //     "Insuffucient DAI balance"
+        //  );
  
-        DAIToken.transferFrom(msg.sender, address(this), diamondNodePrice);
+        // DAIToken.transferFrom(msg.sender, address(this), diamondNodePrice);
         supply.increment();
         _safeMint(msg.sender, supply.current());
     }

@@ -14,7 +14,7 @@ contract MockSapphire is ERC721Enumerable, Ownable{
     Counters.Counter private supply;
 
 
-    uint256 sapphireNodePrice = 540;
+    uint256 public sapphireNodePrice = 540;
     string private baseURI;
 
     IERC20 DAIToken;
@@ -23,12 +23,9 @@ contract MockSapphire is ERC721Enumerable, Ownable{
     }
 
     function mintNode() public payable {
-        require(
-           DAIToken.balanceOf(msg.sender) > sapphireNodePrice,
-           "Insuffucient DAI balance"
-        );
+        
 
-        DAIToken.transferFrom(msg.sender, address(this), sapphireNodePrice);
+        //DAIToken.transferFrom(msg.sender, address(this), sapphireNodePrice);
         supply.increment();
         _safeMint(msg.sender, supply.current());
     

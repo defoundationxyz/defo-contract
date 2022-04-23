@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract MockNode is ERC721Enumerable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdCounter;
-    
 
     enum NodeType {
         Sapphire,
