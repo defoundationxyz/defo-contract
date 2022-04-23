@@ -13,12 +13,27 @@ contract MockNode is ERC721Enumerable {
         Ruby,
         Diamond
     }
+
+    enum Booster {
+        None,
+        Delta,
+        Omega
+    }
     constructor() ERC721("Mock Defo Node", "MDN") {}
     function RedeemMint(NodeType _type, address _to) public {
-        _mintNode(_type, _to);
+        _mintGem(_type, _to);
     }
 
-    function _mintNode (NodeType _type, address _to) internal {
+    function RedeemMintBooster(
+        NodeType _type,
+        Booster _booster,
+        address _to
+    ) public {
+        _mintGem(_type, _to);
+        
+    }
+
+    function _mintGem (NodeType _type, address _to) internal {
         _tokenIdCounter.increment();
         uint256 tokenId = _tokenIdCounter.current();
         _safeMint(_to, tokenId);

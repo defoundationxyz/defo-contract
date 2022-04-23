@@ -106,8 +106,6 @@ describe("RedeemFunctionality", function () {
     // mint dai
     await mockdai.connect(acc1).mintTokens(acc1.address, "5400000000000000000000000")
     await mockdai.connect(acc1).approve(mocksapphire.address, "5400000000000000000000")
-    console.log("ACC1 Balance: ", await mockdai.balanceOf(acc1.address))
-    console.log("MockSapphire Price: ", await mocksapphire.sapphireNodePrice())
     // buy presale nft
     for (var i = 0; i < 3; i++) {
       
@@ -360,7 +358,7 @@ describe ("RedeemFunctionality2", function () {
     // redeem from redeem contract
     await mockdeltasapphire.connect(acc1).setApprovalForAll(redeem.address, true)
     await mockomegasapphire.connect(acc1).setApprovalForAll(redeem.address, true)
-    //await redeem.connect(acc1).secondPresaleRedeem()
+    await redeem.connect(acc1).secondPresaleRedeem()
     //expect(await mocknode.balanceOf(acc1.address)).to.equal(3)
     // check balance of caller (acc1)
     console.log("Sapphire Delta presale balance: ", await mockdeltasapphire.balanceOf(acc1.address)) // must return 0
@@ -376,7 +374,6 @@ describe ("RedeemFunctionality2", function () {
     await mockdai.connect(acc[0]).approve(mockruby.address, "72000000000000000000000")
     // buy presale nft
     await mockdeltaruby.connect(acc[0]).mintNode(3)
-    await mockomegaruby.connect(acc[0]).mintNode(3)
     await mockomegaruby.connect(acc[0]).mintNode(3)
     // redeem from redeem contract
     await mockdeltaruby.connect(acc[0]).setApprovalForAll(redeem.address, true)
@@ -425,9 +422,12 @@ describe ("RedeemFunctionality2", function () {
     await mockdeltadiamond.connect(acc[2]).mintNode(1)
     await mockomegadiamond.connect(acc[2]).mintNode(1)
     // redeem from redeem contract
-    await mocksapphire.connect(acc[2]).setApprovalForAll(redeem.address, true)
-    await mockruby.connect(acc[2]).setApprovalForAll(redeem.address, true)
-    await mockdiamond.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockdeltasapphire.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockomegasapphire.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockdeltaruby.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockomegaruby.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockdeltadiamond.connect(acc[2]).setApprovalForAll(redeem.address, true)
+    await mockomegadiamond.connect(acc[2]).setApprovalForAll(redeem.address, true)
     await redeem.connect(acc[2]).secondPresaleRedeem()
     //expect(await mocknode.balanceOf(acc[2].address)).to.equal(6)
     //check balance of caller (acc[2])

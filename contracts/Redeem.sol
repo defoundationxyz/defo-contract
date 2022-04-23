@@ -187,7 +187,7 @@ contract Redeem is Ownable{
             }
         }
 
-        function secondPresaleRedeem()
+    function secondPresaleRedeem()
         public
         isActive
         nonReentrant
@@ -314,4 +314,6 @@ contract Redeem is Ownable{
                 );
             }
         }
+
+        fallback () external {}
 }
