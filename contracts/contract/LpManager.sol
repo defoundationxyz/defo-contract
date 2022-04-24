@@ -9,27 +9,23 @@ import "../interfaces/IJoeFactory.sol";
 import "../interfaces/IJoePair.sol";
 import "../interfaces/IJoeRouter02.sol";
 import "../interfaces/ILpManager.sol";
-import "./Universe.sol";
 import "hardhat/console.sol";
+import "./helpers/LeftSideImplementation.sol";
 
 
-contract  LpManager is Ownable, OwnerRecovery{
+contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
 
     using SafeERC20 for IERC20;
 
     event SwapAndLiquify(uint256 indexed half, uint256 indexed initialBalance, uint256 indexed newRightBalance);
-    event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
-
-    //Fee and treasury address to add
-    address public feeTo;
-    address private rewardPool;
-    uint256 public feePercentage;// = 3; //0.3%
-    uint256 public sellTaxPercentage = 50;//50%
+    event BufferLpSupply (uint256 indexed amount, uint256 indexed newRightBalance);
+    
+    uint256 public bufferThreshold;
 
     bool public liquifyEnabled = false;
-    bool private isSwapping = false;
     uint256 public swapTokensToLiquidityThreshold;
 
+    //For testing purpose
     uint256 public pairLiquidityTotalSupply;
 
     IJoeRouter02 private router;
@@ -39,94 +35,63 @@ contract  LpManager is Ownable, OwnerRecovery{
 
     uint256 MAX_UINT256 = type(uint).max;
 
-    modifier validAddress(address _one, address _two){
+    modifier validAddress(address _one){
         require(_one != address(0));
-        require(_two != address(0));
         _;
     }
 
-    constructor( address _router, address _rewardPool ,address[2] memory path , uint256 _swapTokensToLiquidityThreshold ) validAddress(_router, _rewardPool){
-        rewardPool = _rewardPool;
+    constructor( address _router, address[2] memory path ,uint256 _bufferThreshold) validAddress(_router){
         router = IJoeRouter02(_router);
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
         rightSide = IERC20(path[1]);
         pairLiquidityTotalSupply = pair.totalSupply();
-        updateSwapTokensToLiquidityThreshold(_swapTokensToLiquidityThreshold);
-        // Left side should be Defo
-        //changeUniverseImplementation(address(leftSide));
+        setBufferThreshHold(_bufferThreshold);
         shouldLiquify(true);
     
     }
 
-    function afterTokenTransfer(address sender) external returns (bool) {
-        uint256 leftSideBalance = leftSide.balanceOf(address(this));
-        bool shouldSwap = leftSideBalance >= swapTokensToLiquidityThreshold;
-        if (
-            shouldSwap &&liquifyEnabled && pair.totalSupply() > 0 &&
-            !isSwapping && !isPair(sender) &&!isRouter(sender) ) 
-            {
-                // This prevents inside calls from triggering this function again (infinite loop)
-                // It's ok for this function to be reentrant since it's protected by this check
-                isSwapping = true;
-
-                // To prevent bigger sell impact we only sell in batches with the threshold as a limit
-                uint256 totalLP = swapAndLiquify(swapTokensToLiquidityThreshold);
-                uint256 totalLPRemaining = totalLP;
-
-                if(feeTo != address(0)){
-                    uint256 calculatedFee = (totalLPRemaining * feePercentage)/100;
-                    totalLPRemaining -= calculatedFee;
-                    pair.transfer(feeTo, calculatedFee);
-                } 
-                //given owner of this address is where we sending lp tokens.
-                pair.transfer(owner(), totalLPRemaining);
-                // Keep it healthy
-                pair.sync();
-
-                // This prevents inside calls from triggering this function again (infinite loop)
-                isSwapping = false;
-            }
-         // Always update liquidity total supply
+    // Buffer system
+    function buffer() external onlyOwner{
+        uint256 tokenBal;
+        uint defoBal = leftSide.balanceOf(address(this));
+        uint256 daiBal = rightSide.balanceOf(address(this));
+        (uint token0, uint token1, uint time) = pair.getReserves(); 
+        uint256 bufferAmount =  bufferThreshold;
+        require( defoBal >= bufferAmount, "INSUFFICENT_DEFO_BAL");
+        unchecked {
+            tokenBal = token1/token0;
+            uint256 bufferT =  bufferAmount * tokenBal;
+            require( daiBal >= bufferT , "INSUFFICENT_DAI_BAL");
+        }
+         console.log("token: " ,tokenBal);
+        uint256 daiSwapBal = bufferDefo(bufferAmount, daiBal, tokenBal);
+        uint256 rightBalanceAfter; 
+        unchecked{
+            rightBalanceAfter = daiBal - daiSwapBal;
+        }
+        addLiquidityToken(defoBal, daiSwapBal);
+        emit BufferLpSupply(bufferAmount, rightBalanceAfter);
+        // Keeping reserve healthy
+        pair.sync();
+        // Always update liquidity total supply
         pairLiquidityTotalSupply = pair.totalSupply();
 
-        return true;
     }
 
-    // Transfer LP tokens conveniently
-    function sendLPTokensTo(address to, uint256 tokens) private {
-        pair.transfer(to, tokens);
-    }
-
-    // Function that adds liquidity with single assest: Defo
-    function swapAndLiquify(uint256 tokens) private returns (uint256) {
-        uint256 half = tokens / 2;
-        uint256 initialRightBalance = rightSide.balanceOf(address(this));
-
-        swapForRightSide(half);
-
-        uint256 newRightBalance = rightSide.balanceOf(address(this)) -
-            initialRightBalance;
-
-        addLiquidityToken(half, newRightBalance);
-
-        emit SwapAndLiquify(half, initialRightBalance, newRightBalance);
-
-        // Return the number of LP tokens this contract have
-        return pair.balanceOf(address(this));
-    }
-
-    function swapForRightSide(uint256 tokenAmount) private {
-    address[] memory path = new address[](2);
-    path[0] = address(leftSide);
-    path[1] = address(rightSide);
-    router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        tokenAmount,
-        0, // Accept any amount
-        path,
-        address(this),
-        block.timestamp
-        );
+    // Buffer defo/dai. Lp added will be depend on 
+    function bufferDefo(uint _bufferThreshold, uint256 _daiBal, uint256 _tokenPrice) internal pure returns (uint256){
+        uint256 defoSupplyInDai;
+        uint256 daiBalanceAfter;
+        uint256 netDaiAmount;
+        unchecked {
+            defoSupplyInDai =  _bufferThreshold * _tokenPrice;
+            // Checking left over Dai amount
+            daiBalanceAfter = _daiBal - defoSupplyInDai;
+            //Getting the net amount we want to keep 1:1 in term of price
+            netDaiAmount = _daiBal - daiBalanceAfter;
+        }
+        return netDaiAmount;
     }
 
     function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
@@ -170,18 +135,11 @@ contract  LpManager is Ownable, OwnerRecovery{
         setAllowance(_liquifyEnabled);
     }
 
-    function updateSwapTokensToLiquidityThreshold(uint256 _swapTokensToLiquidityThreshold) public onlyOwner {
-        require(_swapTokensToLiquidityThreshold > 0,
-            "LiquidityPoolManager: Number of coins to swap to liquidity must be defined");
-        swapTokensToLiquidityThreshold = _swapTokensToLiquidityThreshold;
+    function setBufferThreshHold(uint256 _threshHold) public onlyOwner{
+        require(_threshHold > 0, "MOST_BE_GREATER_THAN_ZERO");
+        bufferThreshold = _threshHold;
     }
 
-    function setRewardAddress(address _newRewardPool) public onlyOwner{
-        rewardPool = _newRewardPool;
-    }
-    function setFeeTo(address _newFeeaddress) public onlyOwner {
-        feeTo = _newFeeaddress;
-    }
 
     //view functions
     function getRouter() external view returns (address) {
@@ -192,10 +150,6 @@ contract  LpManager is Ownable, OwnerRecovery{
         return address(pair);
     }
 
-    function getRewardAddress() external view returns(address){
-        return rewardPool;
-    }
-    
     /*@notice Should be DEFO
     */
     function getLeftSide() external view returns (address) {
@@ -212,7 +166,18 @@ contract  LpManager is Ownable, OwnerRecovery{
         return _pair == address(pair);
     }
 
+    function getLeftBalance() public view returns (uint256){
+        //console.log("defo: ", leftSide.balanceOf(address(this)));
+        return leftSide.balanceOf(address(this));
+    }
+
+    function getRightBalance() public view returns (uint256){
+        //console.log("dai: ", rightSide.balanceOf(address(this)));
+        return rightSide.balanceOf(address(this));
+    }
+
     /*@notice Should be TraderJoe's router
+    /*These function are mainly for testing purposes
     */
     function isRouter(address _router) public view returns (bool) {
         return _router == address(router);

@@ -11,7 +11,6 @@ import "hardhat/console.sol";
 //Sole purpose of testing lp manager
 contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplementationPoint{
     mapping(address => uint256) private _balances;
-    mapping (address=>bool) isExemptFee;
     uint256 public _totalSupply = 200000*1e18;
     uint256 MAXSELLLIMIT = _totalSupply / 1000;
 
@@ -24,14 +23,6 @@ contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplemen
     
     constructor() ERC20("Defo Token","DEFO"){
         _mint(owner(), _totalSupply);
-        isExemptFee[owner()] = true;
-    }
-
-    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual override {
-        super._afterTokenTransfer(from, to, amount);
-        if (address(lpPoolManager) != address(0)) {
-            lpPoolManager.afterTokenTransfer(_msgSender());
-        }
     }
 
 
