@@ -8,7 +8,7 @@ const routerAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
 
 describe("Deploying Contracts", function () {
   //const provider = new ethers.providers.JsonRpcProvider();
-  let defoOwner, dai, acc1, wAVAXOwner, treasury, acc2, acc3, routerContract, defoDaiAddress, factoryAddress, swapTokensToLiquidityThreshold;
+  let defoOwner, dai, acc1, wAVAXOwner, treasury, acc2, acc3, routerContract, defoDaiAddress, factoryAddress, bufferThreshold;
   let defo, lpManager;
   let table = new Table({
     head:['Contracts', 'contract addresses'],
@@ -43,11 +43,9 @@ describe("Deploying Contracts", function () {
 
     //deploying Lp manager
     const LpManager = await hre.ethers.getContractFactory("LpManager");
-    swapTokensToLiquidityThreshold= "100000000000000000000";//100 tokens
-    lpManager = await LpManager.deploy(routerAddress, treasury.address, [defo.address, dai.address] /*, swapTokensToLiquidityThreshold*/);
+    bufferThreshold= "100000000000000000000";//100 tokens
+    lpManager = await LpManager.deploy(routerAddress, [defo.address, dai.address] , bufferThreshold);
     defoDaiAddress = await lpManager.getPair();
-    //This address should be equal to 
-    //const uaddy = await lpManager.getUniverseImplementation();
     
     //set setLiquidityPoolManager with Lp manager address
     await defo.setLiquidityPoolManager(lpManager.address);
@@ -62,7 +60,6 @@ describe("Deploying Contracts", function () {
         ["factory address: ", factoryAddress],
         ["LpManager deployed at:", lpManager.address],
         ["Lp address: ", defoDaiAddress],
-       // ["Universal Implementation: ", uaddy],
         ["Router address: ", routerAddress],
         ["Lp Manager By defo", lpManagerViaDefo],
         ["reward pool address: ", treasury.address],
@@ -98,9 +95,6 @@ describe("Deploying Contracts", function () {
     expect (await lpManager.getRightSide()).to.equal((dai.address).toString());
     expect (isLiquidityAddedBefore.toString()).to.equal("false");
     
-    //Checking swapTokensToLiquidityThreshold
-    // const thresholdValue = (await lpManager.swapTokensToLiquidityThreshold()/1e18).toString();
-    // expect (thresholdValue).to.equal((swapTokensToLiquidityThreshold/1e18).toString());
       
     //transfering defo and Dai token to acc1 
     const tokenAccOneDecimals = "2000000000000000000000"; //2000 tokens

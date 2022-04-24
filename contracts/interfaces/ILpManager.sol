@@ -24,9 +24,6 @@ interface ILpManager {
 
     function isLiquidityAdded() external view returns (bool);
 
-    function afterTokenTransfer(address sender) external returns (bool);
+    function buffer( ) external returns (bool);
 
-    function calculateSellTax(address from, address to, uint256 amount) external view returns(uint256);
-
-    function sellCondition(address receiver) external view returns (bool);
 }

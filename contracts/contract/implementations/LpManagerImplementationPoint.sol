@@ -34,7 +34,7 @@ abstract contract LpManagerImplementationPoint is Ownable{
     function setLiquidityPoolManager(address newImplementation) public virtual onlyOwner{
         address oldImplementation = address(lpPoolManager);
         require(Address.isContract(newImplementation) || newImplementation == address(0),
-        "LiquidityPoolManager: You can only set 0x0 or a contract address as a new implementation");
+        "LiquidityPoolManager: either 0x0 or a contract address");
         lpPoolManager = ILpManager(newImplementation);
 
         emit UpdateLiquidityPoolManager(oldImplementation, newImplementation);

@@ -10,10 +10,8 @@ import "../interfaces/IJoePair.sol";
 import "../interfaces/IJoeRouter02.sol";
 import "../interfaces/ILpManager.sol";
 import "hardhat/console.sol";
-import "./helpers/LeftSideImplementation.sol";
 
-
-contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
+contract  LpManager is Ownable, OwnerRecovery{
 
     using SafeERC20 for IERC20;
 
@@ -52,7 +50,7 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
     }
 
     // Buffer system
-    function buffer() external onlyOwner{
+    function buffer() external onlyOwner returns(bool){
         uint256 tokenBal;
         uint defoBal = leftSide.balanceOf(address(this));
         uint256 daiBal = rightSide.balanceOf(address(this));
@@ -64,7 +62,6 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
             uint256 bufferT =  bufferAmount * tokenBal;
             require( daiBal >= bufferT , "INSUFFICENT_DAI_BAL");
         }
-         console.log("token: " ,tokenBal);
         uint256 daiSwapBal = bufferDefo(bufferAmount, daiBal, tokenBal);
         uint256 rightBalanceAfter; 
         unchecked{
@@ -76,6 +73,8 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
         pair.sync();
         // Always update liquidity total supply
         pairLiquidityTotalSupply = pair.totalSupply();
+
+        return true;
 
     }
 
@@ -109,7 +108,6 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
 
     function createPairWith(address[2] memory path) private returns (IJoePair) {
         IJoeFactory factory = IJoeFactory(router.factory());
-       // console.log(factory);
         address _pair;
         address _currentPair = factory.createPair(path[0], path[1]);
         if (_currentPair != address(0)) {
@@ -136,7 +134,7 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
     }
 
     function setBufferThreshHold(uint256 _threshHold) public onlyOwner{
-        require(_threshHold > 0, "MOST_BE_GREATER_THAN_ZERO");
+        require(_threshHold > 0, "MUST_BE_GREATER_THAN_ZERO");
         bufferThreshold = _threshHold;
     }
 
@@ -167,12 +165,10 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
     }
 
     function getLeftBalance() public view returns (uint256){
-        //console.log("defo: ", leftSide.balanceOf(address(this)));
         return leftSide.balanceOf(address(this));
     }
 
     function getRightBalance() public view returns (uint256){
-        //console.log("dai: ", rightSide.balanceOf(address(this)));
         return rightSide.balanceOf(address(this));
     }
 
@@ -195,7 +191,7 @@ contract  LpManager is Ownable, OwnerRecovery, LeftSideImplementation{
         return pairLiquidityTotalSupply > pair.totalSupply();
     }
 
-    //@notice Below functions are to test the stablisier
+    //@notice Below functions are to test the price action
     function getReserver0() external view returns(uint112 reserve0){
         uint256 reserve1;
         uint256 time;
