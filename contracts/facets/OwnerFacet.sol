@@ -110,6 +110,11 @@ contract OwnerFacet {
         metads.MinReward = _minReward;
     }
 
+    function setMinRewardTime(uint256 _minRewardTime) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.RewardTime = _minRewardTime;
+    }
+
     function setMintLimitHours(uint8 _MintLimitHours) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.MintLimitHours = _MintLimitHours;

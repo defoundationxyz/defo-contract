@@ -277,6 +277,32 @@ describe("Node Tests", function () {
 
     });
   
+
+      it("Test min claim time", async function () {
+
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
+        expect(await OwnerFacet.setMinRewardTime(3600 * 24 * 7)).to.ok;
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [3600 * 24])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;        
+        /// expect revert 
+      
+        let rewardBeforeTax = await GemFacet.checkTaperedReward("0");
+        expect(await GemFacet.connect(addr1).checkTaxedReward("0")).to.lt(rewardBeforeTax);
+        await expect(GemFacet.connect(addr1).ClaimRewards("0")).to.be.reverted
+
+
+      });
+  
   it("Test mintlimit", async function () {
             const saphireGem = {
       LastMint: "0",
