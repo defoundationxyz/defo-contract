@@ -53,7 +53,10 @@ contract VaultStakingFacet {
         return ds.StakedAmount[LibMeta.msgSender()];
     }
 
-    function unstakeTokens(uint256 _tokenId, uint256 amount) public {
+    function unstakeTokens(uint256 _tokenId, uint256 amount)
+        public
+        onlyGemOwner(_tokenId)
+    {
         LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
