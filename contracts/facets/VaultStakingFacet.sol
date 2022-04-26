@@ -8,6 +8,7 @@ pragma solidity ^0.8.4;
 
 import "../libraries/LibERC721.sol";
 import "../libraries/LibGem.sol";
+import "../libraries/LibUser.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibVaultStaking.sol";
 
@@ -32,11 +33,23 @@ contract VaultStakingFacet {
     {
         LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
         uint256 _pendingRewards = LibGem._taperCalculate(_tokenId);
         require(amount >= _pendingRewards, "Not enough pending rewards");
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
+
+        uint256 charityAmount = (metads.CharityRate * amount) / 1000;
+        amount = amount - charityAmount;
+
+        metads.DefoToken.transferFrom(
+            metads.RewardPool,
+            metads.Donation,
+            charityAmount
+        );
+        user.charityContribution = user.charityContribution + charityAmount;
         gem.claimedReward = gem.claimedReward + amount;
         ds.StakedAmount[LibMeta.msgSender()] = amount;
         metads.DefoToken.transferFrom(
@@ -57,6 +70,10 @@ contract VaultStakingFacet {
         public
         onlyGemOwner(_tokenId)
     {
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage userData = userds.GetUserData[
+            LibMeta.msgSender()
+        ];
         LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
@@ -65,7 +82,17 @@ contract VaultStakingFacet {
         require(ds.StakedAmount[user] >= amount, "Not enough staked tokens");
         ds.StakedAmount[user] = ds.StakedAmount[user] - amount;
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
+        uint256 charityAmount = (metads.CharityRate * amount) / 1000;
+        amount = amount + charityAmount;
 
+        metads.DefoToken.transferFrom(
+            metads.Donation,
+            metads.RewardPool,
+            charityAmount
+        );
+        userData.charityContribution =
+            userData.charityContribution -
+            charityAmount;
         uint256 taxed = (amount * 10) / 100;
         metads.DefoToken.transferFrom(
             metads.Vault,

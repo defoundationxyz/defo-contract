@@ -132,7 +132,7 @@ contract GemFacet {
         gem.claimedReward = gem.claimedReward + _rewardDefo;
 
         metads.DefoToken.transferFrom(
-            metads.Treasury,
+            metads.RewardPool,
             metads.Donation,
             charityAmount
         );
