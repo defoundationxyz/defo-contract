@@ -244,9 +244,9 @@ describe("Node Tests", function () {
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq("0");
         expect(await VaultStakingFacet.connect(addr1).addToVault("0", pendingReward)).to.ok;
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(pendingReward);
-        expect(await VaultStakingFacet.connect(addr1).unstakeTokens(pendingReward)).to.ok;
+        expect(await VaultStakingFacet.connect(addr1).unstakeTokens("0" , pendingReward)).to.ok;
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(0);
-        expect(await GemFacet.checkTaperedReward("0")).to.eq("0")
+        expect(await GemFacet.checkTaperedReward("0")).to.lt(pendingReward)
 
     });
   

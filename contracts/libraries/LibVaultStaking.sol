@@ -5,6 +5,7 @@ import "./LibERC721.sol";
 
 library LibVaultStaking {
     struct DiamondStorage {
+        mapping(uint256 => uint256) StakedFrom;
         mapping(address => uint256) StakedAmount; // address -> amount mapping
     }
 
