@@ -22,23 +22,19 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
 
     mapping(address => bool) public Whitelist; //Addresses that are excluded from observation
     mapping(address => bool) public Blocklist; //Denied Addresses
-    mapping(uint256 => mapping(address => uint256)) public tokensBought; //Tokens bought
+    mapping(uint256 => mapping(address => uint256)) public tokensSold; //Tokens bought
     mapping (address => bool) public unauthorizedAddresses;
 
     // The block number `timeframeExpiration` is added to
     uint256 internal currentTimeframeWindow;
     
-    // Amount of time that must pass between each buy
+    // Amount of time that must pass between each sell
     uint256 public timeframeExpiration = 1 days; 
 
-    //Max percentage of total supply a wallet can hold
-    uint256 public maxPercentageVsTotalSupply = 50; 
-
-    //basis points
-    uint256 public taxRate = 5000; 
-    uint256 public buyTaxAmount= 1000;
+    // Max percentage of total supply a wallet can sell
+    uint256 public sellLimitVsTotalSupply = 10; 
+    
     uint256 constant DECIMAL_MULTIPLIER = 10 ** 18;
-    bool public buyTaxActive = true;
     address public taxCollector;
 
     function initialize( 
@@ -119,13 +115,20 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
 
             if (isPair(to)) {
                 uint256[] memory gemIds = GemHybrid.getGemIdsOf(from);
+                uint256 sellAmount;
                 require(gemIds.length > 0);
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     uint8 gemType = GemHybrid.GemOf(gemIds[i]).GemType;
-                    uint16 gemReward = GemHybrid.GetGemTypeMetadata(gemType).RewardRate;
-                    require(amount <= gemReward, "Cannot sell more than amount of rewards per week");
-
+                    sellAmount += GemHybrid.GetGemTypeMetadata(gemType).RewardRate;
                 }
+
+                require(amount <= sellAmount, "Cannot sell more than amount of total rewards per week");
+                require(
+                    tokensSold[currentTimeframeWindow][from] <= 
+                    ((DefoToken.totalSupply() * sellLimitVsTotalSupply) / 10000), 
+                    "Cannot sell more then 0.1% of DEFO total supply per 24h"
+                );
+
                 uint256 taxedAmount = (amount * taxRate) / 10000;
     
                 DefoToken.transferFrom(from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
@@ -181,10 +184,6 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
 
     function setTimeframeExpiration(uint256 newTimeframeExpiration) external onlyRole(DEFAULT_ADMIN_ROLE) {
         timeframeExpiration = newTimeframeExpiration;
-    }
-
-    function flipBuyTaxState() external onlyRole(DEFAULT_ADMIN_ROLE) {
-        buyTaxActive = !buyTaxActive;
     }
     function setBuyTaxAmount (uint256 newBuyTaxAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         buyTaxAmount = newBuyTaxAmount;
