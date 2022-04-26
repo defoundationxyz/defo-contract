@@ -314,6 +314,4 @@ contract Redeem is Ownable{
                 );
             }
         }
-
-        fallback () external {}
 }
