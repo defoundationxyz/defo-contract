@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity =0.6.12;
 
-import "../../libraries/JoeLibrary.sol";
-import "../../libraries/SafeMath.sol";
-import "../../libraries/TransferHelper.sol";
-import "../../interfaces/IJoeRouter02.sol";
-import "../../interfaces/IJoeFactory.sol";
-import "../../interfaces/IERC20.sol";
-import "../../interfaces/IWAVAX.sol";
+import "../libraries/JoeLibrary.sol";
+import "../libraries/SafeMath.sol";
+import "../libraries/TransferHelper.sol";
+import "../interfaces/IJoeRouter02.sol";
+import "../interfaces/IJoeFactory.sol";
+import "../interfaces/IERC20.sol";
+import "../interfaces/IWAVAX.sol";
 //import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
@@ -45,18 +45,36 @@ contract JoeRouter02 is IJoeRouter02 {
         if (IJoeFactory(factory).getPair(tokenA, tokenB) == address(0)) {
             IJoeFactory(factory).createPair(tokenA, tokenB);
         }
-        (uint256 reserveA, uint256 reserveB) = JoeLibrary.getReserves(factory, tokenA, tokenB);
+        (uint256 reserveA, uint256 reserveB) = JoeLibrary.getReserves(
+            factory,
+            tokenA,
+            tokenB
+        );
         if (reserveA == 0 && reserveB == 0) {
             (amountA, amountB) = (amountADesired, amountBDesired);
         } else {
-            uint256 amountBOptimal = JoeLibrary.quote(amountADesired, reserveA, reserveB);
+            uint256 amountBOptimal = JoeLibrary.quote(
+                amountADesired,
+                reserveA,
+                reserveB
+            );
             if (amountBOptimal <= amountBDesired) {
-                require(amountBOptimal >= amountBMin, "JoeRouter: INSUFFICIENT_B_AMOUNT");
+                require(
+                    amountBOptimal >= amountBMin,
+                    "JoeRouter: INSUFFICIENT_B_AMOUNT"
+                );
                 (amountA, amountB) = (amountADesired, amountBOptimal);
             } else {
-                uint256 amountAOptimal = JoeLibrary.quote(amountBDesired, reserveB, reserveA);
+                uint256 amountAOptimal = JoeLibrary.quote(
+                    amountBDesired,
+                    reserveB,
+                    reserveA
+                );
                 assert(amountAOptimal <= amountADesired);
-                require(amountAOptimal >= amountAMin, "JoeRouter: INSUFFICIENT_A_AMOUNT");
+                require(
+                    amountAOptimal >= amountAMin,
+                    "JoeRouter: INSUFFICIENT_A_AMOUNT"
+                );
                 (amountA, amountB) = (amountAOptimal, amountBDesired);
             }
         }
@@ -82,7 +100,14 @@ contract JoeRouter02 is IJoeRouter02 {
             uint256 liquidity
         )
     {
-        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        (amountA, amountB) = _addLiquidity(
+            tokenA,
+            tokenB,
+            amountADesired,
+            amountBDesired,
+            amountAMin,
+            amountBMin
+        );
         address pair = JoeLibrary.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
@@ -122,7 +147,8 @@ contract JoeRouter02 is IJoeRouter02 {
         assert(IWAVAX(WAVAX).transfer(pair, amountAVAX));
         liquidity = IJoePair(pair).mint(to);
         // refund dust eth, if any
-        if (msg.value > amountAVAX) TransferHelper.safeTransferAVAX(msg.sender, msg.value - amountAVAX);
+        if (msg.value > amountAVAX)
+            TransferHelper.safeTransferAVAX(msg.sender, msg.value - amountAVAX);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -134,12 +160,20 @@ contract JoeRouter02 is IJoeRouter02 {
         uint256 amountBMin,
         address to,
         uint256 deadline
-    ) public virtual override ensure(deadline) returns (uint256 amountA, uint256 amountB) {
+    )
+        public
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256 amountA, uint256 amountB)
+    {
         address pair = JoeLibrary.pairFor(factory, tokenA, tokenB);
         IJoePair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
         (uint256 amount0, uint256 amount1) = IJoePair(pair).burn(to);
         (address token0, ) = JoeLibrary.sortTokens(tokenA, tokenB);
-        (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
+        (amountA, amountB) = tokenA == token0
+            ? (amount0, amount1)
+            : (amount1, amount0);
         require(amountA >= amountAMin, "JoeRouter: INSUFFICIENT_A_AMOUNT");
         require(amountB >= amountBMin, "JoeRouter: INSUFFICIENT_B_AMOUNT");
     }
@@ -151,7 +185,13 @@ contract JoeRouter02 is IJoeRouter02 {
         uint256 amountAVAXMin,
         address to,
         uint256 deadline
-    ) public virtual override ensure(deadline) returns (uint256 amountToken, uint256 amountAVAX) {
+    )
+        public
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256 amountToken, uint256 amountAVAX)
+    {
         (amountToken, amountAVAX) = removeLiquidity(
             token,
             WAVAX,
@@ -181,8 +221,24 @@ contract JoeRouter02 is IJoeRouter02 {
     ) external virtual override returns (uint256 amountA, uint256 amountB) {
         address pair = JoeLibrary.pairFor(factory, tokenA, tokenB);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IJoePair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
+        IJoePair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+        (amountA, amountB) = removeLiquidity(
+            tokenA,
+            tokenB,
+            liquidity,
+            amountAMin,
+            amountBMin,
+            to,
+            deadline
+        );
     }
 
     function removeLiquidityAVAXWithPermit(
@@ -196,11 +252,31 @@ contract JoeRouter02 is IJoeRouter02 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external virtual override returns (uint256 amountToken, uint256 amountAVAX) {
+    )
+        external
+        virtual
+        override
+        returns (uint256 amountToken, uint256 amountAVAX)
+    {
         address pair = JoeLibrary.pairFor(factory, token, WAVAX);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IJoePair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
-        (amountToken, amountAVAX) = removeLiquidityAVAX(token, liquidity, amountTokenMin, amountAVAXMin, to, deadline);
+        IJoePair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
+        (amountToken, amountAVAX) = removeLiquidityAVAX(
+            token,
+            liquidity,
+            amountTokenMin,
+            amountAVAXMin,
+            to,
+            deadline
+        );
     }
 
     // **** REMOVE LIQUIDITY (supporting fee-on-transfer tokens) ****
@@ -221,7 +297,11 @@ contract JoeRouter02 is IJoeRouter02 {
             address(this),
             deadline
         );
-        TransferHelper.safeTransfer(token, to, IERC20Joe(token).balanceOf(address(this)));
+        TransferHelper.safeTransfer(
+            token,
+            to,
+            IERC20Joe(token).balanceOf(address(this))
+        );
         IWAVAX(WAVAX).withdraw(amountAVAX);
         TransferHelper.safeTransferAVAX(to, amountAVAX);
     }
@@ -240,7 +320,15 @@ contract JoeRouter02 is IJoeRouter02 {
     ) external virtual override returns (uint256 amountAVAX) {
         address pair = JoeLibrary.pairFor(factory, token, WAVAX);
         uint256 value = approveMax ? uint256(-1) : liquidity;
-        IJoePair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IJoePair(pair).permit(
+            msg.sender,
+            address(this),
+            value,
+            deadline,
+            v,
+            r,
+            s
+        );
         amountAVAX = removeLiquidityAVAXSupportingFeeOnTransferTokens(
             token,
             liquidity,
@@ -265,8 +353,15 @@ contract JoeRouter02 is IJoeRouter02 {
             (uint256 amount0Out, uint256 amount1Out) = input == token0
                 ? (uint256(0), amountOut)
                 : (amountOut, uint256(0));
-            address to = i < path.length - 2 ? JoeLibrary.pairFor(factory, output, path[i + 2]) : _to;
-            IJoePair(JoeLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to, new bytes(0));
+            address to = i < path.length - 2
+                ? JoeLibrary.pairFor(factory, output, path[i + 2])
+                : _to;
+            IJoePair(JoeLibrary.pairFor(factory, input, output)).swap(
+                amount0Out,
+                amount1Out,
+                to,
+                new bytes(0)
+            );
         }
     }
 
@@ -276,10 +371,24 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         amounts = JoeLibrary.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT");
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amounts[0]
+        );
         _swap(amounts, path, to);
     }
 
@@ -289,10 +398,21 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         amounts = JoeLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, "JoeRouter: EXCESSIVE_INPUT_AMOUNT");
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amounts[0]
+        );
         _swap(amounts, path, to);
     }
 
@@ -301,12 +421,27 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external payable virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        payable
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         require(path[0] == WAVAX, "JoeRouter: INVALID_PATH");
         amounts = JoeLibrary.getAmountsOut(factory, msg.value, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         IWAVAX(WAVAX).deposit{value: amounts[0]}();
-        assert(IWAVAX(WAVAX).transfer(JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        assert(
+            IWAVAX(WAVAX).transfer(
+                JoeLibrary.pairFor(factory, path[0], path[1]),
+                amounts[0]
+            )
+        );
         _swap(amounts, path, to);
     }
 
@@ -316,11 +451,22 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         require(path[path.length - 1] == WAVAX, "JoeRouter: INVALID_PATH");
         amounts = JoeLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, "JoeRouter: EXCESSIVE_INPUT_AMOUNT");
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amounts[0]
+        );
         _swap(amounts, path, address(this));
         IWAVAX(WAVAX).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferAVAX(to, amounts[amounts.length - 1]);
@@ -332,11 +478,25 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         require(path[path.length - 1] == WAVAX, "JoeRouter: INVALID_PATH");
         amounts = JoeLibrary.getAmountsOut(factory, amountIn, path);
-        require(amounts[amounts.length - 1] >= amountOutMin, "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT");
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        require(
+            amounts[amounts.length - 1] >= amountOutMin,
+            "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amounts[0]
+        );
         _swap(amounts, path, address(this));
         IWAVAX(WAVAX).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferAVAX(to, amounts[amounts.length - 1]);
@@ -347,24 +507,42 @@ contract JoeRouter02 is IJoeRouter02 {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external payable virtual override ensure(deadline) returns (uint256[] memory amounts) {
+    )
+        external
+        payable
+        virtual
+        override
+        ensure(deadline)
+        returns (uint256[] memory amounts)
+    {
         require(path[0] == WAVAX, "JoeRouter: INVALID_PATH");
         amounts = JoeLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= msg.value, "JoeRouter: EXCESSIVE_INPUT_AMOUNT");
         IWAVAX(WAVAX).deposit{value: amounts[0]}();
-        assert(IWAVAX(WAVAX).transfer(JoeLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
+        assert(
+            IWAVAX(WAVAX).transfer(
+                JoeLibrary.pairFor(factory, path[0], path[1]),
+                amounts[0]
+            )
+        );
         _swap(amounts, path, to);
         // refund dust eth, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferAVAX(msg.sender, msg.value - amounts[0]);
+        if (msg.value > amounts[0])
+            TransferHelper.safeTransferAVAX(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
-    function _swapSupportingFeeOnTransferTokens(address[] memory path, address _to) internal virtual {
+    function _swapSupportingFeeOnTransferTokens(
+        address[] memory path,
+        address _to
+    ) internal virtual {
         for (uint256 i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
             (address token0, ) = JoeLibrary.sortTokens(input, output);
-            IJoePair pair = IJoePair(JoeLibrary.pairFor(factory, input, output));
+            IJoePair pair = IJoePair(
+                JoeLibrary.pairFor(factory, input, output)
+            );
             uint256 amountInput;
             uint256 amountOutput;
             {
@@ -373,13 +551,21 @@ contract JoeRouter02 is IJoeRouter02 {
                 (uint256 reserveInput, uint256 reserveOutput) = input == token0
                     ? (reserve0, reserve1)
                     : (reserve1, reserve0);
-                amountInput = IERC20Joe(input).balanceOf(address(pair)).sub(reserveInput);
-                amountOutput = JoeLibrary.getAmountOut(amountInput, reserveInput, reserveOutput);
+                amountInput = IERC20Joe(input).balanceOf(address(pair)).sub(
+                    reserveInput
+                );
+                amountOutput = JoeLibrary.getAmountOut(
+                    amountInput,
+                    reserveInput,
+                    reserveOutput
+                );
             }
             (uint256 amount0Out, uint256 amount1Out) = input == token0
                 ? (uint256(0), amountOutput)
                 : (amountOutput, uint256(0));
-            address to = i < path.length - 2 ? JoeLibrary.pairFor(factory, output, path[i + 2]) : _to;
+            address to = i < path.length - 2
+                ? JoeLibrary.pairFor(factory, output, path[i + 2])
+                : _to;
             pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
     }
@@ -391,11 +577,17 @@ contract JoeRouter02 is IJoeRouter02 {
         address to,
         uint256 deadline
     ) external virtual override ensure(deadline) {
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amountIn);
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amountIn
+        );
         uint256 balanceBefore = IERC20Joe(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IERC20Joe(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
+            IERC20Joe(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
+                amountOutMin,
             "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
     }
@@ -409,11 +601,17 @@ contract JoeRouter02 is IJoeRouter02 {
         require(path[0] == WAVAX, "JoeRouter: INVALID_PATH");
         uint256 amountIn = msg.value;
         IWAVAX(WAVAX).deposit{value: amountIn}();
-        assert(IWAVAX(WAVAX).transfer(JoeLibrary.pairFor(factory, path[0], path[1]), amountIn));
+        assert(
+            IWAVAX(WAVAX).transfer(
+                JoeLibrary.pairFor(factory, path[0], path[1]),
+                amountIn
+            )
+        );
         uint256 balanceBefore = IERC20Joe(path[path.length - 1]).balanceOf(to);
         _swapSupportingFeeOnTransferTokens(path, to);
         require(
-            IERC20Joe(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >= amountOutMin,
+            IERC20Joe(path[path.length - 1]).balanceOf(to).sub(balanceBefore) >=
+                amountOutMin,
             "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
         );
     }
@@ -426,10 +624,18 @@ contract JoeRouter02 is IJoeRouter02 {
         uint256 deadline
     ) external virtual override ensure(deadline) {
         require(path[path.length - 1] == WAVAX, "JoeRouter: INVALID_PATH");
-        TransferHelper.safeTransferFrom(path[0], msg.sender, JoeLibrary.pairFor(factory, path[0], path[1]), amountIn);
+        TransferHelper.safeTransferFrom(
+            path[0],
+            msg.sender,
+            JoeLibrary.pairFor(factory, path[0], path[1]),
+            amountIn
+        );
         _swapSupportingFeeOnTransferTokens(path, address(this));
         uint256 amountOut = IERC20Joe(WAVAX).balanceOf(address(this));
-        require(amountOut >= amountOutMin, "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT");
+        require(
+            amountOut >= amountOutMin,
+            "JoeRouter: INSUFFICIENT_OUTPUT_AMOUNT"
+        );
         IWAVAX(WAVAX).withdraw(amountOut);
         TransferHelper.safeTransferAVAX(to, amountOut);
     }

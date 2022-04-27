@@ -60,8 +60,8 @@ library LibMeta {
         uint256 LiquidityDefoRate;
         uint256 LiquidityDaiRate;
         Counters.Counter _tokenIdCounter;
-        IERC20 PaymentToken;
-        IERC20 DefoToken;
+        IERC20Joe PaymentToken;
+        IERC20Joe DefoToken;
         uint256[] RewardTaxTable;
         uint256 MinReward;
         uint256 RewardTime;

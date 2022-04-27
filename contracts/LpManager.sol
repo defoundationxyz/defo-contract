@@ -5,19 +5,25 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./helpers/OwnerRecovery.sol";
-import "../interfaces/IJoeFactory.sol";
-import "../interfaces/IJoePair.sol";
-import "../interfaces/IJoeRouter02.sol";
-import "../interfaces/ILpManager.sol";
+import "./interfaces/IJoeFactory.sol";
+import "./interfaces/IJoePair.sol";
+import "./interfaces/IJoeRouter02.sol";
+import "./interfaces/ILpManager.sol";
 import "hardhat/console.sol";
 
-contract  LpManager is Ownable, OwnerRecovery{
-
+contract LpManager is Ownable, OwnerRecovery {
     using SafeERC20 for IERC20;
 
-    event SwapAndLiquify(uint256 indexed half, uint256 indexed initialBalance, uint256 indexed newRightBalance);
-    event BufferLpSupply (uint256 indexed amount, uint256 indexed newRightBalance);
-    
+    event SwapAndLiquify(
+        uint256 indexed half,
+        uint256 indexed initialBalance,
+        uint256 indexed newRightBalance
+    );
+    event BufferLpSupply(
+        uint256 indexed amount,
+        uint256 indexed newRightBalance
+    );
+
     uint256 public bufferThreshold;
 
     bool public liquifyEnabled = false;
@@ -31,14 +37,18 @@ contract  LpManager is Ownable, OwnerRecovery{
     IERC20 private leftSide;
     IERC20 private rightSide;
 
-    uint256 MAX_UINT256 = type(uint).max;
+    uint256 MAX_UINT256 = type(uint256).max;
 
-    modifier validAddress(address _one){
+    modifier validAddress(address _one) {
         require(_one != address(0));
         _;
     }
 
-    constructor( address _router, address[2] memory path ,uint256 _bufferThreshold) validAddress(_router){
+    constructor(
+        address _router,
+        address[2] memory path,
+        uint256 _bufferThreshold
+    ) validAddress(_router) {
         router = IJoeRouter02(_router);
         pair = createPairWith(path);
         leftSide = IERC20(path[0]);
@@ -46,25 +56,24 @@ contract  LpManager is Ownable, OwnerRecovery{
         pairLiquidityTotalSupply = pair.totalSupply();
         setBufferThreshHold(_bufferThreshold);
         shouldLiquify(true);
-    
     }
 
     // Buffer system
-    function buffer() external onlyOwner returns(bool){
+    function buffer() external onlyOwner returns (bool) {
         uint256 tokenBal;
-        uint defoBal = leftSide.balanceOf(address(this));
+        uint256 defoBal = leftSide.balanceOf(address(this));
         uint256 daiBal = rightSide.balanceOf(address(this));
-        (uint token0, uint token1, uint time) = pair.getReserves(); 
-        uint256 bufferAmount =  bufferThreshold;
-        require( defoBal >= bufferAmount, "INSUFFICENT_DEFO_BAL");
+        (uint256 token0, uint256 token1, uint256 time) = pair.getReserves();
+        uint256 bufferAmount = bufferThreshold;
+        require(defoBal >= bufferAmount, "INSUFFICENT_DEFO_BAL");
         unchecked {
-            tokenBal = token1/token0;
-            uint256 bufferT =  bufferAmount * tokenBal;
-            require( daiBal >= bufferT , "INSUFFICENT_DAI_BAL");
+            tokenBal = token1 / token0;
+            uint256 bufferT = bufferAmount * tokenBal;
+            require(daiBal >= bufferT, "INSUFFICENT_DAI_BAL");
         }
         uint256 daiSwapBal = bufferDefo(bufferAmount, daiBal, tokenBal);
-        uint256 rightBalanceAfter; 
-        unchecked{
+        uint256 rightBalanceAfter;
+        unchecked {
             rightBalanceAfter = daiBal - daiSwapBal;
         }
         addLiquidityToken(defoBal, daiSwapBal);
@@ -75,16 +84,19 @@ contract  LpManager is Ownable, OwnerRecovery{
         pairLiquidityTotalSupply = pair.totalSupply();
 
         return true;
-
     }
 
-    // Buffer defo/dai. Lp added will be depend on 
-    function bufferDefo(uint _bufferThreshold, uint256 _daiBal, uint256 _tokenPrice) internal pure returns (uint256){
+    // Buffer defo/dai. Lp added will be depend on
+    function bufferDefo(
+        uint256 _bufferThreshold,
+        uint256 _daiBal,
+        uint256 _tokenPrice
+    ) internal pure returns (uint256) {
         uint256 defoSupplyInDai;
         uint256 daiBalanceAfter;
         uint256 netDaiAmount;
         unchecked {
-            defoSupplyInDai =  _bufferThreshold * _tokenPrice;
+            defoSupplyInDai = _bufferThreshold * _tokenPrice;
             // Checking left over Dai amount
             daiBalanceAfter = _daiBal - defoSupplyInDai;
             //Getting the net amount we want to keep 1:1 in term of price
@@ -93,7 +105,9 @@ contract  LpManager is Ownable, OwnerRecovery{
         return netDaiAmount;
     }
 
-    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
+    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount)
+        private
+    {
         router.addLiquidity(
             address(leftSide),
             address(rightSide),
@@ -118,7 +132,6 @@ contract  LpManager is Ownable, OwnerRecovery{
         return IJoePair(_pair);
     }
 
-
     //owner function
     function setAllowance(bool active) public onlyOwner {
         // Gas optimization - Approval
@@ -133,15 +146,14 @@ contract  LpManager is Ownable, OwnerRecovery{
         setAllowance(_liquifyEnabled);
     }
 
-    function setBufferThreshHold(uint256 _threshHold) public onlyOwner{
+    function setBufferThreshHold(uint256 _threshHold) public onlyOwner {
         require(_threshHold > 0, "MUST_BE_GREATER_THAN_ZERO");
         bufferThreshold = _threshHold;
     }
 
-
     //view functions
     function getRouter() external view returns (address) {
-        return address(router); 
+        return address(router);
     }
 
     function getPair() external view returns (address) {
@@ -149,13 +161,13 @@ contract  LpManager is Ownable, OwnerRecovery{
     }
 
     /*@notice Should be DEFO
-    */
+     */
     function getLeftSide() external view returns (address) {
         return address(leftSide);
     }
 
     /*@notice Should be DAI
-    */
+     */
     function getRightSide() external view returns (address) {
         return address(rightSide);
     }
@@ -164,11 +176,11 @@ contract  LpManager is Ownable, OwnerRecovery{
         return _pair == address(pair);
     }
 
-    function getLeftBalance() public view returns (uint256){
+    function getLeftBalance() public view returns (uint256) {
         return leftSide.balanceOf(address(this));
     }
 
-    function getRightBalance() public view returns (uint256){
+    function getRightBalance() public view returns (uint256) {
         return rightSide.balanceOf(address(this));
     }
 
@@ -183,7 +195,7 @@ contract  LpManager is Ownable, OwnerRecovery{
         return pair.totalSupply();
     }
 
-    function setPairAllowance(address _spender, uint _amount) public {
+    function setPairAllowance(address _spender, uint256 _amount) public {
         pair.approve(_spender, _amount);
     }
 
@@ -192,21 +204,20 @@ contract  LpManager is Ownable, OwnerRecovery{
     }
 
     //@notice Below functions are to test the price action
-    function getReserver0() external view returns(uint112 reserve0){
+    function getReserver0() external view returns (uint112 reserve0) {
         uint256 reserve1;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
 
-    function getReserver1() external view returns(uint112 reserve1){
+    function getReserver1() external view returns (uint112 reserve1) {
         uint256 reserve0;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
 
-    function checkBalance() external view returns (uint256){
+    function checkBalance() external view returns (uint256) {
         uint256 balance = pair.balanceOf(msg.sender);
         return balance;
     }
-
 }

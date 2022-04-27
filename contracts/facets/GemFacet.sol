@@ -66,7 +66,7 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 amount = _amount;
 
-        IERC20 Token;
+        IERC20Joe Token;
         /// defo : %75 reward , %25 liq
         if (_isDefo) {
             uint256 reward = (amount * metads.TreasuryDefoRate) / 1000;
@@ -215,9 +215,9 @@ contract GemFacet {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
 
-        if (gem.Booster == LibGem.Booster.Omega) {
+        if (gem.booster == LibGem.Booster.Omega) {
             return 50;
-        } else if (gem.Booster == LibGem.Booster.Delta) {
+        } else if (gem.booster == LibGem.Booster.Delta) {
             return 25;
         } else {
             return 0;
@@ -255,7 +255,7 @@ contract GemFacet {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
-        require(gem.Booster == LibGem.Booster.None, "Gem is already boosted");
+        require(gem.booster == LibGem.Booster.None, "Gem is already boosted");
         LibUser.UserData storage userData = userds.GetUserData[msg.sender];
         require(
             (userData.OmegaClaims[gem.GemType] > 0) ||
@@ -267,7 +267,7 @@ contract GemFacet {
                 userData.OmegaClaims[gem.GemType] > 0,
                 "Not enough boost claims"
             );
-            gem.Booster = LibGem.Booster.Omega;
+            gem.booster = LibGem.Booster.Omega;
             userData.OmegaClaims[gem.GemType] =
                 userData.OmegaClaims[gem.GemType] -
                 1;
@@ -276,7 +276,7 @@ contract GemFacet {
                 userData.DeltaClaims[gem.GemType] > 0,
                 "Not enough boost claims"
             );
-            gem.Booster = LibGem.Booster.Delta;
+            gem.booster = LibGem.Booster.Delta;
             userData.DeltaClaims[gem.GemType] =
                 userData.DeltaClaims[gem.GemType] -
                 1;

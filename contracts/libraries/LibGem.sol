@@ -18,7 +18,7 @@ library LibGem {
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         /// @dev i'm not sure if enums are packed as uint8 in here
-        Booster Booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
+        Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
         uint256 claimedReward; // previously claimed rewards
     }
 
@@ -77,9 +77,9 @@ library LibGem {
         ];
 
         uint256 _rate = gemType.RewardRate;
-        if (gem.Booster == LibGem.Booster.Omega) {
+        if (gem.booster == LibGem.Booster.Omega) {
             _rate = _rate * 2;
-        } else if (gem.Booster == LibGem.Booster.Delta) {
+        } else if (gem.booster == LibGem.Booster.Delta) {
             _rate = _rate + (((_rate * 20)) / 100);
         }
 

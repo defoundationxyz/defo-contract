@@ -3,10 +3,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../../interfaces/ILpManager.sol";
+import "../interfaces/ILpManager.sol";
 
-
-abstract contract LpManagerImplementationPoint is Ownable{
+abstract contract LpManagerImplementationPoint is Ownable {
     ILpManager public lpPoolManager;
 
     event UpdateLiquidityPoolManager(
@@ -31,14 +30,21 @@ abstract contract LpManagerImplementationPoint is Ownable{
         return address(lpPoolManager);
     }
 
-    function setLiquidityPoolManager(address newImplementation) public virtual onlyOwner{
+    function setLiquidityPoolManager(address newImplementation)
+        public
+        virtual
+        onlyOwner
+    {
         address oldImplementation = address(lpPoolManager);
-        require(Address.isContract(newImplementation) || newImplementation == address(0),
-        "LiquidityPoolManager: either 0x0 or a contract address");
+        require(
+            Address.isContract(newImplementation) ||
+                newImplementation == address(0),
+            "LiquidityPoolManager: either 0x0 or a contract address"
+        );
         lpPoolManager = ILpManager(newImplementation);
 
         emit UpdateLiquidityPoolManager(oldImplementation, newImplementation);
-    } 
+    }
 
     uint256[49] private __gap;
 }

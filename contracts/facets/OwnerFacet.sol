@@ -29,8 +29,8 @@ contract OwnerFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
         gemds.MinterAddr = _redeemContract;
-        metads.DefoToken = IERC20(_defoToken);
-        metads.PaymentToken = IERC20(_paymentToken);
+        metads.DefoToken = IERC20Joe(_defoToken);
+        metads.PaymentToken = IERC20Joe(_paymentToken);
         metads.Treasury = _treasury;
         metads.LimiterAddr = _limiter;
         metads.RewardPool = _rewardPool;
@@ -133,7 +133,7 @@ contract OwnerFacet {
 
     function ChangePaymentToken(address _newToken) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.PaymentToken = IERC20(_newToken);
+        metads.PaymentToken = IERC20Joe(_newToken);
     }
 
     function setTaperRate(uint256 _rate) external onlyOwner {
