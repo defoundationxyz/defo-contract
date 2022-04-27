@@ -6,7 +6,7 @@ const {router_abi, factory_abi} = require("../abi/router_abi");
 const routerAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
 
 
-describe("Deploying Contracts", function () {
+describe("Deploying Contracts Router", function () {
   //const provider = new ethers.providers.JsonRpcProvider();
   let defoOwner, dai, acc1, wAVAXOwner, treasury, acc2, acc3, routerContract, defoDaiAddress, factoryAddress, bufferThreshold;
   let defo, lpManager;
@@ -136,7 +136,7 @@ describe("Deploying Contracts", function () {
     //swapping token
     const amountToSwap = "100000000000000000000"; //100
     await routerContract.connect(acc1).swapExactTokensForTokens(
-      amountToSwap, "0", [ dai.address, defo.address], 
+      amountToSwap, "0", [ defo.address, dai.address], 
       acc1.address, "1649910829447"
     );
 

@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../../interfaces/ILpManager.sol";
 
 
+
 abstract contract LpManagerImplementationPoint is Ownable{
     ILpManager public lpPoolManager;
 
