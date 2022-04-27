@@ -10,6 +10,8 @@
     "ethers": "^5.5.4",
     "hardhat": "^2.8.4",
     "hardhat-gas-reporter": "^1.0.8",
-    "solidity-coverage": "^0.7.20"
-  }
+    "solidity-coverage": "^0.7.20",
+    "@openzeppelin/test-helpers": "^0.5.15"
+  },
+  "dependencies": {}
 }
