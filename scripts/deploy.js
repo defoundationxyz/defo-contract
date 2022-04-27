@@ -3,7 +3,7 @@
 
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
 
-async function deployDiamond () {
+async function deployDiamond() {
   const accounts = await ethers.getSigners()
   const contractOwner = accounts[0]
 
@@ -71,8 +71,21 @@ async function deployDiamond () {
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
   console.log('Completed diamond cut')
+  
+  let defoaddy = "0x8d352F4c8643DB1d7f7FD6F2b508998EA6cb4388";
+  let daiAddress = "0xd586e7f844cea2f87f50152665bcbc2c279d8d70";
+  const routerAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+    
+  //deploying lpManager contract.
+  const LPManager = await hre.ethers.getContractFactory("LpManager");
+  const bufferThreshold= "1000000000000000000000";
+  const lpManager = await LPManager.connect(owner).deploy(routerAddress,[defoaddy, daiAddress], bufferThreshold);
+  console.log("LpManager deployed: ", lpManager.address);
   return diamond.address
+
+
 }
+
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

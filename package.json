@@ -6,6 +6,7 @@
     "@openzeppelin/contracts": "^4.5.0",
     "@openzeppelin/contracts-upgradeable": "^4.5.2",
     "chai": "^4.3.6",
+    "cli-table3": "^0.6.1",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
     "hardhat": "^2.8.4",
@@ -13,5 +14,7 @@
     "solidity-coverage": "^0.7.20",
     "@openzeppelin/test-helpers": "^0.5.15"
   },
-  "dependencies": {}
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  }
 }

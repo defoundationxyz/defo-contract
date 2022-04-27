@@ -1,6 +1,11 @@
 require("@nomiclabs/hardhat-waffle");
+<<<<<<< HEAD
 require("hardhat-gas-reporter");
 require("solidity-coverage");
+=======
+require('dotenv').config();
+
+>>>>>>> feature/lpManager
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -18,6 +23,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+<<<<<<< HEAD
 <<<<<<< HEAD
     solidity: {
     version: "0.8.7",
@@ -39,6 +45,8 @@ module.exports = {
     }
   }
 =======
+=======
+>>>>>>> feature/lpManager
   networks:{
     hardhat: {
       chainId: 43114,
@@ -46,7 +54,11 @@ module.exports = {
       forking: {
           url: "https://api.avax.network/ext/bc/C/rpc",
           enabled: true,
+<<<<<<< HEAD
           blockNumber: 8528605,
+=======
+          blockNumber: 8772544,
+>>>>>>> feature/lpManager
       },
     },
   },
@@ -81,5 +93,8 @@ module.exports = {
       },
     ],
   },
+<<<<<<< HEAD
 >>>>>>> feature/limiter
+=======
+>>>>>>> feature/lpManager
 };
