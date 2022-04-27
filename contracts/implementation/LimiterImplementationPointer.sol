@@ -5,10 +5,11 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "@openzeppelin/contracts/utils/Address.sol";
+import "../interfaces/ILimiter.sol";
 
 /// To do: Finish limiter so I can make interface
 
-contract LimiterImplementationPointer is Ownable, Address {
+contract LimiterImplementationPointer is Ownable {
     ILimiter public DefoLimiter;
 
     event UpdatedLimiterImplementation (
@@ -36,7 +37,7 @@ contract LimiterImplementationPointer is Ownable, Address {
         );
         DefoLimiter = ILimiter(newImplementation);
 
-        // emit UpdatedLimiterImplementation();
+        emit UpdatedLimiterImplementation(oldImplementation, newImplementation);
     }
 
     function getLimiter() public view returns(address) {

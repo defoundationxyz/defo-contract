@@ -30,7 +30,7 @@ contract MockGemHybridFacet {
         uint256 StablePrice; // Required StableCoin tokens while minting
     }
 
-    function GemOf(uint256 _tokenId) external view returns (Gem memory) {
+    function GemOf(uint256 _tokenId) external pure returns (Gem memory) {
         Gem memory gem = Gem({
             MintTime: 0,
             LastReward: 0,
@@ -45,7 +45,7 @@ contract MockGemHybridFacet {
 
     function GetGemTypeMetadata(uint8 _type)
         external
-        view
+        pure
         returns (GemTypeMetadata memory)
     {
         GemTypeMetadata memory gemType = GemTypeMetadata({

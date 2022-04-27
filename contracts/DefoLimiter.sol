@@ -128,10 +128,8 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
                     ((DefoToken.totalSupply() * sellLimitVsTotalSupply) / 10000), 
                     "Cannot sell more then 0.1% of DEFO total supply per 24h"
                 );
-
-                uint256 taxedAmount = (amount * taxRate) / 10000;
     
-                DefoToken.transferFrom(from, taxCollector, taxedAmount * DECIMAL_MULTIPLIER);
+                DefoToken.transferFrom(from, taxCollector, amount);
 
                 emit UserLimiterSell(
                     from,
@@ -140,27 +138,14 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
             }
             return true;
     }
-
-    function getMaxPercentage() public view returns(uint256) {
-        return (DefoToken.totalSupply() * maxPercentageVsTotalSupply) / 10000;
-    }
     function isExcludedFromObs(address _account) public view returns(bool) {
         return Whitelist[_account] || 
         DefoLPManager.isRouter(_account) ||
         DefoLPManager.isPair(_account);
     }
 
-    /**
-    @notice Use basis points for input
-    i.e. if you want 2% input 200,
-    if you want 20% input 2000 
-    */
-    function setTaxRate (uint256 newTaxRate) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        taxRate = newTaxRate;
-    }
-
     function setMaxPercentage(uint256 _newPercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        maxPercentageVsTotalSupply = _newPercentage;
+        sellLimitVsTotalSupply = _newPercentage;
     }
 
     function setTaxCollector (address newTaxCollector) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -184,9 +169,6 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
 
     function setTimeframeExpiration(uint256 newTimeframeExpiration) external onlyRole(DEFAULT_ADMIN_ROLE) {
         timeframeExpiration = newTimeframeExpiration;
-    }
-    function setBuyTaxAmount (uint256 newBuyTaxAmount) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        buyTaxAmount = newBuyTaxAmount;
     }
 
     function editWhitelist(address _address, bool _allow)
