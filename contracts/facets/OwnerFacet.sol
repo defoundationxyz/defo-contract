@@ -85,6 +85,17 @@ contract OwnerFacet {
         metads.TreasuryDaiRate = _daiRate;
     }
 
+    function setAddressAndDistLiquidity(
+        address _newAddress,
+        uint256 _defoRate,
+        uint256 _daiRate
+    ) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.Liquidity = _newAddress;
+        metads.LiquidityDefoRate = _defoRate;
+        metads.LiquidityDaiRate = _daiRate;
+    }
+
     function setAddressVault(address _newAddress) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Vault = _newAddress;

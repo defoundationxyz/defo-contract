@@ -70,15 +70,19 @@ contract GemFacet {
         /// defo : %75 reward , %25 liq
         if (_isDefo) {
             uint256 reward = (amount * metads.TreasuryDefoRate) / 1000;
+            uint256 liq = (amount * metads.LiquidityDefoRate) / 1000;
             Token = metads.DefoToken;
             Token.transfer(metads.RewardPool, reward);
+            Token.transfer(metads.Liquidity, liq);
         } else {
             /// dai %67.5 tres , %25 liq , %7.5 core team
             uint256 treasury = (amount * metads.TreasuryDaiRate) / 1000;
             uint256 team = (amount * metads.TeamDaiRate) / 1000;
+            uint256 liq = (amount * metads.LiquidityDaiRate) / 1000;
             Token = metads.PaymentToken;
             Token.transfer(metads.Team, team);
             Token.transfer(metads.Treasury, treasury);
+            Token.transfer(metads.Liquidity, liq);
         }
 
         // TODO : add lp distrubition

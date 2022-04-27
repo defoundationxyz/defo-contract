@@ -57,6 +57,8 @@ library LibMeta {
         uint256 CharityRate;
         uint256 RewardPoolDefoRate;
         uint256 TeamDaiRate;
+        uint256 LiquidityDefoRate;
+        uint256 LiquidityDaiRate;
         Counters.Counter _tokenIdCounter;
         IERC20 PaymentToken;
         IERC20 DefoToken;
@@ -71,6 +73,7 @@ library LibMeta {
         address Team;
         address Donation;
         address Vault;
+        address Liquidity;
         /// @dev if it's 0 users can create unlimited nodes
         uint256 MaxGems;
         /// @dev sale lock
