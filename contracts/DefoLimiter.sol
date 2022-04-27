@@ -32,19 +32,14 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
     uint256 public timeframeExpiration = 1 days; 
 
     // Max percentage of total supply a wallet can sell
-    uint256 public sellLimitVsTotalSupply = 10; 
-    
-    uint256 constant DECIMAL_MULTIPLIER = 10 ** 18;
-    address public taxCollector;
+    uint256 public sellLimitVsTotalSupply = 10;
 
     function initialize( 
-        address _taxCollector, 
         address _defoNodeAddress,
         address _diamondAddress
     ) public initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         defoNode = _defoNodeAddress;
-        taxCollector = _taxCollector;
         diamondAddress = _diamondAddress;
     }
 
@@ -128,8 +123,6 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
                     ((DefoToken.totalSupply() * sellLimitVsTotalSupply) / 10000), 
                     "Cannot sell more then 0.1% of DEFO total supply per 24h"
                 );
-    
-                DefoToken.transferFrom(from, taxCollector, amount);
 
                 emit UserLimiterSell(
                     from,
@@ -138,18 +131,9 @@ contract DefoLimiter is AccessControlUpgradeable, OwnableUpgradeable{
             }
             return true;
     }
-    function isExcludedFromObs(address _account) public view returns(bool) {
-        return Whitelist[_account] || 
-        DefoLPManager.isRouter(_account) ||
-        DefoLPManager.isPair(_account);
-    }
 
     function setMaxPercentage(uint256 _newPercentage) external onlyRole(DEFAULT_ADMIN_ROLE) {
         sellLimitVsTotalSupply = _newPercentage;
-    }
-
-    function setTaxCollector (address newTaxCollector) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        taxCollector = newTaxCollector;
     }
 
     function setTokenAddress (address newTokenAddress) external onlyRole(DEFAULT_ADMIN_ROLE) {

@@ -53,7 +53,6 @@ describe("DefoLimiter", function () {
     await limiter.deployed();
     limiter.initialize(
       node.address,
-      acc2.address,
       mockgemhybridfacet.address
     )
 
