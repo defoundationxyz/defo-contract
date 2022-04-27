@@ -7,6 +7,13 @@ async function main() {
   await defolimiter.deployed();
 
   console.log("DefoLimiter deployed to:", defolimiter.address);
+
+  const Redeem = await hre.ethers.getContractFactory("Redeem");
+  const redeem = await Redeem.deploy("Hello, Hardhat!");
+
+  await redeem.deployed();
+
+  console.log("Redeem deployed to:", redeem.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
