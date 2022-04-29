@@ -34,11 +34,11 @@ describe("Price Testing", function(){
 
     //deploying dai contract
     const MockDai = await hre.ethers.getContractFactory("MockDai");
-    dai = await MockDai.deploy(daiOwner.address);
+    dai = await MockDai.connect(defoOwner).deploy();
     
     //deploying Wavax contract
     const WAVAX = await hre.ethers.getContractFactory("MockDai");
-    wAVAX = await WAVAX.deploy(wAVAXOwner.address);
+    wAVAX = await WAVAX.deploy();
 
     //deploying Lp manager
     const LpManager = await hre.ethers.getContractFactory("LpManager");
@@ -46,7 +46,7 @@ describe("Price Testing", function(){
     const bufferThreshold = ethers.utils.parseEther("200");
     lpManager = await LpManager.connect(lpManagerOwner).deploy(routerAddress, [defo.address, dai.address] , bufferThreshold);
     defoTtAddress = await lpManager.getPair();
-   
+     console.log("token0 add: ", await lpManager.token0() )
     //set setLiquidityPoolManager with Lp manager address
     await defo.setLiquidityPoolManager(lpManager.address);
     const lpManagerViaDefo = await defo.lpPoolManager();
@@ -61,9 +61,9 @@ describe("Price Testing", function(){
     await defo.connect(defoOwner).approve(routerAddress, daiApproveAmount);
 
     //transfering Dai
-    await dai.connect(daiOwner).transfer(defoOwner.address, daiApproveAmount);
-    const accOneBalanceDai = ethers.utils.formatUnits (await dai.balanceOf(defoOwner.address), 18);
-    expect (accOneBalanceDai.toString()).to.equal(ethers.utils.formatUnits (daiApproveAmount, 18).toString()).to.ok;
+    // await dai.connect(defoOwner).transfer(defoOwner.address, daiApproveAmount);
+    // const accOneBalanceDai = ethers.utils.formatUnits (await dai.balanceOf(defoOwner.address), 18);
+    // expect (accOneBalanceDai.toString()).to.equal(ethers.utils.formatUnits (daiApproveAmount, 18).toString()).to.ok;
     await dai.connect(defoOwner).approve(routerAddress, daiApproveAmount);
     
     //adding liquidity
@@ -74,6 +74,8 @@ describe("Price Testing", function(){
         minimumToken, minimumToken,
     defoOwner.address, "1649910829447"// update this with current epoch
     )
+
+  
     console.log("LP balance: ", ethers.utils.formatUnits(await lpManager.getSupply(), 18));
     // console.log("defo balance of owner:", await defo.balanceOf(lpManager.address));
     // console.log("dai balance of owner:", await dai.balanceOf(lpManager.address));
@@ -82,7 +84,7 @@ describe("Price Testing", function(){
         ['Defo token deployed at:', defo.address],
         ["Defo owner is: ", defoOwner.address],
         ["dai deployed at: " , dai.address],
-        ["dai Owner: " , daiOwner.address ],
+        ["dai Owner: " , defoOwner.address ],
         ["factory address: ", factoryAddress],
         ["LpManager deployed at:", lpManager.address],
         ["Lp address: ", defoTtAddress],
@@ -177,7 +179,7 @@ describe("Price Testing", function(){
       const daiApproveAmount = ethers.utils.parseEther("10000");
       const txDefoAmount = ethers.utils.parseEther("1000"); //25000 tokens
       const txDaiAmount = ethers.utils.parseEther("5000");
-      await dai.connect(daiOwner).transfer(lpManager.address, txDaiAmount);
+      await dai.connect(defoOwner).transfer(lpManager.address, txDaiAmount);
       const lpDefoBal = await defo.balanceOf(lpManager.address);
       await dai.connect(lpManagerOwner).approve(routerAddress, lpDefoBal);
       const lpDaiBal = await dai.balanceOf(lpManager.address);

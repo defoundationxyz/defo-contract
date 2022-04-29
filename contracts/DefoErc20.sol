@@ -14,12 +14,6 @@ contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplemen
     uint256 public _totalSupply = 200000*1e18;
     uint256 MAXSELLLIMIT = _totalSupply / 1000;
 
-    struct LastSell{
-        uint256 time;
-        uint256 amount;
-    }
-
-    mapping(address => LastSell) public lastSells;
     
     constructor() ERC20("Defo Token","DEFO"){
         _mint(owner(), _totalSupply);

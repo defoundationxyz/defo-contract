@@ -1,6 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
-require("hardhat-gas-reporter");
-require("solidity-coverage");
+require('dotenv').config();
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -18,13 +18,18 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    solidity: {
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 1
-      }
+  networks:{
+    hardhat: {
+      chainId: 4,
+      gasPrice: 225000000000,
+      forking: {
+          url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
+          enabled: true,
+         //blockNumber: 10579971,
+      },
     },
+  },
+  solidity: {
     compilers: [
       {
         version: "0.5.0",
@@ -55,14 +60,4 @@ module.exports = {
       },
     ],
   },
-  networks: {
-    ganache: {
-      url: "HTTP://127.0.0.1:7545",
-      accounts: ["88ea8fa1a68d36da48826e517a098fb95e013c4c0960a9017e618cbc6ef22ccd"]
-    },
-    rinkeby: {
-      url: "https://rinkeby.infura.io/v3/459646cc0c034ae097198e21693de9e5",
-      accounts: [process.env.RINKEBY]
-    }
-  }
 };

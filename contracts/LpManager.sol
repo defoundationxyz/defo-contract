@@ -205,13 +205,13 @@ contract LpManager is Ownable, OwnerRecovery {
 
     //@notice Below functions are to test the price action
     function getReserver0() external view returns (uint112 reserve0) {
-        uint256 reserve1;
+        uint112 reserve1;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
 
     function getReserver1() external view returns (uint112 reserve1) {
-        uint256 reserve0;
+        uint112 reserve0;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
@@ -219,5 +219,13 @@ contract LpManager is Ownable, OwnerRecovery {
     function checkBalance() external view returns (uint256) {
         uint256 balance = pair.balanceOf(msg.sender);
         return balance;
+    }
+
+    function token0() external view returns (address) {
+        return pair.token0();
+    }
+
+    function token1() external view returns (address) {
+        return pair.token1();
     }
 }
