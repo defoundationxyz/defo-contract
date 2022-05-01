@@ -25,4 +25,15 @@ contract GettersFacet {
         ];
         return gemTypeMetadata;
     }
+
+    function getTotalCharity(address _user) external view returns (uint256) {
+        LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
+        LibUser.UserData storage user = ds.GetUserData[_user];
+        return user.charityContribution;
+    }
+
+    function getMeta() external view returns (LibMeta.DiamondStorage memory) {
+        LibMeta.DiamondStorage storage ds = LibMeta.diamondStorage();
+        return ds;
+    }
 }
