@@ -63,11 +63,11 @@ contract LpManager is Ownable, OwnerRecovery {
         uint256 tokenBal;
         uint256 defoBal = leftSide.balanceOf(address(this));
         uint256 daiBal = rightSide.balanceOf(address(this));
-        (uint256 token0, uint256 token1, uint256 time) = pair.getReserves();
+        (uint256 tokenA, uint256 tokenB, uint256 time) = pair.getReserves();
         uint256 bufferAmount = bufferThreshold;
         require(defoBal >= bufferAmount, "INSUFFICENT_DEFO_BAL");
         unchecked {
-            tokenBal = token1 / token0;
+            tokenBal = tokenB / tokenA;
             uint256 bufferT = bufferAmount * tokenBal;
             require(daiBal >= bufferT, "INSUFFICENT_DAI_BAL");
         }
@@ -184,6 +184,10 @@ contract LpManager is Ownable, OwnerRecovery {
         return rightSide.balanceOf(address(this));
     }
 
+    function isLiquidityAdded() external view returns (bool) {
+        return pairLiquidityTotalSupply > pair.totalSupply();
+    }
+
     /*@notice Should be TraderJoe's router
     /*These function are mainly for testing purposes
     */
@@ -197,10 +201,6 @@ contract LpManager is Ownable, OwnerRecovery {
 
     function setPairAllowance(address _spender, uint256 _amount) public {
         pair.approve(_spender, _amount);
-    }
-
-    function isLiquidityAdded() external view returns (bool) {
-        return pairLiquidityTotalSupply > pair.totalSupply();
     }
 
     //@notice Below functions are to test the price action
