@@ -79,10 +79,9 @@ async function deployDiamond() {
   //deploying lpManager contract.
   const LPManager = await hre.ethers.getContractFactory("LpManager");
   const bufferThreshold= "1000000000000000000000";
-  const lpManager = await LPManager.connect(owner).deploy(routerAddress,[defoaddy, daiAddress], bufferThreshold);
+  const lpManager = await LPManager.deploy(routerAddress,[defoaddy, daiAddress], bufferThreshold);
   console.log("LpManager deployed: ", lpManager.address);
   return diamond.address
-
 
 }
 
@@ -98,4 +97,5 @@ if (require.main === module) {
     })
 }
 
+deployDiamond()
 exports.deployDiamond = deployDiamond

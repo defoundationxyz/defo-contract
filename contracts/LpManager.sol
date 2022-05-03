@@ -63,11 +63,11 @@ contract LpManager is Ownable, OwnerRecovery {
         uint256 tokenBal;
         uint256 defoBal = leftSide.balanceOf(address(this));
         uint256 daiBal = rightSide.balanceOf(address(this));
-        (uint256 token0, uint256 token1, uint256 time) = pair.getReserves();
+        (uint256 tokenA, uint256 tokenB, uint256 time) = pair.getReserves();
         uint256 bufferAmount = bufferThreshold;
         require(defoBal >= bufferAmount, "INSUFFICENT_DEFO_BAL");
         unchecked {
-            tokenBal = token1 / token0;
+            tokenBal = tokenB / tokenA;
             uint256 bufferT = bufferAmount * tokenBal;
             require(daiBal >= bufferT, "INSUFFICENT_DAI_BAL");
         }
@@ -184,6 +184,10 @@ contract LpManager is Ownable, OwnerRecovery {
         return rightSide.balanceOf(address(this));
     }
 
+    function isLiquidityAdded() external view returns (bool) {
+        return pairLiquidityTotalSupply > pair.totalSupply();
+    }
+
     /*@notice Should be TraderJoe's router
     /*These function are mainly for testing purposes
     */
@@ -199,19 +203,15 @@ contract LpManager is Ownable, OwnerRecovery {
         pair.approve(_spender, _amount);
     }
 
-    function isLiquidityAdded() external view returns (bool) {
-        return pairLiquidityTotalSupply > pair.totalSupply();
-    }
-
     //@notice Below functions are to test the price action
     function getReserver0() external view returns (uint112 reserve0) {
-        uint256 reserve1;
+        uint112 reserve1;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
 
     function getReserver1() external view returns (uint112 reserve1) {
-        uint256 reserve0;
+        uint112 reserve0;
         uint256 time;
         (reserve0, reserve1, time) = pair.getReserves();
     }
@@ -219,5 +219,13 @@ contract LpManager is Ownable, OwnerRecovery {
     function checkBalance() external view returns (uint256) {
         uint256 balance = pair.balanceOf(msg.sender);
         return balance;
+    }
+
+    function token0() external view returns (address) {
+        return pair.token0();
+    }
+
+    function token1() external view returns (address) {
+        return pair.token1();
     }
 }
