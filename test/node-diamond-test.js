@@ -91,7 +91,9 @@ describe("Node Tests", function () {
     expect(await Token.connect(addr1).approve(diamondAddress,ethers.utils.parseEther( "100000000000000000000000"))).ok;
     expect(await DAI.connect(addr1).approve(diamondAddress, ethers.utils.parseEther( "100000000000000000000000"))).ok;
     await DAI.mint(addr1.address,ethers.utils.parseEther( "10000000"));
-    expect(await OwnerFacet.setAddressAndDistTeam(owner.address , 75 , 75)).to.ok;    
+    expect(await OwnerFacet.setAddressAndDistTeam(owner.address, 75, 75)).to.ok;    
+    expect(await OwnerFacet.setAddressAndDistLiquidity(owner.address ,0 , 0)).to.ok;    
+
     expect(await OwnerFacet.setRewardTax(["500", "300", "100", "0"])).to.ok;
     expect(await OwnerFacet.setGemSettings("0", saphireGem)).to.ok;
     expect(await OwnerFacet.setGemSettings("1", rubyGem)).to.ok;

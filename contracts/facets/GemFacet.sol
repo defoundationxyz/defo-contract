@@ -108,6 +108,7 @@ contract GemFacet {
         gem.GemType = _type;
         gem.LastReward = uint32(block.timestamp);
         gem.LastMaintained = uint32(block.timestamp);
+        gem.MintTime = uint32(block.timestamp);
         ds.GemOf[tokenId] = gem;
         return tokenId;
     }
@@ -363,6 +364,40 @@ contract GemFacet {
         onlyGemOwner(_tokenid)
     {
         _maintenance(_tokenid, _days);
+    }
+
+    function BatchMaintenance(uint256[] calldata _tokenids) external {
+        require(
+            LibERC721._balanceOf(msg.sender) > 0,
+            "User doesn't have any gems"
+        );
+        for (uint256 index = 0; index < _tokenids.length; index++) {
+            require(
+                LibERC721._ownerOf(_tokenids[index]) == LibMeta.msgSender(),
+                "You don't own this gem"
+            );
+            _maintenance(_tokenids[index], 0);
+        }
+    }
+
+    function BatchClaimRewards(uint256[] calldata _tokenids) external {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        require(
+            LibERC721._balanceOf(msg.sender) > 0,
+            "User doesn't have any gems"
+        );
+        for (uint256 index = 0; index < _tokenids.length; index++) {
+            require(
+                LibERC721._ownerOf(_tokenids[index]) == LibMeta.msgSender(),
+                "You don't own this gem"
+            );
+            LibGem.Gem memory gem = ds.GemOf[_tokenids[index]];
+            uint256 rewardPoints = block.timestamp - gem.LastReward;
+            require(rewardPoints > metads.RewardTime, "Too soon");
+
+            _sendRewardTokens(_tokenids[index], 0);
+        }
     }
 
     /*

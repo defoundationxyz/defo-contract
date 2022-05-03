@@ -26,6 +26,52 @@ contract VaultStakingFacet {
         _;
     }
 
+    function batchAddTovault(
+        uint256[] calldata _tokenIds,
+        uint256[] calldata _amounts
+    ) external {
+        LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            require(
+                LibERC721._ownerOf(_tokenIds[index]) == LibERC721.msgSender(),
+                "You don't own this gem"
+            );
+            require(LibGem._isActive(_tokenIds[index]), "Gem is deactivated");
+            uint256 _pendingRewards = LibGem._taperCalculate(_tokenIds[index]);
+            require(
+                _amounts[index] >= _pendingRewards,
+                "Not enough pending rewards"
+            );
+            LibGem.Gem storage gem = dsgem.GemOf[_tokenIds[index]];
+
+            uint256 charityAmount = (metads.CharityRate * _amounts[index]) /
+                1000;
+            _amounts[index] = _amounts[index] - charityAmount;
+
+            metads.DefoToken.transferFrom(
+                metads.RewardPool,
+                metads.Donation,
+                charityAmount
+            );
+            user.charityContribution = user.charityContribution + charityAmount;
+            gem.claimedReward = gem.claimedReward + _amounts[index];
+            ds.StakedAmount[LibMeta.msgSender()] = _amounts[index];
+            metads.DefoToken.transferFrom(
+                LibMeta.msgSender(),
+                metads.Vault,
+                _amounts[index]
+            );
+            ds.StakedFrom[_tokenIds[index]] =
+                ds.StakedFrom[_tokenIds[index]] +
+                _amounts[index];
+        }
+    }
+
     function addToVault(uint256 _tokenId, uint256 amount)
         public
         onlyGemOwner(_tokenId)
