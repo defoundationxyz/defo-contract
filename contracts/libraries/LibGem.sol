@@ -45,7 +45,7 @@ library LibGem {
     /// always calculates rewards from 0
     function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenId];
+        LibGem.Gem storage gem = ds.GemOf[_tokenId];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[
             gem.GemType
         ];
@@ -62,7 +62,7 @@ library LibGem {
             /// TODO : check for overflows
             return actualReward + rewardCount - gem.claimedReward;
         }
-        return _checkRawReward(_tokenId) - gem.claimedReward; // if less than roi don't taper
+        return _checkRawReward(_tokenId); // if less than roi don't taper
     }
 
     function _checkRawReward(uint256 _tokenid)
