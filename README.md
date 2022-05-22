@@ -16,6 +16,10 @@ npx hardhat help
 
 Following are the Deployed contracts on Fuji Testnet:
 
+Diamond: 0xD4BbEE565C8EeDB54eD9d90c5205c92Eb684539C
+deployer: 0x83c4c6F0Ac462481786b8325f1e291c8f456CB00
+team: 0x120406d37A85C329b71B7098Da752507e0e7BF6A
+
 ////Tokens
 
 Defo token:  0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae

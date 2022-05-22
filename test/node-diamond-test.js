@@ -19,7 +19,7 @@ describe("Node Tests", function () {
   let ERC721EnumerableFacet
   let GemFacet
   let VaultStakingFacet
-  let GettersFacet
+  let GemGettersFacet
   let OwnerFacet
   let NodeLimiterFacet
   let tx
@@ -43,7 +43,7 @@ describe("Node Tests", function () {
         ERC721EnumerableFacet = await ethers.getContractAt('ERC721EnumerableFacet', diamondAddress);
         GemFacet = await ethers.getContractAt('GemFacet', diamondAddress);
         VaultStakingFacet = await ethers.getContractAt('VaultStakingFacet', diamondAddress);
-      GettersFacet = await ethers.getContractAt('GettersFacet', diamondAddress);
+      GemGettersFacet = await ethers.getContractAt('GemGettersFacet', diamondAddress);
       NodeLimiterFacet = await ethers.getContractAt('NodeLimiterFacet', diamondAddress);
     [owner, addr1, addr2, addr3, ...addrs] = await ethers.getSigners();
 
@@ -331,8 +331,8 @@ describe("Node Tests", function () {
     });
   
     it("Test gemGetter", async function () {
-        expect(await GettersFacet.GemOf("0")).to.ok;
-        expect(await GettersFacet.GetGemTypeMetadata("0")).to.ok;
+        expect(await GemGettersFacet.GemOf("0")).to.ok;
+        expect(await GemGettersFacet.GetGemTypeMetadata("0")).to.ok;
     });
   
 

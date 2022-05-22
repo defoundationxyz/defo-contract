@@ -3,13 +3,13 @@ require('dotenv').config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
+// task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
+//   const accounts = await hre.ethers.getSigners();
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
+//   for (const account of accounts) {
+//     console.log(account.address);
+//   }
+// });
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
@@ -18,16 +18,49 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  defaultNetwork: "hardhat",
   networks:{
     hardhat: {
       chainId: 4,
       gasPrice: 225000000000,
       forking: {
           url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
+          // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
+          accounts: [
+            process.env.DEPLOYER_PRIVATE_KEY,
+            process.env.TEAM_WALLET_PRIVATE_KEY
+          ],
           enabled: true,
+          saveDeployments: true,
          //blockNumber: 10579971,
       },
     },
+    fuji: {
+      chainId: 43113,
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts: [
+        process.env.DEPLOYER_PRIVATE_KEY,
+        process.env.TEAM_WALLET_PRIVATE_KEY
+      ]
+    },
+    avalancheTest: {
+      url: 'https://api.avax-test.network/ext/bc/C/rpc',
+      gasPrice: 225000000000,
+      chainId: 43113,
+      accounts: [
+        process.env.DEPLOYER_PRIVATE_KEY,
+        process.env.TEAM_WALLET_PRIVATE_KEY
+      ]
+    },
+    rinkeby: {
+      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
+      accounts: [
+        process.env.DEPLOYER_PRIVATE_KEY,
+        process.env.TEAM_WALLET_PRIVATE_KEY
+      ],
+      saveDeployments: true,
+      tags: ["rinkeby-test-network"]
+    }
   },
   solidity: {
     compilers: [

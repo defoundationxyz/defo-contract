@@ -28,7 +28,7 @@ contract VaultStakingFacet {
 
     function batchAddTovault(
         uint256[] calldata _tokenIds,
-        uint256[] calldata _amounts
+        uint256[] memory _amounts
     ) external {
         LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();

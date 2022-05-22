@@ -38,10 +38,9 @@ async function deployDiamond() {
     'ERC721EnumerableFacet',
     'GemFacet',
     'VaultStakingFacet',
-    'GettersFacet',
+    'GemGettersFacet',
     'OwnerFacet',
     'NodeLimiterFacet'
-
   ]
   const cut = []
   for (const FacetName of FacetNames) {
@@ -82,7 +81,6 @@ async function deployDiamond() {
   const lpManager = await LPManager.deploy(routerAddress,[defoaddy, daiAddress], bufferThreshold);
   console.log("LpManager deployed: ", lpManager.address);
   return diamond.address
-
 }
 
 
