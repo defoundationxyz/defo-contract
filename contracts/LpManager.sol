@@ -26,7 +26,6 @@ contract LpManager is Ownable, OwnerRecovery {
 
     uint256 public bufferThreshold;
 
-    bool public liquifyEnabled = false;
     uint256 public swapTokensToLiquidityThreshold;
 
     //For testing purpose
@@ -55,7 +54,6 @@ contract LpManager is Ownable, OwnerRecovery {
         rightSide = IERC20(path[1]);
         pairLiquidityTotalSupply = pair.totalSupply();
         setBufferThreshHold(_bufferThreshold);
-        shouldLiquify(true);
     }
 
     // Buffer system
@@ -141,11 +139,6 @@ contract LpManager is Ownable, OwnerRecovery {
         rightSide.safeApprove(address(router), (active ? MAX_UINT256 : 0));
     }
 
-    function shouldLiquify(bool _liquifyEnabled) public onlyOwner {
-        liquifyEnabled = _liquifyEnabled;
-        setAllowance(_liquifyEnabled);
-    }
-
     function setBufferThreshHold(uint256 _threshHold) public onlyOwner {
         require(_threshHold > 0, "MUST_BE_GREATER_THAN_ZERO");
         bufferThreshold = _threshHold;
@@ -195,37 +188,7 @@ contract LpManager is Ownable, OwnerRecovery {
         return _router == address(router);
     }
 
-    function getSupply() external view returns (uint256) {
-        return pair.totalSupply();
-    }
-
     function setPairAllowance(address _spender, uint256 _amount) public {
         pair.approve(_spender, _amount);
-    }
-
-    //@notice Below functions are to test the price action
-    function getReserver0() external view returns (uint112 reserve0) {
-        uint112 reserve1;
-        uint256 time;
-        (reserve0, reserve1, time) = pair.getReserves();
-    }
-
-    function getReserver1() external view returns (uint112 reserve1) {
-        uint112 reserve0;
-        uint256 time;
-        (reserve0, reserve1, time) = pair.getReserves();
-    }
-
-    function checkBalance() external view returns (uint256) {
-        uint256 balance = pair.balanceOf(msg.sender);
-        return balance;
-    }
-
-    function token0() external view returns (address) {
-        return pair.token0();
-    }
-
-    function token1() external view returns (address) {
-        return pair.token1();
     }
 }

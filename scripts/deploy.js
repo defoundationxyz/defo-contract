@@ -1,11 +1,15 @@
+
 /* global ethers */
 /* eslint prefer-const: "off" */
+const hre = require("hardhat");
+const { ethers } = require("hardhat");
 
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
 
 async function deployDiamond() {
-  const accounts = await ethers.getSigners()
-  const contractOwner = accounts[0]
+  // const accounts = await ethers.getSigners()
+  // const contractOwner = accounts[0]
+  const owner = "0x09D4198B9c75442f8C2Fae18EB5925f310003296"; 
 
   // deploy DiamondCutFacet
   const DiamondCutFacet = await ethers.getContractFactory('DiamondCutFacet')
@@ -15,7 +19,7 @@ async function deployDiamond() {
 
   // deploy Diamond
   const Diamond = await ethers.getContractFactory('Diamond')
-  const diamond = await Diamond.deploy(contractOwner.address, diamondCutFacet.address)
+  const diamond = await Diamond.deploy(owner, diamondCutFacet.address)
   await diamond.deployed()
   console.log('Diamond deployed:', diamond.address)
 
@@ -72,9 +76,9 @@ async function deployDiamond() {
   }
   console.log('Completed diamond cut')
   
-  let defoaddy = "0x8d352F4c8643DB1d7f7FD6F2b508998EA6cb4388";
-  let daiAddress = "0xd586e7f844cea2f87f50152665bcbc2c279d8d70";
-  const routerAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+  let defoaddy = "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae";
+  let daiAddress = "0x85a2ff500E0eD9fA93719071EA46A86198181581";
+  const routerAddress = "0x318067c2d4D001dC4DBA6F914421DB4912Bf5905"
     
   //deploying lpManager contract.
   const LPManager = await hre.ethers.getContractFactory("LpManager");
@@ -99,3 +103,46 @@ if (require.main === module) {
 
 deployDiamond()
 exports.deployDiamond = deployDiamond
+
+// // When running the script with `npx hardhat run <script>` you'll find the Hardhat
+// // Runtime Environment's members available in the global scope.
+// const hre = require("hardhat");
+// const { ethers } = require("hardhat");
+
+
+// async function main() {
+
+//   //const lpOwner = await ethers.getSigners();
+
+//   let defoaddy = "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae";
+//   let daiAddress = "0x85a2ff500E0eD9fA93719071EA46A86198181581";
+//   const routerAddress = "0x318067c2d4D001dC4DBA6F914421DB4912Bf5905"
+//   //LpManager =  0x99818578400254b391C9c6EaCDe7882865D6E08B
+
+//   //DEPLOYING DEFO TOKEN
+//   // const Defo = await hre.ethers.getContractFactory("Defo");
+//   // const defo = await Defo.deploy();
+
+//   // //DEPLOYING DEFO TOKEN
+//   // const MockDai = await hre.ethers.getContractFactory("MockDai");
+//   // const mDai = await MockDai.deploy();
+
+//   // console.log("Defo token is deployed at: ", defo.address);
+//   // console.log("mDai token is deployed at: ", mDai.address);
+    
+//   //deploying lpManager contract.
+//   const LPManager = await hre.ethers.getContractFactory("LpManager");
+//   const bufferThreshold= "1000000000000000000000";//1000tokens
+//   const lpManager = await LPManager.deploy(routerAddress,[defoaddy, daiAddress], bufferThreshold);
+//   console.log("LpManager deployed: ", lpManager.address);
+
+// }
+
+// // We recommend this pattern to be able to use async/await everywhere
+// // and properly handle errors.
+// main()
+//   .then(() => process.exit(0))
+//   .catch((error) => {
+//     console.error(error);
+//     process.exit(1);
+//   });
