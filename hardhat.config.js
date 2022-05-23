@@ -17,22 +17,26 @@ require('dotenv').config();
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
+
+const accounts = [
+  { privateKey: process.env.DEPLOYER_PRIVATE_KEY, balance: "10000000000000000000000" },
+  { privateKey: process.env.TEAM_WALLET_PRIVATE_KEY, balance: "20000000000000000000000" },
+];
+
 module.exports = {
   defaultNetwork: "hardhat",
-  networks:{
+  networks: {
     hardhat: {
-      chainId: 4,
+      chainId: 43113,
       gasPrice: 225000000000,
+      accounts,
       forking: {
-          url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
-          // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
-          accounts: [
-            process.env.DEPLOYER_PRIVATE_KEY,
-            process.env.TEAM_WALLET_PRIVATE_KEY
-          ],
-          enabled: true,
-          saveDeployments: true,
-         //blockNumber: 10579971,
+        // url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
+        // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
+        url: "https://api.avax-test.network/ext/bc/C/rpc",
+        enabled: true,
+        saveDeployments: true,
+        //blockNumber: 10579971,
       },
     },
     fuji: {
