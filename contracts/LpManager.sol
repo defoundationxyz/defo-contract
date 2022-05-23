@@ -14,11 +14,6 @@ import "hardhat/console.sol";
 contract LpManager is Ownable, OwnerRecovery {
     using SafeERC20 for IERC20;
 
-    event SwapAndLiquify(
-        uint256 indexed half,
-        uint256 indexed initialBalance,
-        uint256 indexed newRightBalance
-    );
     event BufferLpSupply(
         uint256 indexed amount,
         uint256 indexed newRightBalance
@@ -179,16 +174,5 @@ contract LpManager is Ownable, OwnerRecovery {
 
     function isLiquidityAdded() external view returns (bool) {
         return pairLiquidityTotalSupply > pair.totalSupply();
-    }
-
-    /*@notice Should be TraderJoe's router
-    /*These function are mainly for testing purposes
-    */
-    function isRouter(address _router) public view returns (bool) {
-        return _router == address(router);
-    }
-
-    function setPairAllowance(address _spender, uint256 _amount) public {
-        pair.approve(_spender, _amount);
     }
 }

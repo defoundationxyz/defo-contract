@@ -11,7 +11,7 @@ import "hardhat/console.sol";
 //Sole purpose of testing lp manager
 contract Defo is ERC20, ERC20Burnable, Ownable, OwnerRecovery, LpManagerImplementationPoint{
     mapping(address => uint256) private _balances;
-    uint256 public _totalSupply = 200000*1e18;
+    uint8 public _totalSupply = 200000*1e18;
     uint256 MAXSELLLIMIT = _totalSupply / 1000;
 
     
