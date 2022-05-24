@@ -21,6 +21,7 @@
     "node-cron": "^3.0.0"
   },
   "scripts": {
-    "fork-fuji": "npx hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc"
+    "fork-fuji": "npx hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc",
+    "localhost-deploy-2": "npx hardhat run --network localhost scripts/deploy-2.js"
   }
 }

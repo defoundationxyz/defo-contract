@@ -30,9 +30,8 @@ library LibMeta {
     function getChainID() internal view returns (uint256 id) {
         assembly {
             id := chainid()
-        }
-    }
-
+        }}
+        
     function msgSender() internal view returns (address sender_) {
         if (msg.sender == address(this)) {
             bytes memory array = msg.data;
@@ -42,13 +41,10 @@ library LibMeta {
                 sender_ := and(
                     mload(add(array, index)),
                     0xffffffffffffffffffffffffffffffffffffffff
-                )
-            }
+                )}
         } else {
             sender_ = msg.sender;
-        }
-    }
-
+        }}
     struct DiamondStorage {
         /// TODO: reorganize variable order
         uint256 MaintenanceDays;

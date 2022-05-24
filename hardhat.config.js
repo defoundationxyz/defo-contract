@@ -27,7 +27,7 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      chainId: 43113,
+      chainId: 1337,
       gasPrice: 225000000000,
       accounts,
       forking: {

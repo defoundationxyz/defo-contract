@@ -1,7 +1,7 @@
 /* global ethers */
 /* eslint prefer-const: "off" */
 
-const { ethers } = require('hardhat')
+const { ethers, network } = require('hardhat')
 const hre = require("hardhat");
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
 const Table = require("cli-table3");
@@ -154,21 +154,42 @@ async function deployDiamond() {
 	await ownerFacetInstance.setGemSettings("1", rubyGem);
 	await ownerFacetInstance.setGemSettings("2", diamondGem);
 
+	// activate limit hours
+	await ownerFacetInstance.setMintLimitHours("7");
+
 	await defoInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
 	await daiInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
 
 	console.log(table.toString());
-
-	const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(1);
-	console.log('gemMeta before ', gemMeta);
 	
-	await mintGem(gemFacetInstance, 1);
+	// const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(1);
+	// console.log('gemMeta before ', gemMeta);
+	
+	for (let i = 0; i < 5; i++) {
+		await mintGem(gemFacetInstance, 0);
+		await mintGem(gemFacetInstance, 1);
+		await mintGem(gemFacetInstance, 2);
+	}
+
+	const isMintAvailable = await gemGetterFacetInstance.isMintAvailableForGem(0);
+	console.log('isMintAvailable------- ', isMintAvailable);
+
+	await network.provider.send('evm_increaseTime', [3600 * 3]);
+	await ethers.provider.send('evm_mine');
+
+	const isMintAvailableAfter = await gemGetterFacetInstance.isMintAvailableForGem(0);
+	console.log('isMintAvailableAfter------- ', isMintAvailableAfter);
+
+	if(!isMintAvailable) { 
+		const timeLeft = await gemGetterFacetInstance.getLeftTimeForGem(0);
+		console.log('Time until mint will be available: ', timeLeft);
+	}
 
 	const getGemIdsTx = await gemFacetInstance.getGemIdsOf(deployer.address);
-	console.log('gemIds: ', getGemIdsTx);
+	console.log('gemIds: ', getGemIdsTx.map(item => item.toString()));
 
-	const gemMetaAfter = await gemGetterFacetInstance.GetGemTypeMetadata(1);
-	console.log('gemMeta after: ', gemMetaAfter);
+	// const gemMetaAfter = await gemGetterFacetInstance.GetGemTypeMetadata(1);
+	// console.log('gemMeta after: ', gemMetaAfter);
 	
 	// assure balances are less
 	console.log(await getDefoDaiBalance(defoInstance, daiInstance, deployer));
@@ -187,7 +208,7 @@ async function mintGem(gemFacetInstance, type) {
 	return await gemFacetInstance.MintGem(type)
 }
 
-if (require.main === module) {
+if (require.main === module) {	
 	deployDiamond()
 		.then(() => process.exit(0))
 		.catch(error => {
