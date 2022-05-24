@@ -286,7 +286,6 @@ contract GemFacet {
 
     /// @notice mint a new gem
     function MintGem(uint8 _type) external SaleLock mintTimeLimit(_type) {
-        console.log("MINTING GEM...........................");
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         if (metads.MaxGems != 0) {

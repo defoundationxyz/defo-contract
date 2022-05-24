@@ -43,35 +43,21 @@ const diamondGem = {
 }
 
 
-
 async function deployDiamond() {
 	const table = new Table({
 		head: ['Contracts', 'contract addresses'],
 		colWidths: ['auto', 'auto']
 	});
 
-	// const provider = ethers.getDefaultProvider();
-
 	const [deployer, team, ...restAccounts] = await ethers.getSigners();
-	const provider = await deployer.provider;
+	const provider = deployer.provider
+	
+	const defoInstance = await ethers.getContractAt(DEFO_ABI, DEFO_TOKEN, deployer);
+	const daiInstance = await ethers.getContractAt(DEFO_ABI, DAI_TOKEN, deployer);
 
 	table.push(
 		["deployer", deployer.address],
-		["team", team.address]
-	)
-	
-	// deploy tokens
-	const MDefoToken = await ethers.getContractFactory("MockDEFO", deployer);
-	const mDefoToken = await MDefoToken.deploy();
-    await mDefoToken.mintTokens(deployer.address, ethers.utils.parseEther("9000000"));
-
-	const MDaiToken = await ethers.getContractFactory("MockDAI", deployer);
-	const mDaiToken = await MDaiToken.deploy();
-    await mDaiToken.mintTokens(deployer.address, ethers.utils.parseEther("8000000"));
-
-	table.push(
-		["Mock DEFO Token", mDefoToken.address],
-		["Mock DAI Token", mDaiToken.address],
+		["team", team.address],
 	)
 
 	// deploy DiamondCutFacet
@@ -129,33 +115,30 @@ async function deployDiamond() {
 	if (!receipt.status) {
 		throw Error(`Diamond upgrade failed: ${tx.hash}`)
 	}
-	console.log('Completed diamond cut')
-
-	// //deploying lpManager contract.
-	// const LPManager = await hre.ethers.getContractFactory("LpManager");
-	// const bufferThreshold = "1000000000000000000000";
-	// const lpManager = await LPManager.deploy(JOE_ROUTER_MAIN, [DEFO_TOKEN, DAI_TOKEN], bufferThreshold);
-	// console.log("LpManager deployed: ", lpManager.address);
-
 
 	const erc721Facet = await ethers.getContractAt("ERC721Facet", diamond.address);
 	const ownerFacetInstance = await ethers.getContractAt('OwnerFacet', diamond.address);
 	const gemGetterFacetInstance = await ethers.getContractAt("GemGettersFacet", diamond.address);
 	const gemFacetInstance = await ethers.getContractAt("GemFacet", diamond.address);
+
+	const avaxBalance = formatBalance(await provider.getBalance(deployer.address)).toString();
+	const deployerDefoBalance = formatBalance(await defoInstance.balanceOf(deployer.address)).toString();
+	const deployerDaiBalance = formatBalance(await daiInstance.balanceOf(deployer.address)).toString();
 	
-	const avaxBalance = formatBalance(await provider.getBalance(deployer.address));
-	table.push(["Deployer AVAX balance: ", avaxBalance]);
-
-	const deployerDefoBalance = formatBalance(await mDefoToken.balanceOf(deployer.address));
-	table.push(["Deployer DEFO balance: ", deployerDefoBalance]);
-
+	table.push(
+		["Deployer AVAX balance: ", avaxBalance],
+		["Deployer DEFO balance: ", deployerDefoBalance],
+		["Deployer DAI balance: ", deployerDaiBalance]
+	);
 
 	// TODO: update with valid addresses
 	// initialize diamondStorage
 	await ownerFacetInstance.initialize(
 		deployer.address,
-		mDefoToken.address,
-		mDaiToken.address,
+		DEFO_TOKEN,
+		DAI_TOKEN,
+		// mDefoToken.address,
+		// mDaiToken.address,
 		deployer.address,
 		diamond.address,
 		deployer.address,
@@ -164,31 +147,44 @@ async function deployDiamond() {
 	await erc721Facet.initialize("Defo Node", "DFN");
 
 	await ownerFacetInstance.setAddressAndDistTeam(deployer.address, 75, 75);
-    await ownerFacetInstance.setAddressAndDistLiquidity(deployer.address, 0, 0);
+	await ownerFacetInstance.setAddressAndDistLiquidity(deployer.address, 0, 0);
 
-    await ownerFacetInstance.setRewardTax(["500", "300", "100", "0"]);
-    await ownerFacetInstance.setGemSettings("0", saphireGem);
-    await ownerFacetInstance.setGemSettings("1", rubyGem);
-    await ownerFacetInstance.setGemSettings("2", diamondGem);
-	
-	await mDaiToken.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
-	await mDefoToken.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
+	await ownerFacetInstance.setRewardTax(["500", "300", "100", "0"]);
+	await ownerFacetInstance.setGemSettings("0", saphireGem);
+	await ownerFacetInstance.setGemSettings("1", rubyGem);
+	await ownerFacetInstance.setGemSettings("2", diamondGem);
 
-	// const gemMetaTx = await gemGetterFacetInstance.getMeta();
+	await defoInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
+	await daiInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
+
 	console.log(table.toString());
 
-	// const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(0);
-	// console.log('gemMeta before ', gemMeta);
-
-	const mintGemTx = await gemFacetInstance.MintGem(1);
+	const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(1);
+	console.log('gemMeta before ', gemMeta);
+	
+	await mintGem(gemFacetInstance, 1);
 
 	const getGemIdsTx = await gemFacetInstance.getGemIdsOf(deployer.address);
 	console.log('gemIds: ', getGemIdsTx);
 
 	const gemMetaAfter = await gemGetterFacetInstance.GetGemTypeMetadata(1);
 	console.log('gemMeta after: ', gemMetaAfter);
-
+	
+	// assure balances are less
+	console.log(await getDefoDaiBalance(defoInstance, daiInstance, deployer));
+	
 	return diamond.address
+}
+
+async function getDefoDaiBalance(defoInstance, daiInstance, deployer) {
+	const defoBalance = formatBalance(await defoInstance.balanceOf(deployer.address));
+	const daiBalance = formatBalance(await daiInstance.balanceOf(deployer.address));
+
+	return { DEFO: defoBalance, DAI: daiBalance }
+}
+
+async function mintGem(gemFacetInstance, type) {
+	return await gemFacetInstance.MintGem(type)
 }
 
 if (require.main === module) {

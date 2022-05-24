@@ -14,6 +14,8 @@ node scripts/sample-script.js
 npx hardhat help
 ```
 
+Be sure you create .env file (see .env-example)
+
 Following are the Deployed contracts on Fuji Testnet:
 
 Diamond: 0xD4BbEE565C8EeDB54eD9d90c5205c92Eb684539C

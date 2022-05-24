@@ -34,9 +34,9 @@ module.exports = {
         // url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
         // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
         url: "https://api.avax-test.network/ext/bc/C/rpc",
-        enabled: true,
-        saveDeployments: true,
-        //blockNumber: 10579971,
+        // enabled: true,
+        // saveDeployments: true,
+        // blockNumber: 1057997,
       },
     },
     fuji: {
