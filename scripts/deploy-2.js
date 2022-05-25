@@ -51,7 +51,7 @@ async function deployDiamond() {
 
 	const [deployer, team, ...restAccounts] = await ethers.getSigners();
 	const provider = deployer.provider
-	
+
 	const defoInstance = await ethers.getContractAt(DEFO_ABI, DEFO_TOKEN, deployer);
 	const daiInstance = await ethers.getContractAt(DEFO_ABI, DAI_TOKEN, deployer);
 
@@ -124,7 +124,7 @@ async function deployDiamond() {
 	const avaxBalance = formatBalance(await provider.getBalance(deployer.address)).toString();
 	const deployerDefoBalance = formatBalance(await defoInstance.balanceOf(deployer.address)).toString();
 	const deployerDaiBalance = formatBalance(await daiInstance.balanceOf(deployer.address)).toString();
-	
+
 	table.push(
 		["Deployer AVAX balance: ", avaxBalance],
 		["Deployer DEFO balance: ", deployerDefoBalance],
@@ -157,32 +157,45 @@ async function deployDiamond() {
 	// activate limit hours
 	await ownerFacetInstance.setMintLimitHours("7");
 
-	await defoInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
-	await daiInstance.approve(diamond.address, ethers.utils.parseEther( "100000000000000000000000"));
+	await defoInstance.approve(diamond.address, ethers.utils.parseEther("100000000000000000000000"));
+	await daiInstance.approve(diamond.address, ethers.utils.parseEther("100000000000000000000000"));
 
 	console.log(table.toString());
-	
+
 	// const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(1);
 	// console.log('gemMeta before ', gemMeta);
-	
-	for (let i = 0; i < 5; i++) {
-		await mintGem(gemFacetInstance, 0);
-		await mintGem(gemFacetInstance, 1);
-		await mintGem(gemFacetInstance, 2);
-	}
+
+	// for (let i = 0; i < 5; i++) {
+	// }
+	await mintGem(gemFacetInstance, 0);
+	await mintGem(gemFacetInstance, 0);
+	await mintGem(gemFacetInstance, 0);
+	await mintGem(gemFacetInstance, 0);
+	await mintGem(gemFacetInstance, 0);
+
+
+	const mint1Metadata = await gemGetterFacetInstance.GetGemTypeMetadata(0);
+	// returns MintCount: 3
+
+	console.log('Metadata: ', mint1Metadata);
 
 	const isMintAvailable = await gemGetterFacetInstance.isMintAvailableForGem(0);
 	console.log('isMintAvailable------- ', isMintAvailable);
 
-	await network.provider.send('evm_increaseTime', [3600 * 3]);
-	await ethers.provider.send('evm_mine');
+	// 1 - 3604
+	// 2 - 7205   - 3601
+	// 3 - 10804  - 3599
+	// 4 - 14405  - 3601
+	// 5 - 18004  - 3599
+	// 6 - 21605  - 3601
 
-	const isMintAvailableAfter = await gemGetterFacetInstance.isMintAvailableForGem(0);
-	console.log('isMintAvailableAfter------- ', isMintAvailableAfter);
+	if (!isMintAvailable) {
+		await network.provider.send('evm_increaseTime', [3600 * 1]);
+		await ethers.provider.send('evm_mine');
 
-	if(!isMintAvailable) { 
-		const timeLeft = await gemGetterFacetInstance.getLeftTimeForGem(0);
-		console.log('Time until mint will be available: ', timeLeft);
+		const timeLeft = await gemGetterFacetInstance.getExpiredTimeSinceLock(0);
+		console.log('Expired hours since lock: ', timeLeft);
+		console.log(`hours until mint: `, getHoursFromSecondsInRange(timeLeft));
 	}
 
 	const getGemIdsTx = await gemFacetInstance.getGemIdsOf(deployer.address);
@@ -190,10 +203,10 @@ async function deployDiamond() {
 
 	// const gemMetaAfter = await gemGetterFacetInstance.GetGemTypeMetadata(1);
 	// console.log('gemMeta after: ', gemMetaAfter);
-	
+
 	// assure balances are less
-	console.log(await getDefoDaiBalance(defoInstance, daiInstance, deployer));
-	
+	// console.log(await getDefoDaiBalance(defoInstance, daiInstance, deployer));
+
 	return diamond.address
 }
 
@@ -208,7 +221,18 @@ async function mintGem(gemFacetInstance, type) {
 	return await gemFacetInstance.MintGem(type)
 }
 
-if (require.main === module) {	
+// return the closest amount of hours
+function getHoursFromSecondsInRange(number) {
+	const seconds = Math.round(number / 100) * 100;
+	const hours = Math.floor(seconds / 3600);
+
+	return hours
+	// console.log(`seconds: ${seconds}`);
+	// console.log(`hours: ${hours}`);
+}
+
+
+if (require.main === module) {
 	deployDiamond()
 		.then(() => process.exit(0))
 		.catch(error => {

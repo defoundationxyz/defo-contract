@@ -37,7 +37,7 @@ contract GemGettersFacet {
         return ds;
     }
 
-    function getLeftTimeForGem(uint8 _gemType) external view returns(uint) { 
+    function getExpiredTimeSinceLock(uint8 _gemType) external view returns(uint) { 
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
 
