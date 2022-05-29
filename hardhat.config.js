@@ -20,7 +20,11 @@ require('dotenv').config();
 
 const accounts = [
   { privateKey: process.env.DEPLOYER_PRIVATE_KEY, balance: "10000000000000000000000" },
+  { privateKey: process.env.TREASURY_WALLET_PRIVATE_KEY, balance: "20000000000000000000000" },
+  { privateKey: process.env.DONATIONS_WALLET_PRIVATE_KEY, balance: "0" },
   { privateKey: process.env.TEAM_WALLET_PRIVATE_KEY, balance: "20000000000000000000000" },
+  { privateKey: process.env.VAULT_PRIVATE_KEY, balance: "0" },
+  { privateKey: process.env.REWARD_POOL_PRIVATE_KEY, balance: "10000000000000000000000" },
 ];
 
 module.exports = {

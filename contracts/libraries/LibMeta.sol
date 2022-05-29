@@ -46,7 +46,7 @@ library LibMeta {
             sender_ = msg.sender;
         }}
     struct DiamondStorage {
-        /// TODO: reorganize variable order
+        /// TODO: reorganize variable order => this will reflect on the DAPP
         uint256 MaintenanceDays;
         uint256 TreasuryDefoRate;
         uint256 TreasuryDaiRate;

@@ -14,9 +14,12 @@ const JOE_ROUTER_MAIN = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4";
 
 const formatBalance = (balance, decimals = 18) => Number(balance.div(BigNumber.from(10).pow(decimals)));
 
+// (seconds in a day) * count days
+const REWARD_TIME = (3600 * 24) * 7;
+
 const saphireGem = {
 	LastMint: "0",
-	MaintenanceFee: "0",
+	MaintenanceFee: "10",
 	RewardRate: "10",
 	DailyLimit: "5",
 	MintCount: "0",
@@ -25,7 +28,7 @@ const saphireGem = {
 }
 const rubyGem = {
 	LastMint: "0",
-	MaintenanceFee: "0",
+	MaintenanceFee: "50",
 	RewardRate: "10",
 	DailyLimit: "5",
 	MintCount: "0",
@@ -34,7 +37,7 @@ const rubyGem = {
 }
 const diamondGem = {
 	LastMint: "0",
-	MaintenanceFee: "0",
+	MaintenanceFee: "350",
 	RewardRate: "10",
 	DailyLimit: "5",
 	MintCount: "0",
@@ -49,15 +52,23 @@ async function deployDiamond() {
 		colWidths: ['auto', 'auto']
 	});
 
-	const [deployer, team, ...restAccounts] = await ethers.getSigners();
+	const [deployer, treasury, donations, team, vault, rewardPool, ...restAccounts] = await ethers.getSigners();
 	const provider = deployer.provider
 
 	const defoInstance = await ethers.getContractAt(DEFO_ABI, DEFO_TOKEN, deployer);
 	const daiInstance = await ethers.getContractAt(DEFO_ABI, DAI_TOKEN, deployer);
 
+	// send some DEFO to treasury
+	await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
+
+	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
+	
 	table.push(
 		["deployer", deployer.address],
 		["team", team.address],
+		["treasury", treasury.address],
+		["donations", donations.address],
+		["vault", vault.address]
 	)
 
 	// deploy DiamondCutFacet
@@ -120,6 +131,7 @@ async function deployDiamond() {
 	const ownerFacetInstance = await ethers.getContractAt('OwnerFacet', diamond.address);
 	const gemGetterFacetInstance = await ethers.getContractAt("GemGettersFacet", diamond.address);
 	const gemFacetInstance = await ethers.getContractAt("GemFacet", diamond.address);
+	const vaultStakingFacetInstance = await ethers.getContractAt("VaultStakingFacet", diamond.address);
 
 	const avaxBalance = formatBalance(await provider.getBalance(deployer.address)).toString();
 	const deployerDefoBalance = formatBalance(await defoInstance.balanceOf(deployer.address)).toString();
@@ -139,15 +151,18 @@ async function deployDiamond() {
 		DAI_TOKEN,
 		// mDefoToken.address,
 		// mDaiToken.address,
-		deployer.address,
+		treasury.address,
 		diamond.address,
-		deployer.address,
-		deployer.address
+		rewardPool.address,
+		donations.address,
 	)
 	await erc721Facet.initialize("Defo Node", "DFN");
 
-	await ownerFacetInstance.setAddressAndDistTeam(deployer.address, 75, 75);
+	await ownerFacetInstance.setAddressAndDistTeam(team.address, 50, 50);
 	await ownerFacetInstance.setAddressAndDistLiquidity(deployer.address, 0, 0);
+	await ownerFacetInstance.setAddressDonation(donations.address, 5);
+	await ownerFacetInstance.setAddressVault(vault.address);
+	await ownerFacetInstance.setMinRewardTime(REWARD_TIME);
 
 	await ownerFacetInstance.setRewardTax(["500", "300", "100", "0"]);
 	await ownerFacetInstance.setGemSettings("0", saphireGem);
@@ -155,42 +170,35 @@ async function deployDiamond() {
 	await ownerFacetInstance.setGemSettings("2", diamondGem);
 
 	// activate limit hours
-	await ownerFacetInstance.setMintLimitHours("7");
+	await ownerFacetInstance.setMintLimitHours("12");
 
-	await defoInstance.approve(diamond.address, ethers.utils.parseEther("100000000000000000000000"));
-	await daiInstance.approve(diamond.address, ethers.utils.parseEther("100000000000000000000000"));
+	await defoInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.connect(rewardPool).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
 
+	await defoInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await daiInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+
+	await defoInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await daiInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
+
+	// table.push(["treasury balance before mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
+	const GEM_TYPE_1 = 1;
+
+	await mintGem(gemFacetInstance, 0); // 0.75 -> treasury
+	await mintGem(gemFacetInstance, 1);
+	await mintGem(gemFacetInstance, 1); // 7.5
+	await mintGem(gemFacetInstance, 2); // 75 -> treasury
+
+	console.log('BALANCES AFTER MINT');
+	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
+
+	// table.push(["treasury balance after mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
 	console.log(table.toString());
 
-	// const gemMeta = await gemGetterFacetInstance.GetGemTypeMetadata(1);
-	// console.log('gemMeta before ', gemMeta);
-
-	// for (let i = 0; i < 5; i++) {
-	// }
-	await mintGem(gemFacetInstance, 0);
-	await mintGem(gemFacetInstance, 0);
-	await mintGem(gemFacetInstance, 0);
-	await mintGem(gemFacetInstance, 0);
-	await mintGem(gemFacetInstance, 0);
-
-
-	const mint1Metadata = await gemGetterFacetInstance.GetGemTypeMetadata(0);
-	// returns MintCount: 3
-
-	console.log('Metadata: ', mint1Metadata);
 
 	const isMintAvailable = await gemGetterFacetInstance.isMintAvailableForGem(0);
-	console.log('isMintAvailable------- ', isMintAvailable);
-
-	// 1 - 3604
-	// 2 - 7205   - 3601
-	// 3 - 10804  - 3599
-	// 4 - 14405  - 3601
-	// 5 - 18004  - 3599
-	// 6 - 21605  - 3601
-
 	if (!isMintAvailable) {
-		await network.provider.send('evm_increaseTime', [3600 * 1]);
+		await network.provider.send('evm_increaseTime', [3600 * 5]);
 		await ethers.provider.send('evm_mine');
 
 		const timeLeft = await gemGetterFacetInstance.getExpiredTimeSinceLock(0);
@@ -199,13 +207,64 @@ async function deployDiamond() {
 	}
 
 	const getGemIdsTx = await gemFacetInstance.getGemIdsOf(deployer.address);
-	console.log('gemIds: ', getGemIdsTx.map(item => item.toString()));
+	const gemIdsCollection = getGemIdsTx.map(item => +item) 
+	console.log('gemIds: ', gemIdsCollection);
 
-	// const gemMetaAfter = await gemGetterFacetInstance.GetGemTypeMetadata(1);
-	// console.log('gemMeta after: ', gemMetaAfter);
+	// test rewards / increase time
+	const DAYS_AFTER = 80;
+	await network.provider.send("evm_increaseTime", [86400 * DAYS_AFTER])
+	await ethers.provider.send('evm_mine');
+	
+	const checkRewardTx0 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(0));
+	console.log(`reward after ${DAYS_AFTER} days for gem id 0: `, checkRewardTx0);
 
-	// assure balances are less
-	// console.log(await getDefoDaiBalance(defoInstance, daiInstance, deployer));
+	const checkRewardTx1 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(1));
+	console.log(`reward after ${DAYS_AFTER} days for gem id 1: `, checkRewardTx1);
+	
+	const checkRewardTx2 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(2));
+	console.log(`reward after ${DAYS_AFTER} days for gem id 2: `, checkRewardTx2);
+
+	const checkRewardTx3 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(3));
+	console.log(`reward after ${DAYS_AFTER} days for gem id 3: `, checkRewardTx3);
+
+
+	// [8] LastReward
+	// console.log('gem0 before claim: ', await gemGetterFacetInstance.GemOf(0));
+
+	// pay claim fee's and claimRewards for ONE GEM
+	await gemFacetInstance.Maintenance(0, 0);
+	const taxedReward = await gemFacetInstance.checkTaxedReward(0);
+	console.log('taxedReward: ', ethers.utils.formatEther(taxedReward));
+	await gemFacetInstance.ClaimRewards(0);
+
+	const totalCharity = await gemGetterFacetInstance.getTotalCharity(deployer.address);
+	console.log('totalCharity: ', ethers.utils.formatEther(totalCharity));
+
+	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
+
+	// // check if gem eligable for claim
+	// console.log('---------check if gem eligable for claim---------');
+	// await getIsEligableForClaim(gemGetterFacetInstance, provider);
+	// console.log('AFTER 7 days');
+	// await network.provider.send("evm_increaseTime", [86401 * 7]) // increase by 7 days
+	// await ethers.provider.send('evm_mine');
+	// await getIsEligableForClaim(gemGetterFacetInstance, provider);
+
+
+	// BATCH pay fee and claimRewards - be sure treasury has enough funds to pay
+	// await gemFacetInstance.BatchMaintenance(gemIdsCollection);
+	// await gemFacetInstance.BatchClaimRewards(gemIdsCollection);
+
+	// console.log('BALANCES AFTER BATCH');
+	// console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
+
+
+	// console.log('DEFO After Batch -------');
+	// const defoAfterBatch = await defoInstance.balanceOf(deployer.address);
+	// console.log('defoAfterBatch: ', ethers.utils.formatEther(defoAfterBatch));
+
+	// console.log('Treasury After Batch: ', ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address)));
 
 	return diamond.address
 }
@@ -231,6 +290,28 @@ function getHoursFromSecondsInRange(number) {
 	// console.log(`hours: ${hours}`);
 }
 
+async function getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool) { 
+	return { 
+		deployer: ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address)),
+		treasury: ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address)),
+		donations: ethers.utils.formatEther(await defoInstance.balanceOf(donations.address)),
+		team: ethers.utils.formatEther(await defoInstance.balanceOf(team.address)),
+		vault: ethers.utils.formatEther(await defoInstance.balanceOf(vault.address)),
+		rewardPool: ethers.utils.formatEther(await defoInstance.balanceOf(rewardPool.address)),
+	}
+}
+
+async function getIsEligableForClaim(gemGetterFacetInstance, provider) {
+	const gem0 = await gemGetterFacetInstance.GemOf(0);
+	const blockNumber = await provider.getBlockNumber();
+	const timestamp = await (await provider.getBlock(blockNumber)).timestamp
+	const rewardPoints = timestamp - gem0.LastReward; // in seconds - 86 400 => 1 day
+
+	console.log('rewardPoints: ', rewardPoints);
+	// console.log('gem last reward: ', gem0.LastReward);
+	// console.log('timestamp: ', timestamp);
+	console.log('is eligable: ', rewardPoints > REWARD_TIME);
+}
 
 if (require.main === module) {
 	deployDiamond()

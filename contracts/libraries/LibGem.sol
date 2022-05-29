@@ -14,7 +14,7 @@ library LibGem {
     struct Gem {
         uint32 MintTime; // timestamp of the mint time
         uint32 LastReward; // timestamp of last reward claim
-        uint32 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
+        uint256 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         /// @dev i'm not sure if enums are packed as uint8 in here
@@ -60,6 +60,10 @@ library LibGem {
                 rewardCount = (((rewardCount) * ds.taperRate) / 100);
             }
             /// TODO : check for overflows
+            console.log("actualReward: ", actualReward);
+            console.log("rewardCount: ", rewardCount);
+            console.log("gem.claimedReward: ", gem.claimedReward);
+            console.log("result: ", actualReward + rewardCount - gem.claimedReward);
             return actualReward + rewardCount - gem.claimedReward;
         }
         return _checkRawReward(_tokenId) - gem.claimedReward; // if less than roi don't taper
