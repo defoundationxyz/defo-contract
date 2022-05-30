@@ -278,7 +278,33 @@ describe("Node Tests", function () {
         expect(await GemFacet.connect(addr1).ClaimRewards("0")).to.ok;
 
     });
-  
+
+      it.only("Test check tax after reward", async function () {
+
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
+
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 365])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;        
+        /// expect revert 
+        //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2" , "0")).to.ok;
+        expect(await GemFacet.connect(addr1).ClaimRewards("0")).to.ok;
+        expect(await GemFacet.connect(addr1).checkTaxedReward("0")).to.ok;
+        //expect(await GemFacet.connect(addr1).checkTaperedReward("0")).to.ok;
+
+    });
 
       it("Test min claim time", async function () {
 
