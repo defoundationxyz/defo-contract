@@ -135,7 +135,8 @@ contract GemFacet {
         uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
         _rewardDefo = _rewardDefo - charityAmount;
         gem.claimedReward = gem.claimedReward + _rewardDefo;
-
+        console.log("hope is pointless %s", _rewardDefo);
+        console.log("hope is pointless %s", gem.claimedReward);
         metads.DefoToken.transferFrom(
             metads.RewardPool,
             metads.Donation,
@@ -330,7 +331,6 @@ contract GemFacet {
         } else {
             gemType.MintCount = gemType.MintCount + 1;
         }
-        console.log(gemType.MintCount);
     }
 
     function ClaimRewards(uint256 _tokenid)
@@ -509,6 +509,7 @@ contract GemFacet {
         _rewardDefo = _rewardDefo;
 
         uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
+
         _rewardDefo = _rewardDefo - charityAmount;
 
         return _rewardDefo;
