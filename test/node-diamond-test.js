@@ -279,7 +279,7 @@ describe("Node Tests", function () {
 
     });
 
-      it.only("Test check tax after reward", async function () {
+      it("Test check tax after reward", async function () {
 
         //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
         expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
