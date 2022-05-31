@@ -61,8 +61,8 @@ async function deployDiamond() {
 	// send some DEFO to treasury
 	await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
 
-	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
-	
+	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool));
+
 	table.push(
 		["deployer", deployer.address],
 		["team", team.address],
@@ -190,7 +190,7 @@ async function deployDiamond() {
 	await mintGem(gemFacetInstance, 2); // 75 -> treasury
 
 	console.log('BALANCES AFTER MINT');
-	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
+	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool));
 
 	// table.push(["treasury balance after mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
 	console.log(table.toString());
@@ -207,41 +207,64 @@ async function deployDiamond() {
 	}
 
 	const getGemIdsTx = await gemFacetInstance.getGemIdsOf(deployer.address);
-	const gemIdsCollection = getGemIdsTx.map(item => +item) 
+	const gemIdsCollection = getGemIdsTx.map(item => +item)
 	console.log('gemIds: ', gemIdsCollection);
 
 	// test rewards / increase time
 	const DAYS_AFTER = 80;
 	await network.provider.send("evm_increaseTime", [86400 * DAYS_AFTER])
 	await ethers.provider.send('evm_mine');
-	
+
 	const checkRewardTx0 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(0));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 0: `, checkRewardTx0);
 
 	const checkRewardTx1 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(1));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 1: `, checkRewardTx1);
-	
+
 	const checkRewardTx2 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(2));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 2: `, checkRewardTx2);
 
 	const checkRewardTx3 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(3));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 3: `, checkRewardTx3);
 
+	const percentage = BigNumber.from("50");
+	const number = BigNumber.from("200");
+	let result = percentage.mul(BigNumber.from("100")).div(number);
+	// console.log('result: ', result);
+
+
+	// add to vault
+	const taxedReward = ethers.utils.formatEther(await gemFacetInstance.checkTaxedReward(0));
+	console.log('taxedReward: ', taxedReward);	
+
+	// const percentageAmount = BigNumber.from("20");
+	// const amountToProvideToTheVault = percentageAmount.mul(BigNumber.from("100")).div(taxedReward);
+	// console.log('amountToProvideToTheVault: ', amountToProvideToTheVault);
+
+	const tapperReward = await gemFacetInstance.checkTaperedReward(0);
+	
+	console.log('tapperReward: ', tapperReward);
+
+	await gemFacetInstance.Maintenance(0, 0);
+	await vaultStakingFacetInstance.addToVault(0, tapperReward);
+
+	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	console.log('stakedAmount: ', stakedAmount)
 
 	// [8] LastReward
 	// console.log('gem0 before claim: ', await gemGetterFacetInstance.GemOf(0));
 
-	// pay claim fee's and claimRewards for ONE GEM
-	await gemFacetInstance.Maintenance(0, 0);
-	const taxedReward = await gemFacetInstance.checkTaxedReward(0);
-	console.log('taxedReward: ', ethers.utils.formatEther(taxedReward));
-	await gemFacetInstance.ClaimRewards(0);
+	// // pay claim fee's and claimRewards for ONE GEM
+	// await gemFacetInstance.Maintenance(0, 0);
+	// const taxedReward = await gemFacetInstance.checkTaxedReward(0);
+	// console.log('taxedReward: ', ethers.utils.formatEther(taxedReward));
+	// await gemFacetInstance.ClaimRewards(0);
 
-	const totalCharity = await gemGetterFacetInstance.getTotalCharity(deployer.address);
-	console.log('totalCharity: ', ethers.utils.formatEther(totalCharity));
+	// const totalCharity = await gemGetterFacetInstance.getTotalCharity(deployer.address);
+	// console.log('totalCharity: ', ethers.utils.formatEther(totalCharity));
 
-	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
-	console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
+	// const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	// console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
 
 	// // check if gem eligable for claim
 	// console.log('---------check if gem eligable for claim---------');
@@ -290,8 +313,8 @@ function getHoursFromSecondsInRange(number) {
 	// console.log(`hours: ${hours}`);
 }
 
-async function getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool) { 
-	return { 
+async function getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool) {
+	return {
 		deployer: ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address)),
 		treasury: ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address)),
 		donations: ethers.utils.formatEther(await defoInstance.balanceOf(donations.address)),
