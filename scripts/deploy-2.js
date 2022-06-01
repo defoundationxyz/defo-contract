@@ -59,7 +59,7 @@ async function deployDiamond() {
 	const daiInstance = await ethers.getContractAt(DEFO_ABI, DAI_TOKEN, deployer);
 
 	// send some DEFO to treasury
-	await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
+	// await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
 
 	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool));
 
@@ -227,23 +227,39 @@ async function deployDiamond() {
 	const checkRewardTx3 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(3));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 3: `, checkRewardTx3);
 
-	
+	const percentage = BigNumber.from("50");
 	const number = BigNumber.from("200");
-	const percentage = BigNumber.from("0.2");
-	console.log(number);
-	console.log('percentage: ', percentage);
+	let result = percentage.mul(BigNumber.from("100")).div(number);
+	// console.log('result: ', result);
+
+
+	// add to vault
+	const taxedReward = ethers.utils.formatEther(await gemFacetInstance.checkTaxedReward(0));
+	console.log('taxedReward: ', taxedReward);
+
+	// const percentageAmount = BigNumber.from("20");
+	// const amountToProvideToTheVault = percentageAmount.mul(BigNumber.from("100")).div(taxedReward);
+	// console.log('amountToProvideToTheVault: ', amountToProvideToTheVault);
+
+	const tapperReward = await gemFacetInstance.checkTaperedReward(0);
+
+	console.log('tapperReward: ', tapperReward);
+	const investAmount = BigNumber.from("8000000000000000000");
+	console.log('investAmount: ', investAmount);
+
+	await gemFacetInstance.Maintenance(0, 0);
+	await vaultStakingFacetInstance.addToVault(0, investAmount);
+
+	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	console.log('stakedAmount: ', stakedAmount)
 	
-
-	const result = number.mul
-	// number.mul()
-
-	// batch add to vault
-	for (const gemId of gemIdsCollection) {
-		const gemPendingReward = await gemFacetInstance.checkTaxedReward(gemId);
-		// const gem20Procent = gemPendingReward.mul(100);
-		// const percentage = gem20Procent.div
-		console.log(`${gemId} has pending reward: ${ethers.utils.formatEther(gemPendingReward)}`);
-	}
+	// // batch add to vault
+	// for (const gemId of gemIdsCollection) {
+	// 	const gemPendingReward = await gemFacetInstance.checkTaxedReward(gemId);
+	// 	// const gem20Procent = gemPendingReward.mul(100);
+	// 	// const percentage = gem20Procent.div
+	// 	console.log(`${gemId} has pending reward: ${ethers.utils.formatEther(gemPendingReward)}`);
+	// }
 
 
 	// [8] LastReward
