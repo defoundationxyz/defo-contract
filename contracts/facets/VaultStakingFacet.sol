@@ -44,7 +44,7 @@ contract VaultStakingFacet {
             require(LibGem._isActive(_tokenIds[index]), "Gem is deactivated");
             uint256 _pendingRewards = LibGem._taperCalculate(_tokenIds[index]);
             require(
-                _amounts[index] >= _pendingRewards,
+                _amounts[index] <= _pendingRewards,
                 "Not enough pending rewards"
             );
             LibGem.Gem storage gem = dsgem.GemOf[_tokenIds[index]];
