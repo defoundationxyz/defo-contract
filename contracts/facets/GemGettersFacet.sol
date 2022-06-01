@@ -36,4 +36,30 @@ contract GettersFacet {
         LibMeta.DiamondStorage storage ds = LibMeta.diamondStorage();
         return ds;
     }
+
+    function getExpiredTimeSinceLock(uint8 _gemType)
+        external
+        view
+        returns (uint256)
+    {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
+
+        return block.timestamp - gemType.LastMint;
+    }
+
+    function isMintAvailableForGem(uint8 _gemType)
+        external
+        view
+        returns (bool)
+    {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+
+        return
+            (block.timestamp - gemType.LastMint >=
+                1 hours * metads.MintLimitHours) ||
+            (gemType.MintCount + 1 < gemType.DailyLimit);
+    }
 }
