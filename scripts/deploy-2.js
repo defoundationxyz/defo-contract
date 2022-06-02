@@ -59,7 +59,7 @@ async function deployDiamond() {
 	const daiInstance = await ethers.getContractAt(DEFO_ABI, DAI_TOKEN, deployer);
 
 	// send some DEFO to treasury
-	await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
+	// await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
 
 	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool));
 
@@ -235,21 +235,32 @@ async function deployDiamond() {
 
 	// add to vault
 	const taxedReward = ethers.utils.formatEther(await gemFacetInstance.checkTaxedReward(0));
-	console.log('taxedReward: ', taxedReward);	
+	console.log('taxedReward: ', taxedReward);
 
 	// const percentageAmount = BigNumber.from("20");
 	// const amountToProvideToTheVault = percentageAmount.mul(BigNumber.from("100")).div(taxedReward);
 	// console.log('amountToProvideToTheVault: ', amountToProvideToTheVault);
 
 	const tapperReward = await gemFacetInstance.checkTaperedReward(0);
-	
+
 	console.log('tapperReward: ', tapperReward);
+	const investAmount = BigNumber.from("8000000000000000000");
+	console.log('investAmount: ', investAmount);
 
 	await gemFacetInstance.Maintenance(0, 0);
-	await vaultStakingFacetInstance.addToVault(0, tapperReward);
+	await vaultStakingFacetInstance.addToVault(0, investAmount);
 
 	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
 	console.log('stakedAmount: ', stakedAmount)
+	
+	// // batch add to vault
+	// for (const gemId of gemIdsCollection) {
+	// 	const gemPendingReward = await gemFacetInstance.checkTaxedReward(gemId);
+	// 	// const gem20Procent = gemPendingReward.mul(100);
+	// 	// const percentage = gem20Procent.div
+	// 	console.log(`${gemId} has pending reward: ${ethers.utils.formatEther(gemPendingReward)}`);
+	// }
+
 
 	// [8] LastReward
 	// console.log('gem0 before claim: ', await gemGetterFacetInstance.GemOf(0));
@@ -263,21 +274,32 @@ async function deployDiamond() {
 	// const totalCharity = await gemGetterFacetInstance.getTotalCharity(deployer.address);
 	// console.log('totalCharity: ', ethers.utils.formatEther(totalCharity));
 
-	// const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
-	// console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
+	// // const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	// // console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
 
 	// // check if gem eligable for claim
 	// console.log('---------check if gem eligable for claim---------');
-	// await getIsEligableForClaim(gemGetterFacetInstance, provider);
+	// console.log(await getAreGemsEligableForClaim(gemGetterFacetInstance, provider, [0]));
 	// console.log('AFTER 7 days');
 	// await network.provider.send("evm_increaseTime", [86401 * 7]) // increase by 7 days
 	// await ethers.provider.send('evm_mine');
-	// await getIsEligableForClaim(gemGetterFacetInstance, provider);
+	// console.log(await getAreGemsEligableForClaim(gemGetterFacetInstance, provider, [0]));
 
+	// await gemFacetInstance.Maintenance(0, 0);
+	// await gemFacetInstance.ClaimRewards(0);
 
-	// BATCH pay fee and claimRewards - be sure treasury has enough funds to pay
+	// console.log('charity after 7 days more: ', ethers.utils.formatEther(await gemGetterFacetInstance.getTotalCharity(deployer.address)));
+
+	// await network.provider.send("evm_increaseTime", [86401 * 365]) // increase by 7 days
+	// await ethers.provider.send('evm_mine');
+
+	// // BATCH pay fee and claimRewards - be sure treasury has enough funds to pay
 	// await gemFacetInstance.BatchMaintenance(gemIdsCollection);
 	// await gemFacetInstance.BatchClaimRewards(gemIdsCollection);
+
+	// console.log('charity after 365 days more and claimed all gems: ',
+	// 	ethers.utils.formatEther(await gemGetterFacetInstance.getTotalCharity(deployer.address))
+	// );
 
 	// console.log('BALANCES AFTER BATCH');
 	// console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool)); 
@@ -334,6 +356,18 @@ async function getIsEligableForClaim(gemGetterFacetInstance, provider) {
 	// console.log('gem last reward: ', gem0.LastReward);
 	// console.log('timestamp: ', timestamp);
 	console.log('is eligable: ', rewardPoints > REWARD_TIME);
+}
+
+async function getAreGemsEligableForClaim(gemGetterFacetInstance, provider, gemsIdCollection) {
+	const blockNumber = await provider.getBlockNumber();
+	const timestamp = await (await provider.getBlock(blockNumber)).timestamp;
+
+	for (const gemId of gemsIdCollection) {
+		const gem = await gemGetterFacetInstance.GemOf(gemId);
+		const rewardPoints = timestamp - gem.LastReward;
+		if (rewardPoints <= REWARD_TIME) { return false; }
+	}
+	return true;
 }
 
 if (require.main === module) {

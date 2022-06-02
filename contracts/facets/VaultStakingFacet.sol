@@ -84,7 +84,7 @@ contract VaultStakingFacet {
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
         uint256 _pendingRewards = LibGem._taperCalculate(_tokenId);
-        require(amount >= _pendingRewards, "Not enough pending rewards");
+        require(amount <= _pendingRewards, "Not enough pending rewards");
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
 
         uint256 charityAmount = (metads.CharityRate * amount) / 1000;
