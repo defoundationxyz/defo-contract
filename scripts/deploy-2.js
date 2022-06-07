@@ -20,7 +20,7 @@ const REWARD_TIME = (3600 * 24) * 7;
 const saphireGem = {
 	LastMint: "0",
 	MaintenanceFee: "10",
-	RewardRate: 0.31,
+	RewardRate: "2",
 	DailyLimit: "5",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("5"),
@@ -29,7 +29,7 @@ const saphireGem = {
 const rubyGem = {
 	LastMint: "0",
 	MaintenanceFee: "50",
-	RewardRate: 1.2,
+	RewardRate: "3",
 	DailyLimit: "5",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("20"),
@@ -38,7 +38,7 @@ const rubyGem = {
 const diamondGem = {
 	LastMint: "0",
 	MaintenanceFee: "350",
-	RewardRate: 5,
+	RewardRate: "4",
 	DailyLimit: "5",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("80"),
