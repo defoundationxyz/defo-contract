@@ -104,6 +104,7 @@ contract VaultStakingFacet {
             amount
         );
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
+        ds.totalAmount = ds.totalAmount + amount;
     }
 
     function showStakedAmount() public view returns (uint256) {
@@ -112,7 +113,52 @@ contract VaultStakingFacet {
         return ds.StakedAmount[LibMeta.msgSender()];
     }
 
-    function unstakeTokens(uint256 _tokenId, uint256 amount)
+    function showTotalAmount() public view returns (uint256) {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        return ds.totalAmount;
+    }
+
+    function gemVaultAmount(uint256 _tokenId) public view returns (uint256) {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        return ds.StakedFrom[_tokenId];
+    }
+
+    function getAllVaultAmounts(address _user)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        uint256 numberOfGems = LibERC721._balanceOf(_user);
+        uint256[] memory vaultAmounts = new uint256[](numberOfGems);
+        for (uint256 i = 0; i < numberOfGems; i++) {
+            uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(_user, i);
+            require(LibERC721._exists(gemId), "This gem doesn't exists");
+            vaultAmounts[i] = ds.StakedFrom[gemId];
+        }
+        return vaultAmounts;
+    }
+
+    function removeAllFromVault() public {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        uint256 numberOfGems = LibERC721._balanceOf(LibMeta.msgSender());
+        uint256[] memory vaultAmounts = new uint256[](numberOfGems);
+        for (uint256 i = 0; i < numberOfGems; i++) {
+            uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(
+                LibMeta.msgSender(),
+                i
+            );
+            require(LibERC721._exists(gemId), "This gem doesn't exists");
+            vaultAmounts[i] = ds.StakedFrom[gemId];
+            removeFromVault(gemId, ds.StakedFrom[gemId]);
+        }
+    }
+
+    function removeFromVault(uint256 _tokenId, uint256 amount)
         public
         onlyGemOwner(_tokenId)
     {
@@ -146,6 +192,7 @@ contract VaultStakingFacet {
             amount - taxed
         );
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
+        ds.totalAmount = ds.totalAmount - amount;
         gem.claimedReward = gem.claimedReward - (amount - taxed);
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
     }
