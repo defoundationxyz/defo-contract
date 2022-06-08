@@ -37,6 +37,11 @@ contract GettersFacet {
         return ds;
     }
 
+    function getTotalCharity() external view returns (uint256) {
+        LibMeta.DiamondStorage storage ds = LibMeta.diamondStorage();
+        return ds.TotalCharity;
+    }
+
     function getExpiredTimeSinceLock(uint8 _gemType)
         external
         view

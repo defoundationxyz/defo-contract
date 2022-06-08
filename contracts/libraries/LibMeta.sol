@@ -59,6 +59,7 @@ library LibMeta {
         uint256 TeamDaiRate;
         uint256 LiquidityDefoRate;
         uint256 LiquidityDaiRate;
+        uint256 TotalCharity;
         Counters.Counter _tokenIdCounter;
         IERC20 PaymentToken;
         IERC20 DefoToken;
