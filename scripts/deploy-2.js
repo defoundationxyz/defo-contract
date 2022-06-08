@@ -211,7 +211,7 @@ async function deployDiamond() {
 	console.log('gemIds: ', gemIdsCollection);
 
 	// test rewards / increase time
-	const DAYS_AFTER = 80;
+	const DAYS_AFTER = 365;
 	await network.provider.send("evm_increaseTime", [86400 * DAYS_AFTER])
 	await ethers.provider.send('evm_mine');
 
@@ -227,10 +227,10 @@ async function deployDiamond() {
 	const checkRewardTx3 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(3));
 	console.log(`reward after ${DAYS_AFTER} days for gem id 3: `, checkRewardTx3);
 
-	const percentage = BigNumber.from("50");
-	const number = BigNumber.from("200");
-	let result = percentage.mul(BigNumber.from("100")).div(number);
-	// console.log('result: ', result);
+	// const percentage = BigNumber.from("50");
+	// const number = BigNumber.from("200");
+	// let result = percentage.mul(BigNumber.from("100")).div(number);
+	// // console.log('result: ', result);
 
 	// const totalCharityBefore = await gemGetterFacetInstance.getTotalCharity(deployer.address);
 	// console.log('totalCharityBefore: ', ethers.utils.formatEther(totalCharityBefore));
@@ -239,18 +239,16 @@ async function deployDiamond() {
 	// console.log('defoBefore: ', defoBefore);
 
 	// const gem0Amount = (await gemFacetInstance.checkTaxedReward(0)).div(100).mul(20);
-	// const gem1Amount = (await gemFacetInstance.checkTaxedReward(1)).div(100).mul(20);
-	// const gem2Amount = (await gemFacetInstance.checkTaxedReward(2)).div(100).mul(20);
+	// const gem1Amount = (await gemFacetInstance.checkTaxedReward(1)).div(100).mul(100); // 19.9
+	// const gem2Amount = (await gemFacetInstance.checkTaxedReward(2)).div(100).mul(100); // 19.9
 	// const gem3Amount = (await gemFacetInstance.checkTaxedReward(3)).div(100).mul(100);
 	// console.log('gem1Amount: ', ethers.utils.formatEther(gem1Amount));
 	// console.log('gem2Amount: ', ethers.utils.formatEther(gem2Amount));
 	// console.log('gem3Amount: ', ethers.utils.formatEther(gem3Amount));
 
-	// // 20% - 15.8404
-	// // 100% - 79.202
 
-	// await gemFacetInstance.BatchMaintenance([1, 2]);
-	// await vaultStakingFacetInstance.batchAddTovault([1, 2], [gem1Amount, gem2Amount]);
+	// await gemFacetInstance.BatchMaintenance([1, 3]);
+	// await vaultStakingFacetInstance.batchAddTovault([1, 3], [gem1Amount, gem3Amount]);
 
 	// const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
 	// console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
@@ -262,6 +260,20 @@ async function deployDiamond() {
 	
 	// const defoAfter =  ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address))
 	// console.log('defoAfter: ', defoAfter);
+	// console.log('---------------------------------NEW---------------------------------');
+	// const vaultTotalAmount = await vaultStakingFacetInstance.showTotalAmount();
+	// console.log('vaultTotalAmount: ', vaultTotalAmount);
+
+	// const gem1AmountVault = await vaultStakingFacetInstance.gemVaultAmount(1);
+	// const gem2AmountVault = await vaultStakingFacetInstance.gemVaultAmount(2);
+	// console.log('gem2AmountVault: ', ethers.utils.formatEther(gem2AmountVault));
+	// console.log('gem1AmountVault: ', ethers.utils.formatEther(gem1AmountVault));
+
+	// const userAmouts = await vaultStakingFacetInstance.getAllVaultAmounts(deployer.address);
+
+
+
+
 
 	// 96833 - VAULT
 	// 97916 - no VAULT
