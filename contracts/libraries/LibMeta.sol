@@ -59,7 +59,6 @@ library LibMeta {
         uint256 TeamDaiRate;
         uint256 LiquidityDefoRate;
         uint256 LiquidityDaiRate;
-        uint256 TotalCharity;
         Counters.Counter _tokenIdCounter;
         IERC20 PaymentToken;
         IERC20 DefoToken;
@@ -80,6 +79,7 @@ library LibMeta {
         /// @dev sale lock
         bool Lock;
         bool transferLock;
+        uint256 TotalCharity;
     }
 
     // Returns the struct from a specified position in contract storage
