@@ -79,6 +79,7 @@ library LibMeta {
         /// @dev sale lock
         bool Lock;
         bool transferLock;
+        uint256 TotalCharity;
     }
 
     // Returns the struct from a specified position in contract storage

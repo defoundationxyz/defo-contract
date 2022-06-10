@@ -26,49 +26,17 @@ contract VaultStakingFacet {
         _;
     }
 
-    function batchAddTovault(
+    function batchAddToVault(
         uint256[] memory _tokenIds,
         uint256[] memory _amounts
     ) external {
-        LibGem.DiamondStorage storage dsgem = LibGem.diamondStorage();
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
-        LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
-        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
-            .diamondStorage();
         for (uint256 index = 0; index < _tokenIds.length; index++) {
             require(
                 LibERC721._ownerOf(_tokenIds[index]) == LibERC721.msgSender(),
                 "You don't own this gem"
             );
             require(LibGem._isActive(_tokenIds[index]), "Gem is deactivated");
-            uint256 _pendingRewards = LibGem._taperCalculate(_tokenIds[index]);
-            require(
-                _amounts[index] >= _pendingRewards,
-                "Not enough pending rewards"
-            );
-            LibGem.Gem storage gem = dsgem.GemOf[_tokenIds[index]];
-
-            uint256 charityAmount = (metads.CharityRate * _amounts[index]) /
-                1000;
-            _amounts[index] = _amounts[index] - charityAmount;
-
-            metads.DefoToken.transferFrom(
-                metads.RewardPool,
-                metads.Donation,
-                charityAmount
-            );
-            user.charityContribution = user.charityContribution + charityAmount;
-            gem.claimedReward = gem.claimedReward + _amounts[index];
-            ds.StakedAmount[LibMeta.msgSender()] = _amounts[index];
-            metads.DefoToken.transferFrom(
-                LibMeta.msgSender(),
-                metads.Vault,
-                _amounts[index]
-            );
-            ds.StakedFrom[_tokenIds[index]] =
-                ds.StakedFrom[_tokenIds[index]] +
-                _amounts[index];
+            addToVault(_tokenIds[index], _amounts[index]);
         }
     }
 
@@ -96,14 +64,18 @@ contract VaultStakingFacet {
             charityAmount
         );
         user.charityContribution = user.charityContribution + charityAmount;
+        metads.TotalCharity = metads.TotalCharity + charityAmount;
         gem.claimedReward = gem.claimedReward + amount;
-        ds.StakedAmount[LibMeta.msgSender()] = amount;
+        ds.StakedAmount[LibMeta.msgSender()] =
+            ds.StakedAmount[LibMeta.msgSender()] +
+            amount;
         metads.DefoToken.transferFrom(
             LibMeta.msgSender(),
             metads.Vault,
             amount
         );
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
+        ds.totalAmount = ds.totalAmount + amount;
     }
 
     function showStakedAmount() public view returns (uint256) {
@@ -112,7 +84,52 @@ contract VaultStakingFacet {
         return ds.StakedAmount[LibMeta.msgSender()];
     }
 
-    function unstakeTokens(uint256 _tokenId, uint256 amount)
+    function showTotalAmount() public view returns (uint256) {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        return ds.totalAmount;
+    }
+
+    function gemVaultAmount(uint256 _tokenId) public view returns (uint256) {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        return ds.StakedFrom[_tokenId];
+    }
+
+    function getAllVaultAmounts(address _user)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        uint256 numberOfGems = LibERC721._balanceOf(_user);
+        uint256[] memory vaultAmounts = new uint256[](numberOfGems);
+        for (uint256 i = 0; i < numberOfGems; i++) {
+            uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(_user, i);
+            require(LibERC721._exists(gemId), "This gem doesn't exists");
+            vaultAmounts[i] = ds.StakedFrom[gemId];
+        }
+        return vaultAmounts;
+    }
+
+    function removeAllFromVault() public {
+        LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
+            .diamondStorage();
+        uint256 numberOfGems = LibERC721._balanceOf(LibMeta.msgSender());
+        uint256[] memory vaultAmounts = new uint256[](numberOfGems);
+        for (uint256 i = 0; i < numberOfGems; i++) {
+            uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(
+                LibMeta.msgSender(),
+                i
+            );
+            require(LibERC721._exists(gemId), "This gem doesn't exists");
+            vaultAmounts[i] = ds.StakedFrom[gemId];
+            removeFromVault(gemId, ds.StakedFrom[gemId]);
+        }
+    }
+
+    function removeFromVault(uint256 _tokenId, uint256 amount)
         public
         onlyGemOwner(_tokenId)
     {
@@ -130,7 +147,7 @@ contract VaultStakingFacet {
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
         uint256 charityAmount = (metads.CharityRate * amount) / 1000;
         amount = amount + charityAmount;
-
+        //TODO: this could create problems
         metads.DefoToken.transferFrom(
             metads.Donation,
             metads.RewardPool,
@@ -139,6 +156,7 @@ contract VaultStakingFacet {
         userData.charityContribution =
             userData.charityContribution -
             charityAmount;
+        metads.TotalCharity = metads.TotalCharity - charityAmount;
         uint256 taxed = (amount * 10) / 100;
         metads.DefoToken.transferFrom(
             metads.Vault,
@@ -146,6 +164,7 @@ contract VaultStakingFacet {
             amount - taxed
         );
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
+        ds.totalAmount = ds.totalAmount - amount;
         gem.claimedReward = gem.claimedReward - (amount - taxed);
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
     }

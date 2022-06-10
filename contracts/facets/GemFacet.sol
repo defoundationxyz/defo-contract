@@ -135,13 +135,12 @@ contract GemFacet {
         uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
         _rewardDefo = _rewardDefo - charityAmount;
         gem.claimedReward = gem.claimedReward + _rewardDefo;
-        console.log("hope is pointless %s", _rewardDefo);
-        console.log("hope is pointless %s", gem.claimedReward);
         metads.DefoToken.transferFrom(
             metads.RewardPool,
             metads.Donation,
             charityAmount
         );
+        metads.TotalCharity = charityAmount + metads.TotalCharity;
         user.charityContribution = user.charityContribution + charityAmount;
         metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
         gem.LastReward = uint32(block.timestamp);

@@ -7,6 +7,7 @@ library LibVaultStaking {
     struct DiamondStorage {
         mapping(uint256 => uint256) StakedFrom;
         mapping(address => uint256) StakedAmount; // address -> amount mapping
+        uint256 totalAmount;
     }
 
     // Returns the struct from a specified position in contract storage

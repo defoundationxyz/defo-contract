@@ -246,9 +246,47 @@ describe("Node Tests", function () {
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq("0");
         expect(await VaultStakingFacet.connect(addr1).addToVault("0", pendingReward)).to.ok;
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(pendingReward);
-        expect(await VaultStakingFacet.connect(addr1).unstakeTokens("0" , pendingReward)).to.ok;
+        expect(await VaultStakingFacet.connect(addr1).removeFromVault("0" , pendingReward)).to.ok;
         expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(0);
         expect(await GemFacet.checkTaperedReward("0")).to.lt(pendingReward)
+
+    });
+  
+        it("Test batch vault", async function () {
+
+        //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
+        expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
+        expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
+        expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
+
+        for (let index = 0; index < 2; index++) {
+            await network.provider.send("evm_increaseTime", [86400 * 365])
+            await ethers.provider.send('evm_mine');
+        
+        } 
+        /// tresury must approve
+        expect(await OwnerFacet.setAddressVault(addr2.address)).to.ok;
+        expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;     
+          
+        expect(await Token.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;
+        expect(await DAI.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;   
+        /// expect revert 
+        //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("1", "0")).to.ok;
+        expect(await GemFacet.connect(addr1).Maintenance("2", "0")).to.ok;
+        let pendingReward0 = await GemFacet.checkTaperedReward("0");
+        let pendingReward1 = await GemFacet.checkTaperedReward("1");
+        let pendingReward2 = await GemFacet.checkTaperedReward("2");
+        
+        expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq("0");
+        expect(await VaultStakingFacet.connect(addr1).batchAddToVault(["0" , "1" , "2"], [pendingReward0 ,pendingReward1 , pendingReward2])).to.ok;
+ //       expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(pendingReward0 + pendingReward1 + pendingReward2);
+        expect(await VaultStakingFacet.connect(addr1).removeFromVault("0" , pendingReward0)).to.ok;
+ //       expect(await VaultStakingFacet.connect(addr1).showStakedAmount()).to.eq(pendingReward1 + pendingReward2);
+        expect(await GemFacet.checkTaperedReward("0")).to.lt(pendingReward0)
 
     });
   
