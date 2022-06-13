@@ -291,7 +291,7 @@ describe("Node Tests", function () {
     });
   
    
-      it.only("Test vault bug", async function () {
+      it("Test vault rempval bug", async function () {
 
         //expect(await NodeInst.setMinDaiReward("1")).to.ok;         
         expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
