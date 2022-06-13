@@ -60,6 +60,7 @@ async function deployDiamond() {
 
 	// send some DEFO to treasury
 	await defoInstance.transfer(treasury.address, ethers.utils.parseEther("10000"));
+	await daiInstance.transfer(treasury.address, ethers.utils.parseEther("1500"));
 
 	console.log(await getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool));
 
@@ -171,9 +172,13 @@ async function deployDiamond() {
 
 	// activate limit hours
 	await ownerFacetInstance.setMintLimitHours("12");
-
-	await defoInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
 	await defoInstance.connect(rewardPool).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.connect(vault).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.connect(donations).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+
+	// gem minter need to approve dai/defo
+	await defoInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await daiInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
 
 	await defoInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
 	await daiInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
@@ -183,9 +188,10 @@ async function deployDiamond() {
 
 	// table.push(["treasury balance before mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
 	const GEM_TYPE_1 = 1;
-
+	
 	await mintGem(gemFacetInstance, 0); // 0.75 -> treasury
 	await mintGem(gemFacetInstance, 1);
+	await gemFacetInstance.connect(treasury).MintGem(0);
 	await mintGem(gemFacetInstance, 1); // 7.5
 	await mintGem(gemFacetInstance, 2); // 75 -> treasury
 
@@ -232,30 +238,42 @@ async function deployDiamond() {
 	// let result = percentage.mul(BigNumber.from("100")).div(number);
 	// // console.log('result: ', result);
 
-	// const totalCharityBefore = await gemGetterFacetInstance.getTotalCharity(deployer.address);
-	// console.log('totalCharityBefore: ', ethers.utils.formatEther(totalCharityBefore));
+	// console.log(vaultStakingFacetInstance);
+	const totalCharityBefore = await gemGetterFacetInstance.getTotalCharity();
+	console.log('totalCharityBefore: ', ethers.utils.formatEther(totalCharityBefore));
 
-	// const defoBefore =  ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address))
-	// console.log('defoBefore: ', defoBefore);
+	const defoBefore =  ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address))
+	console.log('defoBefore: ', defoBefore);
 
-	// const gem0Amount = (await gemFacetInstance.checkTaxedReward(0)).div(100).mul(20);
-	// const gem1Amount = (await gemFacetInstance.checkTaxedReward(1)).div(100).mul(100); // 19.9
+	const gem0Amount = (await gemFacetInstance.checkTaxedReward(0)).div(100).mul(20);
+	const gem1Amount = (await gemFacetInstance.checkTaxedReward(1)).div(100).mul(100); // 19.9
 	// const gem2Amount = (await gemFacetInstance.checkTaxedReward(2)).div(100).mul(100); // 19.9
-	// const gem3Amount = (await gemFacetInstance.checkTaxedReward(3)).div(100).mul(100);
-	// console.log('gem1Amount: ', ethers.utils.formatEther(gem1Amount));
+	const gem3Amount = (await gemFacetInstance.checkTaxedReward(3)).div(100).mul(100);
+	console.log('gem1Amount: ', ethers.utils.formatEther(gem1Amount));
 	// console.log('gem2Amount: ', ethers.utils.formatEther(gem2Amount));
-	// console.log('gem3Amount: ', ethers.utils.formatEther(gem3Amount));
+	console.log('gem3Amount: ', ethers.utils.formatEther(gem3Amount));
 
 
-	// await gemFacetInstance.BatchMaintenance([1, 3]);
-	// await vaultStakingFacetInstance.batchAddTovault([1, 3], [gem1Amount, gem3Amount]);
+	await gemFacetInstance.BatchMaintenance([1, 3]);
+	await vaultStakingFacetInstance.batchAddToVault([1, 3], [gem1Amount, gem3Amount]);
 
-	// const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
-	// console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
+	const stakedAmount = await vaultStakingFacetInstance.showStakedAmount();
+	console.log('stakedAmount: ', ethers.utils.formatEther(stakedAmount));
+
+	const removeAmount = BigNumber.from("19");
+	console.log('removeAmount: ', removeAmount);
+	// await vaultStakingFacetInstance.removeFromVault(gem.id, gem.vaultAmount); 
+
+	const gem1VaultAmount = await vaultStakingFacetInstance.gemVaultAmount(1);
+	// await vaultStakingFacetInstance.removeFromVault(1, gem1VaultAmount);
+	await vaultStakingFacetInstance.removeAllFromVault();
+
+	const stakedAmountAfter = await vaultStakingFacetInstance.showStakedAmount();
+	console.log('stakedAmountAfter: ', ethers.utils.formatEther(stakedAmountAfter));
 
 	// await gemFacetInstance.BatchClaimRewards([1, 2]);
 
-	// const totalCharityAfter = await gemGetterFacetInstance.getTotalCharity(deployer.address);
+	// const totalCharityAfter = await gemGetterFacetInstance.getTotalCharity();
 	// console.log('totalCharityAfter: ', ethers.utils.formatEther(totalCharityAfter));
 	
 	// const defoAfter =  ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address))

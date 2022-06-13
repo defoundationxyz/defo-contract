@@ -1,6 +1,4 @@
-// SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.4;
+ 
 
 /// @title Defo Vault Staking Facet
 /// @author jvoljvolizka
@@ -103,6 +101,7 @@ contract VaultStakingFacet {
     {
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking
             .diamondStorage();
+            
         uint256 numberOfGems = LibERC721._balanceOf(_user);
         uint256[] memory vaultAmounts = new uint256[](numberOfGems);
         for (uint256 i = 0; i < numberOfGems; i++) {

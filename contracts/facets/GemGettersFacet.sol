@@ -26,7 +26,7 @@ contract GemGettersFacet {
         return gemTypeMetadata;
     }
 
-    function getTotalCharity(address _user) external view returns (uint256) {
+    function getUserCharity(address _user) external view returns (uint256) {
         LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
         LibUser.UserData storage user = ds.GetUserData[_user];
         return user.charityContribution;
