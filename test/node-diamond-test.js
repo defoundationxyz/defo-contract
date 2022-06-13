@@ -303,11 +303,14 @@ describe("Node Tests", function () {
         } 
         /// tresury must approve
         expect(await OwnerFacet.setAddressVault(addr2.address)).to.ok;
+        expect(await OwnerFacet.setAddressDonation(addr3.address , 200)).to.ok
         expect(await Token.approve(diamondAddress, "100000000000000000000000")).ok;
         expect(await DAI.approve(diamondAddress, "100000000000000000000000")).ok;     
           
         expect(await Token.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;
         expect(await DAI.connect(addr2).approve(diamondAddress, "100000000000000000000000")).ok;   
+        expect(await DAI.connect(addr3).approve(diamondAddress, "100000000000000000000000")).ok;  
+        expect(await Token.connect(addr3).approve(diamondAddress, "100000000000000000000000")).ok;
         /// expect revert 
         //expect(await NodeInst.connect(addr1).ClaimRewardsAll()).to.ok;
         expect(await GemFacet.connect(addr1).Maintenance("0", "0")).to.ok;
