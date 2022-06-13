@@ -157,7 +157,7 @@ contract VaultStakingFacet {
             userData.charityContribution -
             charityAmount;
         metads.TotalCharity = metads.TotalCharity - charityAmount;
-        uint256 taxed = ((amount) * 10) / 100;
+        uint256 taxed = ((amount - charityAmount) * 10) / 100;
         metads.DefoToken.transferFrom(
             metads.Vault,
             LibMeta.msgSender(),
@@ -165,7 +165,7 @@ contract VaultStakingFacet {
         );
 
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
-        ds.totalAmount = ds.totalAmount - amount;
+        ds.totalAmount = ds.totalAmount - (amount - charityAmount);
         gem.claimedReward = gem.claimedReward - (amount - taxed);
 
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
