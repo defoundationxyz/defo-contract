@@ -146,7 +146,7 @@ contract VaultStakingFacet {
         ds.StakedAmount[user] = ds.StakedAmount[user] - amount;
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
         uint256 charityAmount = (metads.CharityRate * amount) / 1000;
-        amount = amount + charityAmount;
+        /*amount = amount + charityAmount;*/
         //TODO: this could create problems
         metads.DefoToken.transferFrom(
             metads.Donation,
@@ -157,15 +157,17 @@ contract VaultStakingFacet {
             userData.charityContribution -
             charityAmount;
         metads.TotalCharity = metads.TotalCharity - charityAmount;
-        uint256 taxed = (amount * 10) / 100;
+        uint256 taxed = ((amount - charityAmount) * 10) / 100;
         metads.DefoToken.transferFrom(
             metads.Vault,
             LibMeta.msgSender(),
             amount - taxed
         );
+
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
-        ds.totalAmount = ds.totalAmount - amount;
+        ds.totalAmount = ds.totalAmount - (amount - charityAmount);
         gem.claimedReward = gem.claimedReward - (amount - taxed);
+
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
     }
 }
