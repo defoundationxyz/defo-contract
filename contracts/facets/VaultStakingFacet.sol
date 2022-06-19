@@ -53,7 +53,7 @@ contract VaultStakingFacet {
         require(amount <= _pendingRewards, "Not enough pending rewards");
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
 
-        uint256 charityAmount = (metads.CharityRate * amount) / 1000;
+        uint256 charityAmount = (metads.CharityRate * amount) / 10000;
         amount = amount - charityAmount;
 
         metads.DefoToken.transferFrom(
@@ -144,7 +144,7 @@ contract VaultStakingFacet {
         require(ds.StakedAmount[user] >= amount, "Not enough staked tokens");
         ds.StakedAmount[user] = ds.StakedAmount[user] - amount;
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
-        uint256 charityAmount = (metads.CharityRate * amount) / 1000;
+        uint256 charityAmount = (metads.CharityRate * amount) / 10000;
         /*amount = amount + charityAmount;*/
         //TODO: this could create problems
         metads.DefoToken.transferFrom(

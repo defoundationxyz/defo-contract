@@ -91,10 +91,10 @@ library LibGem {
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
 
         uint256 _rewardDefo = _passedDays *
-            ((_rate * gemType.DefoPrice) / 1000);
+            ((_rate * gemType.DefoPrice) / 10000);
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
         }
         return (_rewardDefo);
     }
