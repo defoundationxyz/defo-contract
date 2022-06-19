@@ -69,16 +69,16 @@ contract GemFacet {
         IERC20Joe Token;
         /// defo : %75 reward , %25 liq
         if (_isDefo) {
-            uint256 reward = (amount * metads.TreasuryDefoRate) / 1000;
-            uint256 liq = (amount * metads.LiquidityDefoRate) / 1000;
+            uint256 reward = (amount * metads.TreasuryDefoRate) / 10000;
+            uint256 liq = (amount * metads.LiquidityDefoRate) / 10000;
             Token = metads.DefoToken;
             Token.transfer(metads.RewardPool, reward);
             Token.transfer(metads.Liquidity, liq);
         } else {
             /// dai %67.5 tres , %25 liq , %7.5 core team
-            uint256 treasury = (amount * metads.TreasuryDaiRate) / 1000;
-            uint256 team = (amount * metads.TeamDaiRate) / 1000;
-            uint256 liq = (amount * metads.LiquidityDaiRate) / 1000;
+            uint256 treasury = (amount * metads.TreasuryDaiRate) / 10000;
+            uint256 team = (amount * metads.TeamDaiRate) / 10000;
+            uint256 liq = (amount * metads.LiquidityDaiRate) / 10000;
             Token = metads.PaymentToken;
             Token.transfer(metads.Team, team);
             Token.transfer(metads.Treasury, treasury);
@@ -126,13 +126,13 @@ contract GemFacet {
         LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         uint256 taxRate = LibGem._rewardTax(_tokenid);
         if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
+            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
         }
         _rewardDefo = _rewardDefo - _offset;
         require(_rewardDefo > metads.MinReward, "Less than min reward");
 
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
-        uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
+        uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 10000;
         _rewardDefo = _rewardDefo - charityAmount;
         gem.claimedReward = gem.claimedReward + _rewardDefo;
         metads.DefoToken.transferFrom(
