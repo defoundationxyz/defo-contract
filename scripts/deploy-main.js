@@ -20,7 +20,7 @@ const REWARD_TIME = (3600 * 24) * 7;
 // fix these numbers
 const saphireGem = {
 	LastMint: "0",
-	MaintenanceFee: "10",
+	MaintenanceFee: "50000000000000000", // daily fee 
 	RewardRate: "2",
 	DailyLimit: "5",
 	MintCount: "0",
@@ -29,7 +29,7 @@ const saphireGem = {
 }
 const rubyGem = {
 	LastMint: "0",
-	MaintenanceFee: "50",
+	MaintenanceFee: "200000000000000000",
 	RewardRate: "3",
 	DailyLimit: "5",
 	MintCount: "0",
@@ -38,7 +38,7 @@ const rubyGem = {
 }
 const diamondGem = {
 	LastMint: "0",
-	MaintenanceFee: "350",
+	MaintenanceFee: "800000000000000000",
 	RewardRate: "4",
 	DailyLimit: "5",
 	MintCount: "0",
