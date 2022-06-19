@@ -64,7 +64,7 @@ describe("Node Tests", function () {
     const saphireGem = {
       LastMint: "0",
       MaintenanceFee: "0",
-      RewardRate: "10",
+      RewardRate: "100",
       DailyLimit: "5",
       MintCount: "0",
       DefoPrice: ethers.utils.parseEther("10"),
@@ -73,7 +73,7 @@ describe("Node Tests", function () {
     const rubyGem = {
       LastMint: "0",
       MaintenanceFee: "0",
-      RewardRate: "10",
+      RewardRate: "100",
       DailyLimit: "5",
       MintCount: "0",
       DefoPrice: ethers.utils.parseEther("100"),
@@ -82,7 +82,7 @@ describe("Node Tests", function () {
     const diamondGem = {
       LastMint: "0",
       MaintenanceFee: "0",
-      RewardRate: "10",
+      RewardRate: "100",
       DailyLimit: "5",
       MintCount: "0",
       DefoPrice: ethers.utils.parseEther("1000"),
@@ -451,7 +451,7 @@ describe("Node Tests", function () {
         expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
         expect(await GemFacet.connect(addr1).checkRawReward("0")).to.ok;
 
-        for (let index = 0; index < 2; index++) {
+        for (let index = 0; index < 4; index++) {
             await network.provider.send("evm_increaseTime", [86400 * 365])
             await ethers.provider.send('evm_mine');
         
