@@ -20,27 +20,27 @@ const REWARD_TIME = (3600 * 24) * 7;
 // fix these numbers
 const saphireGem = {
 	LastMint: "0",
-	MaintenanceFee: "10",
-	RewardRate: "2",
-	DailyLimit: "5",
+	MaintenanceFee: "50000000000000000", // daily fee 
+	RewardRate: "88", // 88.57
+	DailyLimit: "32",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("5"),
 	StablePrice: ethers.utils.parseEther("25")
 }
 const rubyGem = {
 	LastMint: "0",
-	MaintenanceFee: "50",
-	RewardRate: "3",
-	DailyLimit: "5",
+	MaintenanceFee: "200000000000000000",
+	RewardRate: "85", // 85.71
+	DailyLimit: "8",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("20"),
 	StablePrice: ethers.utils.parseEther("100")
 }
 const diamondGem = {
 	LastMint: "0",
-	MaintenanceFee: "350",
-	RewardRate: "4",
-	DailyLimit: "5",
+	MaintenanceFee: "800000000000000000",
+	RewardRate: "89", // 89.29
+	DailyLimit: "2",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("80"),
 	StablePrice: ethers.utils.parseEther("400")
@@ -158,13 +158,15 @@ async function deployDiamond() {
 	)
 	await erc721Facet.initialize("Defo Node", "DFN");
 
-	await ownerFacetInstance.setAddressAndDistTeam(team.address, 50, 50);
-	await ownerFacetInstance.setAddressAndDistLiquidity(deployer.address, 0, 0);
-	await ownerFacetInstance.setAddressDonation(donations.address, 5);
+	await ownerFacetInstance.setAddressAndDistTeam(team.address, 0, 0);
+	await ownerFacetInstance.setAddressAndDistLiquidity(deployer.address, 2500, 2500);
+	await ownerFacetInstance.setAddressAndDistRewardPool(rewardPool.address, 7500);
+	await ownerFacetInstance.setAddressAndDistTreasury(treasury.address, 7500);
+	await ownerFacetInstance.setAddressDonation(donations.address, 500);
 	await ownerFacetInstance.setAddressVault(vault.address);
 	await ownerFacetInstance.setMinRewardTime(REWARD_TIME);
 
-	await ownerFacetInstance.setRewardTax(["500", "300", "100", "0"]);
+	await ownerFacetInstance.setRewardTax(["3000", "2000", "1000", "0"]);
 	await ownerFacetInstance.setGemSettings("0", saphireGem);
 	await ownerFacetInstance.setGemSettings("1", rubyGem);
 	await ownerFacetInstance.setGemSettings("2", diamondGem);
