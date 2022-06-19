@@ -51,7 +51,7 @@ contract GemFacet {
         require(
             (block.timestamp - gemType.LastMint >=
                 1 hours * metads.MintLimitHours) ||
-                (gemType.MintCount + 1 < gemType.DailyLimit),
+                (gemType.MintCount + 1 <= gemType.DailyLimit),
             "Gem mint restriction"
         );
         _;
@@ -175,7 +175,7 @@ contract GemFacet {
             1 hours * metads.MintLimitHours
         ) {
             gemType.LastMint = uint32(block.timestamp);
-            gemType.MintCount = 0;
+            gemType.MintCount = 1;
         } else {
             gemType.MintCount = gemType.MintCount + 1;
         }
@@ -321,7 +321,7 @@ contract GemFacet {
             1 hours * metads.MintLimitHours
         ) {
             gemType.LastMint = uint32(block.timestamp);
-            gemType.MintCount = 0;
+            gemType.MintCount = 1;
         } else {
             gemType.MintCount = gemType.MintCount + 1;
         }

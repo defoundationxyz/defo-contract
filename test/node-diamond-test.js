@@ -414,10 +414,21 @@ describe("Node Tests", function () {
     expect(await OwnerFacet.setGemSettings("0", saphireGem)).to.ok;
     expect(await OwnerFacet.setMintLimitHours("7")).to.ok;
     
-        for (let index = 0; index < 3; index++) {
+       /* for (let index = 0; index < 3; index++) {
           expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
-        }
+        }*/
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        let boop1 = await GettersFacet.connect(addr1).GetGemTypeMetadata("0")
+    console.log(boop1[4])
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        let boop2 = await GettersFacet.connect(addr1).GetGemTypeMetadata("0")
+    console.log(boop2[4])
+    expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
+        let boop3 = await GettersFacet.connect(addr1).GetGemTypeMetadata("0")
+    console.log(boop3[4])
         await expect(GemFacet.connect(addr1).MintGem("0")).to.be.reverted 
+    let boop = await GettersFacet.connect(addr1).GetGemTypeMetadata("0")
+    console.log(boop[4])
         await network.provider.send("evm_increaseTime", [3600 * 7])
         await ethers.provider.send('evm_mine');
     
