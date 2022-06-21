@@ -19,27 +19,27 @@ const REWARD_TIME = (3600 * 24) * 7;
 
 const saphireGem = {
 	LastMint: "0",
-	MaintenanceFee: "10",
-	RewardRate: "2",
-	DailyLimit: "5",
+	MaintenanceFee: "50000000000000000", // daily fee 
+	RewardRate: "88", // 88.57
+	DailyLimit: "32",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("5"),
 	StablePrice: ethers.utils.parseEther("25")
 }
 const rubyGem = {
 	LastMint: "0",
-	MaintenanceFee: "50",
-	RewardRate: "3",
-	DailyLimit: "5",
+	MaintenanceFee: "200000000000000000",
+	RewardRate: "85", // 85.71
+	DailyLimit: "8",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("20"),
 	StablePrice: ethers.utils.parseEther("100")
 }
 const diamondGem = {
 	LastMint: "0",
-	MaintenanceFee: "350",
-	RewardRate: "4",
-	DailyLimit: "5",
+	MaintenanceFee: "800000000000000000",
+	RewardRate: "89", // 89.29
+	DailyLimit: "2",
 	MintCount: "0",
 	DefoPrice: ethers.utils.parseEther("80"),
 	StablePrice: ethers.utils.parseEther("400")
@@ -188,9 +188,9 @@ async function deployDiamond() {
 
 	// table.push(["treasury balance before mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
 	const GEM_TYPE_1 = 1;
-	
-	await mintGem(gemFacetInstance, 0); // 0.75 -> treasury
-	await mintGem(gemFacetInstance, 1);
+
+	// await mintGem(gemFacetInstance, 0); // 0.75 -> treasury
+	// await mintGem(gemFacetInstance, 1);
 	await gemFacetInstance.connect(treasury).MintGem(0);
 	await mintGem(gemFacetInstance, 1); // 7.5
 	await mintGem(gemFacetInstance, 2); // 75 -> treasury
@@ -273,12 +273,12 @@ async function deployDiamond() {
 
 
 
-	
+
 	// await gemFacetInstance.BatchClaimRewards([1, 2]);
 
 	// const totalCharityAfter = await gemGetterFacetInstance.getTotalCharity();
 	// console.log('totalCharityAfter: ', ethers.utils.formatEther(totalCharityAfter));
-	
+
 	// const defoAfter =  ethers.utils.formatEther(await defoInstance.balanceOf(deployer.address))
 	// console.log('defoAfter: ', defoAfter);
 	// console.log('---------------------------------NEW---------------------------------');
