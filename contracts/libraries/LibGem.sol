@@ -25,7 +25,7 @@ library LibGem {
     /// @dev A struct for keeping info about node types
     struct GemTypeMetadata {
         uint32 LastMint; // last mint timestamp
-        uint16 MaintenanceFee; // Maintenance fee for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
+        uint256 MaintenanceFee; // Maintenance fee for the node type
         uint16 RewardRate; // Reward rate  for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
         uint8 DailyLimit; // global mint limit for a node type
         uint8 MintCount; // mint count resets every MintLimitHours hours
