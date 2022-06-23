@@ -131,6 +131,11 @@ contract OwnerFacet {
         metads.MintLimitHours = _MintLimitHours;
     }
 
+    function setMaintenanceDays(uint256 _maintenanceDays) external onlyOwner {
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        metads.MaintenanceDays = _maintenanceDays;
+    }
+
     function ChangePaymentToken(address _newToken) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.PaymentToken = IERC20(_newToken);
