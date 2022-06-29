@@ -170,24 +170,25 @@ async function deployDiamond() {
 	await ownerFacetInstance.setGemSettings("0", saphireGem);
 	await ownerFacetInstance.setGemSettings("1", rubyGem);
 	await ownerFacetInstance.setGemSettings("2", diamondGem);
-
+	await ownerFacetInstance.setMintLimitHours("12");
+	await ownerFacetInstance.setMaintenanceDays("30")
 
     // SOME OF THESE MUST BE RUN BT THE USER NOT HERE
 	// activate limit hours
-	await ownerFacetInstance.setMintLimitHours("12");
-	await defoInstance.connect(rewardPool).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-	await defoInstance.connect(vault).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-	await defoInstance.connect(donations).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+
+	await defoInstance.connect(rewardPool).approve(diamond.address, ethers.constants.MaxUint256);
+	await defoInstance.connect(vault).approve(diamond.address, ethers.constants.MaxUint256);
+	await defoInstance.connect(donations).approve(diamond.address, ethers.constants.MaxUint256);
 
 	// gem minter need to approve dai/defo
-	await defoInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-	await daiInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.connect(treasury).approve(diamond.address, ethers.constants.MaxUint256);
+	await daiInstance.connect(treasury).approve(diamond.address, ethers.constants.MaxUint256);
 
-	await defoInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-	await daiInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.approve(diamond.address, ethers.constants.MaxUint256);
+	await daiInstance.approve(diamond.address, ethers.constants.MaxUint256);
 
-	await defoInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
-	await daiInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
+	await defoInstance.approve(deployer.address, ethers.constants.MaxUint256);
+	await daiInstance.approve(deployer.address, ethers.constants.MaxUint256);
 
 
 	console.log(table.toString());
