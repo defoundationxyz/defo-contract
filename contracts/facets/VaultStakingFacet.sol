@@ -11,6 +11,8 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibVaultStaking.sol";
 
 contract VaultStakingFacet {
+    event AddedToVault(uint256 indexed _amount, address indexed _user);
+    event RemovedFromVault(uint256 indexed _amount, address indexed _user);
     modifier onlyGemOwner(uint256 _tokenId) {
         require(
             LibERC721._ownerOf(_tokenId) == LibERC721.msgSender(),
@@ -74,6 +76,7 @@ contract VaultStakingFacet {
         );
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
         ds.totalAmount = ds.totalAmount + amount;
+        emit AddedToVault(amount, LibMeta.msgSender());
     }
 
     function showStakedAmount() public view returns (uint256) {
@@ -168,5 +171,6 @@ contract VaultStakingFacet {
         gem.claimedReward = gem.claimedReward - (amount - taxed);
 
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
+        emit RemovedFromVault(amount - taxed, LibMeta.msgSender());
     }
 }

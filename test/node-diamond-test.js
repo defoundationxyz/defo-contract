@@ -164,13 +164,13 @@ describe("Node Tests", function () {
         expect(await OwnerFacet.setGemSettings("0", saphireGem)).to.ok;
         expect(await OwnerFacet.setGemSettings("1", rubyGem)).to.ok;
         expect(await OwnerFacet.setGemSettings("2", diamondGem)).to.ok;
-
+        expect(await OwnerFacet.setMaintenanceDays("30")).to.ok;
         expect(await GemFacet.connect(addr1).MintGem("0")).to.ok;
         expect(await GemFacet.connect(addr1).MintGem("1")).to.ok;
         expect(await GemFacet.connect(addr1).MintGem("2")).to.ok;
         expect(await GemFacet.connect(addr1).checkPendingMaintenance("0")).to.eq("0");
         var before = await GemFacet.connect(addr1).checkPendingMaintenance("0")
-        for (let index = 0; index < 365; index++) {
+        for (let index = 0; index < 31; index++) {
             await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
 
@@ -179,7 +179,13 @@ describe("Node Tests", function () {
         expect(await GemFacet.connect(addr1).Maintenance("0" , "0")).to.ok;
         expect(await GemFacet.connect(addr1).checkPendingMaintenance("0")).to.eq(before);
 
-
+        for (let index = 0; index < 3; index++) {
+            await network.provider.send("evm_increaseTime", [86400])
+            await ethers.provider.send('evm_mine');
+        }
+      
+      await expect(GemFacet.connect(addr1).Maintenance("0" , "0")).to.be.reverted
+      
         for (let index = 0; index < 365; index++) {
             await network.provider.send("evm_increaseTime", [86400])
             await ethers.provider.send('evm_mine');
