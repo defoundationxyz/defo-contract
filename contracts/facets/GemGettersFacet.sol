@@ -71,4 +71,18 @@ contract GettersFacet {
                 1 hours * metads.MintLimitHours) ||
             (gemType.MintCount + 1 < gemType.DailyLimit);
     }
+
+    function getAvailableBoosters(
+        LibGem.Booster _booster,
+        uint8 _type,
+        address _user
+    ) public view returns (uint8) {
+        LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
+        LibUser.UserData storage user = ds.GetUserData[_user];
+        if (_booster == LibGem.Booster.Omega) {
+            return user.OmegaClaims[_type];
+        } else if (_booster == LibGem.Booster.Delta) {
+            return user.DeltaClaims[_type];
+        } else return 0;
+    }
 }
