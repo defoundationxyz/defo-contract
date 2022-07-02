@@ -171,50 +171,19 @@ async function deployDiamond() {
 	await ownerFacetInstance.setGemSettings("1", rubyGem);
 	await ownerFacetInstance.setGemSettings("2", diamondGem);
 	await ownerFacetInstance.setMintLimitHours("12");
-	await ownerFacetInstance.setMaintenanceDays("30")
+	await ownerFacetInstance.setMaintenanceDays("30");
 
-    // SOME OF THESE MUST BE RUN BT THE USER NOT HERE
-	// activate limit hours
-
+	// RUN THESE VIA SCRIPT
 	await defoInstance.connect(rewardPool).approve(diamond.address, ethers.constants.MaxUint256);
 	await defoInstance.connect(vault).approve(diamond.address, ethers.constants.MaxUint256);
 	await defoInstance.connect(donations).approve(diamond.address, ethers.constants.MaxUint256);
 
-	// gem minter need to approve dai/defo
 	await defoInstance.connect(treasury).approve(diamond.address, ethers.constants.MaxUint256);
 	await daiInstance.connect(treasury).approve(diamond.address, ethers.constants.MaxUint256);
-
-	await defoInstance.approve(diamond.address, ethers.constants.MaxUint256);
-	await daiInstance.approve(diamond.address, ethers.constants.MaxUint256);
-
-	await defoInstance.approve(deployer.address, ethers.constants.MaxUint256);
-	await daiInstance.approve(deployer.address, ethers.constants.MaxUint256);
-
 
 	console.log(table.toString());
 
 	return diamond.address
-}
-
-async function getDefoDaiBalance(defoInstance, daiInstance, deployer) {
-	const defoBalance = formatBalance(await defoInstance.balanceOf(deployer.address));
-	const daiBalance = formatBalance(await daiInstance.balanceOf(deployer.address));
-
-	return { DEFO: defoBalance, DAI: daiBalance }
-}
-
-async function mintGem(gemFacetInstance, type) {
-	return await gemFacetInstance.MintGem(type)
-}
-
-// return the closest amount of hours
-function getHoursFromSecondsInRange(number) {
-	const seconds = Math.round(number / 100) * 100;
-	const hours = Math.floor(seconds / 3600);
-
-	return hours
-	// console.log(`seconds: ${seconds}`);
-	// console.log(`hours: ${hours}`);
 }
 
 async function getAllAddressesDefoBalances(defoInstance, deployer, treasury, donations, team, vault, rewardPool) {
@@ -227,7 +196,6 @@ async function getAllAddressesDefoBalances(defoInstance, deployer, treasury, don
 		rewardPool: ethers.utils.formatEther(await defoInstance.balanceOf(rewardPool.address)),
 	}
 }
-
 
 
 if (require.main === module) {
