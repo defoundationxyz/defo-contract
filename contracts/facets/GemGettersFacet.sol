@@ -7,7 +7,7 @@ import "../libraries/LibGem.sol";
 import "../libraries/LibUser.sol";
 import "../libraries/LibMeta.sol";
 
-contract GettersFacet {
+contract GemGettersFacet {
     function GemOf(uint256 _tokenId) external view returns (LibGem.Gem memory) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];
@@ -36,7 +36,7 @@ contract GettersFacet {
         return user.charityContribution;
     }
 
-    function getMeta() external view returns (LibMeta.DiamondStorage memory) {
+    function getMeta() external pure returns (LibMeta.DiamondStorage memory) {
         LibMeta.DiamondStorage storage ds = LibMeta.diamondStorage();
         return ds;
     }

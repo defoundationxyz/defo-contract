@@ -8,6 +8,7 @@ pragma solidity ^0.8.4;
 import "../libraries/LibDiamond.sol";
 import "../libraries/LibGem.sol";
 import "../libraries/LibMeta.sol";
+import "hardhat/console.sol";
 
 contract OwnerFacet {
     // Owner Functions
@@ -18,14 +19,15 @@ contract OwnerFacet {
     }
 
     function initialize(
-        address _redeemContract,
-        address _defoToken,
-        address _paymentToken,
-        address _treasury,
-        address _limiter,
-        address _rewardPool,
-        address _donation
+    address _redeemContract,
+    address _defoToken,
+    address _paymentToken,
+    address _treasury,
+    address _limiter,
+    address _rewardPool,
+    address _donation
     ) external onlyOwner {
+        console.log("OwnerFacet initialized");
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
         gemds.MinterAddr = _redeemContract;

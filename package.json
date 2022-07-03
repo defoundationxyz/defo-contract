@@ -19,5 +19,10 @@
     "bignumber.js": "^9.0.2",
     "dotenv": "^16.0.0",
     "node-cron": "^3.0.0"
+  },
+  "scripts": {
+    "fork-fuji": "npx hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc",
+    "localhost-deploy-dev": "npx hardhat run --network localhost scripts/deploy-dev.js",
+    "localhost-deploy-main": "npx hardhat run --network localhost scripts/deploy-main.js"
   }
 }
