@@ -35,11 +35,11 @@ describe("Deploying Contracts", function () {
 
     //deploying dai contract
     const MockDai = await hre.ethers.getContractFactory("MockDai");
-    dai = await MockDai.deploy(daiOwner.address);
+    dai = await MockDai.connect(daiOwner).deploy();
     
     //deploying Wavax contract
     const WAVAX = await hre.ethers.getContractFactory("MockDai");
-    wAVAX = await WAVAX.deploy(wAVAXOwner.address);
+    wAVAX = await WAVAX.deploy();
 
     //deploying Lp manager
     const LpManager = await hre.ethers.getContractFactory("LpManager");

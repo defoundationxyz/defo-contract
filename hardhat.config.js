@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require("@nomiclabs/hardhat-etherscan");
 require('dotenv').config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -20,14 +21,22 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   networks:{
     hardhat: {
-      chainId: 4,
+      chainId: 43113,
       gasPrice: 225000000000,
       forking: {
-          url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
+          url: "https://api.avax-test.network/ext/bc/C/rpc",
           enabled: true,
-         //blockNumber: 10579971,
+          blockNumber: 8772544,
       },
     },
+    Fuji:{
+      chainId: 43113,
+      url:"https://api.avax-test.network/ext/bc/C/rpc",
+      accounts:[process.env.PRIVATE_KEY],
+    }
+  },
+  etherscan:{
+    apiKey:process.env.API_KEY,
   },
   solidity: {
     compilers: [

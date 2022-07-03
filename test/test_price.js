@@ -2,13 +2,13 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { expectRevert } = require('@openzeppelin/test-helpers');
 const Table = require("cli-table3");
-const {router_abi, factory_abi} = require("../abi/router_abi");
+const {router_abi, factory_abi, lp_abi} = require("../abi/router_abi");
 const routerAddress = "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
 
 
 describe("Price Testing", function(){
     let defoOwner, dai, lpManagerOwner, wAVAX, acc2, routerContract, defoTtAddress, factoryAddress, swapTokensToLiquidityThreshold;
-  let defo, lpManager;
+  let defo, lpManager, reserve0, reserve1;
   let table = new Table({
     head:['Contracts', 'contract addresses'],
     colWidths:['auto','auto']
@@ -51,6 +51,10 @@ describe("Price Testing", function(){
     await defo.setLiquidityPoolManager(lpManager.address);
     const lpManagerViaDefo = await defo.lpPoolManager();
     
+    //initating LP
+    lpInit = await ethers.getContractAt(lp_abi, defoTtAddress);
+    reserves = await lpInit.getReserves();
+
     // Adding LP 
     //transfering and approving defo and Dai token 
     const defoLpAmount = ethers.utils.parseEther("25000"); //25000
@@ -107,9 +111,9 @@ describe("Price Testing", function(){
     //Checking total Lp minted
     let lpLiquidityBalance = ethers.utils.formatUnits(await lpManager.getSupply(), 18);
     //defo Reserves
-    let reserver0 = ethers.utils.formatUnits (await lpManager.getReserver0(), 18);
+    let reserver0 = ethers.utils.formatUnits (reserves[0], 18);
     //dai Reserves
-    let reserver1 = ethers.utils.formatUnits (await lpManager.getReserver1(), 18);
+    let reserver1 = ethers.utils.formatUnits (reserves[1], 18);
     // Checking defo price
     let defoDaiPrice = reserver1/reserver0;
     
@@ -126,8 +130,8 @@ describe("Price Testing", function(){
     // Checking LP balance after swap
     const lpLiquidityBalanceAfterSwap = ethers.utils.formatUnits(await lpManager.getSupply(), 18);
     // Reserves after buying defo
-    const reserver0before = ethers.utils.formatUnits (await lpManager.getReserver0(), 18);
-    const reserver1before = ethers.utils.formatUnits (await lpManager.getReserver1(), 18);
+    const reserver0before = ethers.utils.formatUnits (reserves[0], 18);
+    const reserver1before = ethers.utils.formatUnits (reserves[1], 18);
     // Checking after buying
     const defoDaiPriceBefore = reserver1before/reserver0before;
 
@@ -144,8 +148,8 @@ describe("Price Testing", function(){
     // Checking LP balance after selling
     const lpLiquidityBalanceAfterSell = ethers.utils.formatUnits(await lpManager.getSupply(), 18);
     // Reserves after selling defo
-    const reserver0Sell = ethers.utils.formatUnits (await lpManager.getReserver0(), 18);
-    const reserver1Sell = ethers.utils.formatUnits (await lpManager.getReserver1(), 18);
+    const reserver0Sell = ethers.utils.formatUnits (reserves[0], 18);
+    const reserver1Sell = ethers.utils.formatUnits (reserves[1], 18);
     // Checking after selling
     const defoDaiPriceSell = reserver1Sell/reserver0Sell;
 
