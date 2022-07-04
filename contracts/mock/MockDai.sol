@@ -8,9 +8,13 @@ import "hardhat/console.sol";
 //Sole purpose of testing lp manager
 contract MockDai is ERC20, Ownable{
     uint256 public _totalSupply = 200000*1e18;
-    
+
     constructor() ERC20("Dai token","Dai"){
         _mint(owner(), _totalSupply);
+    }
+
+    function mint(address _to, uint256 _amount) public {
+        _mint(_to, _amount);
     }
 
 }
