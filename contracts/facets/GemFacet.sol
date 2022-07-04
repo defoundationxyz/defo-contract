@@ -142,6 +142,8 @@ contract GemFacet {
         );
         metads.TotalCharity = charityAmount + metads.TotalCharity;
         user.charityContribution = user.charityContribution + charityAmount;
+
+        // approve here
         metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
         gem.LastReward = uint32(block.timestamp);
         return _rewardDefo;
@@ -200,12 +202,15 @@ contract GemFacet {
         require(_passedDays > metads.MaintenanceDays, "Too soon");
         _passedDays = _passedDays + _days;
         uint256 _amount = _passedDays * _fee;
+        console.log("passedDays: ", _passedDays);
+        console.log('_amount: ', _amount);
         require(
             metads.PaymentToken.balanceOf(msg.sender) > _amount,
             "Not enough funds to pay"
         );
         metads.PaymentToken.transferFrom(msg.sender, metads.Treasury, _amount);
         gem.LastMaintained = uint32(block.timestamp) + uint32((_days * 1 days));
+        console.log('gem.LastMaintained: ', gem.LastMaintained);
     }
 
     function _maintenanceDiscount(uint256 _tokenid)
@@ -495,6 +500,7 @@ contract GemFacet {
     function checkTaxedReward(uint256 _tokenid) public view returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
+        console.log("_rewardDefo: ", _rewardDefo);
         uint256 taxRate = LibGem._rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));

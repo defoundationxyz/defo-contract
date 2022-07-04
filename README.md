@@ -1,4 +1,4 @@
-# Basic Sample Hardhat Project
+# DEFO smart contracts
 
 This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
 
@@ -14,7 +14,13 @@ node scripts/sample-script.js
 npx hardhat help
 ```
 
+Be sure you create .env file (see .env-example)
+
 Following are the Deployed contracts on Fuji Testnet:
+
+Diamond: 0xD4BbEE565C8EeDB54eD9d90c5205c92Eb684539C
+deployer: 0x83c4c6F0Ac462481786b8325f1e291c8f456CB00
+team: 0x120406d37A85C329b71B7098Da752507e0e7BF6A
 
 ////Tokens
 
