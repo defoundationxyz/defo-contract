@@ -89,8 +89,8 @@ describe("Node Tests", function () {
     await Token.mintTokens(addr1.address, ethers.utils.parseEther("10000000"));
     await Token.mintTokens(owner.address, ethers.utils.parseEther("10000000"));
     await DAI.mint(owner.address, ethers.utils.parseEther("10000000"));
-    await Token.mint(addr1.address, ethers.utils.parseEther("10000000"));
-    await Token.mint(addr2.address, ethers.utils.parseEther("10000000"));
+    await Token.mintTokens(addr1.address, ethers.utils.parseEther("10000000"));
+    await Token.mintTokens(addr2.address, ethers.utils.parseEther("10000000"));
 
     await DAI.mint(addr1.address, ethers.utils.parseEther("10000000"));
     await DAI.mint(addr2.address, ethers.utils.parseEther("10000000"));
