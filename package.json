@@ -71,7 +71,10 @@
     "fork-mainnet": "npx hardhat node --fork https://api.avax.network/ext/bc/C/rpc",
     "test": "npx hardhat test test/node-diamond-test.js",
     "localhost-deploy-dev": "npx hardhat run --network localhost scripts/deploy-dev.js",
-    "localhost-deploy-main": "npx hardhat run --network localhost scripts/deploy-main.js"
+    "localhost-deploy-main": "npx hardhat run --network localhost scripts/deploy-main.js",
+    "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
+    "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
+    "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts ."
   },
   "config": {
     "commitizen": {
