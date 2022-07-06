@@ -7,16 +7,23 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "lib": ["es6"],
-    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es6"
+    "target": "es2017"
   },
   "exclude": ["node_modules"],
-  "files": ["./hardhat.config.ts"],
-  "include": ["src/**/*", "tasks/**/*", "test/**/*"]
+  "files": [
+    "./hardhat.config.ts",
+    "./hardhat.network.ts",
+    "./hardhat.accounts.ts",
+    "./addresses.ts"
+  ],
+  "include": ["src/**/*", "tasks/**/*", "test/**/*"],
+  "paths": {
+    "@src/*": ["src/*"]
+  }
 }

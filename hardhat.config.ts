@@ -14,7 +14,8 @@ import { namedAccounts } from "./hardhat.accounts";
 import networks from "./hardhat.network";
 import "./tasks/accounts";
 import "./tasks/deploy";
-import * as forkTasks from "./tasks/fork";
+
+// import * as forkTasks from "./tasks/fork";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 
@@ -38,7 +39,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     currency: "USD",
     gasPrice: 100,
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: !!process.env.REPORT_GAS,
   },
   mocha: {
     timeout: 30000,
@@ -52,7 +53,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: optimizerEnabled,
-            runs: 200,
+            runs: 250,
           },
           outputSelection: {
             "*": {
@@ -66,6 +67,6 @@ const config: HardhatUserConfig = {
   },
 };
 
-forkTasks;
+// forkTasks;
 
 export default config;

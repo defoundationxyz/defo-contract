@@ -67,7 +67,7 @@ const namedAccounts: NamedAccounts = {
   },
 };
 
-if (Object.values(accounts).length !== Object.values(namedAccounts).length) {
+if (Object.values(accounts).length !== 6) {
   throw new Error("Please check you've set all six different private keys in the .env file");
 }
 

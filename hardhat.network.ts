@@ -1,16 +1,10 @@
 import { NetworksUserConfig } from "hardhat/src/types/config";
-import { accounts } from './hardhat.accounts';
-import urlExist from 'url-exist';
 
-const exitingUrl = async (url: string): Promise<string | never>  => {
-  if (await urlExist(url)) {
-    return url
-  }
-  throw new Error(`RPC URL ${url} has been set in .env but it's wrong. Fix it or leave empty for the default node.`);
-}
+import { accounts } from "./hardhat.accounts";
 
-const avalancheMainnetJsonRPCUrl: string = process.env.MAINNET_RPC_URL ? await exitingUrl(process.env.MAINNET_RPC_URL) : "https://api.avax.network/ext/bc/C/rpc";
-const avalancheFujiJsonRPCUrl: string = process.env.FUJI_RPC_URL ? await exitingUrl(process.env.FUJI_RPC_URL) : "https://api.avax-test.network/ext/bc/C/rpc";
+export const avalancheMainnetJsonRPCUrl: string =
+  process.env.MAINNET_RPC_URL ?? "https://api.avax.network/ext/bc/C/rpc";
+export const avalancheFujiJsonRPCUrl: string = process.env.FUJI_RPC_URL ?? "https://api.avax-test.network/ext/bc/C/rpc";
 
 const networks: NetworksUserConfig = {
   coverage: {
@@ -25,7 +19,7 @@ const networks: NetworksUserConfig = {
   },
   fuji: {
     chainId: 43113,
-    url: "https://api.avax-test.network/ext/bc/C/rpc",
+    url: avalancheFujiJsonRPCUrl,
     accounts,
   },
 };
@@ -37,18 +31,17 @@ if (process.env.FORK_ENABLED) {
     gas: 12000000,
     blockGasLimit: 0x1fffffffffffff,
     forking: {
-      url: process.env.FORK_TESTNET ? avalancheFujiJsonRPCUrl: avalancheMainnetJsonRPCUrl,
+      url: process.env.FORK_TESTNET ? avalancheFujiJsonRPCUrl : avalancheMainnetJsonRPCUrl,
     },
-    accounts
+    accounts,
   };
 } else {
   networks.hardhat = {
     allowUnlimitedContractSize: true,
     gas: 12000000,
     blockGasLimit: 0x1fffffffffffff,
-    accounts
+    accounts,
   };
 }
-
 
 export default networks;

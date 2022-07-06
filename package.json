@@ -2,6 +2,7 @@
   "name": "defo-contract",
   "description": "Decentralized Foundation Protocol Smart Contracts",
   "verion": "0.1.0",
+  "main": "index.js",
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
@@ -38,6 +39,10 @@
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.9",
     "hardhat": "^2.9.9",
+    "hardhat-abi-exporter": "^2.10.0",
+    "hardhat-deploy": "^0.11.11",
+    "hardhat-deploy-ethers": "^0.3.0-beta.13",
+    "hardhat-ethernal": "^1.0.0",
     "hardhat-gas-reporter": "^1.0.8",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
@@ -66,15 +71,41 @@
     "artifacts/**",
     "contracts/**"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
+    "clean": "shx rm -rf ./artifacts ./cache ./coverage ./src/types ./coverage.json && yarn typechain",
+    "docs": "solidity-docgen --solc-module solc-0.8 -i contracts -o docs -t templates",
+    "commit": "git-cz",
+    "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
+    "coverage": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat coverage",
+    "coverage:file": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat coverage --testfiles",
     "fork-fuji": "npx hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc",
     "fork-mainnet": "npx hardhat node --fork https://api.avax.network/ext/bc/C/rpc",
-    "test": "npx hardhat test test/node-diamond-test.js",
+    "test-old": "npx hardhat test test/node-diamond-test.js",
     "localhost-deploy-dev": "npx hardhat run --network localhost scripts/deploy-dev.js",
     "localhost-deploy-main": "npx hardhat run --network localhost scripts/deploy-main.js",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
-    "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts ."
+    "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts .",
+    "prettier": "prettier --config ./.prettierrc.yml --write \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
+    "prettier:check": "prettier --check --config ./.prettierrc.yml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
+    "remove-logs": "yarn run hardhat remove-logs",
+    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
+    "deploy": "hardhat deploy:Diamond",
+    "accounts": "hardhat --network localhost accounts",
+    "get-some-dai": "hardhat --network localhost fork:get-some-dai --amount 10",
+    "mint-some-gems": "hardhat --network localhost fork:mint-some-gems --amount 10  ",
+    "jump-in-time-one-year": "hardhat --network localhost fork:jump-in-time --time 1y",
+    "run-fork": "yarn get-some-dai && yarn mint-some-gems && yarn jump-in-time-one-year",
+    "run-fork:fuji": "FORK_TESTNET=true yarn run-fork",
+    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat test",
+    "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat test",
+    "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network",
+    "integration-test-fuji": "yarn deploy fuji && hardhat run --network fuji ./scripts/createAndRunPrizePoolMumbai.ts ",
+    "parallel-test": "mocha --require hardhat/register --recursive --parallel --exit --extension ts",
+    "prepack": "rm -rf build cache && yarn compile"
   },
   "config": {
     "commitizen": {
