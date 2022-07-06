@@ -1,123 +1,71 @@
-require("@nomiclabs/hardhat-waffle");
-require("dotenv").config();
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-waffle";
+import "@typechain/hardhat";
+import { config as dotenvConfig } from "dotenv";
+import "hardhat-abi-exporter";
+import "hardhat-deploy";
+import "hardhat-deploy-ethers";
+import "hardhat-gas-reporter";
+import { HardhatUserConfig } from "hardhat/config";
+import { resolve } from "path";
+import "solidity-coverage";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-// task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-//   const accounts = await hre.ethers.getSigners();
+import { namedAccounts } from "./hardhat.accounts";
+import networks from "./hardhat.network";
+import "./tasks/accounts";
+import "./tasks/deploy";
+import * as forkTasks from "./tasks/fork";
 
-//   for (const account of accounts) {
-//     console.log(account.address);
-//   }
-// });
+dotenvConfig({ path: resolve(__dirname, "./.env") });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+const snowtraceApiKey: string | undefined = process.env.SNOWTRACE_API_KEY;
+if (!snowtraceApiKey) {
+  console.log("SNOWTRACE_API_KEY not set in an .env file, won't be available");
+}
 
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
+const optimizerEnabled = !process.env.OPTIMIZER_DISABLED;
 
-const accounts = [
-  {
-    privateKey: process.env.DEPLOYER_PRIVATE_KEY,
-    balance: "10000000000000000000000",
-  },
-  {
-    privateKey: process.env.TREASURY_WALLET_PRIVATE_KEY,
-    balance: "20000000000000000000000",
-  },
-  {
-    privateKey: process.env.DONATIONS_WALLET_PRIVATE_KEY,
-    balance: "10000000000000000000000",
-  },
-  {
-    privateKey: process.env.TEAM_WALLET_PRIVATE_KEY,
-    balance: "20000000000000000000000",
-  },
-  {
-    privateKey: process.env.VAULT_PRIVATE_KEY,
-    balance: "10000000000000000000000",
-  },
-  {
-    privateKey: process.env.REWARD_POOL_PRIVATE_KEY,
-    balance: "10000000000000000000000",
-  },
-];
-
-module.exports = {
+const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
-  networks: {
-    hardhat: {
-      chainId: 1337,
-      gasPrice: 225000000000,
-      accounts,
-      forking: {
-        // url: "https://rinkeby.infura.io/v3/62f40acd5ec24ddd9405609cdc2dc76f",
-        // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
-        // url: "https://api.avax.network/ext/bc/C/rpc",
-        url: "https://api.avax-test.network/ext/bc/C/rpc",
-        // enabled: true,
-        // saveDeployments: true,
-        // blockNumber: 1057997,
-      },
-    },
-    fuji: {
-      chainId: 43113,
-      url: "https://api.avax-test.network/ext/bc/C/rpc",
-      accounts: [
-        process.env.DEPLOYER_PRIVATE_KEY,
-        process.env.TEAM_WALLET_PRIVATE_KEY,
-      ],
-    },
-    avalancheTest: {
-      url: "https://api.avax-test.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
-      chainId: 43113,
-      accounts: [
-        process.env.DEPLOYER_PRIVATE_KEY,
-        process.env.TEAM_WALLET_PRIVATE_KEY,
-      ],
-    },
-    rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`,
-      accounts: [
-        process.env.DEPLOYER_PRIVATE_KEY,
-        process.env.TEAM_WALLET_PRIVATE_KEY,
-      ],
-      saveDeployments: true,
-      tags: ["rinkeby-test-network"],
-    },
+  abiExporter: {
+    path: "./abis",
+    clear: true,
+    flat: true,
   },
+  etherscan: {
+    apiKey: process.env.SNOWTRACE_API_KEY,
+  },
+  gasReporter: {
+    currency: "USD",
+    gasPrice: 100,
+    enabled: process.env.REPORT_GAS ? true : false,
+  },
+  mocha: {
+    timeout: 30000,
+  },
+  namedAccounts,
+  networks,
   solidity: {
     compilers: [
       {
-        version: "0.5.0",
+        version: "0.8.15",
         settings: {
           optimizer: {
-            enabled: true,
+            enabled: optimizerEnabled,
             runs: 200,
           },
-        },
-      },
-      {
-        version: "0.6.12",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
+          outputSelection: {
+            "*": {
+              "*": ["storageLayout"],
+            },
           },
-        },
-      },
-      {
-        version: "0.8.4",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
+          evmVersion: "berlin",
         },
       },
     ],
   },
 };
+
+forkTasks;
+
+export default config;
