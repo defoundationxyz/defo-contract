@@ -1,9 +1,9 @@
-import { strict as assert } from "assert";
 import { HardhatNetworkAccountsUserConfig } from "hardhat/src/types/config";
 
-type NamedAccounts = {
-  [name: string]: string | number | { [network: string]: null | number | string };
-};
+type NamedAccounts<AccountName extends string = string, NetworkName extends string = string> = Record<
+  AccountName,
+  string | number | Record<NetworkName, null | number | string>
+>;
 
 const accounts: HardhatNetworkAccountsUserConfig = [
   {
@@ -41,7 +41,8 @@ const namedAccounts: NamedAccounts = {
   reward: 5,
 };
 
-// Check if there are fewer accounts set in .env than needed or the same privateKey for different contracts
-assert.ok(Object.values(accounts).length === Object.values(namedAccounts).length);
+if (Object.values(accounts).length !== Object.values(namedAccounts).length) {
+  throw new Error("Please check you've set all six different private keys in the .env file");
+}
 
-export { accounts, namedAccounts };
+export { NamedAccounts, accounts, namedAccounts };
