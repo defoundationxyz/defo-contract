@@ -32,6 +32,7 @@ const accounts: HardhatNetworkAccountsUserConfig = [
   },
 ];
 
+/// TODO revise these addresses once contracts with EIP-2612 permit are updated & deployed. Addresses will be different for fuji (DEFO, probably DAI) and for mainnet (DEFO)
 const namedAccounts: NamedAccounts = {
   deployer: 0,
   treasury: 1,
@@ -39,6 +40,36 @@ const namedAccounts: NamedAccounts = {
   team: 3,
   vault: 4,
   reward: 5,
+  dai: {
+    43114: "0xd586e7f844cea2f87f50152665bcbc2c279d8d70",
+    43113: "0x85a2ff500E0eD9fA93719071EA46A86198181581",
+    1337:
+      (process.env.FORK_ENABLED &&
+        (process.env.FORK_TESTNET
+          ? "0x85a2ff500E0eD9fA93719071EA46A86198181581"
+          : "0xd586e7f844cea2f87f50152665bcbc2c279d8d70")) ??
+      null,
+  },
+  defoToken: {
+    43114: "0x8d352F4c8643DB1d7f7FD6F2b508998EA6cb4388",
+    43113: "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae",
+    1337:
+      (process.env.FORK_ENABLED &&
+        (process.env.FORK_TESTNET
+          ? "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae"
+          : "0x8d352F4c8643DB1d7f7FD6F2b508998EA6cb4388")) ??
+      null,
+  },
+  joeRouter: {
+    43114: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
+    43113: "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
+    1337:
+      (process.env.FORK_ENABLED &&
+        (process.env.FORK_TESTNET
+          ? "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901"
+          : "0x60aE616a2155Ee3d9A68541Ba4544862310933d4")) ??
+      null,
+  },
 };
 
 if (Object.values(accounts).length !== Object.values(namedAccounts).length) {
