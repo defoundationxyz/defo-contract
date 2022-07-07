@@ -6,6 +6,7 @@ import { config as dotenvConfig } from "dotenv";
 import "hardhat-abi-exporter";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
+import "hardhat-erc1820";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { resolve } from "path";
@@ -13,9 +14,7 @@ import "solidity-coverage";
 
 import { namedAccounts } from "./hardhat.accounts";
 import networks from "./hardhat.network";
-
-// import "./tasks/accounts";
-// import "./tasks/deploy";
+import "./tasks/accounts";
 
 // import * as forkTasks from "./tasks/fork";
 
