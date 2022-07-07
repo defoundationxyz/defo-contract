@@ -1317,6 +1317,7 @@
     fastq "^1.6.0"
 
 "@nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers", hardhat-deploy-ethers@^0.3.0-beta.13:
+  name "@nomiclabs/hardhat-ethers"
   version "0.3.0-beta.13"
   resolved "https://registry.yarnpkg.com/hardhat-deploy-ethers/-/hardhat-deploy-ethers-0.3.0-beta.13.tgz#b96086ff768ddf69928984d5eb0a8d78cfca9366"
   integrity sha512-PdWVcKB9coqWV1L7JTpfXRCI91Cgwsm7KLmBcwZ8f0COSm1xtABHZTyz3fvF6p42cTnz1VM0QnfDvMFlIRkSNw==
@@ -1860,6 +1861,13 @@
   version "9.1.1"
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-9.1.1.tgz#e7c4f1001eefa4b8afbd1eee27a237fee3bf29c4"
   integrity sha512-Z61JK7DKDtdKTWwLeElSEBcWGRLY8g95ic5FoQqI9CMx0ns/Ghep3B4DfcEimiKMvtamNVULVNKEsiwV3aQmXw==
+
+"@types/moment@^2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@types/moment/-/moment-2.13.0.tgz#604ebd189bc3bc34a1548689404e61a2a4aac896"
+  integrity sha512-DyuyYGpV6r+4Z1bUznLi/Y7HpGn4iQ4IVcGn8zrr1P4KotKLdH0sbK1TFR6RGyX6B+G8u83wCzL+bpawKU/hdQ==
+  dependencies:
+    moment "*"
 
 "@types/ms@*":
   version "0.7.31"
@@ -8767,6 +8775,11 @@ mock-fs@^4.1.0:
   version "4.14.0"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.14.0.tgz#ce5124d2c601421255985e6e94da80a7357b1b18"
   integrity sha512-qYvlv/exQ4+svI3UOvPUpLDF0OMX5euvUH0Ny4N5QyRyhNdgAgUrVH3iUINSzEPLvx0kbo/Bp28GJKIqvE7URw==
+
+moment@*, moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 ms@2.0.0:
   version "2.0.0"

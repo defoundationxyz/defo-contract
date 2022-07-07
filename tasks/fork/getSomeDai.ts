@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from "../../constants/addresses";
-import { info, success } from "../../utils/helpers";
+import { error, info } from "../../utils/helpers";
 
 const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string, amountToTransfer?: number) => {
   const accountToInpersonate = MAINNET_DAI_WHALE_ADDRESS;
@@ -23,13 +23,26 @@ const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string,
 };
 
 export default task("fork:get-some-dai", "Distribute DAI from AAVE")
+  .addOptionalParam(
+    "account",
+    "The account name to get DAI, e.g. 'treasury', 'vault', or 'all'",
+    "deployer",
+    types.string,
+  )
   .addOptionalParam("amount", "The amount to transfer to the deployer", 1000, types.int)
-  .setAction(async ({ amount }, hre) => {
-    info("Gathering DAI from AAVE...");
+  .setAction(async ({ account, amount }, hre) => {
+    info("Gathering DAI from whales...");
 
     const { getNamedAccounts } = hre;
-    const { deployer } = await getNamedAccounts();
+    const namedAccounts = await getNamedAccounts();
+    if (account !== "all" && !namedAccounts[account]) {
+      error(`Named account ${account} not set`);
+      return;
+    }
 
-    await beTheWhale(hre, deployer, amount);
-    success("Done!");
+    const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
+    for (const account of accounts) {
+      info(`Funding...${account}`);
+      await beTheWhale(hre, account, amount);
+    }
   });

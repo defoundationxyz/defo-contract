@@ -13,7 +13,7 @@ const func: DeployFunction = async hre => {
   const defoTokenDeployment = await deployments.get("DEFOToken");
 
   const ownerFacetInstance = await hre.ethers.getContractAt<OwnerFacet>("OwnerFacet", diamondDeployment.address);
-  const ownerFacetInitializeResult = await ownerFacetInstance.initialize(
+  await ownerFacetInstance.initialize(
     deployer, /// TODO it's _redeemContract, shouldn't be the deployer probably
     defoTokenDeployment.address, //_defoToken
     dai, //_paymentToken

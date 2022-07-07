@@ -1,10 +1,10 @@
+import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import { config as dotenvConfig } from "dotenv";
 import "hardhat-abi-exporter";
 import "hardhat-deploy";
-import "hardhat-deploy-ethers";
 import "hardhat-erc1820";
 import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
@@ -13,9 +13,7 @@ import "solidity-coverage";
 
 import { namedAccounts } from "./hardhat.accounts";
 import networks from "./hardhat.network";
-import * as runtimeTasks from "./tasks";
-
-// import * as forkTasks from "./tasks/fork";
+import * as tasks from "./tasks";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 const snowtraceApiKey: string | undefined = process.env.SNOWTRACE_API_KEY;
@@ -70,8 +68,6 @@ const config: HardhatUserConfig = {
   },
 };
 
-runtimeTasks;
-
-// forkTasks;
+tasks;
 
 export default config;
