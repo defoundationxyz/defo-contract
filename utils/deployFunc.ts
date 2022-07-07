@@ -12,7 +12,7 @@ export const deployAndTell = async (
   args: any,
 ) => {
   deployAnnounce(`\n 📡 Deploying ${contractName}...\n`);
-  const contractResult = await deploy(contractName, { log: true, ...args });
-  displayDeployResult("Diamond", contractResult);
+  const contractResult = await deploy(contractName, { log: !process.env.HIDE_DEPLOY_LOG, ...args });
+  displayDeployResult(contractName, contractResult);
   return contractResult;
 };

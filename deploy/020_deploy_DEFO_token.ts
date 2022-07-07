@@ -6,26 +6,15 @@ import { deployAndTell } from "../utils/deployFunc";
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {
     getNamedAccounts,
-    deployments: { diamond },
+    deployments: { deploy },
   } = hre;
   const { deployer } = await getNamedAccounts();
 
-  const facetNames = [
-    "ERC721Facet",
-    "ERC721EnumerableFacet",
-    "GemFacet",
-    "VaultStakingFacet",
-    "GemGettersFacet",
-    "OwnerFacet",
-    "NodeLimiterFacet",
-  ];
-
-  await deployAndTell(diamond.deploy, "DEFODiamond", {
+  await deployAndTell(deploy, "DEFOToken", {
     from: deployer,
     owner: deployer,
-    facets: facetNames,
   });
 };
 
 export default func;
-func.tags = ["Diamond"];
+func.tags = ["DEFO"];

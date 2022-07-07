@@ -6,14 +6,6 @@ pragma solidity ^0.8.0;
 /// @de
 contract Defo {
     mapping(address => uint256) private _balances;
-    uint256 public _totalSupply = 200000*1e18;
-    uint256 MAXSELLLIMIT = _totalSupply / 1000;
-
-
-    constructor() ERC20("Defo Token","DEFO"){
-        _mint(owner(), _totalSupply);
-    }
-
 
     // --- Auth ---
     mapping (address => uint) public wards;
@@ -52,7 +44,6 @@ contract Defo {
     bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
     constructor(uint256 chainId_) public {
-        _mint(owner(), _totalSupply);
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),

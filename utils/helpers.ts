@@ -3,7 +3,9 @@ import { providers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
 
 export const info = (message: string) => console.log(chalk.dim(message));
+export const announce = (message: string) => console.log(chalk.cyan(message));
 export const success = (message: string) => console.log(chalk.green(message));
+export const warning = (message: string) => console.log(chalk.yellow(message));
 
 export const deployInfo = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.dim(message));
 export const deployAnnounce = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.cyan(message));
