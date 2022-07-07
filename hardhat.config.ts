@@ -1,4 +1,3 @@
-import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
@@ -14,7 +13,7 @@ import "solidity-coverage";
 
 import { namedAccounts } from "./hardhat.accounts";
 import networks from "./hardhat.network";
-import "./tasks/accounts";
+import * as runtimeTasks from "./tasks";
 
 // import * as forkTasks from "./tasks/fork";
 
@@ -66,6 +65,8 @@ const config: HardhatUserConfig = {
     ],
   },
 };
+
+runtimeTasks;
 
 // forkTasks;
 

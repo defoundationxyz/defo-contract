@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 /// @title DEFO Token
 /// @author crypt0grapher, © Copyright 2022 Decentralized Foundation
-/// @de
-contract Defo {
+/// @notice ERC20 with gasless approvals on EIP712 signatures
+contract DEFOToken {
     mapping(address => uint256) private _balances;
 
     // --- Auth ---
@@ -43,7 +43,7 @@ contract Defo {
     // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
     bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
-    constructor(uint256 chainId_) public {
+    constructor(uint256 chainId_) {
         wards[msg.sender] = 1;
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -62,7 +62,7 @@ contract Defo {
     public returns (bool)
     {
         require(balanceOf[src] >= wad, "Defo/insufficient-balance");
-        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
+        if (src != msg.sender && allowance[src][msg.sender] != type(uint256).max) {
             require(allowance[src][msg.sender] >= wad, "Defo/insufficient-allowance");
             allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
         }
@@ -78,7 +78,7 @@ contract Defo {
     }
     function burn(address usr, uint wad) external {
         require(balanceOf[usr] >= wad, "Defo/insufficient-balance");
-        if (usr != msg.sender && allowance[usr][msg.sender] != uint(-1)) {
+        if (usr != msg.sender && allowance[usr][msg.sender] != type(uint256).max) {
             require(allowance[usr][msg.sender] >= wad, "Defo/insufficient-allowance");
             allowance[usr][msg.sender] = sub(allowance[usr][msg.sender], wad);
         }
@@ -121,9 +121,9 @@ contract Defo {
 
         require(holder != address(0), "Defo/invalid-address-0");
         require(holder == ecrecover(digest, v, r, s), "Defo/invalid-permit");
-        require(expiry == 0 || now <= expiry, "Defo/permit-expired");
+        require(expiry == 0 || block.timestamp <= expiry, "Defo/permit-expired");
         require(nonce == nonces[holder]++, "Defo/invalid-nonce");
-        uint wad = allowed ? uint(-1) : 0;
+        uint wad = allowed ? type(uint256).max : 0;
         allowance[holder][spender] = wad;
         emit Approval(holder, spender, wad);
     }

@@ -60,7 +60,7 @@ const namedAccounts: NamedAccounts = {
   defoToken: {
     43114: MAINNET_DEFO_ADDRESS,
     43113: FUJI_DEFO_ADDRESS,
-    1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? null,
+    1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? 6,
   },
   joeRouter: {
     43114: MAINNET_JOE_ROUTER_ADDRESS,

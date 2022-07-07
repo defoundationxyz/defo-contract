@@ -1,9 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { deployAndTell } from "../utils/deployFunc";
 
-const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
+const func: DeployFunction = async hre => {
   const {
     getNamedAccounts,
     deployments: { diamond },
@@ -28,4 +27,4 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 };
 
 export default func;
-func.tags = ["Diamond"];
+func.tags = ["DEFODiamond"];
