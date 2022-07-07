@@ -19,7 +19,8 @@ export default task("mint-some-gems", "mint all NFTs")
       error(`Named account ${account} not set`);
       return;
     }
-
+    /// TODO  VM Exception while processing transaction: reverted with reason string 'Defo/insufficient-allowance'
+    /// modify Solidity code to catch the error
     const diamondDeployment = await deployments.get("DEFODiamond");
     const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
     const types: number[] = gemType === -1 ? Object.values(GEM_TYPES) : [gemType];

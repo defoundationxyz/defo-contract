@@ -1,26 +1,28 @@
-// import { ethers } from "hardhat";
-//
-// await defoInstance
-//   .connect(rewardPool)
-//   .approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-// await defoInstance.connect(vault).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-// await defoInstance.connect(donations).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-//
-// // gem minter need to approve dai/defo
-// await defoInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-// await daiInstance.connect(treasury).approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-//
-// await defoInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-// await daiInstance.approve(diamond.address, ethers.utils.parseEther("10000000000000000000000000"));
-//
-// await defoInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
-// await daiInstance.approve(deployer.address, ethers.utils.parseEther("10000000000000000000000000"));
-//
-// // table.push(["treasury balance before mint", ethers.utils.formatEther(await defoInstance.balanceOf(treasury.address))])
-// const GEM_TYPE_1 = 1;
-//
-// // await mintGem(gemFacetInstance, 0); // 0.75 -> treasury
-// // await mintGem(gemFacetInstance, 1);
-// await gemFacetInstance.connect(treasury).MintGem(0);
-// await mintGem(gemFacetInstance, 1); // 7.5
-// await mintGem(gemFacetInstance, 2); // 75 -> treasury
+import { signDaiPermit } from "eth-permit";
+import { task } from "hardhat/config";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+
+import DAI_ABI from "../abi/erc20-abi.json";
+import { info, success } from "../utils/helpers";
+
+export default task(
+  "permit",
+  "sign 712 permit allowing all facets of DEFO Diamond to spend DAI and DEFO on behalf of the deployer",
+).setAction(async (_, hre: HardhatRuntimeEnvironment) => {
+  const { getNamedAccounts, deployments, ethers } = hre;
+  const { deployer, dai } = await getNamedAccounts();
+
+  const { address: spenderAddress } = await deployments.get("DEFODiamond");
+
+  const defoTokenDeployment = await deployments.get("DEFOToken");
+  const defoContract = await ethers.getContractAt("DEFOToken", defoTokenDeployment.address);
+  const daiContract = await ethers.getContractAt(DAI_ABI, dai);
+
+  for (const token of [daiContract, defoContract]) {
+    info(`Signing for ${await token.name()}`);
+    const result = await signDaiPermit(ethers, token.address, deployer, spenderAddress);
+    await token.permit(deployer, spenderAddress, result.nonce, result.expiry, true, result.v, result.r, result.s);
+    const allowance = await token.allowance(deployer, spenderAddress);
+    success(`Permission to spend granted. Now allowance is ${allowance}`);
+  }
+});
