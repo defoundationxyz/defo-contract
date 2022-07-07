@@ -43,6 +43,10 @@ const accounts: HardhatNetworkAccountsUserConfig = [
     privateKey: process.env.REWARD_POOL_PRIVATE_KEY || "",
     balance: "10000000000000000000000",
   },
+  {
+    privateKey: process.env.DEFO_TOKEN_PRIVATE_KEY || "",
+    balance: "10000000000000000000000",
+  },
 ];
 
 const namedAccounts: NamedAccounts = {
@@ -57,10 +61,10 @@ const namedAccounts: NamedAccounts = {
     43113: FUJI_DAI_ADDRESS,
     1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DAI_ADDRESS : MAINNET_DAI_ADDRESS)) ?? null,
   },
-  defoToken: {
+  forkedDefoToken: {
     43114: MAINNET_DEFO_ADDRESS,
     43113: FUJI_DEFO_ADDRESS,
-    1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? 6,
+    1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? null,
   },
   joeRouter: {
     43114: MAINNET_JOE_ROUTER_ADDRESS,
@@ -71,7 +75,7 @@ const namedAccounts: NamedAccounts = {
   },
 };
 
-if (Object.values(accounts).length !== 6) {
+if (Object.values(accounts).length < 6) {
   throw new Error("Please check you've set all six different private keys in the .env file");
 }
 

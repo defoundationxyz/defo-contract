@@ -6,14 +6,14 @@ import { announce, info } from "../utils/helpers";
 task("accounts", "Get the addresses and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
   const { getNamedAccounts, deployments } = hre;
   const namedAccounts = await getNamedAccounts();
-  const { dai, defoToken } = namedAccounts;
+  const { dai, forkedDefoToken } = namedAccounts;
   info("\n 📡 Querying balances...");
   const daiContract = await hre.ethers.getContractAt(ERC20_ABI, dai);
   const defoContract = await hre.ethers.getContractAt(
     "DEFOToken",
-    defoToken || (await deployments.get("DEFOToken")).address,
+    forkedDefoToken || (await deployments.get("DEFOToken")).address,
   );
-  announce(`DEFO token is ${defoToken ? "forked" : "deployed locally"}. Address : ${defoContract.address}`);
+  announce(`DEFO token is ${forkedDefoToken ? "forked" : "deployed locally"}. Address : ${defoContract.address}`);
 
   const table = await Promise.all(
     Object.entries(namedAccounts).map(async ([accountName, accountAddress]) => {

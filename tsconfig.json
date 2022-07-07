@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es6"],
+    "lib": [
+      "es6"
+    ],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "removeComments": true,
@@ -15,17 +17,33 @@
     "strict": true,
     "target": "es2017"
   },
-  "exclude": ["node_modules"],
+  "exclude": [
+    "node_modules",
+    "unused/**/*"
+  ],
   "files": [
     "./hardhat.config.ts",
     "./hardhat.network.ts",
     "./hardhat.accounts.ts",
     "./addresses.ts"
   ],
-  "include": ["src/**/*", "tasks/**/*",  "deploy/**/*", "test/**/*", "utils/**/*"],
+  "include": [
+    "types/**/*",
+    "test/**/*",
+    "tasks/**/*",
+    "deploy/**/*",
+    "utils/**/*",
+    "constants/**/*"
+  ],
   "paths": {
-    "@src/*": ["src/*"],
-    "@utils/*": ["utils/*"],
-    "@lib/*": ["utils/*"]
+    "@types/*": [
+      "types/*"
+    ],
+    "@utils/*": [
+      "utils/*"
+    ],
+    "@lib/*": [
+      "utils/*"
+    ]
   }
 }

@@ -79,7 +79,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "shx rm -rf ./artifacts ./deployments ./cache ./coverage ./src/types ./coverage.json && yarn typechain",
+    "clean": "shx rm -rf ./artifacts ./deployments ./cache ./coverage ./types ./coverage.json && yarn typechain",
     "docs": "solidity-docgen --solc-module solc-0.8 -i contracts -o docs -t templates",
     "commit": "git-cz",
     "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
@@ -87,9 +87,9 @@
     "coverage:file": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat coverage --testfiles",
     "fork-fuji": "npx hardhat node --fork https://api.avax-test.network/ext/bc/C/rpc",
     "fork-mainnet": "npx hardhat node --fork https://api.avax.network/ext/bc/C/rpc",
-    "test-old": "npx hardhat test test/node-diamond-test.js",
-    "localhost-deploy-dev": "npx hardhat run --network localhost scripts/deploy-dev.js",
-    "localhost-deploy-main": "npx hardhat run --network localhost scripts/deploy-main.js",
+    "test-old": "npx hardhat unused/test test/node-diamond-test.js",
+    "localhost-deploy-dev": "npx hardhat run --network localhost unused/scripts/deploy-dev.js",
+    "localhost-deploy-main": "npx hardhat run --network localhost unused/scripts/deploy-main.js",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts .",
@@ -107,8 +107,8 @@
     "jump-in-time": "hardhat --network localhost fork:jump-in-time --time",
     "jump-in-time-1y": "jump-in-time 1y",
     "run-fork": "yarn get-some-dai && yarn mint-some-gems && yarn jump-in-time-1y",
-    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat test",
-    "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat test",
+    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat unused/test",
+    "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat unused/test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network"
   },
   "config": {

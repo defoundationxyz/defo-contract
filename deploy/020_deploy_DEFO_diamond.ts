@@ -3,10 +3,8 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { deployAndTell } from "../utils/deployFunc";
 
 const func: DeployFunction = async hre => {
-  const {
-    getNamedAccounts,
-    deployments: { diamond },
-  } = hre;
+  const { getNamedAccounts, deployments } = hre;
+  const { diamond } = deployments;
   const { deployer } = await getNamedAccounts();
 
   const facetNames = [
