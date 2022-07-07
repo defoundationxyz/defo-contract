@@ -28,12 +28,13 @@
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "chai": "^4.3.6",
-    "chalk": "^5.0.1",
+    "chalk": "4.1.2",
     "cli-table3": "^0.6.1",
     "commitizen": "^4.2.4",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "3.3.0",
     "debug": "^4.3.4",
+    "deploy-eip-1820": "^1.0.0",
     "eslint": "^8.19.0",
     "eslint-config-prettier": "^8.5.0",
     "ethereum-waffle": "^3.4.4",
@@ -71,6 +72,7 @@
     "artifacts/**",
     "contracts/**"
   ],
+  "packageManager": "yarn@1.22.18",
   "publishConfig": {
     "access": "public"
   },
@@ -93,7 +95,9 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
     "remove-logs": "yarn run hardhat remove-logs",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
-    "deploy": "hardhat deploy:Diamond",
+    "start-fork": "FORK_ENABLED=true hardhat node --no-reset --no-deploy",
+    "start-fork:fuji": "FORK_TESTNET=true yarn start-fork",
+    "deploy": "hardhat deploy --write true --network ",
     "accounts": "hardhat --network localhost accounts",
     "get-some-dai": "hardhat --network localhost fork:get-some-dai --amount 10",
     "mint-some-gems": "hardhat --network localhost fork:mint-some-gems --amount 10  ",

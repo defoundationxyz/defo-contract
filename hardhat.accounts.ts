@@ -1,4 +1,6 @@
+import { config as dotenvConfig } from "dotenv";
 import { HardhatNetworkAccountsUserConfig } from "hardhat/src/types/config";
+import { resolve } from "path";
 
 import {
   FUJI_DAI_ADDRESS,
@@ -8,6 +10,8 @@ import {
   MAINNET_DEFO_ADDRESS,
   MAINNET_JOE_ROUTER_ADDRESS,
 } from "./addresses";
+
+dotenvConfig({ path: resolve(__dirname, "./.env") });
 
 type NamedAccounts<AccountName extends string = string, NetworkName extends string = string> = Record<
   AccountName,

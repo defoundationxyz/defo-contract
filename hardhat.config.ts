@@ -1,3 +1,4 @@
+import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
@@ -12,13 +13,13 @@ import "solidity-coverage";
 
 import { namedAccounts } from "./hardhat.accounts";
 import networks from "./hardhat.network";
-import "./tasks/accounts";
-import "./tasks/deploy";
+
+// import "./tasks/accounts";
+// import "./tasks/deploy";
 
 // import * as forkTasks from "./tasks/fork";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
-
 const snowtraceApiKey: string | undefined = process.env.SNOWTRACE_API_KEY;
 if (!snowtraceApiKey) {
   console.log("SNOWTRACE_API_KEY not set in an .env file, won't be available");

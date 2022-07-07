@@ -22,8 +22,10 @@
     "./hardhat.accounts.ts",
     "./addresses.ts"
   ],
-  "include": ["src/**/*", "tasks/**/*", "test/**/*"],
+  "include": ["src/**/*", "tasks/**/*",  "deploy/**/*", "test/**/*", "utils/**/*"],
   "paths": {
-    "@src/*": ["src/*"]
+    "@src/*": ["src/*"],
+    "@utils/*": ["utils/*"],
+    "@lib/*": ["utils/*"]
   }
 }
