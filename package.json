@@ -101,7 +101,7 @@
     "deploy": "hardhat deploy --write true --network",
     "accounts": "hardhat accounts --network localhost",
     "deployments": "hardhat deployments --network localhost",
-    "get-some-dai": "hardhat --network localhost fork:get-some-dai --amount 1000",
+    "get-some-dai": "hardhat --network localhost fork:get-some-dai --amount 10000",
     "mint-gems": "hardhat --network localhost fork:mint-some-gems --amount",
     "mint-some-gems": "yarn mint-gems 10",
     "jump-in-time": "hardhat --network localhost fork:jump-in-time --time",

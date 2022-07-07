@@ -25,7 +25,7 @@
     "./hardhat.config.ts",
     "./hardhat.network.ts",
     "./hardhat.accounts.ts",
-    "./addresses.ts"
+    "./constants/addresses.ts"
   ],
   "include": [
     "types/**/*",

@@ -9,7 +9,7 @@ import {
   MAINNET_DAI_ADDRESS,
   MAINNET_DEFO_ADDRESS,
   MAINNET_JOE_ROUTER_ADDRESS,
-} from "./addresses";
+} from "./constants/addresses";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
 

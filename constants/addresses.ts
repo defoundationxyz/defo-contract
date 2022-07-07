@@ -1,6 +1,7 @@
 /// TODO revise these addresses once contracts with EIP-2612 permit are updated & deployed. Addresses will be different for fuji (DEFO, probably DAI) and for mainnet (DEFO)
 
 export const FUJI_DAI_DEFO_WHALE_ADDRESS = "0x83c4c6F0Ac462481786b8325f1e291c8f456CB00";
+export const MAINNET_DAI_WHALE_ADDRESS = "0x38dae04e4c874afc3d237e73677aee43066ac1f2";
 
 export const FUJI_DAI_ADDRESS = "0x85a2ff500E0eD9fA93719071EA46A86198181581";
 export const FUJI_DEFO_ADDRESS = null; //not deployed yet

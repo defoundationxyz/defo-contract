@@ -7,7 +7,7 @@ const { getSelectors, FacetCutAction } = require("./libraries/diamond.js");
 const Table = require("cli-table3");
 const { Contract, BigNumber } = require("ethers");
 const DEFO_ABI = require("../../abi/defo-abi.json");
-const { FUJI_DAI_DEFO_WHALE_ADDRESS } = require("../../addresses");
+const { FUJI_DAI_DEFO_WHALE_ADDRESS } = require("../../constants/addresses");
 
 const DEFO_TOKEN = "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae";
 const DAI_TOKEN = "0x85a2ff500E0eD9fA93719071EA46A86198181581";
