@@ -1,6 +1,10 @@
-import { ethers } from "hardhat";
-
 import { LibGem } from "../types/contracts/facets/OwnerFacet";
+
+export const GEM_TYPES = {
+  Sapphire: 0,
+  Ruby: 1,
+  Diamond: 2,
+};
 
 export const REWARD_TIME = 3600 * 24 * 7;
 
@@ -22,8 +26,8 @@ export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {
   RewardRate: "88",
   DailyLimit: "32",
   MintCount: "0",
-  DefoPrice: ethers.utils.parseEther("5"),
-  StablePrice: ethers.utils.parseEther("25"),
+  DefoPrice: (5 * 1e18).toString(),
+  StablePrice: (25 * 1e18).toString(),
 };
 
 export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
@@ -32,8 +36,8 @@ export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
   RewardRate: "85", // 85.71
   DailyLimit: "8",
   MintCount: "0",
-  DefoPrice: ethers.utils.parseEther("20"),
-  StablePrice: ethers.utils.parseEther("100"),
+  DefoPrice: (20 * 1e18).toString(),
+  StablePrice: (100 * 1e18).toString(),
 };
 
 export const DIAMOND_GEM: LibGem.GemTypeMetadataStruct = {
@@ -42,6 +46,6 @@ export const DIAMOND_GEM: LibGem.GemTypeMetadataStruct = {
   RewardRate: "89", // 89.29
   DailyLimit: "2",
   MintCount: "0",
-  DefoPrice: ethers.utils.parseEther("80"),
-  StablePrice: ethers.utils.parseEther("400"),
+  DefoPrice: (80 * 1e18).toString(),
+  StablePrice: (400 * 1e18).toString(),
 };
