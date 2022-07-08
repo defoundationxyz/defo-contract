@@ -6,7 +6,6 @@ Copy `.env-example` to `.env`.
 
 In one terminal window buils the contracts and start a HH EVM fork of Avalanche mainnet with:
 ```shell
-yarn compile
 yarn start-fork
 ```
 
