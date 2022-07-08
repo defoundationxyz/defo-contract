@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from "../../constants/addresses";
-import { error, info } from "../../utils/helpers";
+import { announce, error, info } from "../../utils/helpers";
 
 const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string, amountToTransfer?: number) => {
   const accountToInpersonate = MAINNET_DAI_WHALE_ADDRESS;
@@ -42,7 +42,7 @@ export default task("fork:get-some-dai", "Distribute DAI from AAVE")
 
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
     for (const account of accounts) {
-      info(`Funding...${account}`);
+      announce(`Funding ${account} with DAI...`);
       await beTheWhale(hre, account, amount);
     }
   });

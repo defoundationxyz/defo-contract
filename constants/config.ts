@@ -1,10 +1,14 @@
 import { LibGem } from "../types/contracts/facets/OwnerFacet";
 
-export const GEM_TYPES = {
-  Sapphire: 0,
-  Ruby: 1,
-  Diamond: 2,
+export type GemNames = "sapphire" | "ruby" | "diamond";
+
+export const gems: Record<GemNames, number> = {
+  sapphire: 0,
+  ruby: 1,
+  diamond: 2,
 };
+export const gemName = (gemNumber: number) =>
+  (Object.keys(gems) as Array<GemNames>).find(key => gems[key] === gemNumber);
 
 export const REWARD_TIME = 3600 * 24 * 7;
 

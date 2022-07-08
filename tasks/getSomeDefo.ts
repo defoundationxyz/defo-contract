@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
 
 import { DEFOToken } from "../types";
-import { error, info } from "../utils/helpers";
+import { announce, error } from "../utils/helpers";
 
 export default task("get-some-defo", "get funded with DEFO Token")
   .addOptionalParam(
@@ -23,7 +23,7 @@ export default task("get-some-defo", "get funded with DEFO Token")
 
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
     for (const account of accounts) {
-      info(`Funding...${account}`);
+      announce(`Funding ${account} with DEFO...`);
       const amt = ethers.utils.parseEther(amount.toString());
       await defoContract.mint(namedAccounts.deployer, amt);
       if (account !== namedAccounts.deployer) {

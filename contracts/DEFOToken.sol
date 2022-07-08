@@ -1,10 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "./helpers/OwnerRecovery.sol";
+import "./implementations/LpManagerImplementationPoint.sol";
 
 /// @title DEFO Token
 /// @author crypt0grapher, © Copyright 2022 Decentralized Foundation
 /// @notice ERC20 with gasless approvals on EIP712 signatures
-contract DEFOToken {
+contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint{
     mapping(address => uint256) private _balances;
 
     // --- Auth ---

@@ -1,6 +1,10 @@
 import chalk from "chalk";
-import { providers } from "ethers";
+import { ethers, providers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
+import _ from "lodash";
+import moment from "moment";
+
+type MutableObject<T> = { -readonly [P in keyof T]: T[P] };
 
 export const info = (message: string) => console.log(chalk.dim(message));
 export const announce = (message: string) => console.log(chalk.cyan(message));
@@ -36,3 +40,19 @@ export const chainName = (chainId: number) => {
       return "Unknown";
   }
 };
+
+export const outputFormatKeyValue = (key: string, value: string | number): string | number =>
+  key.match("Last|Time")
+    ? moment.unix(Number(value)).format("DD.MM.YYYY HH:mm:ss")
+    : key.match("Fee|Price|claimedReward")
+    ? Number(ethers.utils.formatEther(value))
+    : value;
+
+export const outputFormatter = <T extends Record<string, any>>(keys: string[], object: T) =>
+  Object.entries(_.pick(object, keys)).reduce<MutableObject<T>>((acc, cur) => {
+    const key = cur[0];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    acc[key] = outputFormatKeyValue(key, cur[1]);
+    return acc;
+  }, {} as T);

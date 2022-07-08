@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/utils/Context.sol";
 
 /**
  *   @dev This contract is openzeppelin ERC721 implementation edited according to diamond storage pattern
- *   for information about facets and diamond storage please check EIP-2535
+ *   for information about facets and diamond tstorage please check EIP-2535
  */
 
 contract ERC721Facet {
