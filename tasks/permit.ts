@@ -2,8 +2,8 @@ import { signDaiPermit } from "eth-permit";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import DAI_ABI from "../abi/erc20-abi.json";
-import { info, success } from "../utils/helpers";
+import DAI_ABI from "../abi/dai-abi.json";
+import { announce, info, success } from "../utils/helpers";
 
 export default task(
   "permit",
@@ -18,11 +18,19 @@ export default task(
   const defoContract = await ethers.getContractAt("DEFOToken", defoTokenDeployment.address);
   const daiContract = await ethers.getContractAt(DAI_ABI, dai);
 
-  for (const token of [daiContract, defoContract]) {
-    info(`Signing for ${await token.name()}`);
-    const result = await signDaiPermit(ethers, token.address, deployer, spenderAddress);
-    await token.permit(deployer, spenderAddress, result.nonce, result.expiry, true, result.v, result.r, result.s);
-    const allowance = await token.allowance(deployer, spenderAddress);
+  for (const token of [defoContract, daiContract]) {
+    const name = await token.name();
+    announce(`Approving spending for ${name}`);
+    info(`Current allowance is ${ethers.utils.formatEther(await token.allowance(deployer, spenderAddress))}`);
+    if (token == defoContract) {
+      info(`Signing for ${await token.name()}`);
+      const result = await signDaiPermit(ethers.provider, token.address, deployer, spenderAddress);
+      await token.permit(deployer, spenderAddress, result.nonce, result.expiry, true, result.v, result.r, result.s);
+    } else {
+      info(`Calling approve for ${await token.name()}, max amount`);
+      await token.approve(spenderAddress, ethers.constants.MaxUint256);
+    }
+    const allowance = ethers.utils.formatEther(await token.allowance(deployer, spenderAddress));
     success(`Permission to spend granted. Now allowance is ${allowance}`);
   }
 });
