@@ -4,7 +4,7 @@ import _ from "lodash";
 import { gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, error, info, outputFormatKeyValue, outputFormatter, success, warning } from "../utils/helpers";
+import { announce, error, info, success } from "../utils/helpers";
 
 export default task("mint-some-gems", "mint all NFTs")
   .addOptionalParam(
@@ -36,38 +36,11 @@ export default task("mint-some-gems", "mint all NFTs")
       {} as Array<Array<LibGem.GemStructOutput & { gemId: number }>>,
     );
     announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
-    info(`Total Charity: ${await gemGettersFacet.getTotalCharity()}`);
-
     for (const type of types) {
-      warning(`\n\nGem ${gemName(type)} (type ${type})`);
-      announce("Gem config:");
-      console.table([
-        outputFormatter<LibGem.GemTypeMetadataStruct>(
-          ["LastMint", "MaintenanceFee", "RewardRate", "DailyLimit", "MintCount", "DefoPrice", "StablePrice"],
-          await gemGettersFacet.GetGemTypeMetadata(type),
-        ),
-      ]);
-
-      announce(`User balance: ${gemsGroupedByType[type].length}:`);
-      const userGems = gemsGroupedByType[type].map(gem => {
-        const pickedGem = _.pick(gem, [
-          "LastReward",
-          "LastMaintained",
-          "TaperCount",
-          "booster",
-          "claimedReward",
-        ]) as unknown as Record<string, number | string>;
-        const formattedGem: Record<string, string | number> = {};
-        Object.keys(pickedGem).map(function (key) {
-          formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
-        });
-        return formattedGem;
-      });
-      console.table(userGems);
-
+      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type].length}`);
       if (await gemGettersFacet.isMintAvailableForGem(type)) {
         await gemFacetContract.MintGem(type);
-        success(`${gemName(type)} gem minted, total gem balance ${await gemNFT.balanceOf(deployer)}`);
+        success(`Minted, total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
       } else {
         error("Mint not available");
       }
