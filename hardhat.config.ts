@@ -16,10 +16,10 @@ import networks from "./hardhat.network";
 import * as tasks from "./tasks";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
-const snowtraceApiKey: string | undefined = process.env.SNOWTRACE_API_KEY;
-if (!snowtraceApiKey) {
-  console.log("SNOWTRACE_API_KEY not set in an .env file, won't be available");
-}
+// const snowtraceApiKey: string | undefined = process.env.SNOWTRACE_API_KEY;
+// if (!snowtraceApiKey) {
+//   console.log("SNOWTRACE_API_KEY not set in an .env file, won't be available");
+// }
 
 const optimizerEnabled = !process.env.OPTIMIZER_DISABLED;
 
