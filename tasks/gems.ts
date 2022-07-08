@@ -41,7 +41,7 @@ export default task("gems", "get gems info and balance information for the deplo
     ]);
 
     announce(`User balance (${gemsGroupedByType[type]?.length || 0}):`);
-    const userGems = gemsGroupedByType[type].map(gem => {
+    const userGems = gemsGroupedByType[type]?.map(gem => {
       const pickedGem = _.pick(gem, [
         "gemId",
         "MintTime",
@@ -57,6 +57,6 @@ export default task("gems", "get gems info and balance information for the deplo
       });
       return formattedGem;
     });
-    console.table(userGems);
+    userGems && console.table(userGems);
   }
 });
