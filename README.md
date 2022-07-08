@@ -7,24 +7,31 @@ Copy `.env-example` to `.env`.
 $ yarn install
 ```
 
-## Testing
+[//]: # ()
+[//]: # (## Testing)
 
-We use [Hardhat](https://hardhat.dev) and [hardhat-deploy](https://github.com/wighawag/hardhat-deploy)
+[//]: # ()
+[//]: # (To run unit & integration tests:)
 
-To run unit & integration tests:
+[//]: # ()
+[//]: # (```sh)
 
-```sh
-$ yarn test
-```
+[//]: # ($ yarn test)
 
-To run coverage:
+[//]: # (```)
 
-```sh
-$ yarn coverage
-```
+[//]: # ()
+[//]: # (To run coverage:)
+
+[//]: # ()
+[//]: # (```sh)
+
+[//]: # ($ yarn coverage)
+
+[//]: # (```)
 
 ## Deployment
-
+We use [Hardhat](https://hardhat.dev) and [hardhat-deploy](https://github.com/wighawag/hardhat-deploy).
 In one terminal window build the contracts and start a HH EVM fork of Avalanche mainnet with:
 ```shell
 yarn start-fork

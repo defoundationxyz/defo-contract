@@ -19,9 +19,15 @@ export default task("gems", "get gems info and balance information for the deplo
   const gemIds = await gemFacetContract.getGemIdsOf(deployer);
   const gemsIdsWithData = await Promise.all(
     gemIds.map(async gemId => {
-      return { gemId: Number(gemId), ...(await gemGettersFacet.GemOf(gemId)) };
+      return {
+        gemId: Number(gemId),
+        ...(await gemGettersFacet.GemOf(gemId)),
+        unclaimedReward: await gemFacetContract.checkRawReward(gemId),
+      };
     }),
   );
+  // const checkRewardTx0 = ethers.utils.formatEther(await gemFacetInstance.checkRawReward(0));
+  // console.log(`reward after ${DAYS_AFTER} days for gem id 0: `, checkRewardTx0);
 
   const gemsGroupedByType = gemsIdsWithData.reduce(
     (r, v, i, a, k = v.GemType) => ((r[k] || (r[k] = [])).push(v), r),
@@ -50,6 +56,7 @@ export default task("gems", "get gems info and balance information for the deplo
         "TaperCount",
         "booster",
         "claimedReward",
+        "unclaimedReward",
       ]) as unknown as Record<string, number | string>;
       const formattedGem: Record<string, string | number> = {};
       Object.keys(pickedGem).map(function (key) {

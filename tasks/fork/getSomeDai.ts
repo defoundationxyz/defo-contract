@@ -3,7 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from "../../constants/addresses";
-import { announce, error, info } from "../../utils/helpers";
+import { announce, error, info, success } from "../../utils/helpers";
 
 const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string, amountToTransfer?: number) => {
   const accountToInpersonate = MAINNET_DAI_WHALE_ADDRESS;
@@ -18,7 +18,7 @@ const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string,
       (amountToTransfer && hre.ethers.utils.parseEther(amountToTransfer.toString())) ??
       (await contract.balanceOf(accountToInpersonate));
     await contract.connect(whaleSigner).transfer(accountToFund, toTransfer);
-    info(`sent ${toTransfer} of token ${token} to ${accountToFund}`);
+    success(`sent ${toTransfer} of token ${token} to ${accountToFund}`);
   }
 };
 
@@ -29,7 +29,7 @@ export default task("fork:get-some-dai", "Distribute DAI from AAVE")
     "deployer",
     types.string,
   )
-  .addOptionalParam("amount", "The amount to transfer to the deployer", 1000, types.int)
+  .addOptionalParam("amount", "The amount to transfer to the deployer", 100000, types.int)
   .setAction(async ({ account, amount }, hre) => {
     info("Gathering DAI from whales...");
 
