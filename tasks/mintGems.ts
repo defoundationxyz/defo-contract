@@ -6,13 +6,7 @@ import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
 import { announce, error, info, success } from "../utils/helpers";
 
-export default task("mint-some-gems", "mint all NFTs")
-  .addOptionalParam(
-    "account",
-    "The account name to get defo, e.g. 'treasury', 'vault', or 'all'",
-    "deployer",
-    types.string,
-  )
+export default task("get-some-gems", "mint all NFTs")
   .addOptionalParam("gemType", "0 - sapphire, 1 - ruby, 2 - diamond", -1, types.int)
   .setAction(async ({ gemType }, hre) => {
     const { getNamedAccounts, deployments, ethers } = hre;
@@ -37,7 +31,7 @@ export default task("mint-some-gems", "mint all NFTs")
     );
     announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
     for (const type of types) {
-      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type].length}`);
+      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type]?.length || 0}`);
       if (await gemGettersFacet.isMintAvailableForGem(type)) {
         await gemFacetContract.MintGem(type);
         success(`Minted, total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);

@@ -2,10 +2,11 @@
 DEFO is a DeFi protocol on AVAX. If you buy a Yield Gem NFT with our DEFO token, you get DEFO rewards every week.
 
 ## Using the repo
-Be sure you create `.env` file (see `.env-example`).
+Copy `.env-example` to `.env`.
 
-In one terminal window start a HH EVM fork of Avalanche mainnet with:
+In one terminal window buils the contracts and start a HH EVM fork of Avalanche mainnet with:
 ```shell
+yarn compile
 yarn start-fork
 ```
 

@@ -40,7 +40,7 @@ export default task("gems", "get gems info and balance information for the deplo
       ),
     ]);
 
-    announce(`User balance (${gemsGroupedByType[type].length}):`);
+    announce(`User balance (${gemsGroupedByType[type]?.length || 0}):`);
     const userGems = gemsGroupedByType[type].map(gem => {
       const pickedGem = _.pick(gem, [
         "gemId",
