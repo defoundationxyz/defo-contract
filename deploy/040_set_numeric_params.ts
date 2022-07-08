@@ -5,6 +5,7 @@ import {
   DIAMOND_GEM,
   LIQUIDITY_DAI_RATE,
   LIQUIDITY_DEFO_RATE,
+  MAINTENANCE_DAYS,
   MINT_LIMIT_HOURS,
   REWARD_TAX_TABLE,
   REWARD_TIME,
@@ -38,9 +39,11 @@ const func: DeployFunction = async hre => {
   await ownerFacetInstance.setGemSettings("0", SAPHIRE_GEM);
   await ownerFacetInstance.setGemSettings("1", RUBY_GEM);
   await ownerFacetInstance.setGemSettings("2", DIAMOND_GEM);
-
   // activate limit hours
-  await ownerFacetInstance.setMintLimitHours(MINT_LIMIT_HOURS);
+  await ownerFacetInstance.setMintLimitHours(MAINTENANCE_DAYS);
+  // activate maintenance days
+  await ownerFacetInstance.setMaintenanceDays("30");
+
   deploySuccess(`Success`);
 };
 

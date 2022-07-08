@@ -22,6 +22,8 @@ export const CHARITY_RATE = 5;
 
 export const MINT_LIMIT_HOURS = "12";
 
+export const MAINTENANCE_DAYS = "30";
+
 export const REWARD_TAX_TABLE = ["500", "300", "100", "0"];
 
 export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {

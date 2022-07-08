@@ -336,7 +336,7 @@ contract GemFacet {
     function ClaimRewards(uint256 _tokenid)
         external
         onlyGemOwner(_tokenid)
-        onlyActive(_tokenid)
+        onlyActive(_tokenid)ClaimRewards
         returns (uint256)
     {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
