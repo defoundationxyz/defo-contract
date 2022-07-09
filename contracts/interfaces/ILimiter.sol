@@ -1,17 +1,20 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-
 interface ILimiter {
-    function transferLog (address from, address to, uint256 amount) external returns(bool);
+    function transferLog(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool);
 
-    function isExcludedFromObs(address _account) external view returns(bool);
+    function isExcludedFromObs(address _account) external view returns (bool);
 
     function setMaxPercentage(uint256 _newPercentage) external;
 
-    function setTaxCollector (address newTaxCollector) external;
+    function setTaxCollector(address newTaxCollector) external;
 
-    function setTokenAddress (address newTokenAddress) external;
+    function setTokenAddress(address newTokenAddress) external;
 
     function setLPAddress(address newLpAddress) external;
 

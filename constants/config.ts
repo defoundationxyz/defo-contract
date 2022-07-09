@@ -10,7 +10,7 @@ export const gems: Record<GemNames, number> = {
 export const gemName = (gemNumber: number) =>
   (Object.keys(gems) as Array<GemNames>).find(key => gems[key] === gemNumber);
 
-export const REWARD_TIME = 3600 * 24 * 7;
+export const MIN_REWARD_TIME = 3600 * 24 * 7;
 
 export const TREASURY_DEFO_RATE = 50;
 export const TREASURY_DAI_RATE = 50;

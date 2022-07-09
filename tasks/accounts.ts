@@ -1,7 +1,7 @@
 import chalk from "chalk";
 import { task } from "hardhat/config";
 
-import ERC20_ABI from "../abi/defo-abi.json";
+import DAI_ABI from "../abi/dai-abi.json";
 import { announce, info } from "../utils/helpers";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
@@ -9,19 +9,19 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
   const namedAccounts = await getNamedAccounts();
   const { dai, forkedDefoToken } = namedAccounts;
   info("\n 📡 Querying balances...");
-  const daiContract = await hre.ethers.getContractAt(ERC20_ABI, dai);
-  const deployedDEFOToken = (await deployments.getOrNull("DEFOToken"))?.address || "";
+  const daiContract = await hre.ethers.getContractAt(DAI_ABI, dai);
+  const defoTokenDeployment = (await deployments.getOrNull("DEFOToken"))?.address || "";
   const diamondDeployment = await deployments.get("DEFODiamond");
 
   const accounts = { ...namedAccounts, DEFOdiamond: diamondDeployment.address };
 
   const defoContract =
-    forkedDefoToken || deployedDEFOToken
-      ? await hre.ethers.getContractAt("DEFOToken", forkedDefoToken || deployedDEFOToken)
+    forkedDefoToken || defoTokenDeployment
+      ? await hre.ethers.getContractAt("DEFOToken", forkedDefoToken || defoTokenDeployment)
       : null;
   announce(
     `DEFO token is ${chalk.yellow(
-      forkedDefoToken ? "forked" : deployedDEFOToken ? "deployed locally" : chalk.red("not deployed!"),
+      forkedDefoToken ? "forked" : defoTokenDeployment ? "deployed locally" : chalk.red("not deployed!"),
     )}. Address: ${defoContract?.address}`,
   );
 

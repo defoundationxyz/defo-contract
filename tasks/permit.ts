@@ -20,7 +20,7 @@ export default task(
 
   for (const token of [defoContract, daiContract]) {
     const name = await token.name();
-    announce(`Approving spending for ${name}`);
+    announce(`Approving spending of ${name}`);
     info(`Current allowance is ${ethers.utils.formatEther(await token.allowance(deployer, spenderAddress))}`);
     if (token == defoContract) {
       info(`Signing for ${await token.name()}`);

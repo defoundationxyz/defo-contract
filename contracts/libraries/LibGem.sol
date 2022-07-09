@@ -46,9 +46,7 @@ library LibGem {
     function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[
-            gem.GemType
-        ];
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
         uint256 rewardCount = _checkRawReward(_tokenId) + gem.claimedReward; // get reward without taper
         uint256 actualReward = 0;
 
@@ -69,16 +67,10 @@ library LibGem {
         return _checkRawReward(_tokenId); // if less than roi don't taper
     }
 
-    function _checkRawReward(uint256 _tokenid)
-        internal
-        view
-        returns (uint256 defoRewards)
-    {
+    function _checkRawReward(uint256 _tokenid) internal view returns (uint256 defoRewards) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[
-            gem.GemType
-        ];
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
 
         uint256 _rate = gemType.RewardRate;
         if (gem.booster == LibGem.Booster.Omega) {
@@ -90,8 +82,7 @@ library LibGem {
         uint256 _lastTime = gem.LastReward;
         uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
 
-        uint256 _rewardDefo = _passedDays *
-            ((_rate * gemType.DefoPrice) / 10000);
+        uint256 _rewardDefo = _passedDays * ((_rate * gemType.DefoPrice) / 10000);
         uint256 taxRate = _rewardTax(_tokenid);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
@@ -129,11 +120,7 @@ library LibGem {
 
     // Returns the struct from a specified position in contract storage
     // ds is short for DiamondStorage
-    function diamondStorage()
-        internal
-        pure
-        returns (DiamondStorage storage ds)
-    {
+    function diamondStorage() internal pure returns (DiamondStorage storage ds) {
         // Specifies a random position in contract storage
         bytes32 storagePosition = keccak256("diamond.storage.LibGem");
         // Set the position of our struct in contract storage

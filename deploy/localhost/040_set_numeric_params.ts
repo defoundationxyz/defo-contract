@@ -7,8 +7,8 @@ import {
   LIQUIDITY_DEFO_RATE,
   MAINTENANCE_DAYS,
   MINT_LIMIT_HOURS,
+  MIN_REWARD_TIME,
   REWARD_TAX_TABLE,
-  REWARD_TIME,
   RUBY_GEM,
   SAPHIRE_GEM,
   TREASURY_DAI_RATE,
@@ -33,7 +33,7 @@ const func: DeployFunction = async hre => {
   await ownerFacetInstance.setAddressAndDistLiquidity(deployer, LIQUIDITY_DEFO_RATE, LIQUIDITY_DAI_RATE);
   await ownerFacetInstance.setAddressDonation(donations, CHARITY_RATE);
   await ownerFacetInstance.setAddressVault(vault);
-  await ownerFacetInstance.setMinRewardTime(REWARD_TIME);
+  await ownerFacetInstance.setMinRewardTime(MIN_REWARD_TIME);
 
   await ownerFacetInstance.setRewardTax(REWARD_TAX_TABLE);
   await ownerFacetInstance.setGemSettings("0", SAPHIRE_GEM);

@@ -14,15 +14,8 @@ import "hardhat/console.sol";
 contract LpManager is Ownable, OwnerRecovery {
     using SafeERC20 for IERC20;
 
-    event SwapAndLiquify(
-        uint256 indexed half,
-        uint256 indexed initialBalance,
-        uint256 indexed newRightBalance
-    );
-    event BufferLpSupply(
-        uint256 indexed amount,
-        uint256 indexed newRightBalance
-    );
+    event SwapAndLiquify(uint256 indexed half, uint256 indexed initialBalance, uint256 indexed newRightBalance);
+    event BufferLpSupply(uint256 indexed amount, uint256 indexed newRightBalance);
 
     uint256 public bufferThreshold;
 
@@ -105,9 +98,7 @@ contract LpManager is Ownable, OwnerRecovery {
         return netDaiAmount;
     }
 
-    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount)
-        private
-    {
+    function addLiquidityToken(uint256 leftAmount, uint256 rightAmount) private {
         router.addLiquidity(
             address(leftSide),
             address(rightSide),

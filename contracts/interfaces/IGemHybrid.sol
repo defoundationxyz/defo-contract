@@ -6,7 +6,6 @@ pragma solidity ^0.8.4;
     functions into one, and this can be done because we are using EIP-2535 (Diamond standard)
   */
 
-
 interface IGemHybrid {
     enum Booster {
         None,
@@ -39,7 +38,7 @@ interface IGemHybrid {
 
     function getGemIdsOfWithType(address _user, uint8 _type) external returns (uint256[] memory);
 
-    function GemOf(uint256 _tokenId) external view returns(Gem memory);
+    function GemOf(uint256 _tokenId) external view returns (Gem memory);
 
-    function GetGemTypeMetadata(uint8 _type) external returns(GemTypeMetadata memory);
+    function GetGemTypeMetadata(uint8 _type) external returns (GemTypeMetadata memory);
 }

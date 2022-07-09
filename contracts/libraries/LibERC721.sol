@@ -34,11 +34,7 @@ library LibERC721 {
 
     // Returns the struct from a specified position in contract storage
     // ds is short for DiamondStorage
-    function diamondStorage()
-        internal
-        pure
-        returns (DiamondStorage storage ds)
-    {
+    function diamondStorage() internal pure returns (DiamondStorage storage ds) {
         // Specifies a random position in contract storage
         // This can be done with a keccak256 hash of a unique string as is
         // done here or other schemes can be used such as this:
@@ -55,29 +51,17 @@ library LibERC721 {
     ///  (`to` == 0). Exception: during contract creation, any number of NFTs
     ///  may be created and assigned without emitting Transfer. At the time of
     ///  any transfer, the approved address for that NFT (if any) is reset to none.
-    event Transfer(
-        address indexed _from,
-        address indexed _to,
-        uint256 indexed _tokenId
-    );
+    event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
 
     /// @dev This emits when the approved address for an NFT is changed or
     ///  reaffirmed. The zero address indicates there is no approved address.
     ///  When a Transfer event emits, this also indicates that the approved
     ///  address for that NFT (if any) is reset to none.
-    event Approval(
-        address indexed _owner,
-        address indexed _approved,
-        uint256 indexed _tokenId
-    );
+    event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
 
     /// @dev This emits when an operator is enabled or disabled for an owner.
     ///  The operator can manage all NFTs of the owner.
-    event ApprovalForAll(
-        address indexed _owner,
-        address indexed _operator,
-        bool _approved
-    );
+    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
 
@@ -87,10 +71,7 @@ library LibERC721 {
             uint256 index = msg.data.length;
             assembly {
                 // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
-                sender_ := and(
-                    mload(add(array, index)),
-                    0xffffffffffffffffffffffffffffffffffffffff
-                )
+                sender_ := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)
             }
         } else {
             sender_ = msg.sender;
@@ -110,13 +91,7 @@ library LibERC721 {
         }
         if (size > 0) {
             require(
-                ERC721_RECEIVED ==
-                    IERC721TokenReceiver(_to).onERC721Received(
-                        _operator,
-                        _from,
-                        _tokenId,
-                        _data
-                    ),
+                ERC721_RECEIVED == IERC721TokenReceiver(_to).onERC721Received(_operator, _from, _tokenId, _data),
                 "DefoERC721Facet: Transfer rejected/failed by _to"
             );
         }
@@ -124,10 +99,7 @@ library LibERC721 {
 
     function _balanceOf(address owner) internal view returns (uint256) {
         LibERC721.DiamondStorage storage ds = LibERC721.diamondStorage();
-        require(
-            owner != address(0),
-            "ERC721: address zero is not a valid owner"
-        );
+        require(owner != address(0), "ERC721: address zero is not a valid owner");
         return ds._balances[owner];
     }
 
@@ -137,10 +109,7 @@ library LibERC721 {
     function _ownerOf(uint256 tokenId) internal view returns (address) {
         DiamondStorage storage ds = diamondStorage();
         address owner = ds._owners[tokenId];
-        require(
-            owner != address(0),
-            "ERC721: owner query for nonexistent token"
-        );
+        require(owner != address(0), "ERC721: owner query for nonexistent token");
         return owner;
     }
 
@@ -149,10 +118,7 @@ library LibERC721 {
      */
     function _getApproved(uint256 tokenId) internal view returns (address) {
         DiamondStorage storage ds = diamondStorage();
-        require(
-            _exists(tokenId),
-            "ERC721: approved query for nonexistent token"
-        );
+        require(_exists(tokenId), "ERC721: approved query for nonexistent token");
 
         return ds._tokenApprovals[tokenId];
     }
@@ -160,11 +126,7 @@ library LibERC721 {
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function _isApprovedForAll(address owner, address operator)
-        internal
-        view
-        returns (bool)
-    {
+    function _isApprovedForAll(address owner, address operator) internal view returns (bool) {
         DiamondStorage storage ds = diamondStorage();
         return ds._operatorApprovals[owner][operator];
     }
@@ -217,19 +179,10 @@ library LibERC721 {
      *
      * - `tokenId` must exist.
      */
-    function _isApprovedOrOwner(address spender, uint256 tokenId)
-        internal
-        view
-        returns (bool)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721: operator query for nonexistent token"
-        );
+    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view returns (bool) {
+        require(_exists(tokenId), "ERC721: operator query for nonexistent token");
         address owner = _ownerOf(tokenId);
-        return (spender == owner ||
-            _isApprovedForAll(owner, spender) ||
-            _getApproved(tokenId) == spender);
+        return (spender == owner || _isApprovedForAll(owner, spender) || _getApproved(tokenId) == spender);
     }
 
     /**
@@ -300,10 +253,7 @@ library LibERC721 {
         address to,
         uint256 tokenId
     ) internal {
-        require(
-            _ownerOf(tokenId) == from,
-            "ERC721: transfer from incorrect owner"
-        );
+        require(_ownerOf(tokenId) == from, "ERC721: transfer from incorrect owner");
         require(to != address(0), "ERC721: transfer to the zero address");
         DiamondStorage storage ds = diamondStorage();
         _beforeTokenTransfer(from, to, tokenId);

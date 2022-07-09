@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity >=0.5.0;
+
 interface IWAVAX {
     function deposit() external payable;
 

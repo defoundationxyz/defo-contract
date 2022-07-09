@@ -1,7 +1,7 @@
 //const { inputToConfig } = require("@ethereum-waffle/compiler");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { expectRevert } = require('@openzeppelin/test-helpers');
+const { expectRevert } = require("@openzeppelin/test-helpers");
 
 /* 
   -blocklist
@@ -9,33 +9,23 @@ const { expectRevert } = require('@openzeppelin/test-helpers');
     -need mock lp contracts
   -selling tokens
     -need mock router
-*/  
+*/
 
 describe("DefoLimiter", function () {
   var owner, acc1, acc2, acc3;
-  var node, 
-      limiter, 
-      liqpool, 
-      lpmanager, 
-      router, 
-      defotoken, 
-      mockdai, 
-      mockpair, 
-      mockfactory,
-      mockgemhybridfacet, 
-      wavax;
+  var node, limiter, liqpool, lpmanager, router, defotoken, mockdai, mockpair, mockfactory, mockgemhybridfacet, wavax;
 
   beforeEach(async function () {
     [owner, acc1, acc2, acc3, ...accs] = await ethers.getSigners();
 
-    await ethers.provider.send("hardhat_reset",[{
-      forking: {
+    await ethers.provider.send("hardhat_reset", [
+      {
+        forking: {
           jsonRpcUrl: "https://api.avax.network/ext/bc/C/rpc",
           blockNumber: 2975762,
         },
       },
-      ],
-    );
+    ]);
 
     //Mock Node Deployment
     var Node = await ethers.getContractFactory("MockNode");
@@ -43,18 +33,15 @@ describe("DefoLimiter", function () {
     await node.deployed();
 
     //Mock Facet Deployjment
-    var MockGemHybridFacet = await ethers.getContractFactory("MockGemHybridFacet")
-    mockgemhybridfacet = await MockGemHybridFacet.deploy()
-    await mockgemhybridfacet.deployed()
+    var MockGemHybridFacet = await ethers.getContractFactory("MockGemHybridFacet");
+    mockgemhybridfacet = await MockGemHybridFacet.deploy();
+    await mockgemhybridfacet.deployed();
 
     /// Check limiter constructor
     var Limiter = await ethers.getContractFactory("DefoLimiter");
     limiter = await Limiter.deploy();
     await limiter.deployed();
-    limiter.initialize(
-      node.address,
-      mockgemhybridfacet.address
-    )
+    limiter.initialize(node.address, mockgemhybridfacet.address);
 
     //Mock LP Deployment
     var LiqPool = await ethers.getContractFactory("MockLiqPool");
@@ -94,10 +81,7 @@ describe("DefoLimiter", function () {
 
     //Mock LP Manager Deployment
     var LPManager = await ethers.getContractFactory("MockLPManager");
-    lpmanager = await LPManager.connect(owner).deploy(
-      router.address,
-      [mockdai.address, defotoken.address]
-    );
+    lpmanager = await LPManager.connect(owner).deploy(router.address, [mockdai.address, defotoken.address]);
     await lpmanager.deployed();
 
     //Set addresses in limiter contract
@@ -107,14 +91,13 @@ describe("DefoLimiter", function () {
     await defotoken.allowance(owner.address, limiter.address);
   });
 
-  it("Should add an address to the blocklist and try to call from that address", async function() {
+  it("Should add an address to the blocklist and try to call from that address", async function () {
     await limiter.editBlocklist(acc1.address, true);
     expect(await limiter.Blocklist(acc1.address)).to.equal(true);
 
     await expectRevert(defotoken.connect(acc1).mint(acc1.address, "10000"), "Address is not permitted");
-  })
+  });
 
-  
   /*it("Should buy some tokens outside of timeframe", async function() {
     await defotoken.mint(owner.address, "200000"); //Mint all tokens to owner for total supply
     await limiter.setLPAddress(owner.address) //Set owner address as LP
@@ -135,12 +118,12 @@ describe("DefoLimiter", function () {
   }) */
 
   it("Should sell tokens from an account", async () => {
-    await defotoken.mint(acc1.address, "5000000000000000000")
+    await defotoken.mint(acc1.address, "5000000000000000000");
     await defotoken.connect(acc1).transfer(defotoken.address, "4");
 
     await expectRevert(
-      defotoken.connect(acc1).transfer(defotoken.address, "4"), 
-      "Cannot sell more than amount of rewards per week"
-    )
-  })
+      defotoken.connect(acc1).transfer(defotoken.address, "4"),
+      "Cannot sell more than amount of rewards per week",
+    );
+  });
 });

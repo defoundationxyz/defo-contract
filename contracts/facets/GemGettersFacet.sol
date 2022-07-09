@@ -14,23 +14,13 @@ contract GemGettersFacet {
         return gem;
     }
 
-    function GetGemTypeMetadata(uint8 _type)
-    external
-    view
-    returns (LibGem.GemTypeMetadata memory)
-    {
+    function GetGemTypeMetadata(uint8 _type) external view returns (LibGem.GemTypeMetadata memory) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.GemTypeMetadata storage gemTypeMetadata = ds.GetGemTypeMetadata[
-        _type
-        ];
+        LibGem.GemTypeMetadata storage gemTypeMetadata = ds.GetGemTypeMetadata[_type];
         return gemTypeMetadata;
     }
 
-    function getUserTotalCharity(address _user)
-    external
-    view
-    returns (uint256)
-    {
+    function getUserTotalCharity(address _user) external view returns (uint256) {
         LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
         LibUser.UserData storage user = ds.GetUserData[_user];
         return user.charityContribution;
@@ -46,28 +36,20 @@ contract GemGettersFacet {
         return ds.TotalCharity;
     }
 
-    function getExpiredTimeSinceLock(uint8 _gemType)
-    external
-    view
-    returns (uint256)
-    {
+    function getExpiredTimeSinceLock(uint8 _gemType) external view returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
 
         return block.timestamp - gemType.LastMint;
     }
 
-    function isMintAvailableForGem(uint8 _gemType)
-    external
-    view
-    returns (bool)
-    {
+    function isMintAvailableForGem(uint8 _gemType) external view returns (bool) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         return
-        (block.timestamp - gemType.LastMint >= uint256 (metads.MintLimitHours) * 1 hours) ||
-        (gemType.MintCount + 1 < gemType.DailyLimit);
+            (block.timestamp - gemType.LastMint >= uint256(metads.MintLimitHours) * 1 hours) ||
+            (gemType.MintCount + 1 < gemType.DailyLimit);
     }
 
     function getAvailableBoosters(

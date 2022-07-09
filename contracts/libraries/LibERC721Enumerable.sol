@@ -20,18 +20,12 @@ library LibERC721Enumerable {
 
     // Returns the struct from a specified position in contract storage
     // ds is short for DiamondStorage
-    function diamondStorage()
-        internal
-        pure
-        returns (DiamondStorage storage ds)
-    {
+    function diamondStorage() internal pure returns (DiamondStorage storage ds) {
         // Specifies a random position in contract storage
         // This can be done with a keccak256 hash of a unique string as is
         // done here or other schemes can be used such as this:
         // bytes32 storagePosition = keccak256(abi.encodePacked(ERC1155.interfaceId, ERC1155.name, address(this)));
-        bytes32 storagePosition = keccak256(
-            "diamond.storage.LibERC721Enumerable"
-        );
+        bytes32 storagePosition = keccak256("diamond.storage.LibERC721Enumerable");
         // Set the position of our struct in contract storage
         assembly {
             ds.slot := storagePosition
@@ -41,16 +35,9 @@ library LibERC721Enumerable {
     /**
      * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
      */
-    function _tokenOfOwnerByIndex(address owner, uint256 index)
-        internal
-        view
-        returns (uint256)
-    {
+    function _tokenOfOwnerByIndex(address owner, uint256 index) internal view returns (uint256) {
         DiamondStorage storage ds = diamondStorage();
-        require(
-            index < LibERC721._balanceOf(owner),
-            "ERC721Enumerable: owner index out of bounds"
-        );
+        require(index < LibERC721._balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
         return ds._ownedTokens[owner][index];
     }
 
@@ -93,8 +80,7 @@ library LibERC721Enumerable {
      * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
      */
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         uint256 length = LibERC721._balanceOf(to);
         ds._ownedTokens[to][length] = tokenId;
         ds._ownedTokensIndex[tokenId] = length;
@@ -105,8 +91,7 @@ library LibERC721Enumerable {
      * @param tokenId uint256 ID of the token to be added to the tokens list
      */
     function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         ds._allTokensIndex[tokenId] = ds._allTokens.length;
         ds._allTokens.push(tokenId);
     }
@@ -119,11 +104,8 @@ library LibERC721Enumerable {
      * @param from address representing the previous owner of the given token ID
      * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
      */
-    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId)
-        private
-    {
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
@@ -149,8 +131,7 @@ library LibERC721Enumerable {
      * @param tokenId uint256 ID of the token to be removed from the tokens list
      */
     function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
