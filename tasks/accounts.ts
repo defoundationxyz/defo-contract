@@ -11,6 +11,9 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
   info("\n 📡 Querying balances...");
   const daiContract = await hre.ethers.getContractAt(ERC20_ABI, dai);
   const deployedDEFOToken = (await deployments.getOrNull("DEFOToken"))?.address || "";
+  const diamondDeployment = await deployments.get("DEFODiamond");
+
+  const accounts = { ...namedAccounts, DEFOdiamond: diamondDeployment.address };
 
   const defoContract =
     forkedDefoToken || deployedDEFOToken
@@ -23,7 +26,7 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
   );
 
   const table = await Promise.all(
-    Object.entries(namedAccounts).map(async ([accountName, accountAddress]) => {
+    Object.entries(accounts).map(async ([accountName, accountAddress]) => {
       return {
         name: accountName,
         address: accountAddress,
