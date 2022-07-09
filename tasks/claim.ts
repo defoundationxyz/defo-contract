@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -31,7 +30,9 @@ export default task("claim", "claim rewards for gem(s)")
         return {
           gemId: Number(gemId),
           ...(await gemGettersFacet.GemOf(gemId)),
-          unclaimedReward: await gemFacetContract.checkRawReward(gemId),
+          rawReward: await gemFacetContract.checkRawReward(gemId),
+          taperedReward: await gemFacetContract.checkTaperedReward(gemId),
+          taxedReward: await gemFacetContract.checkTaxedReward(gemId),
           claimable: await gemFacetContract.isClaimable(gemId),
         };
       }),
@@ -43,27 +44,33 @@ export default task("claim", "claim rewards for gem(s)")
     announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
     for (const type of types) {
       announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type]?.length || 0}`);
-      const userGems = await Promise.all(
-        gemsGroupedByType[type]?.map(async gem => {
-          if (gemIdParam == -1 || gem.gemId == gemIdParam) {
-            const pickedGem = _.pick(gem, ["gemId", "claimedReward", "unclaimedReward"]) as unknown as Record<
-              string,
-              number | string
-            >;
-            const formattedGem: Record<string, string | number> = {};
-            Object.keys(pickedGem).map(key => {
-              formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
-            });
-            if (gem.claimable) {
-              await gemFacetContract.ClaimRewards(gem.gemId);
-              formattedGem.claimed = "Done";
-            } else {
-              formattedGem.claimed = "Not claimable";
+      const userGems = (
+        await Promise.all(
+          gemsGroupedByType[type]?.map(async gem => {
+            if (gemIdParam == -1 || gem.gemId == gemIdParam) {
+              const pickedGem = _.pick(gem, [
+                "gemId",
+                "rawReward",
+                "taperedReward",
+                "taxedReward",
+              ]) as unknown as Record<string, number | string>;
+              const formattedGem: Record<string, string | number> = {};
+              Object.keys(pickedGem).map(key => {
+                formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
+              });
+              if (gem.claimable) {
+                await gemFacetContract.ClaimRewards(gem.gemId);
+                formattedGem.claimed = Number(
+                  ethers.utils.formatEther((await gemGettersFacet.GemOf(gem.gemId)).claimedReward),
+                );
+              } else {
+                formattedGem.claimed = "Not claimable";
+              }
+              return formattedGem;
             }
-            return formattedGem;
-          }
-        }),
-      );
+          }),
+        )
+      ).filter(el => el);
       userGems && userGems[0] && console.table(userGems);
     }
     info(`Total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);

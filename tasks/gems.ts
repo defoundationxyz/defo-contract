@@ -25,7 +25,7 @@ export default task("gems", "get gems info and balance information for the deplo
         return {
           gemId: Number(gemId),
           ...gemData,
-          unclaimedReward: await gemFacetContract.checkRawReward(gemId),
+          unclaimedReward: await gemFacetContract.checkTaperedReward(gemId),
           pendingMaintenance: await gemFacetContract.checkPendingMaintenance(gemId),
           claimable: await gemFacetContract.isClaimable(gemId),
         };
