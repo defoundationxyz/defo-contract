@@ -32,14 +32,14 @@ $ yarn install
 
 ## Deployment
 We use [Hardhat](https://hardhat.dev) and [hardhat-deploy](https://github.com/wighawag/hardhat-deploy).
-In one terminal window build the contracts and start a HH EVM fork of Avalanche mainnet with:
+In one terminal window build the contracts, start a HH EVM fork of Avalanche mainnet, and deploy with:
 ```shell
 yarn start-fork
 ```
 
-In the other terminal window run the deployment and test scripts
+In the other terminal window run the permint, mint, and wait a year script
 ```shell
-yarn run-fork
+yarn dev
 ```
 
 ## Handy scripts

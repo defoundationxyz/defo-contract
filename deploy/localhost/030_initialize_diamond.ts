@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { ERC721Facet, OwnerFacet } from "../types";
-import { deployAnnounce, deploySuccess } from "../utils/helpers";
+import { ERC721Facet, OwnerFacet } from "../../types";
+import { deployAnnounce, deploySuccess } from "../../utils/helpers";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;

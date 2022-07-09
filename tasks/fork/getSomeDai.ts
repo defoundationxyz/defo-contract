@@ -1,26 +1,7 @@
 import { task, types } from "hardhat/config";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import DAI_ABI from "../../abi/erc20-abi.json";
-import { MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from "../../constants/addresses";
 import { announce, error, info, success } from "../../utils/helpers";
-
-const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: string, amountToTransfer?: number) => {
-  const accountToInpersonate = MAINNET_DAI_WHALE_ADDRESS;
-  await hre.network.provider.request({
-    method: "hardhat_impersonateAccount",
-    params: [accountToInpersonate],
-  });
-  const whaleSigner = await hre.ethers.getSigner(accountToInpersonate);
-  for (const token of [MAINNET_DAI_ADDRESS]) {
-    const contract = new hre.ethers.Contract(token, DAI_ABI, whaleSigner);
-    const toTransfer =
-      (amountToTransfer && hre.ethers.utils.parseEther(amountToTransfer.toString())) ??
-      (await contract.balanceOf(accountToInpersonate));
-    await contract.connect(whaleSigner).transfer(accountToFund, toTransfer);
-    success(`sent ${toTransfer} of token ${token} to ${accountToFund}`);
-  }
-};
+import { beTheWhale } from "./beTheWhale";
 
 export default task("fork:get-some-dai", "Distribute DAI from AAVE")
   .addOptionalParam(
@@ -44,5 +25,6 @@ export default task("fork:get-some-dai", "Distribute DAI from AAVE")
     for (const account of accounts) {
       announce(`Funding ${account} with DAI...`);
       await beTheWhale(hre, account, amount);
+      success(`sent ${amount} to ${account}`);
     }
   });

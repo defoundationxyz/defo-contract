@@ -102,7 +102,7 @@
     "prettier:check": "prettier --check --config ./.prettierrc.yml \"**/*.{js,json,md,sol,ts,yaml,yml}\"",
     "remove-logs": "yarn run hardhat remove-logs",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain",
-    "start-fork": "yarn compile && FORK_ENABLED=true hardhat node --no-deploy",
+    "start-fork": "yarn compile && FORK_ENABLED=true hardhat node",
     "deploy": "hardhat deploy --write true --network",
     "accounts": "hardhat accounts --network localhost",
     "gems": "hardhat gems --network localhost",
@@ -112,7 +112,7 @@
     "get-some-gems": "hardhat --network localhost get-some-gems",
     "jump-in-time": "hardhat --network localhost jump-in-time",
     "permit": "hardhat --network localhost permit",
-    "run-fork": "yarn deploy localhost && yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time && yarn gems && yarn accounts",
+    "dev": "yarn permit && yarn get-some-gems && yarn jump-in-time && yarn gems && yarn accounts",
     "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat unused/test",
     "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat unused/test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network"

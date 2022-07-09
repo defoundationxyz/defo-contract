@@ -13,9 +13,9 @@ import {
   SAPHIRE_GEM,
   TREASURY_DAI_RATE,
   TREASURY_DEFO_RATE,
-} from "../constants";
-import { OwnerFacet } from "../types";
-import { deployAnnounce, deploySuccess } from "../utils/helpers";
+} from "../../constants";
+import { OwnerFacet } from "../../types";
+import { deployAnnounce, deploySuccess } from "../../utils/helpers";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;
