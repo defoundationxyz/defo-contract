@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "es6"
+    ],
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2017"
+  },
+  "exclude": [
+    "node_modules",
+    "unused/**/*"
+  ],
+  "files": [
+    "./hardhat.config.ts",
+    "./hardhat.network.ts",
+    "./hardhat.accounts.ts",
+    "./constants/addresses.ts"
+  ],
+  "include": [
+    "types/**/*",
+    "test/**/*",
+    "tasks/**/*",
+    "deploy/**/*",
+    "utils/**/*",
+    "constants/**/*"
+  ],
+  "paths": {
+    "@types/*": [
+      "types/*"
+    ],
+    "@utils/*": [
+      "utils/*"
+    ]
+  }
+}

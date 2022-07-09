@@ -50,7 +50,7 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(
             (block.timestamp - gemType.LastMint >=
-                1 hours * metads.MintLimitHours) ||
+                1 hours * uint256(metads.MintLimitHours)) ||
                 (gemType.MintCount + 1 <= gemType.DailyLimit),
             "Gem mint restriction"
         );
@@ -102,6 +102,7 @@ contract GemFacet {
             );
         }
         uint256 tokenId = metads._tokenIdCounter.current();
+        console.log("minting tokenID: ", tokenId);
         metads._tokenIdCounter.increment();
         LibERC721._safeMint(_to, tokenId);
         LibGem.Gem memory gem;
@@ -150,7 +151,7 @@ contract GemFacet {
     }
 
     // gem compounding function creates a gem from unclaimed rewards , only creates same type of the compounded gem
-    function _compound(uint256 _tokenid, uint8 _gemType)
+        function _compound(uint256 _tokenid, uint8 _gemType)
         internal
         mintTimeLimit(_gemType)
     {
@@ -174,7 +175,7 @@ contract GemFacet {
         ds.GemOf[tokenId] = newGem;
         if (
             block.timestamp - gemType.LastMint >=
-            1 hours * metads.MintLimitHours
+            1 hours * uint256(metads.MintLimitHours)
         ) {
             gemType.LastMint = uint32(block.timestamp);
             gemType.MintCount = 1;
@@ -302,11 +303,11 @@ contract GemFacet {
         LibGem.GemTypeMetadata storage gemType = ds.GetGemTypeMetadata[_type];
         require(
             metads.DefoToken.balanceOf(msg.sender) > gemType.DefoPrice,
-            "Insufficient Defo"
+            "Insufficient DEFO"
         );
         require(
             metads.PaymentToken.balanceOf(msg.sender) > gemType.StablePrice,
-            "Insufficient USD"
+            "Insufficient DAI"
         );
         metads.DefoToken.transferFrom(
             msg.sender,
@@ -323,7 +324,7 @@ contract GemFacet {
         _mintGem(_type, msg.sender);
         if (
             block.timestamp - gemType.LastMint >=
-            1 hours * metads.MintLimitHours
+            1 hours * uint256(metads.MintLimitHours)
         ) {
             gemType.LastMint = uint32(block.timestamp);
             gemType.MintCount = 1;
@@ -538,6 +539,7 @@ contract GemFacet {
 
     function getGemIdsOf(address _user) public view returns (uint256[] memory) {
         uint256 numberOfGems = LibERC721._balanceOf(_user);
+        console.log("number of gems: ", numberOfGems);
         uint256[] memory gemIds = new uint256[](numberOfGems);
         for (uint256 i = 0; i < numberOfGems; i++) {
             uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(_user, i);

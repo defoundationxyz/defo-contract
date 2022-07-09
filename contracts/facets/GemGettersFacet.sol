@@ -15,21 +15,21 @@ contract GemGettersFacet {
     }
 
     function GetGemTypeMetadata(uint8 _type)
-        external
-        view
-        returns (LibGem.GemTypeMetadata memory)
+    external
+    view
+    returns (LibGem.GemTypeMetadata memory)
     {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata storage gemTypeMetadata = ds.GetGemTypeMetadata[
-            _type
+        _type
         ];
         return gemTypeMetadata;
     }
 
     function getUserTotalCharity(address _user)
-        external
-        view
-        returns (uint256)
+    external
+    view
+    returns (uint256)
     {
         LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
         LibUser.UserData storage user = ds.GetUserData[_user];
@@ -47,9 +47,9 @@ contract GemGettersFacet {
     }
 
     function getExpiredTimeSinceLock(uint8 _gemType)
-        external
-        view
-        returns (uint256)
+    external
+    view
+    returns (uint256)
     {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
@@ -58,18 +58,16 @@ contract GemGettersFacet {
     }
 
     function isMintAvailableForGem(uint8 _gemType)
-        external
-        view
-        returns (bool)
+    external
+    view
+    returns (bool)
     {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-
         return
-            (block.timestamp - gemType.LastMint >=
-                1 hours * metads.MintLimitHours) ||
-            (gemType.MintCount + 1 < gemType.DailyLimit);
+        (block.timestamp - gemType.LastMint >= uint256 (metads.MintLimitHours) * 1 hours) ||
+        (gemType.MintCount + 1 < gemType.DailyLimit);
     }
 
     function getAvailableBoosters(
