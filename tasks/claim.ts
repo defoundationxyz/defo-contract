@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -45,31 +46,25 @@ export default task("claim", "claim rewards for gem(s)")
       const userGems = await Promise.all(
         gemsGroupedByType[type]?.map(async gem => {
           if (gemIdParam == -1 || gem.gemId == gemIdParam) {
-            const pickedGem = _.pick(gem, [
-              "gemId",
-              "MintTime",
-              "LastReward",
-              "LastMaintained",
-              "booster",
-              "claimedReward",
-              "unclaimedReward",
-              "claimable",
-            ]) as unknown as Record<string, number | string>;
+            const pickedGem = _.pick(gem, ["gemId", "claimedReward", "unclaimedReward"]) as unknown as Record<
+              string,
+              number | string
+            >;
             const formattedGem: Record<string, string | number> = {};
             Object.keys(pickedGem).map(key => {
               formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
             });
             if (gem.claimable) {
-              const claimed = await gemFacetContract.ClaimRewards(gem.gemId);
-              formattedGem.claimed = claimed.data;
+              await gemFacetContract.ClaimRewards(gem.gemId);
+              formattedGem.claimed = "Done";
             } else {
-              formattedGem.claimed = "no";
+              formattedGem.claimed = "Not claimable";
             }
             return formattedGem;
           }
         }),
       );
-      userGems && console.table(userGems);
+      userGems && userGems[0] && console.table(userGems);
     }
     info(`Total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
   });

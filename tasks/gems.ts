@@ -26,7 +26,6 @@ export default task("gems", "get gems info and balance information for the deplo
           gemId: Number(gemId),
           ...gemData,
           unclaimedReward: await gemFacetContract.checkRawReward(gemId),
-          active: await gemFacetContract.isActive(gemId),
           pendingMaintenance: await gemFacetContract.checkPendingMaintenance(gemId),
           claimable: await gemFacetContract.isClaimable(gemId),
         };
@@ -37,7 +36,7 @@ export default task("gems", "get gems info and balance information for the deplo
 
     const gemsGroupedByType = gemsIdsWithData.reduce(
       (r, v, i, a, k = v.GemType) => ((r[k] || (r[k] = [])).push(v), r),
-      {} as Array<Array<LibGem.GemStructOutput & { gemId: number }>>,
+      {} as Array<Array<LibGem.GemStructOutput & { gemId: number; claimable: boolean }>>,
     );
     announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
     info(`Total Charity: ${await gemGettersFacet.getTotalCharity()}`);
@@ -63,7 +62,6 @@ export default task("gems", "get gems info and balance information for the deplo
           "booster",
           "claimedReward",
           "unclaimedReward",
-          "active",
           "claimable",
           "pendingMaintenance",
         ]) as unknown as Record<string, number | string>;
