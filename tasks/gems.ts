@@ -23,6 +23,8 @@ export default task("gems", "get gems info and balance information for the deplo
         gemId: Number(gemId),
         ...(await gemGettersFacet.GemOf(gemId)),
         unclaimedReward: await gemFacetContract.checkRawReward(gemId),
+        active: await gemFacetContract.isActive(gemId),
+        pendingMaintenance: await gemFacetContract.checkPendingMaintenance(gemId),
       };
     }),
   );
@@ -57,6 +59,8 @@ export default task("gems", "get gems info and balance information for the deplo
         "booster",
         "claimedReward",
         "unclaimedReward",
+        "active",
+        "pendingMaintenance",
       ]) as unknown as Record<string, number | string>;
       const formattedGem: Record<string, string | number> = {};
       Object.keys(pickedGem).map(function (key) {

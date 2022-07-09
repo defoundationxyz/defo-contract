@@ -7,7 +7,7 @@ import { LibGem } from "../types/contracts/facets/GemGettersFacet";
 import { announce, error, info, success } from "../utils/helpers";
 
 export default task("get-some-gems", "mint all NFTs")
-  .addOptionalParam("gemType", "0 - sapphire, 1 - ruby, 2 - diamond", -1, types.int)
+  .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond", -1, types.int)
   .setAction(async ({ gemType }, hre) => {
     const { getNamedAccounts, deployments, ethers } = hre;
     const { deployer } = await getNamedAccounts();
@@ -16,7 +16,7 @@ export default task("get-some-gems", "mint all NFTs")
     const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
     const gemGettersFacet = await ethers.getContractAt<GemGettersFacet>("GemGettersFacet", diamondDeployment.address);
     const gemNFT = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-    const types: number[] = gemType === -1 ? Object.values(gems) : [gemType];
+    const types: number[] = !gemType || gemType === -1 ? Object.values(gems) : [gemType];
 
     const gemIds = await gemFacetContract.getGemIdsOf(deployer);
     const gemsIdsWithData = await Promise.all(

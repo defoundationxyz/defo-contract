@@ -44,7 +44,7 @@ export const chainName = (chainId: number) => {
 export const outputFormatKeyValue = (key: string, value: string | number): string | number =>
   key.match("Last|Time")
     ? moment.unix(Number(value)).format("DD.MM.YYYY HH:mm:ss")
-    : key.match("Fee|Price|claim")
+    : key.match("Fee|Price|claim|Maintenance")
     ? Number(ethers.utils.formatEther(value))
     : value;
 
