@@ -50,7 +50,7 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(
             (block.timestamp - gemType.LastMint >=
-                1 hours * metads.MintLimitHours) ||
+                1 hours * uint256(metads.MintLimitHours)) ||
                 (gemType.MintCount + 1 <= gemType.DailyLimit),
             "Gem mint restriction"
         );
@@ -151,7 +151,7 @@ contract GemFacet {
     }
 
     // gem compounding function creates a gem from unclaimed rewards , only creates same type of the compounded gem
-    function _compound(uint256 _tokenid, uint8 _gemType)
+        function _compound(uint256 _tokenid, uint8 _gemType)
         internal
         mintTimeLimit(_gemType)
     {
@@ -175,7 +175,7 @@ contract GemFacet {
         ds.GemOf[tokenId] = newGem;
         if (
             block.timestamp - gemType.LastMint >=
-            1 hours * metads.MintLimitHours
+            1 hours * uint256(metads.MintLimitHours)
         ) {
             gemType.LastMint = uint32(block.timestamp);
             gemType.MintCount = 1;
@@ -324,7 +324,7 @@ contract GemFacet {
         _mintGem(_type, msg.sender);
         if (
             block.timestamp - gemType.LastMint >=
-            1 hours * metads.MintLimitHours
+            1 hours * uint256(metads.MintLimitHours)
         ) {
             gemType.LastMint = uint32(block.timestamp);
             gemType.MintCount = 1;
