@@ -37,7 +37,7 @@ In one terminal window build the contracts, start a HH EVM fork of Avalanche mai
 yarn start-fork
 ```
 
-In the other terminal window run the permint, mint, and wait a year script
+In the other terminal window run the permit, mint, and wait a year script
 ```shell
 yarn dev
 ```
