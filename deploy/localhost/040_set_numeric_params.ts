@@ -21,7 +21,7 @@ const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;
   const { deployer, donations, team, vault } = await getNamedAccounts();
 
-  const ownerFacetInstance = await hre.ethers.getContractAt<OwnerFacet>(
+  const ownerFacetInstance = await ethers.getContractAt<OwnerFacet>(
     "OwnerFacet",
     (
       await deployments.get("DEFODiamond")
