@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { task } from "hardhat/config";
 
 import DAI_ABI from "../abi/dai-abi.json";
-import { announce, info } from "../utils/helpers";
+import { announce, info } from "../utils/output.helper";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
   const { getNamedAccounts, deployments, ethers } = hre;

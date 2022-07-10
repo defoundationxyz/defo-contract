@@ -4,13 +4,14 @@ import _ from "lodash";
 import { MIN_REWARD_TIME, gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, info, outputFormatKeyValue, outputFormatter, warning } from "../utils/helpers";
+import { announce, info, outputFormatKeyValue, outputFormatter, warning } from "../utils/output.helper";
 
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
   .setAction(async ({ type }, hre) => {
     const { getNamedAccounts, deployments, ethers } = hre;
     const { deployer } = await getNamedAccounts();
+    info("\n 📡 Querying gems...");
 
     const diamondDeployment = await deployments.get("DEFODiamond");
     const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);

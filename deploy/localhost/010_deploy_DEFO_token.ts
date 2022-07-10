@@ -16,6 +16,8 @@ const func: DeployFunction = async hre => {
     owner: deployer,
     args: [chainId],
   });
+  /// TODO clarify and deploy under DEFO token deployer / transfer ownership
+  /// TODO set total supply and other parameters from tokenomics requirements
 };
 
 export default func;

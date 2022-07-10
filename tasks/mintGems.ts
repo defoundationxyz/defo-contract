@@ -4,7 +4,7 @@ import _ from "lodash";
 import { gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, error, info, success } from "../utils/helpers";
+import { announce, error, info, success } from "../utils/output.helper";
 
 export default task("get-some-gems", "mint NFT gems")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - mint all three", -1, types.int)

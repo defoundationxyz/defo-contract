@@ -2,10 +2,10 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { beTheWhale } from "../../tasks/fork/beTheWhale";
 import { DEFOToken } from "../../types";
-import { announce, info, success } from "../../utils/helpers";
+import { announce, info, success } from "../../utils/output.helper";
 
 const func: DeployFunction = async hre => {
-  const { getNamedAccounts, deployments, ethers } = hre;
+  const { getNamedAccounts, ethers } = hre;
   const { deployer } = await getNamedAccounts();
 
   const AMOUNT = 1000000;
@@ -14,8 +14,7 @@ const func: DeployFunction = async hre => {
   await beTheWhale(hre, deployer, AMOUNT);
   info(`${AMOUNT} DAI have been sent`);
 
-  const defoTokenDeployment = await deployments.get("DEFOToken");
-  const defoContract = await ethers.getContractAt<DEFOToken>("DEFOToken", defoTokenDeployment.address);
+  const defoContract = await ethers.getContract<DEFOToken>("DEFOToken");
 
   const amt = ethers.utils.parseEther(AMOUNT.toString());
   await defoContract.mint(deployer, amt);

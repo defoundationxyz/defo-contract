@@ -4,7 +4,7 @@ import _ from "lodash";
 import { gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, info, outputFormatKeyValue } from "../utils/helpers";
+import { announce, info, outputFormatKeyValue } from "../utils/output.helper";
 
 export default task("claim", "claim rewards for gem(s)")
   .addOptionalParam("id", "gem id to claim rewards for a specific gemId", -1, types.int)

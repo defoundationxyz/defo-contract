@@ -47,8 +47,9 @@ To use those you need to have a local network running and contracts deployed, e.
 ```shell
 yarn accounts       # AVAX, DAI, DEFO balances of all the named accounts
 yarn gems           # balances of the NFTs for the deployer
-yarn get-some-dai   # optional with named account (or all) and amount --account all --amount 10000
+yarn get-some-dai   # optional with account and amount, e.g. --account all --amount 10000
 yarn get-some-defo  # same
 yarn get-some-gems  # mints all 3 gems, optional with gem type (0,1,2), e.g. --type 0
-yarn jump-in-time   # optional with human-readable time without spaces, e.g. --time 3y
+yarn jump-in-time   # optional with human-readable time without spaces, e.g. --time 7d
+yarn claim          # optional with human-readable time without spaces, e.g. --time 7d
 ```

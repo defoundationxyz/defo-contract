@@ -5,7 +5,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { DEFOToken, ERC721Facet, OwnerFacet } from "../../types";
-import { deployAnnounce, deployInfo, deploySuccess } from "../../utils/helpers";
+import { deployAnnounce, deployInfo, deploySuccess } from "../../utils/output.helper";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments, ethers } = hre;

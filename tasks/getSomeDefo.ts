@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
 
 import { DEFOToken } from "../types";
-import { announce, error, success } from "../utils/helpers";
+import { announce, error, success } from "../utils/output.helper";
 
 export default task("get-some-defo", "get funded with DEFO Token")
   .addOptionalParam(

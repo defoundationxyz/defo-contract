@@ -1,9 +1,9 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { deployInfo, deploySuccess } from "../../utils/helpers";
+import { deployInfo, deploySuccess } from "../../utils/output.helper";
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function () {
   deployInfo("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   deploySuccess("Contract Deployments Complete!");
   deployInfo("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");

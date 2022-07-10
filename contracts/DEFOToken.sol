@@ -24,12 +24,12 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
     }
 
     modifier auth() {
-        require(wards[msg.sender] == 1, "Defo/not-authorized");
+        require(wards[msg.sender] == 1, "DEFO/not-authorized");
         _;
     }
 
     // --- ERC20 Data ---
-    string public constant name = "Defo Token";
+    string public constant name = "DEFO Token";
     string public constant symbol = "DEFO";
     string public constant version = "1";
     uint8 public constant decimals = 18;
@@ -79,9 +79,9 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
         address dst,
         uint256 wad
     ) public returns (bool) {
-        require(balanceOf[src] >= wad, "Defo/insufficient-balance");
+        require(balanceOf[src] >= wad, "DEFO/insufficient-balance");
         if (src != msg.sender && allowance[src][msg.sender] != type(uint256).max) {
-            require(allowance[src][msg.sender] >= wad, "Defo/insufficient-allowance");
+            require(allowance[src][msg.sender] >= wad, "DEFO/insufficient-allowance");
             allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
         }
         balanceOf[src] = sub(balanceOf[src], wad);
@@ -97,9 +97,9 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
     }
 
     function burn(address usr, uint256 wad) external {
-        require(balanceOf[usr] >= wad, "Defo/insufficient-balance");
+        require(balanceOf[usr] >= wad, "DEFO/insufficient-balance");
         if (usr != msg.sender && allowance[usr][msg.sender] != type(uint256).max) {
-            require(allowance[usr][msg.sender] >= wad, "Defo/insufficient-allowance");
+            require(allowance[usr][msg.sender] >= wad, "DEFO/insufficient-allowance");
             allowance[usr][msg.sender] = sub(allowance[usr][msg.sender], wad);
         }
         balanceOf[usr] = sub(balanceOf[usr], wad);
@@ -149,10 +149,10 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
             )
         );
 
-        require(holder != address(0), "Defo/invalid-address-0");
-        require(holder == ecrecover(digest, v, r, s), "Defo/invalid-permit");
-        require(expiry == 0 || block.timestamp <= expiry, "Defo/permit-expired");
-        require(nonce == nonces[holder]++, "Defo/invalid-nonce");
+        require(holder != address(0), "DEFO/invalid-address-0");
+        require(holder == ecrecover(digest, v, r, s), "DEFO/invalid-permit");
+        require(expiry == 0 || block.timestamp <= expiry, "DEFO/permit-expired");
+        require(nonce == nonces[holder]++, "DEFO/invalid-nonce");
         uint256 wad = allowed ? type(uint256).max : 0;
         allowance[holder][spender] = wad;
         emit Approval(holder, spender, wad);

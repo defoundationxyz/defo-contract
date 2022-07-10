@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { ethers, providers } from "ethers";
+import { ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
 import _ from "lodash";
 import moment from "moment";
@@ -21,25 +21,6 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
   !result.newlyDeployed
     ? deployWarning(`Re-used existing ${name} at ${result.address}`)
     : deploySuccess(`${name} deployed at ${result.address}`);
-
-export const increaseTime = async (provider: providers.JsonRpcProvider, time: number) => {
-  await provider.send("evm_increaseTime", [time]);
-  await provider.send("evm_mine", []);
-};
-
-export const chainName = (chainId: number) => {
-  switch (chainId) {
-    case 1337:
-    case 31337:
-      return "HardhatEVM";
-    case 43113:
-      return "Avalanche Fuji Testnet";
-    case 43114:
-      return "Avalanche Mainnet";
-    default:
-      return "Unknown";
-  }
-};
 
 export const outputFormatKeyValue = (key: string, value: string | number): string | number =>
   key.match("Last|Time")

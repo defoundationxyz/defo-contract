@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
 
 import { VaultStakingFacet } from "../types";
-import { announce, info, success } from "../utils/helpers";
+import { announce, info, success } from "../utils/output.helper";
 
 task("vault", "Get the vault state")
   .addOptionalParam("id", "gem id to add to the vault", undefined, types.int)

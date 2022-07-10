@@ -20,6 +20,7 @@ library LibGem {
         /// @dev i'm not sure if enums are packed as uint8 in here
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
         uint256 claimedReward; // previously claimed rewards
+        uint256 vaultReward; // rewards previously added to vault
     }
 
     /// @dev A struct for keeping info about node types

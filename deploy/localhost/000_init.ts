@@ -1,7 +1,8 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import { chainName, deployInfo } from "../../utils/helpers";
+import { chainName } from "../../utils/chain.helper";
+import { deployInfo } from "../../utils/output.helper";
 
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { getNamedAccounts, getChainId } = hre;
