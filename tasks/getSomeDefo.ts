@@ -1,5 +1,5 @@
 import { fundDefo } from "@utils/actions.helper";
-import { announce, error, info, success } from "@utils/output.helper";
+import { announce, error, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
 export default task("get-some-defo", "get funded with DEFO Token")
@@ -18,10 +18,9 @@ export default task("get-some-defo", "get funded with DEFO Token")
       return;
     }
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
-    announce(`Funding ${accounts.toString()} with ${amount} DEFO...`);
+    announce(`Minting DEFO to ${accounts.toString()}...`);
     for (const account of accounts) {
       await fundDefo(hre, account, amount);
-      info(`Funded ${account}.`);
+      success(`${account} funded with ${amount.toLocaleString()}.`);
     }
-    success("Done");
   });

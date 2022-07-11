@@ -1,11 +1,10 @@
 import { DEFOToken } from "@contractTypes/contracts";
-import assert from "assert";
 import { expect } from "chai";
-import newDebug from "debug";
-import { Contract } from "ethers";
-import { deployments, ethers, getNamedAccounts } from "hardhat";
+import { deployments, ethers } from "hardhat";
 
-const debug = newDebug("defo:DEFOToken.test.ts");
+//import newDebug from "debug";
+///TODO Add transfer ownership and other tests, including security
+//const debug = newDebug("defo:DEFOToken.test.ts");
 
 describe("DEFO Token", async () => {
   const decimals = 18;

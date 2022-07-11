@@ -113,8 +113,8 @@
     "claim": "hardhat --network localhost claim",
     "jump-in-time": "hardhat --network localhost jump-in-time",
     "permit": "hardhat --network localhost permit",
-    "dev": "yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time --time 8d && yarn get-some-defo --account treasury --amount 1000 && yarn claim --id 0 && yarn gems && yarn accounts",
-    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true hardhat test",
+    "dev": "yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time --time 8d && yarn claim --id 0 && yarn gems && yarn accounts",
+    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true DEBUG='defo:*' hardhat test",
     "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network"
   },

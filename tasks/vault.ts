@@ -12,13 +12,9 @@ task("vault", "Get the vault state")
     types.float,
   )
   .setAction(async ({ id, amount }, hre) => {
-    const { getNamedAccounts, deployments, ethers } = hre;
-    const namedAccounts = await getNamedAccounts();
-    const diamondDeployment = await deployments.get("DEFODiamond");
-    const vaultStakingFacet = await ethers.getContractAt<VaultStakingFacet>(
-      "VaultStakingFacet",
-      diamondDeployment.address,
-    );
+    const { ethers } = hre;
+    const vaultStakingFacet = await ethers.getContract<VaultStakingFacet>("DEFODiamond_DiamondProxy");
+
     announce("Showing vault stats");
     info(`Total staked ${ethers.utils.formatEther(await vaultStakingFacet.showTotalAmount())}`);
     info(`Deployer staked ${ethers.utils.formatEther(await vaultStakingFacet.showStakedAmount())}`);

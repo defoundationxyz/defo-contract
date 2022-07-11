@@ -1,4 +1,5 @@
 import { DEFOToken } from "@contractTypes/contracts";
+import { VaultStakingFacet } from "@contractTypes/contracts/facets";
 import assert from "assert";
 import { expect } from "chai";
 import newDebug from "debug";
@@ -7,15 +8,12 @@ import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 const debug = newDebug("defo:DEFOToken.test.ts");
 
-describe("DEFO Token", function () {
-  let token: Contract;
-  const tokenName = "DEFO Token";
-  const tokenSymbol = "DEFO";
-  const tokenDecimals = 18;
-  const tokenSupply = 1e6;
+describe("Vault Tests", function () {
+  let vault: VaultStakingFacet;
 
   beforeEach(async function () {
-    await deployments.fixture("DEFOToken");
+    await deployments.fixture("DiamondConfigured");
+    vault = await ethers.getContract();
   });
   describe("get public variables", () => {
     it("getting correct name", async function () {
