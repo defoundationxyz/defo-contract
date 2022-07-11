@@ -25,6 +25,6 @@ export default task("fork:get-some-dai", "Distribute DAI from AAVE")
     for (const account of accounts) {
       announce(`Funding ${account} with DAI...`);
       await beTheWhale(hre, account, amount);
-      success(`sent ${amount} to ${account}`);
+      success(`sent ${amount.toLocaleString()} to ${account}`);
     }
   });

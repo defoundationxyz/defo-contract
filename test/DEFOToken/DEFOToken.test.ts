@@ -7,23 +7,40 @@ import { deployments, ethers, getNamedAccounts } from "hardhat";
 
 const debug = newDebug("defo:DEFOToken.test.ts");
 
-describe("DEFO Token", function () {
-  let token: Contract;
-  const tokenName = "DEFO Token";
-  const tokenSymbol = "DEFO";
-  const tokenDecimals = 18;
-  const tokenSupply = 1e6;
+describe("DEFO Token", async () => {
+  const decimals = 18;
+  const supply = 1e6;
+  const name = "DEFO Token";
+  const ticker = "DEFO";
+  let defo: DEFOToken;
 
   beforeEach(async function () {
     await deployments.fixture("DEFOToken");
+    defo = await ethers.getContract<DEFOToken>("DEFOToken");
   });
-  describe("get public variables", () => {
-    it("getting correct name", async function () {
-      const defo = await ethers.getContract<DEFOToken>("DEFOToken");
-      assert.equal(await defo.name(), tokenName);
-      assert.equal(await defo.symbol(), tokenSymbol);
-      assert.equal(await defo.decimals(), tokenDecimals);
-      assert.equal(await defo.totalSupply(), tokenSupply);
+
+  describe("name and ticker", () => {
+    it("getting token name", async function () {
+      expect(await defo.name()).to.equal(name);
+      expect(await defo.symbol()).to.equal(ticker);
+    });
+  });
+
+  describe("decimals()", () => {
+    it(`should return default decimals`, async () => {
+      expect(await defo.decimals()).to.equal(decimals);
+    });
+  });
+
+  describe("totalSupply()", () => {
+    it("should return correct supply", async () => {
+      expect((await defo.totalSupply()).eq(ethers.utils.parseEther(supply.toString()))).to.be.true;
+    });
+  });
+
+  describe("owner()", () => {
+    it("should return correct token owner", async () => {
+      expect(await defo.owner()).to.equal(process.env.DEFO_TOKEN_PUBLIC_KEY);
     });
   });
 });
