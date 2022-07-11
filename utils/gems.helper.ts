@@ -1,21 +1,30 @@
 import { GemFacet } from "@contractTypes/contracts/facets";
 import { GemGettersFacet, LibGem } from "@contractTypes/contracts/facets/GemGettersFacet";
+import { BigNumber } from "ethers";
 
-export const gemsGroupedByType = async (gemContract: GemFacet & GemGettersFacet, account: string) => {
-  const gemIds = await gemContract.getGemIdsOf(account);
-  const gemsIdsWithData = await Promise.all(
-    gemIds.map(async gemId => {
-      return {
-        gemId: Number(gemId),
-        unclaimedReward: await gemContract.checkTaperedReward(gemId),
-        pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
-        claimable: await gemContract.isClaimable(gemId),
-        ...(await gemContract.GemOf(gemId)),
-      };
-    }),
-  );
-  return gemsIdsWithData.reduce(
-    (r, v, i, a, k = v.GemType) => ((r[k] || (r[k] = [])).push(v), r),
-    {} as Array<Array<LibGem.GemStructOutput & { gemId: number }>>,
-  );
+export type CompleteGemData = LibGem.GemStruct & {
+  gemId: number;
+  taperedReward: BigNumber;
+  pendingMaintenance: BigNumber;
+  isClaimable: boolean;
 };
+
+export const gemsIdsWithData =
+  (gemContract: GemFacet & GemGettersFacet, account: string) => async (): Promise<Array<CompleteGemData>> =>
+    Promise.all(
+      (await gemContract.getGemIdsOf(account)).map(async gemId => {
+        return {
+          gemId: Number(gemId),
+          taperedReward: await gemContract.checkTaperedReward(gemId),
+          pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
+          isClaimable: await gemContract.isClaimable(gemId),
+          ...(await gemContract.GemOf(gemId)),
+        };
+      }),
+    );
+
+export const gemsGroupedByType = async (gemContract: GemFacet & GemGettersFacet, account: string) =>
+  (await gemsIdsWithData(gemContract, account)()).reduce(
+    (r, v, i, a, k = v.GemType) => ((r[k as number] || (r[k as number] = [])).push(v), r),
+    {} as Array<Array<CompleteGemData>>,
+  );

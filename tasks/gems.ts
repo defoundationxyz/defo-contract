@@ -41,8 +41,8 @@ export default task("gems", "get gems info and balance information for the deplo
           // "TaperCount",
           "booster",
           "claimedReward",
-          "unclaimedReward",
-          "claimable",
+          "taperedReward",
+          "isClaimable",
           "pendingMaintenance",
         ]) as unknown as Record<string, number | string>;
         const formattedGem: Record<string, string | number> = {};

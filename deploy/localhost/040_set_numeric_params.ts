@@ -21,7 +21,7 @@ const func: DeployFunction = async hre => {
   const { getNamedAccounts, ethers } = hre;
   const { deployer, donations, team, vault } = await getNamedAccounts();
 
-  const ownerFacetInstance = await ethers.getContract<OwnerFacet>("DEFODiamond");
+  const ownerFacetInstance = await ethers.getContract<OwnerFacet>("DEFODiamond_DiamondProxy");
 
   deployAnnounce("\n\nInitializing OwnerFacet with numeric parameters from  constants/config.ts ...");
 
