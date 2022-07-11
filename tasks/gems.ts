@@ -1,10 +1,10 @@
+import { GEMS, MIN_REWARD_TIME, gemName } from "@config";
+import { announce, info, outputFormatKeyValue, outputFormatter, warning } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
-import { MIN_REWARD_TIME, gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, info, outputFormatKeyValue, outputFormatter, warning } from "../utils/output.helper";
 
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
@@ -17,7 +17,7 @@ export default task("gems", "get gems info and balance information for the deplo
     const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
     const gemGettersFacet = await ethers.getContractAt<GemGettersFacet>("GemGettersFacet", diamondDeployment.address);
     const gemNFT = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-    const types: number[] = type === -1 ? Object.values(gems) : [type];
+    const types: number[] = type === -1 ? Object.values(GEMS) : [type];
 
     const gemIds = await gemFacetContract.getGemIdsOf(deployer);
     const gemsIdsWithData = await Promise.all(

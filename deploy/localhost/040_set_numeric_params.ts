@@ -1,5 +1,3 @@
-import { DeployFunction } from "hardhat-deploy/types";
-
 import {
   CHARITY_RATE,
   DIAMOND_GEM,
@@ -13,9 +11,11 @@ import {
   SAPHIRE_GEM,
   TREASURY_DAI_RATE,
   TREASURY_DEFO_RATE,
-} from "../../constants";
+} from "@config";
+import { deployAnnounce, deploySuccess } from "@utils/output.helper";
+import { DeployFunction } from "hardhat-deploy/types";
+
 import { OwnerFacet } from "../../types";
-import { deployAnnounce, deploySuccess } from "../../utils/output.helper";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, ethers } = hre;
@@ -45,4 +45,4 @@ const func: DeployFunction = async hre => {
 };
 
 export default func;
-func.tags = ["DiamondInitialize"];
+func.tags = ["DiamondConfigured"];

@@ -1,8 +1,8 @@
+import { announce, info } from "@utils/output.helper";
 import chalk from "chalk";
 import { task } from "hardhat/config";
 
 import DAI_ABI from "../abi/dai-abi.json";
-import { announce, info } from "../utils/output.helper";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
   const { getNamedAccounts, deployments, ethers } = hre;
@@ -20,7 +20,7 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
       ? await ethers.getContractAt("DEFOToken", forkedDefoToken || defoTokenDeployment)
       : null;
   announce(
-    `DEFO token is ${chalk.yellow(
+    `DEFO token was ${chalk.yellow(
       forkedDefoToken ? "forked" : defoTokenDeployment ? "deployed locally" : chalk.red("not deployed!"),
     )}. Address: ${defoContract?.address}`,
   );

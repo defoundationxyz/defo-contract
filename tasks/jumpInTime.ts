@@ -1,11 +1,15 @@
+import { increaseTime } from "@utils/actions.helper";
+import { announce, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import moment from "moment";
 
-import { increaseTime } from "../utils/chain.helper";
-import { announce, success } from "../utils/output.helper";
-
-export default task("jump-in-time", "Jump given time ahead")
-  .addOptionalParam("time", "Time to skip in a human-readable format: '1y', '10d', '20h', etc.", "1y", types.string)
+export default task("jump-in-time", "Jump given time ahead or backward")
+  .addParam(
+    "time",
+    "Time to skip in a human-readable format: '1y', '10d', '20h', etc. Negative value lets jumps in the past",
+    "6d",
+    types.string,
+  )
   .setAction(async ({ time }, hre) => {
     const num = time.match(/[0-9]+/g)[0];
     const unit = time.slice(num.length);

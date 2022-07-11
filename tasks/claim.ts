@@ -1,10 +1,10 @@
+import { GEMS, gemName } from "@config";
+import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
-import { gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, info, outputFormatKeyValue } from "../utils/output.helper";
 
 export default task("claim", "claim rewards for gem(s)")
   .addOptionalParam("id", "gem id to claim rewards for a specific gemId", -1, types.int)
@@ -22,7 +22,7 @@ export default task("claim", "claim rewards for gem(s)")
     const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
     const gemGettersFacet = await ethers.getContractAt<GemGettersFacet>("GemGettersFacet", diamondDeployment.address);
     const gemNFT = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-    const types: number[] = !gemTypeParam || gemTypeParam === -1 ? Object.values(gems) : [gemTypeParam];
+    const types: number[] = !gemTypeParam || gemTypeParam === -1 ? Object.values(GEMS) : [gemTypeParam];
 
     const gemIds = await gemFacetContract.getGemIdsOf(deployer);
     const gemsIdsWithData = await Promise.all(

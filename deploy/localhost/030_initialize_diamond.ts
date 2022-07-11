@@ -1,31 +1,32 @@
+import { getContractWithSigner, namedSigner } from "@utils/chain.helper";
+import { deployAnnounce, deployInfo, deploySuccess } from "@utils/output.helper";
 import assert from "assert";
 import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
+import { namedAccountsIndex } from "../../hardhat.accounts";
 import { DEFOToken, ERC721Facet, OwnerFacet } from "../../types";
-import { deployAnnounce, deployInfo, deploySuccess } from "../../utils/output.helper";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments, ethers } = hre;
-  const { deployer, dai, treasury, vault, reward, donations, team } = await getNamedAccounts();
-  const [_deployerSigner, treasurySigner, donationsSigner, teamSigner, vaultSigner, rewardSigner, _defoSigner] =
-    await ethers.getSigners();
+  const { deployer, dai, treasury, vault, rewardPool, donations, team } = await getNamedAccounts();
+  const signers = await ethers.getSigners();
 
   deployAnnounce(
     "\n\nInitializing OwnerFacet and ERC721Facet with preconfigured account addresses, and giving pemission to DEFO and DAI to spend on behalf of treasury and vault ...",
   );
 
   assert(
-    treasury === treasurySigner.address &&
-      vault === vaultSigner.address &&
-      reward === rewardSigner.address &&
-      donations === donationsSigner.address &&
-      team === teamSigner.address &&
-      chalk.red(
-        "Configuration error, named accounts do not correspond to signers: check the order of the Hardhat accounts.",
-      ),
+    treasury === signers[namedAccountsIndex.treasury as number].address &&
+      vault === signers[namedAccountsIndex.vault as number].address &&
+      rewardPool === signers[namedAccountsIndex.rewardPool as number].address &&
+      donations === signers[namedAccountsIndex.donations as number].address &&
+      team === signers[namedAccountsIndex.team as number].address,
+    chalk.red(
+      "Configuration error, named accounts do not correspond to signers: check the order of the Hardhat accounts.",
+    ),
   );
 
   const diamondDeployment = await deployments.get("DEFODiamond");
@@ -38,40 +39,29 @@ const func: DeployFunction = async hre => {
     dai, //_paymentToken
     treasury, //_treasury
     diamondDeployment.address, //_limiter ?
-    reward, //_rewardPool
+    rewardPool, //_rewardPool
     donations, //_donatio
   );
   deployInfo("OwnerFacet initialized with preconfigured facet addresses.");
 
-  for (const tokensOwner of [
-    { name: "treasury facet", signer: treasurySigner },
-    { name: "vault facet", signer: vaultSigner },
-    { name: "reward facet", signer: rewardSigner },
-    { name: "donations facet", signer: donationsSigner },
-  ]) {
-    deployAnnounce(`\nApproving Diamond to spend on behalf of ${chalk.yellow(tokensOwner.name)}`);
-    const defoContract = (await ethers.getContractAt<DEFOToken>("DEFOToken", defoTokenDeployment.address)).connect(
-      tokensOwner.signer,
-    );
-    const daiContract = (await ethers.getContractAt(DAI_ABI, dai)).connect(tokensOwner.signer);
+  for (const tokensOwner of ["treasury", "vault", "rewardPool", "donations"]) {
+    deployAnnounce(`\nApproving Diamond to spend on behalf of ${chalk.yellow(tokensOwner)}`);
+    const defoContract = await getContractWithSigner<DEFOToken>(hre, "DEFOToken", tokensOwner);
+    const signer = await namedSigner(hre, tokensOwner);
+    const daiContract = await ethers.getContractAt(DAI_ABI, dai, signer);
     for (const token of [defoContract, daiContract]) {
       const name = await token.name();
-      deployAnnounce(`Approving spending of ${name}`);
+      deployAnnounce(`🔑 Approving spending of ${name}...`);
       deployInfo(
         `Current allowance is ${ethers.utils.formatEther(
-          await token.allowance(tokensOwner.signer.address, diamondDeployment.address),
+          await token.allowance(signer.address, diamondDeployment.address),
         )}`,
       );
       if (token == defoContract) {
-        deployInfo(`Signing for ${await token.name()}`);
-        const result = await signDaiPermit(
-          ethers.provider,
-          token.address,
-          tokensOwner.signer.address,
-          diamondDeployment.address,
-        );
+        deployInfo(`Signing for ${name}`);
+        const result = await signDaiPermit(ethers.provider, token.address, signer.address, diamondDeployment.address);
         await token.permit(
-          tokensOwner.signer.address,
+          signer.address,
           diamondDeployment.address,
           result.nonce,
           result.expiry,
@@ -84,10 +74,12 @@ const func: DeployFunction = async hre => {
         deployInfo(`Calling approve for ${await token.name()}, max amount`);
         await token.approve(diamondDeployment.address, ethers.constants.MaxUint256);
       }
-      const allowance = ethers.utils.formatEther(
-        await token.allowance(tokensOwner.signer.address, diamondDeployment.address),
+      const allowance = await token.allowance(signer.address, diamondDeployment.address);
+      deploySuccess(
+        `Permission to spend granted.Allowance is ${
+          allowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : ethers.utils.formatEther(allowance)
+        }`,
       );
-      deploySuccess(`Permission to spend granted. Now allowance is ${allowance}`);
     }
   }
 
@@ -98,4 +90,4 @@ const func: DeployFunction = async hre => {
 };
 
 export default func;
-func.tags = ["DiamondInitialize"];
+func.tags = ["DiamondInitialized"];

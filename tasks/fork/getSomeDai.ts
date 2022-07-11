@@ -1,6 +1,6 @@
+import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
-import { announce, error, info, success } from "../../utils/output.helper";
 import { beTheWhale } from "./beTheWhale";
 
 export default task("fork:get-some-dai", "Distribute DAI from AAVE")

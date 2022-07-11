@@ -13,13 +13,17 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "target": "es2017",
+    "baseUrl": "./",
+    "paths": {
+      "@config": ["config/contracts.config"],
+      "@contractTypes/*": ["types/*"],
+      "@utils/*": ["utils/*"],
+      "@constants/*": ["constants/*"]
+    }
   },
   "exclude": ["node_modules", "unused/**/*"],
-  "files": ["./hardhat.config.ts", "./hardhat.network.ts", "./hardhat.accounts.ts", "./constants/addresses.ts"],
-  "include": ["types/**/*", "test/**/*", "tasks/**/*", "deploy/**/*", "utils/**/*", "constants/**/*"],
-  "paths": {
-    "@types/*": ["types/*"],
-    "@utils/*": ["utils/*"]
-  }
+  "files": ["./hardhat.config.ts", "./hardhat.network.ts", "./hardhat.accounts.ts"],
+  "include": ["types/**/*", "test/**/*", "tasks/**/*", "deploy/**/*", "utils/**/*", "constants/**/*", "config/**/*"],
+
 }

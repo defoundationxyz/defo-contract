@@ -1,7 +1,6 @@
+import { fundDefo } from "@utils/actions.helper";
+import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
-
-import { DEFOToken } from "../types";
-import { announce, error, success } from "../utils/output.helper";
 
 export default task("get-some-defo", "get funded with DEFO Token")
   .addOptionalParam(
@@ -12,23 +11,17 @@ export default task("get-some-defo", "get funded with DEFO Token")
   )
   .addOptionalParam("amount", "How much", 10000, types.int)
   .setAction(async ({ account, amount }, hre) => {
-    const { getNamedAccounts, deployments, ethers } = hre;
+    const { getNamedAccounts } = hre;
     const namedAccounts = await getNamedAccounts();
     if (account !== "all" && !namedAccounts[account]) {
       error(`Named account ${account} not set`);
       return;
     }
-    const defoTokenDeployment = await deployments.get("DEFOToken");
-    const defoContract = await ethers.getContractAt<DEFOToken>("DEFOToken", defoTokenDeployment.address);
-
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
+    announce(`Funding ${accounts.toString()} with ${amount} DEFO...`);
     for (const account of accounts) {
-      const amt = ethers.utils.parseEther(amount.toString());
-      announce(`Funding ${account} with ${amt} DEFO...`);
-      await defoContract.mint(namedAccounts.deployer, amt);
-      if (account !== namedAccounts.deployer) {
-        await defoContract.transfer(account, amt);
-      }
+      await fundDefo(hre, account, amount);
+      info(`Funded ${account}.`);
     }
     success("Done");
   });

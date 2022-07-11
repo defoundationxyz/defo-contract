@@ -2,13 +2,18 @@ import { LibGem } from "../types/contracts/facets/OwnerFacet";
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
-export const gems: Record<GemNames, number> = {
+export const DEFO_TOKEN_TOTAL_SUPPLY = 1e6;
+export const DEFO_TOKEN_REWARD_POOL = 875_000;
+export const DEFO_TOKEN_TREASURY = 100_000;
+export const DEFO_TOKEN_LIQUIDITY_POOL = DEFO_TOKEN_TOTAL_SUPPLY - DEFO_TOKEN_REWARD_POOL - DEFO_TOKEN_TREASURY;
+
+export const GEMS: Record<GemNames, number> = {
   sapphire: 0,
   ruby: 1,
   diamond: 2,
 };
 export const gemName = (gemNumber: number) =>
-  (Object.keys(gems) as Array<GemNames>).find(key => gems[key] === gemNumber);
+  (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
 
 export const MIN_REWARD_TIME = 3600 * 24 * 7;
 

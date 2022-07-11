@@ -1,7 +1,7 @@
+import { announce, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
 import { VaultStakingFacet } from "../types";
-import { announce, info, success } from "../utils/output.helper";
 
 task("vault", "Get the vault state")
   .addOptionalParam("id", "gem id to add to the vault", undefined, types.int)
@@ -14,7 +14,6 @@ task("vault", "Get the vault state")
   .setAction(async ({ id, amount }, hre) => {
     const { getNamedAccounts, deployments, ethers } = hre;
     const namedAccounts = await getNamedAccounts();
-    const { dai, forkedDefoToken, vault } = namedAccounts;
     const diamondDeployment = await deployments.get("DEFODiamond");
     const vaultStakingFacet = await ethers.getContractAt<VaultStakingFacet>(
       "VaultStakingFacet",

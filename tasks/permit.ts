@@ -1,9 +1,9 @@
+import { announce, info, success } from "@utils/output.helper";
 import { signDaiPermit } from "eth-permit";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import DAI_ABI from "../abi/dai-abi.json";
-import { announce, info, success } from "../utils/output.helper";
 
 export default task(
   "permit",

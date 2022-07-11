@@ -1,7 +1,6 @@
+import { deployInfo, deploySuccess } from "@utils/output.helper";
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-
-import { deployInfo, deploySuccess } from "../../utils/output.helper";
 
 const func: DeployFunction = async function () {
   deployInfo("\n\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
