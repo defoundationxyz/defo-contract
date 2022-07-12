@@ -115,7 +115,7 @@
     "permit": "hardhat --network localhost permit",
     "vault": "hardhat --network localhost vault",
     "dev": "yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time --time 8d && yarn claim --id 0 && yarn gems && yarn accounts",
-    "test": "HIDE_DEPLOY_LOG=true OPTIMIZER_DISABLED=true DEBUG='defo:*' hardhat test",
+    "test": "HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true DEBUG='defo:*' hardhat test",
     "gas": "REPORT_GAS=true HIDE_DEPLOY_LOG=true hardhat test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network"
   },

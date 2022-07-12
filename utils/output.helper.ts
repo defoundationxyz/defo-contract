@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import chalk, { Chalk } from "chalk";
 import { ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
 import _ from "lodash";
@@ -6,16 +6,22 @@ import moment from "moment";
 
 type MutableObject<T> = { -readonly [P in keyof T]: T[P] };
 
-export const info = (message: string) => console.log(chalk.dim(message));
-export const announce = (message: string) => console.log(chalk.cyan(message));
-export const success = (message: string) => console.log(chalk.green(message));
-export const warning = (message: string) => console.log(chalk.yellow(message));
-export const error = (message: string) => console.log(chalk.red(message));
+const suppresableLogger =
+  (hide: boolean | string | undefined, logger: (message: string) => void) => (message: string) =>
+    !hide && logger(message);
 
-export const deployInfo = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.dim(message));
-export const deployAnnounce = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.cyan(message));
-export const deployWarning = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.yellow(message));
-export const deploySuccess = (message: string) => !process.env.HIDE_DEPLOY_LOG && console.log(chalk.green(message));
+const taskLogger = suppresableLogger(process.env.HIDE_TASK_LOG, console.log);
+export const info = (message: string) => taskLogger(chalk.dim(message));
+export const announce = (message: string) => taskLogger(chalk.cyan(message));
+export const success = (message: string) => taskLogger(chalk.green(message));
+export const warning = (message: string) => taskLogger(chalk.yellow(message));
+export const error = (message: string) => taskLogger(chalk.red(message));
+
+const deployLogger = suppresableLogger(process.env.HIDE_DEPLOY_LOG, console.log);
+export const deployInfo = (message: string) => deployLogger(chalk.dim(message));
+export const deployAnnounce = (message: string) => deployLogger(chalk.cyan(message));
+export const deployWarning = (message: string) => deployLogger(chalk.yellow(message));
+export const deploySuccess = (message: string) => deployLogger(chalk.green(message));
 
 export const displayDeployResult = (name: string, result: DeployResult) =>
   !result.newlyDeployed

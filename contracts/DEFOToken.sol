@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
@@ -67,6 +68,13 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
                 address(this)
             )
         );
+    }
+
+    // Transfer ownership update with authorization
+    function transferOwnership(address newOwner) public auth override  {
+        wards[msg.sender] = 0;
+        wards[newOwner] = 1;
+        super.transferOwnership(newOwner);
     }
 
     // --- Token ---

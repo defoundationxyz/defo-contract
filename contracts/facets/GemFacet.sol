@@ -92,7 +92,6 @@ contract GemFacet {
             require(metads._tokenIdCounter.current() < metads.MaxGems, "Sold Out");
         }
         uint256 tokenId = metads._tokenIdCounter.current();
-        console.log("minting tokenID: ", tokenId);
         metads._tokenIdCounter.increment();
         LibERC721._safeMint(_to, tokenId);
         LibGem.Gem memory gem;

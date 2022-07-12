@@ -46,7 +46,7 @@ export default task("gems", "get gems info and balance information for the deplo
           "pendingMaintenance",
         ]) as unknown as Record<string, number | string>;
         const formattedGem: Record<string, string | number> = {};
-        Object.keys(gemWithFieldsToShow).map(function (key) {
+        Object.keys(gemWithFieldsToShow).map(key => {
           formattedGem[key] = outputFormatKeyValue(key, gemWithFieldsToShow[key]);
         });
         return formattedGem;

@@ -27,7 +27,6 @@ contract OwnerFacet {
         address _rewardPool,
         address _donation
     ) external onlyOwner {
-        console.log("OwnerFacet initialized");
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
         gemds.MinterAddr = _redeemContract;
