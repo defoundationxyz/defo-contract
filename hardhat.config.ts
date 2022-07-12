@@ -10,8 +10,9 @@ import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { resolve } from "path";
 import "solidity-coverage";
+import "tsconfig-paths/register";
 
-import { namedAccounts } from "./hardhat.accounts";
+import { namedAccountsIndex } from "./hardhat.accounts";
 import networks from "./hardhat.network";
 import * as tasks from "./tasks";
 
@@ -41,7 +42,7 @@ const config: HardhatUserConfig = {
   mocha: {
     timeout: 30000,
   },
-  namedAccounts,
+  namedAccounts: namedAccountsIndex,
   networks,
   solidity: {
     compilers: [

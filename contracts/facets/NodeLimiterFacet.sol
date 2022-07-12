@@ -15,8 +15,7 @@ contract NodeLimiterFacet {
     }
 
     function addToWhitelist(address _newAddress) external onlyOwner {
-        LibNodeLimiter.DiamondStorage storage ds = LibNodeLimiter
-            .diamondStorage();
+        LibNodeLimiter.DiamondStorage storage ds = LibNodeLimiter.diamondStorage();
         ds.whitelist.push(_newAddress);
     }
 
@@ -25,8 +24,7 @@ contract NodeLimiterFacet {
         address to,
         uint256 tokenId
     ) public {
-        LibNodeLimiter.DiamondStorage storage ds = LibNodeLimiter
-            .diamondStorage();
+        LibNodeLimiter.DiamondStorage storage ds = LibNodeLimiter.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         if (metads.transferLock) {
             bool transferblock = true;

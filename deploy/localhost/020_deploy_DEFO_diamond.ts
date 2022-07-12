@@ -1,6 +1,5 @@
+import { deployAndTell } from "@utils/deployFunc";
 import { DeployFunction } from "hardhat-deploy/types";
-
-import { deployAndTell } from "../../utils/deployFunc";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;
@@ -16,7 +15,7 @@ const func: DeployFunction = async hre => {
     "OwnerFacet",
     "NodeLimiterFacet",
   ];
-
+  /// TODO Check ERC721Enumerable since it has bad reputation for huge gas overhead
   await deployAndTell(diamond.deploy, "DEFODiamond", {
     from: deployer,
     owner: deployer,

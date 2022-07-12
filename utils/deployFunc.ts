@@ -1,7 +1,7 @@
 import { DiamondOptions } from "hardhat-deploy/dist/types";
 import { DeployOptions, DeployResult } from "hardhat-deploy/types";
 
-import { deployAnnounce, displayDeployResult } from "./helpers";
+import { deployAnnounce, displayDeployResult } from "./output.helper";
 
 type DeployFunctionType = (name: string, options: DeployOptions) => Promise<DeployResult>;
 type DiamondFunctionType = (name: string, options: DiamondOptions) => Promise<DeployResult>;

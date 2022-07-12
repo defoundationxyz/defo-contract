@@ -1,5 +1,4 @@
-`
-`
+` `
 Be sure you create .env file (see .env-example)
 
 Following are the Deployed contracts on Fuji Testnet:
@@ -10,9 +9,9 @@ team: 0x120406d37A85C329b71B7098Da752507e0e7BF6A
 
 ////Tokens
 
-Defo token:  0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae
+Defo token: 0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae
 
-mDai token:  0x85a2ff500E0eD9fA93719071EA46A86198181581
+mDai token: 0x85a2ff500E0eD9fA93719071EA46A86198181581
 
 ////Presale Nft Contract
 

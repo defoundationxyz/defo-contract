@@ -1,43 +1,39 @@
+import { GEMS, gemName } from "@config";
+import { ERC721Facet, GemFacet, GemGettersFacet } from "@contractTypes/index";
+import { gemsGroupedByType } from "@utils/gems.helper";
+import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
-import _ from "lodash";
 
-import { gemName, gems } from "../constants";
-import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
-import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, error, info, success } from "../utils/helpers";
-
-export default task("get-some-gems", "mint all NFTs")
-  .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond", -1, types.int)
-  .setAction(async ({ gemType }, hre) => {
-    const { getNamedAccounts, deployments, ethers } = hre;
+export default task("get-some-gems", "mint NFT gems")
+  .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - mint all three", -1, types.int)
+  .addOptionalParam("amount", "number of gems to be minted", 1, types.int)
+  .setAction(async ({ type, amount }, hre) => {
+    const { getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const diamondDeployment = await deployments.get("DEFODiamond");
-    const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
-    const gemGettersFacet = await ethers.getContractAt<GemGettersFacet>("GemGettersFacet", diamondDeployment.address);
-    const gemNFT = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-    const types: number[] = !gemType || gemType === -1 ? Object.values(gems) : [gemType];
+    const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
+    const types: number[] = type === -1 ? Object.values(GEMS) : [type];
 
-    const gemIds = await gemFacetContract.getGemIdsOf(deployer);
-    const gemsIdsWithData = await Promise.all(
-      gemIds.map(async gemId => {
-        return { gemId: Number(gemId), ...(await gemGettersFacet.GemOf(gemId)) };
-      }),
-    );
+    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, deployer);
 
-    const gemsGroupedByType = gemsIdsWithData.reduce(
-      (r, v, i, a, k = v.GemType) => ((r[k] || (r[k] = [])).push(v), r),
-      {} as Array<Array<LibGem.GemStructOutput & { gemId: number }>>,
-    );
-    announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
-    for (const type of types) {
-      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type]?.length || 0}`);
-      if (await gemGettersFacet.isMintAvailableForGem(type)) {
-        await gemFacetContract.MintGem(type);
-        success(`Minted, total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
-      } else {
+    announce(`Deployer ${deployer} has ${await gemContract.balanceOf(deployer)} gem(s)`);
+    for (const gemType of types) {
+      const name = gemName(gemType);
+      announce(`\nGem ${name} (type ${gemType}), balance: ${gemsOfDeployerGroupedByType[gemType]?.length || 0}`);
+      try {
+        await Promise.all(
+          Array.from({ length: amount }, async () => {
+            if (await gemContract.isMintAvailableForGem(gemType)) {
+              await gemContract.MintGem(gemType);
+              info(`Minted +1 ${name}`);
+            } else {
+              throw new Error("Mint not available");
+            }
+          }),
+        );
+      } catch (e: unknown) {
         error("Mint not available");
       }
     }
-    info(`Total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
+    success(`Total balance ${await gemContract.balanceOf(deployer)} gem(s)`);
   });

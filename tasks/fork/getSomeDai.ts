@@ -1,6 +1,6 @@
+import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
-import { announce, error, info, success } from "../../utils/helpers";
 import { beTheWhale } from "./beTheWhale";
 
 export default task("fork:get-some-dai", "Distribute DAI from AAVE")
@@ -25,6 +25,6 @@ export default task("fork:get-some-dai", "Distribute DAI from AAVE")
     for (const account of accounts) {
       announce(`Funding ${account} with DAI...`);
       await beTheWhale(hre, account, amount);
-      success(`sent ${amount} to ${account}`);
+      success(`${amount.toLocaleString()} DAI has been sent to ${account}`);
     }
   });

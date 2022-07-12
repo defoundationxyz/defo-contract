@@ -6,7 +6,6 @@ pragma solidity ^0.8.4;
     functions into one, and this can be done because we are using EIP-2535 (Diamond standard)
   */
 
-
 interface IGemHybrid {
     enum Booster {
         None,
@@ -21,7 +20,7 @@ interface IGemHybrid {
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
-        uint256 claimedReward; // previously claimed rewards
+        uint256 claimedReward; // previously claimed rewards, including those deposited to vault
     }
 
     /// @dev A struct for keeping info about node types
@@ -39,7 +38,7 @@ interface IGemHybrid {
 
     function getGemIdsOfWithType(address _user, uint8 _type) external returns (uint256[] memory);
 
-    function GemOf(uint256 _tokenId) external view returns(Gem memory);
+    function GemOf(uint256 _tokenId) external view returns (Gem memory);
 
-    function GetGemTypeMetadata(uint8 _type) external returns(GemTypeMetadata memory);
+    function GetGemTypeMetadata(uint8 _type) external returns (GemTypeMetadata memory);
 }

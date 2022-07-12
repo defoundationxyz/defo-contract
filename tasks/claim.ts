@@ -1,75 +1,63 @@
+import { GEMS, gemName } from "@config";
+import { gemsGroupedByType } from "@utils/gems.helper";
+import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
-import { gemName, gems } from "../constants";
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
-import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import { announce, info, outputFormatKeyValue } from "../utils/helpers";
 
-export default task("claim", "claim rewards for gem type")
-  .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond", -1, types.int)
-  .setAction(async ({ gemType }, hre) => {
-    const { getNamedAccounts, deployments, ethers } = hre;
+export default task("claim", "claim rewards for gem(s)")
+  .addOptionalParam("id", "gem id to claim rewards for a specific gemId", -1, types.int)
+  .addOptionalParam(
+    "type",
+    "claim for all gems of given type 0 - sapphire, 1 - ruby, 2 - diamond, all gems if empty",
+    -1,
+    types.int,
+  )
+  .setAction(async ({ id: gemIdParam, type: gemTypeParam }, hre) => {
+    const {
+      getNamedAccounts,
+      ethers,
+      ethers: {
+        utils: { formatEther: fromWei },
+      },
+    } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const diamondDeployment = await deployments.get("DEFODiamond");
-    const gemFacetContract = await ethers.getContractAt<GemFacet>("GemFacet", diamondDeployment.address);
-    const gemGettersFacet = await ethers.getContractAt<GemGettersFacet>("GemGettersFacet", diamondDeployment.address);
-    const gemNFT = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-    const types: number[] = !gemType || gemType === -1 ? Object.values(gems) : [gemType];
+    const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
+    const types: number[] = !gemTypeParam || gemTypeParam === -1 ? Object.values(GEMS) : [gemTypeParam];
 
-    const gemIds = await gemFacetContract.getGemIdsOf(deployer);
-    const gemsIdsWithData = await Promise.all(
-      gemIds.map(async gemId => {
-        return {
-          gemId: Number(gemId),
-          ...(await gemGettersFacet.GemOf(gemId)),
-          unclaimedReward: await gemFacetContract.checkRawReward(gemId),
-          active: await gemFacetContract.isActive(gemId),
-        };
-      }),
-    );
-    const gemsGroupedByType = gemsIdsWithData.reduce(
-      (r, v, i, a, k = v.GemType) => ((r[k] || (r[k] = [])).push(v), r),
-      {} as Array<Array<LibGem.GemStructOutput & { gemId: number; active: boolean }>>,
-    );
-    announce(`Deployer ${deployer} has ${await gemNFT.balanceOf(deployer)} gem(s)`);
+    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, deployer);
+
+    announce(`Deployer ${deployer} has ${await gemContract.balanceOf(deployer)} gem(s)`);
     for (const type of types) {
-      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsGroupedByType[type]?.length || 0}`);
-      const userGems = await Promise.all(
-        gemsGroupedByType[type]?.map(async gem => {
-          const pickedGem = _.pick(gem, [
-            "gemId",
-            "MintTime",
-            "LastReward",
-            "LastMaintained",
-            "TaperCount",
-            "booster",
-            "claimedReward",
-            "unclaimedReward",
-            "active",
-          ]) as unknown as Record<string, number | string>;
-          const formattedGem: Record<string, string | number> = {};
-          Object.keys(pickedGem).map(function (key) {
-            formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
-          });
-          if (gem.active) {
-            const claimed = await gemFacetContract.ClaimRewards(gem.gemId);
-            formattedGem.claimed = claimed.data;
-          } else {
-            formattedGem.claimed = "-";
-          }
-          return formattedGem;
-        }),
-      );
-      userGems && console.table(userGems);
-
-      // if (await gemGettersFacet.isMintAvailableForGem(type)) {
-      //   await gemFacetContract.MintGem(type);
-      //   success(`Minted, total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
-      // } else {
-      //   error("Mint not available");
-      // }
+      announce(`\nGem ${gemName(type)} (type ${type}), balance: ${gemsOfDeployerGroupedByType[type]?.length || 0}`);
+      const userGems = (
+        await Promise.all(
+          gemsOfDeployerGroupedByType[type]?.map(async gem => {
+            if (gemIdParam == -1 || gem.gemId == gemIdParam) {
+              const pickedGem = _.pick(gem, [
+                "gemId",
+                "rawReward",
+                "taxedReward",
+                "taperedReward",
+              ]) as unknown as Record<string, number | string>;
+              const formattedGem: Record<string, string | number> = {};
+              Object.keys(pickedGem).map(key => {
+                formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
+              });
+              if (gem.isClaimable) {
+                await gemContract.ClaimRewards(gem.gemId);
+                formattedGem.claimed = Number(fromWei((await gemContract.GemOf(gem.gemId)).claimedReward));
+              } else {
+                formattedGem.claimed = "Not claimable";
+              }
+              return formattedGem;
+            }
+          }),
+        )
+      ).filter(el => el);
+      userGems && userGems[0] && console.table(userGems);
     }
-    info(`Total balance ${await gemNFT.balanceOf(deployer)} gem(s)`);
+    info(`Total balance ${await gemContract.balanceOf(deployer)} gem(s)`);
   });

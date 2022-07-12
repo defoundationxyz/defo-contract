@@ -8,21 +8,12 @@ import "../interfaces/ILpManager.sol";
 abstract contract LpManagerImplementationPoint is Ownable {
     ILpManager public lpPoolManager;
 
-    event UpdateLiquidityPoolManager(
-        address indexed oldImplementation,
-        address indexed newImplementation
-    );
+    event UpdateLiquidityPoolManager(address indexed oldImplementation, address indexed newImplementation);
 
     modifier onlyLiquidityPoolManager() {
-        require(
-            address(lpPoolManager) != address(0),
-            "Implementations: LiquidityPoolManager is not set"
-        );
+        require(address(lpPoolManager) != address(0), "Implementations: LiquidityPoolManager is not set");
         address sender = _msgSender();
-        require(
-            sender == address(lpPoolManager),
-            "Implementations: Not LiquidityPoolManager"
-        );
+        require(sender == address(lpPoolManager), "Implementations: Not LiquidityPoolManager");
         _;
     }
 
@@ -30,15 +21,10 @@ abstract contract LpManagerImplementationPoint is Ownable {
         return address(lpPoolManager);
     }
 
-    function setLiquidityPoolManager(address newImplementation)
-        public
-        virtual
-        onlyOwner
-    {
+    function setLiquidityPoolManager(address newImplementation) public virtual onlyOwner {
         address oldImplementation = address(lpPoolManager);
         require(
-            Address.isContract(newImplementation) ||
-                newImplementation == address(0),
+            Address.isContract(newImplementation) || newImplementation == address(0),
             "LiquidityPoolManager: either 0x0 or a contract address"
         );
         lpPoolManager = ILpManager(newImplementation);

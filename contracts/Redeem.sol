@@ -88,26 +88,18 @@ contract Redeem is Ownable {
     }
 
     modifier timeCompliance() {
-        if (
-            !(block.timestamp >= complianceStartTime &&
-                block.timestamp <= complianceEndTime)
-        ) {
+        if (!(block.timestamp >= complianceStartTime && block.timestamp <= complianceEndTime)) {
             redeemActive = false;
         }
 
         require(
-            block.timestamp >= complianceStartTime &&
-                block.timestamp <= complianceEndTime,
+            block.timestamp >= complianceStartTime && block.timestamp <= complianceEndTime,
             "Either too early or too late"
         );
         _;
     }
 
-    function setNodeAddress(address newNodeAddress)
-        public
-        onlyOwner
-        returns (address)
-    {
+    function setNodeAddress(address newNodeAddress) public onlyOwner returns (address) {
         nodeContract = INode(newNodeAddress);
         return (address(nodeContract));
     }
@@ -123,13 +115,7 @@ contract Redeem is Ownable {
     }
 
     /// @dev the redeeming and burning counting is separated by for loop
-    function redeem()
-        public
-        isActive
-        nonReentrant
-        presaleCompliance
-        timeCompliance
-    {
+    function redeem() public isActive nonReentrant presaleCompliance timeCompliance {
         uint256 redeemSapphireBalance = sapphirePresale.balanceOf(msg.sender);
         uint256 redeemRubyBalance = rubyPresale.balanceOf(msg.sender);
         uint256 redeemDiamondBalance = diamondPresale.balanceOf(msg.sender);
@@ -191,35 +177,17 @@ contract Redeem is Ownable {
         }
     }
 
-    function secondPresaleRedeem()
-        public
-        isActive
-        nonReentrant
-        secondPresaleCompliance
-        timeCompliance
-    {
-        uint256 redeemSapphireDeltaBalance = sapphireDeltaPresale.balanceOf(
-            msg.sender
-        );
-        uint256 redeemSapphireOmegaBalance = sapphireOmegaPresale.balanceOf(
-            msg.sender
-        );
+    function secondPresaleRedeem() public isActive nonReentrant secondPresaleCompliance timeCompliance {
+        uint256 redeemSapphireDeltaBalance = sapphireDeltaPresale.balanceOf(msg.sender);
+        uint256 redeemSapphireOmegaBalance = sapphireOmegaPresale.balanceOf(msg.sender);
         uint256 redeemRubyDeltaBalance = rubyDeltaPresale.balanceOf(msg.sender);
         uint256 redeemRubyOmegaBalance = rubyOmegaPresale.balanceOf(msg.sender);
-        uint256 redeemDiamondDeltaBalance = diamondDeltaPresale.balanceOf(
-            msg.sender
-        );
-        uint256 redeemDiamondOmegaBalance = diamondOmegaPresale.balanceOf(
-            msg.sender
-        );
+        uint256 redeemDiamondDeltaBalance = diamondDeltaPresale.balanceOf(msg.sender);
+        uint256 redeemDiamondOmegaBalance = diamondOmegaPresale.balanceOf(msg.sender);
 
         if (redeemSapphireDeltaBalance > 0) {
             for (uint256 i = 0; i < redeemSapphireDeltaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    1,
-                    INode.Booster.Delta,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(1, INode.Booster.Delta, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemSapphireDeltaBalance - 1; i++) {
@@ -238,11 +206,7 @@ contract Redeem is Ownable {
 
         if (redeemSapphireOmegaBalance > 0) {
             for (uint256 i = 0; i < redeemSapphireOmegaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    1,
-                    INode.Booster.Omega,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(1, INode.Booster.Omega, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemSapphireOmegaBalance - 1; i++) {
@@ -261,11 +225,7 @@ contract Redeem is Ownable {
 
         if (redeemRubyDeltaBalance > 0) {
             for (uint256 i = 0; i < redeemRubyDeltaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    0,
-                    INode.Booster.Delta,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(0, INode.Booster.Delta, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemRubyDeltaBalance - 1; i++) {
@@ -284,11 +244,7 @@ contract Redeem is Ownable {
 
         if (redeemRubyOmegaBalance > 0) {
             for (uint256 i = 0; i < redeemRubyOmegaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    0,
-                    INode.Booster.Omega,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(0, INode.Booster.Omega, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemRubyOmegaBalance - 1; i++) {
@@ -307,11 +263,7 @@ contract Redeem is Ownable {
 
         if (redeemDiamondDeltaBalance > 0) {
             for (uint256 i = 0; i < redeemDiamondDeltaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    2,
-                    INode.Booster.Delta,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(2, INode.Booster.Delta, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemDiamondDeltaBalance - 1; i++) {
@@ -330,11 +282,7 @@ contract Redeem is Ownable {
 
         if (redeemDiamondOmegaBalance > 0) {
             for (uint256 i = 0; i < redeemDiamondOmegaBalance; i++) {
-                nodeContract.RedeemMintBooster(
-                    2,
-                    INode.Booster.Omega,
-                    msg.sender
-                );
+                nodeContract.RedeemMintBooster(2, INode.Booster.Omega, msg.sender);
             }
 
             for (uint256 i = 0; i < redeemDiamondOmegaBalance - 1; i++) {

@@ -24,8 +24,7 @@ contract ERC721EnumerableFacet {
         LibDiamond.DiamondStorage storage dsMain = LibDiamond.diamondStorage();
         dsMain.supportedInterfaces[type(IERC721Enumerable).interfaceId] = true; //erc721-enumerable
 
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         require(!ds.init, "already initialized");
         ds.erc721 = IERC721(erc721); //erc721-enumerable
     }
@@ -33,12 +32,7 @@ contract ERC721EnumerableFacet {
     /**
      * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
      */
-    function tokenOfOwnerByIndex(address owner, uint256 index)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view virtual returns (uint256) {
         return LibERC721Enumerable._tokenOfOwnerByIndex(owner, index);
     }
 
@@ -46,8 +40,7 @@ contract ERC721EnumerableFacet {
      * @dev See {IERC721Enumerable-totalSupply}.
      */
     function totalSupply() public view virtual returns (uint256) {
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         return ds._allTokens.length;
     }
 
@@ -55,12 +48,8 @@ contract ERC721EnumerableFacet {
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
-        require(
-            index < ERC721EnumerableFacet.totalSupply(),
-            "ERC721Enumerable: global index out of bounds"
-        );
-        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable
-            .diamondStorage();
+        require(index < ERC721EnumerableFacet.totalSupply(), "ERC721Enumerable: global index out of bounds");
+        LibERC721Enumerable.DiamondStorage storage ds = LibERC721Enumerable.diamondStorage();
         return ds._allTokens[index];
     }
 }

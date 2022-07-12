@@ -15,10 +15,7 @@ async function deployDiamond() {
 
   // deploy Diamond
   const Diamond = await ethers.getContractFactory("Diamond");
-  const diamond = await Diamond.deploy(
-    contractOwner.address,
-    diamondCutFacet.address
-  );
+  const diamond = await Diamond.deploy(contractOwner.address, diamondCutFacet.address);
   await diamond.deployed();
   console.log("Diamond deployed:", diamond.address);
 
@@ -77,14 +74,16 @@ async function deployDiamond() {
   const chainId = hre.network.config.chainId;
   const isTestEnvironment = chainId === 1337;
 
-  const [defoaddy, daiAddress, routerAddress] =  isTestEnvironment ?
-      ["0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae",
+  const [defoaddy, daiAddress, routerAddress] = isTestEnvironment
+    ? [
+        "0x5C7ea2D484464a6Be1c2028CE1E9e1Ec339Dd3Ae",
         "0x85a2ff500E0eD9fA93719071EA46A86198181581",
-        "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901"] :
-      [
+        "0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901",
+      ]
+    : [
         "0x8d352F4c8643DB1d7f7FD6F2b508998EA6cb4388",
         "0xd586e7f844cea2f87f50152665bcbc2c279d8d70",
-        "0x60aE616a2155Ee3d9A68541Ba4544862310933d4"
+        "0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
       ];
 
   /// TODO: this reverts with 'PAIR_EXISTS', most likely it makes sense to check the pair with the factory before deployment. Also won't be the case since we're going to deploy new tokens with EIP2612 permit(). Now commenting.
@@ -105,7 +104,7 @@ async function deployDiamond() {
 if (require.main === module) {
   deployDiamond()
     .then(() => process.exit(0))
-    .catch((error) => {
+    .catch(error => {
       console.error(error);
       process.exit(1);
     });

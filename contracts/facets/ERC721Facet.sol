@@ -15,8 +15,8 @@ import "@openzeppelin/contracts/utils/Context.sol";
 /// @author jvoljvolizka
 
 /**
- *   @dev This contract is openzeppelin ERC721 implementation edited according to diamond storage pattern
- *   for information about facets and diamond tstorage please check EIP-2535
+ *   @dev This contract is OpenZeppelin ERC721 implementation edited according to diamond storage pattern
+ *   for information about facets and diamond storage please check EIP-2535
  */
 
 contract ERC721Facet {
@@ -63,22 +63,11 @@ contract ERC721Facet {
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (string memory)
-    {
-        require(
-            LibERC721._exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
+    function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
+        require(LibERC721._exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         string memory baseURI = _baseURI();
-        return
-            bytes(baseURI).length > 0
-                ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
     }
 
     /**
@@ -109,11 +98,7 @@ contract ERC721Facet {
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function isApprovedForAll(address owner, address operator)
-        public
-        view
-        returns (bool)
-    {
+    function isApprovedForAll(address owner, address operator) public view returns (bool) {
         return LibERC721._isApprovedForAll(owner, operator);
     }
 
@@ -125,8 +110,7 @@ contract ERC721Facet {
         require(to != owner, "ERC721: approval to current owner");
 
         require(
-            LibMeta.msgSender() == owner ||
-                LibERC721._isApprovedForAll(owner, LibMeta.msgSender()),
+            LibMeta.msgSender() == owner || LibERC721._isApprovedForAll(owner, LibMeta.msgSender()),
             "ERC721: approve caller is not owner nor approved for all"
         );
 

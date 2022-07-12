@@ -19,15 +19,14 @@ contract OwnerFacet {
     }
 
     function initialize(
-    address _redeemContract,
-    address _defoToken,
-    address _paymentToken,
-    address _treasury,
-    address _limiter,
-    address _rewardPool,
-    address _donation
+        address _redeemContract,
+        address _defoToken,
+        address _paymentToken,
+        address _treasury,
+        address _limiter,
+        address _rewardPool,
+        address _donation
     ) external onlyOwner {
-        console.log("OwnerFacet initialized");
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage gemds = LibGem.diamondStorage();
         gemds.MinterAddr = _redeemContract;
@@ -40,37 +39,25 @@ contract OwnerFacet {
     }
 
     /// @notice function for creating a new gem type or changing a gem type settings
-    function setGemSettings(
-        uint8 _type,
-        LibGem.GemTypeMetadata calldata _gemData
-    ) external onlyOwner {
+    function setGemSettings(uint8 _type, LibGem.GemTypeMetadata calldata _gemData) external onlyOwner {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         ds.GetGemTypeMetadata[_type] = _gemData;
     }
 
     /// @notice functions for setting distribution addresses
-    function setAddressAndDistTreasury(address _newAddress, uint256 _daiRate)
-        external
-        onlyOwner
-    {
+    function setAddressAndDistTreasury(address _newAddress, uint256 _daiRate) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Treasury = _newAddress;
         metads.TreasuryDaiRate = _daiRate;
     }
 
-    function setAddressAndDistRewardPool(address _newAddress, uint256 _defoRate)
-        external
-        onlyOwner
-    {
+    function setAddressAndDistRewardPool(address _newAddress, uint256 _defoRate) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.RewardPool = _newAddress;
         metads.RewardPoolDefoRate = _defoRate;
     }
 
-    function setAddressDonation(address _newAddress, uint256 _rate)
-        external
-        onlyOwner
-    {
+    function setAddressDonation(address _newAddress, uint256 _rate) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         metads.Donation = _newAddress;
         metads.CharityRate = _rate;

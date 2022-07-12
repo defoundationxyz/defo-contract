@@ -49,13 +49,15 @@ const accounts: HardhatNetworkAccountsUserConfig = [
   },
 ];
 
-const namedAccounts: NamedAccounts = {
+// also used to index the accounts array
+const namedAccountsIndex: NamedAccounts = {
   deployer: 0,
   treasury: 1,
   donations: 2,
   team: 3,
   vault: 4,
-  reward: 5,
+  rewardPool: 5,
+  defoTokenOwner: 6,
   dai: {
     43114: MAINNET_DAI_ADDRESS,
     43113: FUJI_DAI_ADDRESS,
@@ -75,8 +77,8 @@ const namedAccounts: NamedAccounts = {
   },
 };
 
-if (Object.values(accounts).length < 6) {
+if (Object.values(accounts).length < 7) {
   throw new Error("Please check you've set all six different private keys in the .env file");
 }
 
-export { NamedAccounts, accounts, namedAccounts };
+export { NamedAccounts, accounts, namedAccountsIndex };
