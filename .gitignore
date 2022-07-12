@@ -15,7 +15,7 @@
 **/.coverage_contracts
 **/dist
 **/node_modules
-types/*
+types
 
 # files
 *.env
