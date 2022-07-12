@@ -5,6 +5,8 @@ import { Address } from "hardhat-deploy/dist/types";
 
 export type CompleteGemData = LibGem.GemStruct & {
   gemId: number;
+  taxedReward: BigNumber;
+  rawReward: BigNumber;
   taperedReward: BigNumber;
   pendingMaintenance: BigNumber;
   isClaimable: boolean;
@@ -16,6 +18,8 @@ export const gemsIdsWithData =
       (await gemContract.getGemIdsOf(account)).map(async gemId => {
         return {
           gemId: Number(gemId),
+          rawReward: await gemContract.checkRawReward(gemId),
+          taxedReward: await gemContract.checkTaxedReward(gemId),
           taperedReward: await gemContract.checkTaperedReward(gemId),
           pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
           isClaimable: await gemContract.isClaimable(gemId),

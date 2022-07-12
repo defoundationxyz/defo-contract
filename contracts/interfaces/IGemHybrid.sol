@@ -20,7 +20,7 @@ interface IGemHybrid {
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
-        uint256 claimedReward; // previously claimed rewards
+        uint256 claimedReward; // previously claimed rewards, including those deposited to vault
     }
 
     /// @dev A struct for keeping info about node types

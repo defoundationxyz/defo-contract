@@ -13,6 +13,9 @@ const func: DeployFunction = async hre => {
     deployments: { deploy },
     getChainId,
     ethers,
+    ethers: {
+      utils: { parseEther: toWei },
+    },
   } = hre;
   const { defoTokenOwner, rewardPool, treasury } = await getNamedAccounts();
   const chainId = await getChainId();
@@ -33,9 +36,9 @@ const func: DeployFunction = async hre => {
   deployInfo(
     `Minting ${DEFO_TOKEN_TOTAL_SUPPLY.toLocaleString()} DEFO tokens and distributing to treasury and reward pool`,
   );
-  await contract.mint(defoTokenOwner, ethers.utils.parseEther(DEFO_TOKEN_TOTAL_SUPPLY.toString()));
-  await contract.transfer(rewardPool, ethers.utils.parseEther(DEFO_TOKEN_REWARD_POOL.toString()));
-  await contract.transfer(treasury, ethers.utils.parseEther(DEFO_TOKEN_TREASURY.toString()));
+  await contract.mint(defoTokenOwner, toWei(DEFO_TOKEN_TOTAL_SUPPLY.toString()));
+  await contract.transfer(rewardPool, toWei(DEFO_TOKEN_REWARD_POOL.toString()));
+  await contract.transfer(treasury, toWei(DEFO_TOKEN_TREASURY.toString()));
   /// TODO distribute to liquidity pool as well
   deploySuccess(`Done`);
 };

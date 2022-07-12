@@ -52,6 +52,7 @@ contract GemGettersFacet {
             (gemType.MintCount + 1 < gemType.DailyLimit);
     }
 
+    ///checks if the a gem
     function getAvailableBoosters(
         LibGem.Booster _booster,
         uint8 _type,

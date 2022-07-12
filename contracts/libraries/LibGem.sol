@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
+
 import "./LibERC721.sol";
 import "./LibMeta.sol";
 
@@ -48,10 +49,11 @@ library LibGem {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        console.log("gem.claimedReward ",  gem.claimedReward);
         uint256 rewardCount = _checkRawReward(_tokenId) + gem.claimedReward; // get reward without taper
         uint256 actualReward = 0;
-
         uint256 typePrice = gemType.DefoPrice;
+        console.log("_taperCalculate, rewardCount %s, typePrice %s", rewardCount, typePrice);
         if (rewardCount > typePrice) {
             while (rewardCount > typePrice) {
                 rewardCount = rewardCount - typePrice;
@@ -62,10 +64,10 @@ library LibGem {
             console.log("actualReward: ", actualReward);
             console.log("rewardCount: ", rewardCount);
             console.log("gem.claimedReward: ", gem.claimedReward);
-            console.log("result: ", actualReward + rewardCount - gem.claimedReward);
+            console.log("_taperCalculate result: ", actualReward + rewardCount - gem.claimedReward);
             return actualReward + rewardCount - gem.claimedReward;
         }
-        return _checkRawReward(_tokenId); // if less than roi don't taper
+    return _checkRawReward(_tokenId); // if less than roi don't taper
     }
 
     function _checkRawReward(uint256 _tokenid) internal view returns (uint256 defoRewards) {
@@ -88,6 +90,8 @@ library LibGem {
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
         }
+        console.log("_checkRawReward");
+        console.log("_passedDays: %s, taxRate: %s, final _rewardDefo: ",_passedDays, taxRate, _rewardDefo);
         return (_rewardDefo);
     }
 

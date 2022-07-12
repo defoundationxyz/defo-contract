@@ -10,20 +10,18 @@ Copy `.env-example` to `.env`.
 $ yarn install
 ```
 
-[//]: #
-[//]: # "## Testing"
-[//]: #
-[//]: # "To run unit & integration tests:"
-[//]: #
-[//]: # "```sh"
-[//]: # "$ yarn test"
-[//]: # "```"
-[//]: #
-[//]: # "To run coverage:"
-[//]: #
-[//]: # "```sh"
-[//]: # "$ yarn coverage"
-[//]: # "```"
+
+## Testing
+To run unit & integration tests:
+
+```sh
+$ yarn test
+```
+
+To run coverage:
+```sh
+$ yarn coverage
+```
 
 ## Deployment
 
@@ -51,5 +49,6 @@ yarn get-some-dai   # optional with account and amount, e.g. --account all --amo
 yarn get-some-defo  # same
 yarn get-some-gems  # mints all 3 gems, optional with gem type (0,1,2), e.g. --type 0
 yarn jump-in-time   # optional with human-readable time without spaces, e.g. --time 7d
-yarn claim          # optional with human-readable time without spaces, e.g. --time 7d
+yarn claim          # claim all claimable gems rewards, optional with gem id --id
+yarn vault          # showing vault stats without changes, puts to vault with params --id --amount
 ```

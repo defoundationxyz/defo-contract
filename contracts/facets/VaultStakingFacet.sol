@@ -50,6 +50,7 @@ contract VaultStakingFacet {
         metads.DefoToken.transferFrom(LibMeta.msgSender(), metads.Vault, amount);
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
         ds.totalAmount = ds.totalAmount + amount;
+        gem.LastReward = uint32(block.timestamp);
         emit AddedToVault(amount, LibMeta.msgSender());
     }
 

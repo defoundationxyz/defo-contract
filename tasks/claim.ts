@@ -15,7 +15,13 @@ export default task("claim", "claim rewards for gem(s)")
     types.int,
   )
   .setAction(async ({ id: gemIdParam, type: gemTypeParam }, hre) => {
-    const { getNamedAccounts, ethers } = hre;
+    const {
+      getNamedAccounts,
+      ethers,
+      ethers: {
+        utils: { formatEther: fromWei },
+      },
+    } = hre;
     const { deployer } = await getNamedAccounts();
 
     const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
@@ -33,8 +39,8 @@ export default task("claim", "claim rewards for gem(s)")
               const pickedGem = _.pick(gem, [
                 "gemId",
                 "rawReward",
-                "taperedReward",
                 "taxedReward",
+                "taperedReward",
               ]) as unknown as Record<string, number | string>;
               const formattedGem: Record<string, string | number> = {};
               Object.keys(pickedGem).map(key => {
@@ -42,9 +48,7 @@ export default task("claim", "claim rewards for gem(s)")
               });
               if (gem.isClaimable) {
                 await gemContract.ClaimRewards(gem.gemId);
-                formattedGem.claimed = Number(
-                  ethers.utils.formatEther((await gemContract.GemOf(gem.gemId)).claimedReward),
-                );
+                formattedGem.claimed = Number(fromWei((await gemContract.GemOf(gem.gemId)).claimedReward));
               } else {
                 formattedGem.claimed = "Not claimable";
               }

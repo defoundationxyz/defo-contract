@@ -12,18 +12,23 @@ task("vault", "Get the vault state")
     types.float,
   )
   .setAction(async ({ id, amount }, hre) => {
-    const { ethers } = hre;
+    const {
+      ethers,
+      ethers: {
+        utils: { formatEther: fromWei, parseEther: toWei },
+      },
+    } = hre;
     const vaultStakingFacet = await ethers.getContract<VaultStakingFacet>("DEFODiamond_DiamondProxy");
 
-    announce("Showing vault stats");
-    info(`Total staked ${ethers.utils.formatEther(await vaultStakingFacet.showTotalAmount())}`);
-    info(`Deployer staked ${ethers.utils.formatEther(await vaultStakingFacet.showStakedAmount())}`);
+    announce("Current vault stats");
+    info(`Total staked ${fromWei(await vaultStakingFacet.showTotalAmount())}`);
+    info(`Deployer staked ${fromWei(await vaultStakingFacet.showStakedAmount())}`);
 
     if (id || amount) {
-      announce("Adding to vault");
-      await vaultStakingFacet.addToVault(id ?? 0, amount ? ethers.utils.parseEther(amount.toString()) : 0);
-      info(`Total staked ${ethers.utils.formatEther(await vaultStakingFacet.showTotalAmount())}`);
-      info(`Deployer staked ${ethers.utils.formatEther(await vaultStakingFacet.showStakedAmount())}`);
+      announce("Staking to vault...");
+      await vaultStakingFacet.addToVault(id ?? 0, amount ? toWei(amount.toString()) : 0);
+      info(`Total staked ${fromWei(await vaultStakingFacet.showTotalAmount())}`);
+      info(`Deployer staked ${fromWei(await vaultStakingFacet.showStakedAmount())}`);
       success("Done");
     }
   });

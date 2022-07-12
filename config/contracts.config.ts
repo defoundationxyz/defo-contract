@@ -15,13 +15,15 @@ export const GEMS: Record<GemNames, number> = {
 export const gemName = (gemNumber: number) =>
   (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
 
+const HUNDRED_PERCENT = 100;
+
 export const MIN_REWARD_TIME = 3600 * 24 * 7;
 
 export const TREASURY_DEFO_RATE = 50;
-export const TREASURY_DAI_RATE = 50;
+export const TREASURY_DAI_RATE = HUNDRED_PERCENT - TREASURY_DEFO_RATE;
 
 export const LIQUIDITY_DEFO_RATE = 50;
-export const LIQUIDITY_DAI_RATE = 50;
+export const LIQUIDITY_DAI_RATE = HUNDRED_PERCENT - LIQUIDITY_DEFO_RATE;
 
 export const CHARITY_RATE = 5;
 

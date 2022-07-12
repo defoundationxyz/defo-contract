@@ -9,7 +9,7 @@ export default task("get-some-defo", "get funded with DEFO Token")
     "deployer",
     types.string,
   )
-  .addOptionalParam("amount", "How much", 10000, types.int)
+  .addOptionalParam("amount", "How much", 100_000, types.int)
   .setAction(async ({ account, amount }, hre) => {
     const { getNamedAccounts } = hre;
     const namedAccounts = await getNamedAccounts();
@@ -18,9 +18,9 @@ export default task("get-some-defo", "get funded with DEFO Token")
       return;
     }
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
-    announce(`Minting DEFO to ${accounts.toString()}...`);
+    announce(`Funding ${accounts.toString()} with DEFO...`);
     for (const account of accounts) {
       await fundDefo(hre, account, amount);
-      success(`${account} funded with ${amount.toLocaleString()}.`);
+      success(`${amount.toLocaleString()} DEFO has been minted to ${account}.`);
     }
   });

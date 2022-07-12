@@ -12,7 +12,6 @@ import "hardhat/console.sol";
 /// @title Defo Yield Gems
 /// @author jvoljvolizka, crypt0grapher
 /// @notice Main yield gem functionality facet
-
 contract GemFacet {
     using Counters for Counters.Counter;
     modifier SaleLock() {
@@ -59,23 +58,23 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 amount = _amount;
 
-        IERC20Joe Token;
+        IERC20Joe token;
         /// defo : %75 reward , %25 liq
         if (_isDefo) {
             uint256 reward = (amount * metads.TreasuryDefoRate) / 10000;
             uint256 liq = (amount * metads.LiquidityDefoRate) / 10000;
-            Token = metads.DefoToken;
-            Token.transfer(metads.RewardPool, reward);
-            Token.transfer(metads.Liquidity, liq);
+            token = metads.DefoToken;
+            token.transfer(metads.RewardPool, reward);
+            token.transfer(metads.Liquidity, liq);
         } else {
             /// dai %67.5 tres , %25 liq , %7.5 core team
             uint256 treasury = (amount * metads.TreasuryDaiRate) / 10000;
             uint256 team = (amount * metads.TeamDaiRate) / 10000;
             uint256 liq = (amount * metads.LiquidityDaiRate) / 10000;
-            Token = metads.PaymentToken;
-            Token.transfer(metads.Team, team);
-            Token.transfer(metads.Treasury, treasury);
-            Token.transfer(metads.Liquidity, liq);
+            token = metads.PaymentToken;
+            token.transfer(metads.Team, team);
+            token.transfer(metads.Treasury, treasury);
+            token.transfer(metads.Liquidity, liq);
         }
 
         // TODO : add lp distrubition
@@ -104,7 +103,7 @@ contract GemFacet {
     }
 
     /// @dev main reward calculation and transfer function probably will changed in the future all rates are daily rates
-
+    ///TODO what need of the _offset? it's always 0
     function _sendRewardTokens(uint256 _tokenid, uint256 _offset) internal returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
@@ -112,6 +111,7 @@ contract GemFacet {
         uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
         LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         uint256 taxRate = LibGem._rewardTax(_tokenid);
+        console.log("taxRate ", taxRate);
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
         }
@@ -121,11 +121,12 @@ contract GemFacet {
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
         uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 10000;
         _rewardDefo = _rewardDefo - charityAmount;
+        console.log("charity: ", charityAmount);
+        console.log("_rewardDefo after tax and charity: ", _rewardDefo);
         gem.claimedReward = gem.claimedReward + _rewardDefo;
         metads.DefoToken.transferFrom(metads.RewardPool, metads.Donation, charityAmount);
         metads.TotalCharity = charityAmount + metads.TotalCharity;
         user.charityContribution = user.charityContribution + charityAmount;
-
         // approve here
         metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
         gem.LastReward = uint32(block.timestamp);
@@ -263,6 +264,10 @@ contract GemFacet {
         }
     }
 
+    /**
+    @notice Claims rewards for a gem to the owner's wallet. A gem should be active,
+    @param _tokenid gem id
+    */
     function ClaimRewards(uint256 _tokenid) external onlyGemOwner(_tokenid) onlyActive(_tokenid) returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
@@ -404,6 +409,7 @@ contract GemFacet {
     function checkTaxedReward(uint256 _tokenid) public view returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
+        console.log("checkTaxedReward");
         console.log("_rewardDefo: ", _rewardDefo);
         uint256 taxRate = LibGem._rewardTax(_tokenid);
         if (taxRate != 0) {
@@ -412,7 +418,7 @@ contract GemFacet {
         _rewardDefo = _rewardDefo;
 
         uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
-
+        console.log("charityAmount: %s, final _rewardDefo: %s",charityAmount, _rewardDefo);
         _rewardDefo = _rewardDefo - charityAmount;
 
         return _rewardDefo;
@@ -436,7 +442,6 @@ contract GemFacet {
 
     function getGemIdsOf(address _user) public view returns (uint256[] memory) {
         uint256 numberOfGems = LibERC721._balanceOf(_user);
-        console.log("number of gems: ", numberOfGems);
         uint256[] memory gemIds = new uint256[](numberOfGems);
         for (uint256 i = 0; i < numberOfGems; i++) {
             uint256 gemId = LibERC721Enumerable._tokenOfOwnerByIndex(_user, i);

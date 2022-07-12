@@ -5,7 +5,14 @@ import { task } from "hardhat/config";
 import DAI_ABI from "../abi/dai-abi.json";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
-  const { getNamedAccounts, deployments, ethers } = hre;
+  const {
+    getNamedAccounts,
+    deployments,
+    ethers,
+    ethers: {
+      utils: { formatEther: fromWei },
+    },
+  } = hre;
   const namedAccounts = await getNamedAccounts();
   const { dai, forkedDefoToken } = namedAccounts;
   info("\n 📡 Querying balances...");
@@ -30,9 +37,9 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
       return {
         name: accountName,
         address: accountAddress,
-        AVAX: Number(ethers.utils.formatEther(await ethers.provider.getBalance(accountAddress))),
-        DAI: Number(ethers.utils.formatEther(await daiContract.balanceOf(accountAddress))),
-        DEFO: defoContract && Number(ethers.utils.formatEther(await defoContract.balanceOf(accountAddress))),
+        AVAX: Number(fromWei(await ethers.provider.getBalance(accountAddress))),
+        DAI: Number(fromWei(await daiContract.balanceOf(accountAddress))),
+        DEFO: defoContract && Number(fromWei(await defoContract.balanceOf(accountAddress))),
       };
     }),
   );

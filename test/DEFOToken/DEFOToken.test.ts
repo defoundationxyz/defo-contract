@@ -7,6 +7,10 @@ import { ContractTransaction } from "ethers";
 import hardhat, { deployments, ethers, getNamedAccounts } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
 
+const {
+  utils: { parseEther: toWei },
+} = ethers;
+
 describe("DEFO Token", async () => {
   const decimals = 18;
   const supply = 1e6;
@@ -28,7 +32,7 @@ describe("DEFO Token", async () => {
       expect(await defoContract.decimals()).to.equal(decimals);
     });
     it("should return correct total supply", async () => {
-      expect((await defoContract.totalSupply()).eq(ethers.utils.parseEther(supply.toString()))).to.be.true;
+      expect(await defoContract.totalSupply()).to.equal(toWei(supply.toString()));
     });
   });
 
@@ -42,12 +46,12 @@ describe("DEFO Token", async () => {
 
     it("should return correct reward pool balance", async () => {
       const balance = await defoContract.balanceOf(accounts.rewardPool);
-      expect(balance.eq(ethers.utils.parseEther(DEFO_TOKEN_REWARD_POOL.toString()))).is.true;
+      expect(balance).to.equal(toWei(DEFO_TOKEN_REWARD_POOL.toString()));
     });
 
     it("should return correct treasury balance", async () => {
       const balance = await defoContract.balanceOf(accounts.treasury);
-      expect(balance.eq(ethers.utils.parseEther(DEFO_TOKEN_TREASURY.toString()))).is.true;
+      expect(balance).to.equal(toWei(DEFO_TOKEN_TREASURY.toString()));
     });
   });
 

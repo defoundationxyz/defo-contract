@@ -10,7 +10,14 @@ import { namedAccountsIndex } from "../../hardhat.accounts";
 import { DEFOToken, ERC721Facet, OwnerFacet } from "../../types";
 
 const func: DeployFunction = async hre => {
-  const { getNamedAccounts, deployments, ethers } = hre;
+  const {
+    getNamedAccounts,
+    deployments,
+    ethers,
+    ethers: {
+      utils: { formatEther: fromWei },
+    },
+  } = hre;
   const { deployer, dai, treasury, vault, rewardPool, donations, team } = await getNamedAccounts();
   const signers = await ethers.getSigners();
 
@@ -52,11 +59,7 @@ const func: DeployFunction = async hre => {
     for (const token of [defoContract, daiContract]) {
       const name = await token.name();
       deployAnnounce(`🔑 Approving spending of ${name}...`);
-      deployInfo(
-        `Current allowance is ${ethers.utils.formatEther(
-          await token.allowance(signer.address, diamondDeployment.address),
-        )}`,
-      );
+      deployInfo(`Current allowance is ${fromWei(await token.allowance(signer.address, diamondDeployment.address))}`);
       if (token == defoContract) {
         deployInfo(`Signing for ${name}`);
         const result = await signDaiPermit(ethers.provider, token.address, signer.address, diamondDeployment.address);
@@ -77,7 +80,7 @@ const func: DeployFunction = async hre => {
       const allowance = await token.allowance(signer.address, diamondDeployment.address);
       deploySuccess(
         `Permission to spend granted.Allowance is ${
-          allowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : ethers.utils.formatEther(allowance)
+          allowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : fromWei(allowance)
         }`,
       );
     }
