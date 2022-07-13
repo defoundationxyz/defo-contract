@@ -1,4 +1,4 @@
-import chalk, { Chalk } from "chalk";
+import chalk from "chalk";
 import { ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
 import _ from "lodash";
@@ -30,16 +30,19 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 
 export const outputFormatKeyValue = (key: string, value: string | number): string | number =>
   key.match("Last|Time")
-    ? moment.unix(Number(value)).format("DD.MM.YYYY HH:mm:ss")
+    ? moment.unix(Number(value)).format("DD.MM.YYYY")
     : key.match("Fee|Price|Reward|Maintenance") && !key.match("Rate")
     ? Number(ethers.utils.formatEther(value))
     : value;
 
-export const outputFormatter = <T extends Record<string, any>>(keys: string[], object: T) =>
-  Object.entries(_.pick(object, keys)).reduce<MutableObject<T>>((acc, cur) => {
-    const key = cur[0];
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    acc[key] = outputFormatKeyValue(key, cur[1]);
-    return acc;
-  }, {} as T);
+export const outputFormatter = <T extends Record<string, any>>(object: T, keys?: string[]) =>
+  Object.entries(_.pick(object, keys || Object.keys(object).filter(i => isNaN(Number(i))))).reduce<MutableObject<T>>(
+    (acc, cur) => {
+      const key = cur[0];
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      acc[key] = outputFormatKeyValue(key, cur[1]);
+      return acc;
+    },
+    {} as T,
+  );
