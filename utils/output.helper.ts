@@ -1,5 +1,6 @@
+import { PromiseOrValue } from "@contractTypes/common";
 import chalk from "chalk";
-import { ethers } from "ethers";
+import { BigNumber, BigNumberish, ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
 import _ from "lodash";
 import moment from "moment";
@@ -28,12 +29,21 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
     ? deployWarning(`Re-used existing ${name} at ${result.address}`)
     : deploySuccess(`${name} deployed at ${result.address}`);
 
-export const outputFormatKeyValue = (key: string, value: string | number): string | number =>
+export const outputFormatKeyValue = (
+  key: string,
+  value: string | boolean | PromiseOrValue<BigNumberish> | undefined,
+): string | number | bigint =>
   key.match("Last|Time")
     ? moment.unix(Number(value)).format("DD.MM.YYYY")
-    : key.match("Fee|Price|Reward|Maintenance") && !key.match("Rate")
+    : BigNumber.isBigNumber(value)
     ? Number(ethers.utils.formatEther(value))
-    : value;
+    : value instanceof Promise
+    ? outputFormatKeyValue(key, Promise.resolve(value))
+    : typeof value === "number"
+    ? value
+    : typeof value === "undefined"
+    ? "undefined"
+    : value.toString();
 
 export const outputFormatter = <T extends Record<string, any>>(object: T, keys?: string[]) =>
   Object.entries(_.pick(object, keys || Object.keys(object).filter(i => isNaN(Number(i))))).reduce<MutableObject<T>>(

@@ -1,5 +1,5 @@
 import { GEMS, gemName } from "@config";
-import { gemsGroupedByType } from "@utils/gems.helper";
+import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
 import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
@@ -41,10 +41,15 @@ export default task("claim", "claim rewards for gem(s)")
                 "rawReward",
                 "taxedReward",
                 "taperedReward",
-              ]) as unknown as Record<string, number | string>;
-              const formattedGem: Record<string, string | number> = {};
+              ]) as Partial<CompleteGemData>;
+              const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint> & {
+                claimed: string | number;
+              };
               Object.keys(pickedGem).map(key => {
-                formattedGem[key] = outputFormatKeyValue(key, pickedGem[key]);
+                formattedGem[key as keyof Partial<CompleteGemData>] = outputFormatKeyValue(
+                  key,
+                  pickedGem[key as keyof Partial<CompleteGemData>],
+                );
               });
               if (gem.isClaimable) {
                 await gemContract.ClaimRewards(gem.gemId);
