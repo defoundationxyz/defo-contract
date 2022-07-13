@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./LibERC721.sol";
 import "./LibMeta.sol";
 
+//
 library LibGem {
     enum Booster {
         None,
@@ -21,7 +22,7 @@ library LibGem {
         /// @dev i'm not sure if enums are packed as uint8 in here
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
         uint256 claimedReward; // previously claimed rewards
-        uint256 vaultReward; // rewards previously added to vault
+        uint256 stakedReward; // rewards previously added to vault
     }
 
     /// @dev A struct for keeping info about node types
@@ -49,11 +50,12 @@ library LibGem {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
-        console.log("gem.claimedReward ",  gem.claimedReward);
-        uint256 rewardCount = _checkRawReward(_tokenId) + gem.claimedReward; // get reward without taper
+        console.log("_tokenId %s, gem.claimedReward %s",  _tokenId, gem.claimedReward);
+        uint256 rewardCount = _checkRawReward(_tokenId) + gem.claimedReward + gem.stakedReward; // get reward without taper
         uint256 actualReward = 0;
         uint256 typePrice = gemType.DefoPrice;
         console.log("_taperCalculate, rewardCount %s, typePrice %s", rewardCount, typePrice);
+
         if (rewardCount > typePrice) {
             while (rewardCount > typePrice) {
                 rewardCount = rewardCount - typePrice;
@@ -64,8 +66,8 @@ library LibGem {
             console.log("actualReward: ", actualReward);
             console.log("rewardCount: ", rewardCount);
             console.log("gem.claimedReward: ", gem.claimedReward);
-            console.log("_taperCalculate result: ", actualReward + rewardCount - gem.claimedReward);
-            return actualReward + rewardCount - gem.claimedReward;
+            console.log("_taperCalculate result: ", actualReward + rewardCount - gem.claimedReward - gem.stakedReward);
+            return actualReward + rewardCount - gem.claimedReward - gem.stakedReward;
         }
     return _checkRawReward(_tokenId); // if less than roi don't taper
     }
@@ -90,7 +92,7 @@ library LibGem {
         if (taxRate != 0) {
             _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
         }
-        console.log("_checkRawReward");
+        console.log("_checkRawReward, _tokenid", _tokenid);
         console.log("_passedDays: %s, taxRate: %s, final _rewardDefo: ",_passedDays, taxRate, _rewardDefo);
         return (_rewardDefo);
     }

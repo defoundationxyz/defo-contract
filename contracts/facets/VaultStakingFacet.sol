@@ -45,7 +45,7 @@ contract VaultStakingFacet {
         metads.DefoToken.transferFrom(metads.RewardPool, metads.Donation, charityAmount);
         user.charityContribution = user.charityContribution + charityAmount;
         metads.TotalCharity = metads.TotalCharity + charityAmount;
-        gem.claimedReward = gem.claimedReward + amount;
+        gem.stakedReward = gem.stakedReward + amount;
         ds.StakedAmount[LibMeta.msgSender()] = ds.StakedAmount[LibMeta.msgSender()] + amount;
         metads.DefoToken.transferFrom(LibMeta.msgSender(), metads.Vault, amount);
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
@@ -115,7 +115,7 @@ contract VaultStakingFacet {
 
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
         ds.totalAmount = ds.totalAmount - (amount - charityAmount);
-        gem.claimedReward = gem.claimedReward - (amount - taxed);
+        gem.stakedReward = gem.stakedReward - (amount - taxed);
 
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
         emit RemovedFromVault(amount - taxed, LibMeta.msgSender());

@@ -56,3 +56,5 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
     },
     {} as T,
   );
+
+export const isKey = <T>(x: T, k: PropertyKey): k is keyof T => k in x;

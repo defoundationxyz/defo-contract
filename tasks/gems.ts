@@ -1,6 +1,6 @@
 import { GEMS, gemName } from "@config";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
-import { announce, info, outputFormatKeyValue, outputFormatter, warning } from "@utils/output.helper";
+import { announce, info, isKey, outputFormatKeyValue, outputFormatter, warning } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -43,10 +43,7 @@ export default task("gems", "get gems info and balance information for the deplo
 
         const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint>;
         Object.keys(gemWithFieldsToShow).map(key => {
-          formattedGem[key as keyof Partial<CompleteGemData>] = outputFormatKeyValue(
-            key,
-            gemWithFieldsToShow[key as keyof Partial<CompleteGemData>],
-          );
+          if (isKey(gemWithFieldsToShow, key)) formattedGem[key] = outputFormatKeyValue(key, gemWithFieldsToShow[key]);
         });
         return formattedGem;
       });
