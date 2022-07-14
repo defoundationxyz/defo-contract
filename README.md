@@ -10,8 +10,8 @@ Copy `.env-example` to `.env`.
 $ yarn install
 ```
 
-
 ## Testing
+
 To run unit & integration tests:
 
 ```sh
@@ -19,6 +19,7 @@ $ yarn test
 ```
 
 To run coverage:
+
 ```sh
 $ yarn coverage
 ```

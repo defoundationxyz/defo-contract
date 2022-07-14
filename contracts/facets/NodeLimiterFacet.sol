@@ -10,7 +10,7 @@ import "../libraries/LibMeta.sol";
 
 contract NodeLimiterFacet {
     modifier onlyOwner() {
-        require(LibMeta.msgSender() == LibDiamond.contractOwner());
+        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "Not authorized");
         _;
     }
 

@@ -3,12 +3,15 @@ import {
   DIAMOND_GEM,
   LIQUIDITY_DAI_RATE,
   LIQUIDITY_DEFO_RATE,
-  MAINTENANCE_DAYS,
-  MINT_LIMIT_HOURS,
-  MIN_REWARD_TIME,
+  MAINTENANCE_PERIOD,
+  MINT_LIMIT_PERIOD,
   REWARD_TAX_TABLE,
   RUBY_GEM,
   SAPHIRE_GEM,
+  SECONDS_IN_A_WEEK,
+  TAPER_RATE,
+  TEAM_DAI_RATE,
+  TEAM_DEFO_RATE,
   TREASURY_DAI_RATE,
   TREASURY_DEFO_RATE,
 } from "@config";
@@ -26,19 +29,21 @@ const func: DeployFunction = async hre => {
   deployAnnounce("\n\nInitializing OwnerFacet with numeric parameters from  constants/config.ts ...");
 
   await Promise.all([
-    ownerFacetInstance.setAddressAndDistTeam(team, TREASURY_DAI_RATE, TREASURY_DEFO_RATE),
+    ownerFacetInstance.setAddressAndDistTeam(team, TEAM_DAI_RATE, TEAM_DEFO_RATE),
     ownerFacetInstance.setAddressAndDistLiquidity(deployer, LIQUIDITY_DEFO_RATE, LIQUIDITY_DAI_RATE),
+    ownerFacetInstance.setAddressAndDistTreasury(deployer, TREASURY_DAI_RATE),
     ownerFacetInstance.setAddressDonation(donations, CHARITY_RATE),
     ownerFacetInstance.setAddressVault(vault),
-    ownerFacetInstance.setMinRewardTime(MIN_REWARD_TIME),
+    ownerFacetInstance.setMinRewardTime(SECONDS_IN_A_WEEK),
     ownerFacetInstance.setRewardTax(REWARD_TAX_TABLE),
+    ownerFacetInstance.setTaperRate(TAPER_RATE),
     ownerFacetInstance.setGemSettings("0", SAPHIRE_GEM),
     ownerFacetInstance.setGemSettings("1", RUBY_GEM),
     ownerFacetInstance.setGemSettings("2", DIAMOND_GEM),
     // activate limit hours
-    ownerFacetInstance.setMintLimitHours(MINT_LIMIT_HOURS),
+    ownerFacetInstance.setMintLimitPeriod(MINT_LIMIT_PERIOD),
     // activate maintenance days
-    ownerFacetInstance.setMaintenanceDays(MAINTENANCE_DAYS),
+    ownerFacetInstance.setMaintenancePeriod(MAINTENANCE_PERIOD),
   ]);
 
   deploySuccess(`Success`);

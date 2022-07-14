@@ -1,4 +1,4 @@
-import { Contract } from "ethers";
+import { Contract, providers } from "ethers";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { NamedAccounts, namedAccountsIndex } from "../hardhat.accounts";
@@ -30,3 +30,17 @@ export const getContractWithSigner = async <T extends Contract>(
   contractName: string,
   namedAccountId?: keyof NamedAccounts,
 ): Promise<T> => hre.ethers.getContract<T>(contractName, await namedSigner(hre, namedAccountId ?? "deployer"));
+
+export const getTime = (formatter: (timestamp: number) => string) => async (provider: providers.JsonRpcProvider) =>
+  formatter((await provider.getBlock(provider.blockNumber)).timestamp);
+
+export const advanceBlock = async (provider: providers.JsonRpcProvider) => provider.send("evm_mine", []);
+
+export const increaseTime = async (provider: providers.JsonRpcProvider, time: number) => {
+  await provider.send("evm_increaseTime", [time]);
+  await advanceBlock(provider);
+};
+export const setTime = async (provider: providers.JsonRpcProvider, time: number, advance: boolean = true) => {
+  await provider.send("evm_setNextBlockTimestamp", [time]);
+  if (advance) await advanceBlock(provider);
+};

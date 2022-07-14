@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.9;
 
 import "../libraries/LibERC721.sol";
 import "../libraries/LibGem.sol";
@@ -8,12 +8,21 @@ import "../libraries/LibMeta.sol";
 import "../libraries/LibUser.sol";
 import "../libraries/LibERC721Enumerable.sol";
 import "hardhat/console.sol";
+import "../libraries/helpers/TaxHelper.sol";
+import "../libraries/helpers/BoosterHelper.sol";
+import "../libraries/helpers/PercentHelper.sol";
+import "../token/DEFOToken.sol";
 
 /// @title Defo Yield Gems
 /// @author jvoljvolizka, crypt0grapher
 /// @notice Main yield gem functionality facet
 contract GemFacet {
     using Counters for Counters.Counter;
+    using BoosterHelper for LibGem.Booster;
+    using TaxHelper for TaxHelper.TaxTier;
+    using TaxHelper for uint256;
+    using PercentHelper for uint256;
+
     modifier SaleLock() {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(!metads.Lock, "Sale is Locked");
@@ -23,7 +32,6 @@ contract GemFacet {
     modifier onlyMinter() {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         require(ds.MinterAddr == LibMeta.msgSender(), "Only from Redemption contract");
-
         _;
     }
     modifier onlyGemOwner(uint256 _tokenId) {
@@ -37,16 +45,46 @@ contract GemFacet {
         _;
     }
 
-    modifier mintTimeLimit(uint8 _gemType) {
+    modifier mintLimit(uint8 _gemType) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(
-            (block.timestamp - gemType.LastMint >= 1 hours * uint256(metads.MintLimitHours)) ||
-                (gemType.MintCount + 1 <= gemType.DailyLimit),
+            (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) ||
+            (gemType.MintCount + 1 <= gemType.DailyLimit),
             "Gem mint restriction"
         );
         _;
+    }
+
+    /// @notice gets tax tier for a given gemId
+    /// @param _tokenId unique NFT gem id
+    /// @return current tax tier of the gem, might be configurable, now it's 0 (max %),1,2,3 (0 %).
+    function getTaxTier(uint256 _tokenId) external view returns (uint256) {
+        return uint256(LibGem._getTaxTier(_tokenId));
+    }
+
+    /// @notice gets when next tax tier executes for a given gemId
+    function wenNextTaxTier(uint256 timeFromLastRewardWithdrawal) external view returns (uint256) {
+        return TaxHelper.wenNextTaxTier(timeFromLastRewardWithdrawal);
+    }
+
+    /// @notice get total rewards earned
+    function getTotalRewardEarned() internal returns (uint256) {
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
+
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+
+        uint256 totalReward = 0;
+        uint256[] memory userGemIds = getGemIdsOf(msg.sender);
+        for (uint256 i = 0; i < userGemIds.length; i++) {
+            LibGem.Gem storage gem = ds.GemOf[userGemIds[i]];
+            totalReward += LibGem._taperedReward(userGemIds[i]).lessRate(LibGem._rewardTax(userGemIds[i]));
+            totalReward += gem.claimedReward + gem.stakedReward;
+        }
+
+        return totalReward;
     }
 
     // internal functions
@@ -61,23 +99,21 @@ contract GemFacet {
         IERC20Joe token;
         /// defo : %75 reward , %25 liq
         if (_isDefo) {
-            uint256 reward = (amount * metads.TreasuryDefoRate) / 10000;
-            uint256 liq = (amount * metads.LiquidityDefoRate) / 10000;
+            uint256 reward = amount.rate(metads.TreasuryDefoRate);
+            uint256 liq = amount.rate(metads.LiquidityDefoRate);
             token = metads.DefoToken;
             token.transfer(metads.RewardPool, reward);
             token.transfer(metads.Liquidity, liq);
         } else {
             /// dai %67.5 tres , %25 liq , %7.5 core team
-            uint256 treasury = (amount * metads.TreasuryDaiRate) / 10000;
-            uint256 team = (amount * metads.TeamDaiRate) / 10000;
-            uint256 liq = (amount * metads.LiquidityDaiRate) / 10000;
+            uint256 treasury = amount.rate(metads.TreasuryDaiRate);
+            uint256 team = amount.rate(metads.TeamDaiRate);
+            uint256 liq = amount.rate(metads.LiquidityDaiRate);
             token = metads.PaymentToken;
             token.transfer(metads.Team, team);
             token.transfer(metads.Treasury, treasury);
             token.transfer(metads.Liquidity, liq);
         }
-
-        // TODO : add lp distrubition
     }
 
     function _mintGem(uint8 _type, address _to) internal returns (uint256) {
@@ -95,9 +131,9 @@ contract GemFacet {
         LibERC721._safeMint(_to, tokenId);
         LibGem.Gem memory gem;
         gem.GemType = _type;
-        gem.LastReward = uint32(block.timestamp);
-        gem.LastMaintained = uint32(block.timestamp);
-        gem.MintTime = uint32(block.timestamp);
+        gem.LastReward = block.timestamp;
+        gem.LastMaintained = block.timestamp;
+        gem.MintTime = block.timestamp;
         ds.GemOf[tokenId] = gem;
         return tokenId;
     }
@@ -108,38 +144,34 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
+
         LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         uint256 taxRate = LibGem._rewardTax(_tokenid);
-        console.log("taxRate ", taxRate);
-        if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
-        }
-        _rewardDefo = _rewardDefo - _offset;
+
+        uint256 _rewardDefo = LibGem._taperedReward(_tokenid).lessRate(taxRate);
+        _rewardDefo -= _offset;
         require(_rewardDefo > metads.MinReward, "Less than min reward");
 
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
-        uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 10000;
-        _rewardDefo = _rewardDefo - charityAmount;
-        console.log("charity: ", charityAmount);
-        console.log("_rewardDefo after tax and charity: ", _rewardDefo);
+        uint256 charityAmount = _rewardDefo.rate(metads.CharityRate);
+        _rewardDefo -= charityAmount;
         gem.claimedReward = gem.claimedReward + _rewardDefo;
         metads.DefoToken.transferFrom(metads.RewardPool, metads.Donation, charityAmount);
         metads.TotalCharity = charityAmount + metads.TotalCharity;
         user.charityContribution = user.charityContribution + charityAmount;
         // approve here
         metads.DefoToken.transferFrom(metads.Treasury, msg.sender, _rewardDefo);
-        gem.LastReward = uint32(block.timestamp);
+        gem.LastReward = block.timestamp;
         return _rewardDefo;
     }
 
     // gem compounding function creates a gem from unclaimed rewards , only creates same type of the compounded gem
-    function _compound(uint256 _tokenid, uint8 _gemType) internal mintTimeLimit(_gemType) {
+    function _compound(uint256 _tokenid, uint8 _gemType) internal mintLimit(_gemType) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata storage gemType = ds.GetGemTypeMetadata[_gemType];
-        uint256 rewardDefo = LibGem._taperCalculate(_tokenid);
+        uint256 rewardDefo = LibGem._taperedReward(_tokenid);
         require(rewardDefo >= (gemType.DefoPrice), "not enough rewards");
         gem.claimedReward = gem.claimedReward + gemType.DefoPrice;
 
@@ -148,53 +180,40 @@ contract GemFacet {
         LibERC721._safeMint(msg.sender, tokenId);
         LibGem.Gem memory newGem;
         newGem.GemType = _gemType;
-        newGem.LastMaintained = uint32(block.timestamp);
-        newGem.LastReward = uint32(block.timestamp);
+        newGem.LastMaintained = block.timestamp;
+        newGem.LastReward = block.timestamp;
         ds.GemOf[tokenId] = newGem;
-        if (block.timestamp - gemType.LastMint >= 1 hours * uint256(metads.MintLimitHours)) {
-            gemType.LastMint = uint32(block.timestamp);
+        if (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) {
+            gemType.LastMint = block.timestamp;
             gemType.MintCount = 1;
         } else {
             gemType.MintCount = gemType.MintCount + 1;
         }
     }
 
-    // TODO: Add grace period
-    function _maintenance(uint256 _tokenid, uint256 _days) internal {
+    // TODO: Add grace period ?
+    function _maintenance(uint256 _tokenid, uint256 _time) internal {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
 
-        uint256 _fee = gemType.MaintenanceFee;
-        uint256 discountRate = _maintenanceDiscount(_tokenid);
-        _fee = _fee - ((discountRate * _fee) / 100);
+        uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
+        uint256 _fee = gemType.MaintenanceFee.lessRate(discountedRate);
+
         uint256 _lastTime = gem.LastMaintained;
+
         require(_lastTime < block.timestamp, "upfront is paid already");
-        // TODO TEST : check for possible calculation errors
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-        require(_passedDays > metads.MaintenanceDays, "Too soon");
-        _passedDays = _passedDays + _days;
-        uint256 _amount = _passedDays * _fee;
-        console.log("passedDays: ", _passedDays);
-        console.log("_amount: ", _amount);
+
+        uint256 _sinceLastMaintained = block.timestamp - _lastTime;
+        require(_sinceLastMaintained > metads.MaintenancePeriod, "Too soon");
+
+        uint256 _totalTimeForMaintaince = _sinceLastMaintained + _time;
+        uint256 _amount = _totalTimeForMaintaince * _fee;
         require(metads.PaymentToken.balanceOf(msg.sender) > _amount, "Not enough funds to pay");
+
         metads.PaymentToken.transferFrom(msg.sender, metads.Treasury, _amount);
-        gem.LastMaintained = uint32(block.timestamp) + uint32((_days * 1 days));
-        console.log("gem.LastMaintained: ", gem.LastMaintained);
-    }
-
-    function _maintenanceDiscount(uint256 _tokenid) internal view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-
-        if (gem.booster == LibGem.Booster.Omega) {
-            return 50;
-        } else if (gem.booster == LibGem.Booster.Delta) {
-            return 25;
-        } else {
-            return 0;
-        }
+        gem.LastMaintained = block.timestamp + _totalTimeForMaintaince;
     }
 
     // Public Functions
@@ -241,8 +260,14 @@ contract GemFacet {
         }
     }
 
+    function getBoosters(uint256 gemType) external returns (uint256 omega, uint256 delta) {
+        LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
+        LibUser.UserData storage userData = userds.GetUserData[msg.sender];
+        return (userData.OmegaClaims[gemType], userData.DeltaClaims[gemType]);
+    }
+
     /// @notice mint a new gem
-    function MintGem(uint8 _type) external SaleLock mintTimeLimit(_type) {
+    function MintGem(uint8 _type) external SaleLock mintLimit(_type) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         if (metads.MaxGems != 0) {
@@ -256,8 +281,8 @@ contract GemFacet {
         _distributePayment(gemType.DefoPrice, true);
         _distributePayment(gemType.StablePrice, false);
         _mintGem(_type, msg.sender);
-        if (block.timestamp - gemType.LastMint >= 1 hours * uint256(metads.MintLimitHours)) {
-            gemType.LastMint = uint32(block.timestamp);
+        if (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) {
+            gemType.LastMint = block.timestamp;
             gemType.MintCount = 1;
         } else {
             gemType.MintCount = gemType.MintCount + 1;
@@ -294,8 +319,8 @@ contract GemFacet {
         }
     }
 */
-    function Maintenance(uint256 _tokenid, uint256 _days) external onlyGemOwner(_tokenid) {
-        _maintenance(_tokenid, _days);
+    function Maintenance(uint256 _tokenid, uint256 _time) external onlyGemOwner(_tokenid) {
+        _maintenance(_tokenid, _time);
     }
 
     function BatchMaintenance(uint256[] calldata _tokenids) external {
@@ -403,24 +428,17 @@ contract GemFacet {
     }
 
     function checkTaperedReward(uint256 _tokenid) public view returns (uint256) {
-        return LibGem._taperCalculate(_tokenid);
+        return LibGem._taperedReward(_tokenid);
     }
 
     function checkTaxedReward(uint256 _tokenid) public view returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        uint256 _rewardDefo = LibGem._taperCalculate(_tokenid);
-        console.log("checkTaxedReward");
-        console.log("_rewardDefo: ", _rewardDefo);
+        uint256 _rewardDefo = LibGem._taperedReward(_tokenid);
         uint256 taxRate = LibGem._rewardTax(_tokenid);
-        if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 1000));
-        }
-        _rewardDefo = _rewardDefo;
+        _rewardDefo = _rewardDefo.lessRate(taxRate);
 
-        uint256 charityAmount = (metads.CharityRate * _rewardDefo) / 1000;
-        console.log("charityAmount: %s, final _rewardDefo: %s",charityAmount, _rewardDefo);
-        _rewardDefo = _rewardDefo - charityAmount;
-
+        uint256 charityAmount = _rewardDefo.rate(metads.CharityRate);
+        _rewardDefo -= charityAmount;
         return _rewardDefo;
     }
 
@@ -430,12 +448,12 @@ contract GemFacet {
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
         uint256 _fee = gemType.MaintenanceFee;
         uint256 _lastTime = gem.LastMaintained;
-        uint256 _passedDays;
+        uint256 _passedTime;
         if (_lastTime > block.timestamp) {
             return 0;
         } else {
-            _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-            uint256 _amount = _passedDays * _fee;
+            _passedTime = block.timestamp - _lastTime;
+            uint256 _amount = _passedTime * _fee;
             return _amount;
         }
     }

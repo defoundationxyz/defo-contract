@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.9;
+
 /// @title Defo Vault Staking Facet
 /// @author jvoljvolizka
 /// @notice contains functions for vault staking from unclaimed rewards and unlocking
@@ -7,8 +11,11 @@ import "../libraries/LibGem.sol";
 import "../libraries/LibUser.sol";
 import "../libraries/LibMeta.sol";
 import "../libraries/LibVaultStaking.sol";
+import "../libraries/helpers/PercentHelper.sol";
 
 contract VaultStakingFacet {
+    using PercentHelper for uint256;
+
     event AddedToVault(uint256 indexed _amount, address indexed _user);
     event RemovedFromVault(uint256 indexed _amount, address indexed _user);
     modifier onlyGemOwner(uint256 _tokenId) {
@@ -35,11 +42,11 @@ contract VaultStakingFacet {
         LibUser.DiamondStorage storage userds = LibUser.diamondStorage();
         LibUser.UserData storage user = userds.GetUserData[LibMeta.msgSender()];
         LibVaultStaking.DiamondStorage storage ds = LibVaultStaking.diamondStorage();
-        uint256 _pendingRewards = LibGem._taperCalculate(_tokenId);
+        uint256 _pendingRewards = LibGem._taperedReward(_tokenId);
         require(amount <= _pendingRewards, "Not enough pending rewards");
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
 
-        uint256 charityAmount = (metads.CharityRate * amount) / 10000;
+        uint256 charityAmount = amount.rate(metads.CharityRate);
         amount = amount - charityAmount;
 
         metads.DefoToken.transferFrom(metads.RewardPool, metads.Donation, charityAmount);
@@ -50,7 +57,7 @@ contract VaultStakingFacet {
         metads.DefoToken.transferFrom(LibMeta.msgSender(), metads.Vault, amount);
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
         ds.totalAmount = ds.totalAmount + amount;
-        gem.LastReward = uint32(block.timestamp);
+        gem.LastReward = block.timestamp;
         emit AddedToVault(amount, LibMeta.msgSender());
     }
 
@@ -104,12 +111,14 @@ contract VaultStakingFacet {
         require(ds.StakedAmount[user] >= amount, "Not enough staked tokens");
         ds.StakedAmount[user] = ds.StakedAmount[user] - amount;
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
-        uint256 charityAmount = (metads.CharityRate * amount) / 10000;
+        uint256 charityAmount = amount.rate(metads.CharityRate);
         /*amount = amount + charityAmount;*/
         //TODO: this could create problems
         metads.DefoToken.transferFrom(metads.Donation, metads.RewardPool, charityAmount);
         userData.charityContribution = userData.charityContribution - charityAmount;
         metads.TotalCharity = metads.TotalCharity - charityAmount;
+
+        ///fixme test and fix this taxed formula
         uint256 taxed = ((amount - charityAmount) * 10) / 100;
         metads.DefoToken.transferFrom(metads.Vault, LibMeta.msgSender(), amount - taxed);
 

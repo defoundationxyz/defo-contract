@@ -1,6 +1,15 @@
 import { GEMS, gemName } from "@config";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
-import { announce, info, isKey, outputFormatKeyValue, outputFormatter, warning } from "@utils/output.helper";
+import {
+  announce,
+  getChainTime,
+  info,
+  isKey,
+  outputFormatKeyValue,
+  outputFormatter,
+  table,
+  warning,
+} from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -19,6 +28,7 @@ export default task("gems", "get gems info and balance information for the deplo
     } = hre;
     const { deployer } = await getNamedAccounts();
     info("\n 📡 Querying gems...");
+    info(`Current block time: ${await getChainTime(hre.ethers.provider)}`);
 
     const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
@@ -30,23 +40,40 @@ export default task("gems", "get gems info and balance information for the deplo
     for (const gemType of types) {
       warning(`\n\nGem ${gemName(gemType)} (type ${gemType})`);
       announce("Gem config:");
-      console.table([outputFormatter<LibGem.GemTypeMetadataStruct>(await gemContract.GetGemTypeMetadata(gemType))]);
+      console.table([
+        outputFormatter<LibGem.GemTypeMetadataStruct & { isMintAvailableForGem: boolean }>({
+          ...(await gemContract.GetGemTypeMetadata(gemType)),
+          isMintAvailableForGem: await gemContract.isMintAvailableForGem(gemType),
+        }),
+      ]);
 
-      announce(`User balance (${gemsOfDeployerGroupedByType[gemType]?.length || 0}):`);
-      const userGems = gemsOfDeployerGroupedByType[gemType]?.map(gem => {
-        const gemWithFieldsToShow = _.pick(
-          gem,
-          Object.keys(gem)
-            .filter(i => isNaN(Number(i)) && i !== "gemId")
-            .sort(),
-        ) as Partial<CompleteGemData>;
+      const userGemsOfType = gemsOfDeployerGroupedByType[gemType];
 
-        const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint>;
-        Object.keys(gemWithFieldsToShow).map(key => {
-          if (isKey(gemWithFieldsToShow, key)) formattedGem[key] = outputFormatKeyValue(key, gemWithFieldsToShow[key]);
+      announce(`User balance (${userGemsOfType?.length || 0}) gem(s)`);
+
+      const allDetailsExceptRewardFilter = (i: keyof CompleteGemData) =>
+        (isNaN(Number(i)) && i !== "GemType" && !onlyRewardFilter(i)) || i == "gemId";
+      const onlyRewardFilter = (i: keyof CompleteGemData) => i.match("Reward|tax|gemId");
+
+      for (const filterPredicate of [
+        { message: "Core info", func: allDetailsExceptRewardFilter },
+        { message: "Rewards related info", func: onlyRewardFilter },
+      ]) {
+        const userGemsOfTypeForOutput = userGemsOfType?.map(gem => {
+          const gemWithFieldsToShow = _.pick(
+            gem,
+            (<Array<keyof CompleteGemData>>Object.keys(gem)).filter(filterPredicate.func).sort(),
+          ) as Partial<CompleteGemData>;
+
+          const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint>;
+          Object.keys({ gemId: gemWithFieldsToShow.gemId, ...gemWithFieldsToShow }).map(key => {
+            if (isKey(gemWithFieldsToShow, key))
+              formattedGem[key] = outputFormatKeyValue(key, gemWithFieldsToShow[key]);
+          });
+          return formattedGem;
         });
-        return formattedGem;
-      });
-      userGems && console.table(userGems);
+        userGemsOfTypeForOutput?.length && info(filterPredicate.message);
+        userGemsOfTypeForOutput?.length && table(userGemsOfTypeForOutput);
+      }
     }
   });

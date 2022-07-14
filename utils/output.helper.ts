@@ -1,4 +1,4 @@
-import { PromiseOrValue } from "@contractTypes/common";
+import { getTime } from "@utils/chain.helper";
 import chalk from "chalk";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
@@ -7,13 +7,13 @@ import moment from "moment";
 
 type MutableObject<T> = { -readonly [P in keyof T]: T[P] };
 
-const suppresableLogger =
-  (hide: boolean | string | undefined, logger: (message: string) => void) => (message: string) =>
-    !hide && logger(message);
+const suppresableLogger = (hide: boolean | string | undefined, logger: (message: any) => void) => (message: any) =>
+  !hide && logger(message);
 
 const taskLogger = suppresableLogger(process.env.HIDE_TASK_LOG, console.log);
 export const info = (message: string) => taskLogger(chalk.dim(message));
 export const announce = (message: string) => taskLogger(chalk.cyan(message));
+export const table = (message: any) => suppresableLogger(process.env.HIDE_TASK_LOG, console.table)(message);
 export const success = (message: string) => taskLogger(chalk.green(message));
 export const warning = (message: string) => taskLogger(chalk.yellow(message));
 export const error = (message: string) => taskLogger(chalk.red(message));
@@ -31,9 +31,9 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 
 export const outputFormatKeyValue = (
   key: string,
-  value: string | boolean | PromiseOrValue<BigNumberish> | undefined,
+  value: string | boolean | BigNumberish | Promise<BigNumberish> | undefined,
 ): string | number | bigint =>
-  key.match("Last|Time")
+  key.match("Last|Next|Time")
     ? moment.unix(Number(value)).format("DD.MM.YYYY")
     : BigNumber.isBigNumber(value)
     ? Number(ethers.utils.formatEther(value))
@@ -42,7 +42,7 @@ export const outputFormatKeyValue = (
     : typeof value === "number"
     ? value
     : typeof value === "undefined"
-    ? "undefined"
+    ? "-"
     : value.toString();
 
 export const outputFormatter = <T extends Record<string, any>>(object: T, keys?: string[]) =>
@@ -58,3 +58,5 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
   );
 
 export const isKey = <T>(x: T, k: PropertyKey): k is keyof T => k in x;
+
+export const getChainTime = getTime(timestamp => moment.unix(Number(timestamp)).format("DD.MM.YYYY HH:MM"));

@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "./helpers/OwnerRecovery.sol";
-import "./implementations/LpManagerImplementationPoint.sol";
+import "../helpers/OwnerRecovery.sol";
+import "../implementations/LpManagerImplementationPoint.sol";
 
 /// @title DEFO Token
 /// @author crypt0grapher, © Copyright 2022 Decentralized Foundation
@@ -71,7 +71,7 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
     }
 
     // Transfer ownership update with authorization
-    function transferOwnership(address newOwner) public auth override  {
+    function transferOwnership(address newOwner) public override auth {
         wards[msg.sender] = 0;
         wards[newOwner] = 1;
         super.transferOwnership(newOwner);
