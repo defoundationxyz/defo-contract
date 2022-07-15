@@ -33,10 +33,12 @@ export const outputFormatKeyValue = (
   key: string,
   value: string | boolean | BigNumberish | Promise<BigNumberish> | undefined,
 ): string | number | bigint =>
-  key.match("Last|Next|Time")
+  key.match(/Period|duration/i)
+    ? moment.duration(Number(value), "s").humanize()
+    : key.match(/Last|Next|Time/i)
     ? moment.unix(Number(value)).format("DD.MM.YYYY")
     : BigNumber.isBigNumber(value)
-    ? Number(ethers.utils.formatEther(value))
+    ? Number(Number(ethers.utils.formatEther(value)).toFixed(7))
     : value instanceof Promise
     ? outputFormatKeyValue(key, Promise.resolve(value))
     : typeof value === "number"

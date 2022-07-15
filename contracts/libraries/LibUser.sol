@@ -5,8 +5,8 @@ pragma experimental ABIEncoderV2;
 library LibUser {
     /// @dev a struct for keeping info and state about users
     struct UserData {
-        mapping(uint => uint) OmegaClaims; // Remaining Omega booster claims of the user
-        mapping(uint => uint) DeltaClaims; // Remaining Delta
+        mapping(uint256 => uint256) OmegaClaims; // Remaining Omega booster claims of the user
+        mapping(uint256 => uint256) DeltaClaims; // Remaining Delta
         uint256 charityContribution;
         bool blacklisted; // Whether the user is blacklisted or not
     }

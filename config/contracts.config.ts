@@ -6,7 +6,7 @@ export type GemNames = "sapphire" | "ruby" | "diamond";
 
 export const DEFO_TOKEN_TOTAL_SUPPLY = 1e6;
 export const DEFO_TOKEN_REWARD_POOL = 875_000;
-export const DEFO_TOKEN_TREASURY = 100_000;
+export const DEFO_TOKEN_TREASURY = 115_000;
 export const DEFO_TOKEN_LIQUIDITY_POOL = DEFO_TOKEN_TOTAL_SUPPLY - DEFO_TOKEN_REWARD_POOL - DEFO_TOKEN_TREASURY;
 
 export const toWei = (value: number | string | BigNumber) => ethers.utils.parseEther(value.toString());
@@ -28,6 +28,9 @@ export const SECONDS_IN_A_DAY = SECONDS_IN_AN_HOUR * 24;
 export const SECONDS_IN_A_WEEK = SECONDS_IN_A_DAY * 7;
 export const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY;
 
+export const REWARD_TAX_TABLE = [percent(100), percent(30), percent(20), percent(10), 0];
+export const REWARDS_RELEASE_PERIOD = SECONDS_IN_A_WEEK;
+
 export const weeklyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_WEEK);
 export const monthlyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_MONTH);
 
@@ -47,39 +50,40 @@ export const MINT_LIMIT_PERIOD = 12 * SECONDS_IN_AN_HOUR;
 
 export const MAINTENANCE_PERIOD = 30 * SECONDS_IN_A_DAY;
 
-export const REWARD_TAX_TABLE = [percent(30), percent(20), percent(10), 0];
-
 export const TAPER_RATE = percent(20);
 
 export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
-  MaintenanceFee: monthlyInPerSecond(toWei(1.5)),
-  RewardRate: weeklyInPerSecond(toWei(0.29)),
+  MaintenanceFee: monthlyInPerSecond(1.5),
+  RewardRate: weeklyInPerSecond(0.29),
   DailyLimit: 32,
   MintCount: "0",
-  DefoPrice: (5 * 1e18).toString(),
-  StablePrice: (25 * 1e18).toString(),
+  DefoPrice: toWei(5),
+  StablePrice: toWei(25),
   TaperRewardsThreshold: toWei(7.5),
+  freeMaintenancePeriod: SECONDS_IN_A_MONTH,
 };
 
 export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
-  MaintenanceFee: monthlyInPerSecond(toWei(6)),
-  RewardRate: weeklyInPerSecond(toWei(1.2)),
+  MaintenanceFee: monthlyInPerSecond(6),
+  RewardRate: weeklyInPerSecond(1.2),
   DailyLimit: 8,
   MintCount: 0,
   DefoPrice: toWei(20),
   StablePrice: toWei(100),
   TaperRewardsThreshold: toWei(7.5),
+  freeMaintenancePeriod: SECONDS_IN_A_MONTH,
 };
 
 export const DIAMOND_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
-  MaintenanceFee: monthlyInPerSecond(toWei(24)),
-  RewardRate: weeklyInPerSecond(toWei(5)),
+  MaintenanceFee: monthlyInPerSecond(24),
+  RewardRate: weeklyInPerSecond(5),
   DailyLimit: 2,
   MintCount: 0,
   DefoPrice: toWei(80),
   StablePrice: toWei(400),
   TaperRewardsThreshold: toWei(7.5),
+  freeMaintenancePeriod: SECONDS_IN_A_MONTH,
 };

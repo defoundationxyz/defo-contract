@@ -16,8 +16,10 @@ import "../libraries/helpers/PercentHelper.sol";
 contract VaultStakingFacet {
     using PercentHelper for uint256;
 
-    event AddedToVault(uint256 indexed _amount, address indexed _user);
-    event RemovedFromVault(uint256 indexed _amount, address indexed _user);
+    event AddedToVault(address indexed _user, uint256 indexed _amount);
+    event RemovedFromVault(address indexed _user, uint256 indexed _amount);
+    event DonationEvent(address indexed user, uint256 indexed charityAmount);
+
     modifier onlyGemOwner(uint256 _tokenId) {
         require(LibERC721._ownerOf(_tokenId) == LibERC721.msgSender(), "You don't own this gem");
         _;
@@ -47,18 +49,22 @@ contract VaultStakingFacet {
         LibGem.Gem storage gem = dsgem.GemOf[_tokenId];
 
         uint256 charityAmount = amount.rate(metads.CharityRate);
-        amount = amount - charityAmount;
+        uint256 amountLessCharity = amount - charityAmount;
 
         metads.DefoToken.transferFrom(metads.RewardPool, metads.Donation, charityAmount);
-        user.charityContribution = user.charityContribution + charityAmount;
-        metads.TotalCharity = metads.TotalCharity + charityAmount;
-        gem.stakedReward = gem.stakedReward + amount;
-        ds.StakedAmount[LibMeta.msgSender()] = ds.StakedAmount[LibMeta.msgSender()] + amount;
-        metads.DefoToken.transferFrom(LibMeta.msgSender(), metads.Vault, amount);
-        ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] + amount;
-        ds.totalAmount = ds.totalAmount + amount;
+        emit DonationEvent(LibMeta.msgSender(), charityAmount);
+        user.charityContribution += charityAmount;
+        metads.TotalCharity += charityAmount;
+
+        ds.StakedAmount[LibMeta.msgSender()] = ds.StakedAmount[LibMeta.msgSender()] + amountLessCharity;
+        metads.DefoToken.transferFrom(LibMeta.msgSender(), metads.Vault, amountLessCharity);
+
+        gem.stakedReward += amount;
+        gem.unclaimedRewardBalance = _pendingRewards - amount;
         gem.LastReward = block.timestamp;
-        emit AddedToVault(amount, LibMeta.msgSender());
+        ds.StakedFrom[_tokenId] += amount;
+        ds.totalAmount += amount;
+        emit AddedToVault(LibMeta.msgSender(), amount);
     }
 
     function showStakedAmount() public view returns (uint256) {
@@ -125,8 +131,9 @@ contract VaultStakingFacet {
         ds.StakedFrom[_tokenId] = ds.StakedFrom[_tokenId] - amount;
         ds.totalAmount = ds.totalAmount - (amount - charityAmount);
         gem.stakedReward = gem.stakedReward - (amount - taxed);
+        gem.unclaimedRewardBalance += (amount - taxed);
 
         metads.DefoToken.transferFrom(metads.Vault, metads.RewardPool, taxed);
-        emit RemovedFromVault(amount - taxed, LibMeta.msgSender());
+        emit RemovedFromVault(LibMeta.msgSender(), amount - taxed);
     }
 }

@@ -56,7 +56,7 @@ export default task("gems", "get gems info and balance information for the deplo
       const onlyRewardFilter = (i: keyof CompleteGemData) => i.match("Reward|tax|gemId");
 
       for (const filterPredicate of [
-        { message: "Core info", func: allDetailsExceptRewardFilter },
+        { message: "Main info", func: allDetailsExceptRewardFilter },
         { message: "Rewards related info", func: onlyRewardFilter },
       ]) {
         const userGemsOfTypeForOutput = userGemsOfType?.map(gem => {

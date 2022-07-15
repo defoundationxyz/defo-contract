@@ -25,7 +25,7 @@ export const gemsIdsWithData =
           pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
           isClaimable: await gemContract.isClaimable(gemId),
           taxTier: ["30%", "20%", "10%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
-          NextTier: await gemContract.wenNextTaxTier(gem.LastReward),
+          nextTier: await gemContract.wenNextTaxTier(gem.LastReward),
           ...gem,
         };
       }),

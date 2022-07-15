@@ -47,6 +47,7 @@ export default task("claim", "claim rewards for gem(s)")
                 const pickedGem = _.pick(gem, [
                   "gemId",
                   "rawReward",
+                  "taxTier",
                   "taxedReward",
                   "taperedReward",
                   "claimedReward",

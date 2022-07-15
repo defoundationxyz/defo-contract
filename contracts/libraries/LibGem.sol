@@ -8,6 +8,7 @@ import "./helpers/TaxHelper.sol";
 import "./helpers/RewardHelper.sol";
 import "./helpers/BoosterHelper.sol";
 import "./helpers/PercentHelper.sol";
+import "hardhat/console.sol";
 
 //
 library LibGem {
@@ -31,20 +32,22 @@ library LibGem {
         uint8 TaperCount; // Count of how much taper applied
         /// @dev i'm not sure if enums are packed as uint8 in here
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
-        uint256 claimedReward; // previously claimed rewards
-        uint256 stakedReward; // rewards previously added to vault
+        uint256 claimedReward; // previously claimed rewards (before tax and charity)
+        uint256 stakedReward; // rewards previously added to vault (before tax and charity).
+        uint256 unclaimedRewardBalance; // balance on LastReward, Have to maintain since can be put to vault partly
     }
 
     /// @dev A struct for keeping info about node types
     struct GemTypeMetadata {
         uint256 LastMint; // last mint timestamp
         uint256 MaintenanceFee; // Maintenance fee for the node type, per second
-        uint256 RewardRate; // Reward rate for the node type per second
+        uint256 RewardRate; // Reward in DEFO for the node type per second
         uint8 DailyLimit; // global mint limit for a node type
         uint8 MintCount; // mint count resets every MintLimitPeriod
         uint256 DefoPrice; // Required Defo tokens while minting
         uint256 StablePrice; // Required StableCoin tokens while minting
         uint256 TaperRewardsThreshold; //Taper, decreasing rate every given amount of rewards in DEFO
+        uint256 freeMaintenancePeriod; //Free Maintenance period, one month.
     }
 
     struct DiamondStorage {
@@ -67,14 +70,14 @@ library LibGem {
     }
 
     function _checkRawReward(uint256 _tokenid) internal view returns (uint256 defoRewards) {
+        console.log("_checkRawReward, tokenid: ", _tokenid);
         DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
-
+        console.log("gemType.RewardRate", gemType.RewardRate);
         uint256 _boostedRate = gem.booster.boostRewardsRate(gemType.RewardRate);
-        uint256 _rewardDefo =  gemType.DefoPrice.calculateReward(_boostedRate, gem.LastReward);
-        uint256 taxRate = _rewardTax(_tokenid);
-        return _rewardDefo.lessRate(taxRate);
+        console.log("_boostedRate ", _boostedRate);
+        return _boostedRate.calculateReward(gem.LastReward) + gem.unclaimedRewardBalance;
     }
 
     function _getTaxTier(uint256 tokenId) internal view returns (TaxHelper.TaxTier) {
@@ -85,7 +88,6 @@ library LibGem {
 
     // reward rate changes depending on the time
     function _rewardTax(uint256 tokenid) internal view returns (uint256) {
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         TaxHelper.TaxTier tier = _getTaxTier(tokenid);
         return tier.getTaxRate();
     }
@@ -95,10 +97,18 @@ library LibGem {
         DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        uint256 _passedTimeSinceLastMaintenance = block.timestamp - gem.LastMaintained;
-
-        return !(_passedTimeSinceLastMaintenance > metads.MaintenancePeriod);
+        return (gem.LastMaintained >  block.timestamp ||
+        block.timestamp - gem.LastMaintained > metads.MaintenancePeriod);
     }
+
+    // @notice checks if the gem is claimable
+    function _isClaimable(uint256 _tokenId) internal view returns (bool) {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibGem.Gem memory gem = ds.GemOf[_tokenId];
+        return(gem.LastReward > block.timestamp || LibGem._isActive(_tokenId) && block.timestamp - gem.LastReward > metads.RewardTime);
+    }
+
 
     // Returns the struct from a specified position in contract storage
     // ds is short for DiamondStorage
