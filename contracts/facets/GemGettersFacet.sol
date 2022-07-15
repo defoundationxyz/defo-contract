@@ -42,14 +42,13 @@ contract GemGettersFacet {
 
         return block.timestamp - gemType.LastMint;
     }
-
+    ///TODO return false for unexisting gems
     function isMintAvailableForGem(uint8 _gemType) external view returns (bool) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         return
-            (block.timestamp - gemType.LastMint >= uint256(metads.MintLimitHours) * 1 hours) ||
-            (gemType.MintCount + 1 < gemType.DailyLimit);
+            block.timestamp - gemType.LastMint >= metads.MintLimitPeriod || gemType.MintCount + 1 < gemType.DailyLimit;
     }
 
     ///checks if the a gem
@@ -57,7 +56,7 @@ contract GemGettersFacet {
         LibGem.Booster _booster,
         uint8 _type,
         address _user
-    ) public view returns (uint8) {
+    ) public view returns (uint256) {
         LibUser.DiamondStorage storage ds = LibUser.diamondStorage();
         LibUser.UserData storage user = ds.GetUserData[_user];
         if (_booster == LibGem.Booster.Omega) {

@@ -14,9 +14,9 @@ interface IGemHybrid {
     }
 
     struct Gem {
-        uint32 MintTime; // timestamp of the mint time
-        uint32 LastReward; // timestamp of last reward claim
-        uint32 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
+        uint256 MintTime; // timestamp of the mint time
+        uint256 LastReward; // timestamp of last reward claim
+        uint256 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
@@ -25,11 +25,11 @@ interface IGemHybrid {
 
     /// @dev A struct for keeping info about node types
     struct GemTypeMetadata {
-        uint32 LastMint; // last mint timestamp
-        uint16 MaintenanceFee; // Maintenance fee for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
-        uint16 RewardRate; // Reward rate  for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
+        uint256 LastMint; // last mint timestamp
+        uint256 MaintenanceFee; // Maintenance fee for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
+        uint256 RewardRate; // Reward rate  for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
         uint8 DailyLimit; // global mint limit for a node type
-        uint8 MintCount; // mint count resets every MintLimitHours hours
+        uint8 MintCount; // mint count resets every MintLimitPeriod
         uint256 DefoPrice; // Required Defo tokens while minting
         uint256 StablePrice; // Required StableCoin tokens while minting
     }

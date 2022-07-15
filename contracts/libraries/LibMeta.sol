@@ -44,7 +44,7 @@ library LibMeta {
 
     struct DiamondStorage {
         /// TODO: reorganize variable order => this will reflect on the DAPP
-        uint256 MaintenanceDays;
+        uint256 MaintenancePeriod;
         uint256 TreasuryDefoRate;
         uint256 TreasuryDaiRate;
         uint256 CharityRate;
@@ -58,7 +58,7 @@ library LibMeta {
         uint256[] RewardTaxTable;
         uint256 MinReward;
         uint256 RewardTime;
-        uint8 MintLimitHours;
+        uint256 MintLimitPeriod;
         /// @dev probably will be changed to treasury or distrubitor contract
         address Treasury;
         address RewardPool;

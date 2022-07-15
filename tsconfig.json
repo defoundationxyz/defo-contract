@@ -24,6 +24,5 @@
   },
   "exclude": ["node_modules", "unused/**/*"],
   "files": ["./hardhat.config.ts", "./hardhat.network.ts", "./hardhat.accounts.ts"],
-  "include": ["types/**/*", "test/**/*", "tasks/**/*", "deploy/**/*", "utils/**/*", "constants/**/*", "config/**/*"],
-
+  "include": ["types/**/*", "test/**/*", "tasks/**/*", "deploy/**/*", "utils/**/*", "constants/**/*", "config/**/*"]
 }

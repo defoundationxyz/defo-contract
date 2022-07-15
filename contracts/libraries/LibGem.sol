@@ -4,8 +4,20 @@ pragma experimental ABIEncoderV2;
 
 import "./LibERC721.sol";
 import "./LibMeta.sol";
+import "./helpers/TaxHelper.sol";
+import "./helpers/RewardHelper.sol";
+import "./helpers/BoosterHelper.sol";
+import "./helpers/PercentHelper.sol";
+import "hardhat/console.sol";
 
+//
 library LibGem {
+    using TaxHelper for uint256;
+    using RewardHelper for uint256;
+    using PercentHelper for uint256;
+    using TaxHelper for TaxHelper.TaxTier;
+    using BoosterHelper for Booster;
+
     enum Booster {
         None,
         Delta,
@@ -13,115 +25,90 @@ library LibGem {
     }
 
     struct Gem {
-        uint32 MintTime; // timestamp of the mint time
-        uint32 LastReward; // timestamp of last reward claim
+        uint256 MintTime; // timestamp of the mint time
+        uint256 LastReward; // timestamp of last reward claim or stake. Same as MintTime if not yet claimed
         uint256 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
         /// @dev i'm not sure if enums are packed as uint8 in here
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
-        uint256 claimedReward; // previously claimed rewards
-        uint256 vaultReward; // rewards previously added to vault
+        uint256 claimedReward; // previously claimed rewards (before tax and charity)
+        uint256 stakedReward; // rewards previously added to vault (before tax and charity).
+        uint256 unclaimedRewardBalance; // balance on LastReward, Have to maintain since can be put to vault partly
     }
 
     /// @dev A struct for keeping info about node types
     struct GemTypeMetadata {
-        uint32 LastMint; // last mint timestamp
-        uint256 MaintenanceFee; // Maintenance fee for the node type
-        uint16 RewardRate; // Reward rate  for the node type written and calculated as a percentage of DefoPrice so it can be maximum 1000
+        uint256 LastMint; // last mint timestamp
+        uint256 MaintenanceFee; // Maintenance fee for the node type, per second
+        uint256 RewardRate; // Reward in DEFO for the node type per second
         uint8 DailyLimit; // global mint limit for a node type
-        uint8 MintCount; // mint count resets every MintLimitHours hours
+        uint8 MintCount; // mint count resets every MintLimitPeriod
         uint256 DefoPrice; // Required Defo tokens while minting
         uint256 StablePrice; // Required StableCoin tokens while minting
+        uint256 TaperRewardsThreshold; //Taper, decreasing rate every given amount of rewards in DEFO
+        uint256 freeMaintenancePeriod; //Free Maintenance period, one month.
     }
 
     struct DiamondStorage {
         mapping(uint256 => Gem) GemOf; // tokenid -> node struct mapping
         mapping(uint8 => GemTypeMetadata) GetGemTypeMetadata; // node type id -> metadata mapping
         address MinterAddr;
-        uint256 taperRate; // if it's %20 this value should be 80
+        uint256 taperRate; // 20%
     }
 
-    /// calculates the reward taper with roi after 1x everytime roi achived rewards taper by %20
-    /// could be more optimized
-    /// always calculates rewards from 0
-    function _taperCalculate(uint256 _tokenId) internal view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+    function _taperedReward(uint256 _tokenId) internal view returns (uint256) {
+        DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenId];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
-        console.log("gem.claimedReward ",  gem.claimedReward);
-        uint256 rewardCount = _checkRawReward(_tokenId) + gem.claimedReward; // get reward without taper
-        uint256 actualReward = 0;
-        uint256 typePrice = gemType.DefoPrice;
-        console.log("_taperCalculate, rewardCount %s, typePrice %s", rewardCount, typePrice);
-        if (rewardCount > typePrice) {
-            while (rewardCount > typePrice) {
-                rewardCount = rewardCount - typePrice;
-                actualReward = actualReward + typePrice;
-                rewardCount = (((rewardCount) * ds.taperRate) / 100);
-            }
-            /// TODO : check for overflows
-            console.log("actualReward: ", actualReward);
-            console.log("rewardCount: ", rewardCount);
-            console.log("gem.claimedReward: ", gem.claimedReward);
-            console.log("_taperCalculate result: ", actualReward + rewardCount - gem.claimedReward);
-            return actualReward + rewardCount - gem.claimedReward;
-        }
-    return _checkRawReward(_tokenId); // if less than roi don't taper
+
+        uint256 rewardAmount = _checkRawReward(_tokenId);
+        uint256 _totalRewardPaid = rewardAmount + gem.claimedReward + gem.stakedReward;
+        uint256 _taperThreshold = gemType.TaperRewardsThreshold;
+
+        return rewardAmount.applyTaper(_totalRewardPaid, _taperThreshold, ds.taperRate);
     }
 
     function _checkRawReward(uint256 _tokenid) internal view returns (uint256 defoRewards) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        console.log("_checkRawReward, tokenid: ", _tokenid);
+        DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        console.log("gemType.RewardRate", gemType.RewardRate);
+        uint256 _boostedRate = gem.booster.boostRewardsRate(gemType.RewardRate);
+        console.log("_boostedRate ", _boostedRate);
+        return _boostedRate.calculateReward(gem.LastReward) + gem.unclaimedRewardBalance;
+    }
 
-        uint256 _rate = gemType.RewardRate;
-        if (gem.booster == LibGem.Booster.Omega) {
-            _rate = _rate * 2;
-        } else if (gem.booster == LibGem.Booster.Delta) {
-            _rate = _rate + (((_rate * 20)) / 100);
-        }
-
-        uint256 _lastTime = gem.LastReward;
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-
-        uint256 _rewardDefo = _passedDays * ((_rate * gemType.DefoPrice) / 10000);
-        uint256 taxRate = _rewardTax(_tokenid);
-        if (taxRate != 0) {
-            _rewardDefo = (_rewardDefo - ((taxRate * _rewardDefo) / 10000));
-        }
-        console.log("_checkRawReward");
-        console.log("_passedDays: %s, taxRate: %s, final _rewardDefo: ",_passedDays, taxRate, _rewardDefo);
-        return (_rewardDefo);
+    function _getTaxTier(uint256 tokenId) internal view returns (TaxHelper.TaxTier) {
+        DiamondStorage storage ds = LibGem.diamondStorage();
+        LibGem.Gem memory gem = ds.GemOf[tokenId];
+        return (block.timestamp - gem.LastReward).getTaxTier();
     }
 
     // reward rate changes depending on the time
-    function _rewardTax(uint256 _tokenid) internal view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        uint32 diff = uint32(block.timestamp) - gem.LastReward;
-        if (diff < 1 weeks) {
-            return metads.RewardTaxTable[0];
-        } else if (diff > 2 weeks && diff < 3 weeks) {
-            return metads.RewardTaxTable[1];
-        } else if (diff > 3 weeks && diff < 4 weeks) {
-            return metads.RewardTaxTable[2];
-        } else {
-            return metads.RewardTaxTable[3];
-        }
+    function _rewardTax(uint256 tokenid) internal view returns (uint256) {
+        TaxHelper.TaxTier tier = _getTaxTier(tokenid);
+        return tier.getTaxRate();
     }
 
     // View Functions
     function _isActive(uint256 _tokenid) internal view returns (bool) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        uint256 _lastTime = gem.LastMaintained;
-        uint256 _passedDays = (block.timestamp - _lastTime) / 60 / 60 / 24;
-
-        return !(_passedDays > metads.MaintenanceDays);
+        return (gem.LastMaintained >  block.timestamp ||
+        block.timestamp - gem.LastMaintained > metads.MaintenancePeriod);
     }
+
+    // @notice checks if the gem is claimable
+    function _isClaimable(uint256 _tokenId) internal view returns (bool) {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        LibGem.Gem memory gem = ds.GemOf[_tokenId];
+        return(gem.LastReward > block.timestamp || LibGem._isActive(_tokenId) && block.timestamp - gem.LastReward > metads.RewardTime);
+    }
+
 
     // Returns the struct from a specified position in contract storage
     // ds is short for DiamondStorage

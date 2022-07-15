@@ -16,6 +16,7 @@ export const gemsIdsWithData =
   (gemContract: GemFacet & GemGettersFacet, account: Address) => async (): Promise<Array<CompleteGemData>> =>
     Promise.all(
       (await gemContract.getGemIdsOf(account)).map(async gemId => {
+        const gem = await gemContract.GemOf(gemId);
         return {
           gemId: Number(gemId),
           rawReward: await gemContract.checkRawReward(gemId),
@@ -23,7 +24,9 @@ export const gemsIdsWithData =
           taperedReward: await gemContract.checkTaperedReward(gemId),
           pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
           isClaimable: await gemContract.isClaimable(gemId),
-          ...(await gemContract.GemOf(gemId)),
+          taxTier: ["30%", "20%", "10%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
+          nextTier: await gemContract.wenNextTaxTier(gem.LastReward),
+          ...gem,
         };
       }),
     );

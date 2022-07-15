@@ -10,6 +10,7 @@ import "hardhat-gas-reporter";
 import { HardhatUserConfig } from "hardhat/config";
 import { resolve } from "path";
 import "solidity-coverage";
+import "solidity-docgen";
 import "tsconfig-paths/register";
 
 import { namedAccountsIndex } from "./hardhat.accounts";

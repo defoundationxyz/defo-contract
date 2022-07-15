@@ -14,7 +14,7 @@ contract OwnerFacet {
     // Owner Functions
 
     modifier onlyOwner() {
-        require(LibMeta.msgSender() == LibDiamond.contractOwner());
+        require(LibMeta.msgSender() == LibDiamond.contractOwner(), "unauthorized");
         _;
     }
 
@@ -115,14 +115,14 @@ contract OwnerFacet {
         metads.RewardTime = _minRewardTime;
     }
 
-    function setMintLimitHours(uint8 _MintLimitHours) external onlyOwner {
+    function setMintLimitPeriod(uint256 MintLimitPeriod) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.MintLimitHours = _MintLimitHours;
+        metads.MintLimitPeriod = MintLimitPeriod;
     }
 
-    function setMaintenanceDays(uint256 _maintenanceDays) external onlyOwner {
+    function setMaintenancePeriod(uint256 _MaintenancePeriod) external onlyOwner {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        metads.MaintenanceDays = _maintenanceDays;
+        metads.MaintenancePeriod = _MaintenancePeriod;
     }
 
     function ChangePaymentToken(address _newToken) external onlyOwner {

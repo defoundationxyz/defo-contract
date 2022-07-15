@@ -32,7 +32,8 @@ export default task("get-some-gems", "mint NFT gems")
           }),
         );
       } catch (e: unknown) {
-        error("Mint not available");
+        if (e instanceof Error && e.message === "Mint not available") error("Mint not available");
+        else error("Mint failed - check DAI/DEFO balance and approvals.");
       }
     }
     success(`Total balance ${await gemContract.balanceOf(deployer)} gem(s)`);
