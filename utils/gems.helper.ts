@@ -24,7 +24,7 @@ export const gemsIdsWithData =
           taperedReward: await gemContract.checkTaperedReward(gemId),
           pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
           isClaimable: await gemContract.isClaimable(gemId),
-          taxTier: ["30%", "20%", "10%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
+          taxTier: ["100%", "30%", "20%", "10%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
           nextTier: await gemContract.wenNextTaxTier(gem.LastReward),
           ...gem,
         };
