@@ -9,12 +9,14 @@ import "./helpers/RewardHelper.sol";
 import "./helpers/BoosterHelper.sol";
 import "./helpers/PercentHelper.sol";
 import "hardhat/console.sol";
+import "./helpers/TimeHelper.sol";
 
 //
 library LibGem {
     using TaxHelper for uint256;
     using RewardHelper for uint256;
     using PercentHelper for uint256;
+    using TimeHelper for uint256;
     using TaxHelper for TaxHelper.TaxTier;
     using BoosterHelper for Booster;
 
@@ -74,10 +76,11 @@ library LibGem {
         DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         console.log("gemType.RewardRate", gemType.RewardRate);
         uint256 _boostedRate = gem.booster.boostRewardsRate(gemType.RewardRate);
         console.log("_boostedRate ", _boostedRate);
-        return _boostedRate.calculateReward(gem.LastReward) + gem.unclaimedRewardBalance;
+        return _boostedRate.calculateReward(gem.LastReward, metads.RewardTime) + gem.unclaimedRewardBalance;
     }
 
     function _getTaxTier(uint256 tokenId) internal view returns (TaxHelper.TaxTier) {
@@ -97,8 +100,7 @@ library LibGem {
         DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        return (gem.LastMaintained >  block.timestamp ||
-        block.timestamp - gem.LastMaintained > metads.MaintenancePeriod);
+        return (gem.LastMaintained.notPassedFromOrNotHappenedYet(metads.MaintenancePeriod));
     }
 
     // @notice checks if the gem is claimable
@@ -106,7 +108,7 @@ library LibGem {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenId];
-        return(gem.LastReward > block.timestamp || LibGem._isActive(_tokenId) && block.timestamp - gem.LastReward > metads.RewardTime);
+        return  (gem.LastReward.hasPassedFromOrNotHappenedYet(metads.RewardTime) && LibGem._isActive(_tokenId));
     }
 
 

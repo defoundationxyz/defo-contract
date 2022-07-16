@@ -71,7 +71,12 @@ contract GemFacet {
     /// FIXME add modifiers to check if tokenId exists (otherwise returns tier 0x03 for unexisting ids)
     /// @notice gets tax tier for a given gemId
     /// @param _tokenId unique NFT gem id
-    /// @return current tax tier of the gem, might be configurable, now it's 0 (max %),1,2,3 (0 %).
+    /// @return current tax tier of the gem, might be configurable, now it's a number in the range from 0 to 4 inclusive.
+    //4 is no tax
+    //3 is 10%
+    //2 is 20%
+    //1 is  30%
+    //0 means nothing is payed out - for the first week of rewards accrua
     function getTaxTier(uint256 _tokenId) external view returns (uint256) {
         return uint256(LibGem._getTaxTier(_tokenId));
     }
@@ -480,7 +485,7 @@ contract GemFacet {
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
 
         uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
-        uint256 _fee = gemType.MaintenanceFee.lessRate(discountedRate);
+        uint256 _fee = discountedRate;
 
         uint256 _lastTime = gem.LastMaintained;
 

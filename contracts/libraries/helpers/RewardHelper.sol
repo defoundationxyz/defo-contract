@@ -13,15 +13,18 @@ library RewardHelper {
 
     ///@dev calculate rewards with a second precision
     function calculateReward(
-        uint256 ratePerSecond,
-        uint256 lastRewardTime
-    ) internal view returns (uint256) {
-        console.log("calculateReward");
+        uint ratePerSecond,
+        uint lastRewardTime,
+        uint rewardPeriodicity
+    ) internal view returns (uint) {
+        console.log("-- calculateReward");
         console.log("ratePerSecond ", ratePerSecond);
         console.log("lastRewardTime ", lastRewardTime);
-        console.log("timePeriod ", block.timestamp - lastRewardTime);
-        console.log("result: ", (block.timestamp - lastRewardTime) * ratePerSecond);
-        return (block.timestamp - lastRewardTime) * ratePerSecond;
+        console.log("block.timestamp ", block.timestamp);
+        console.log("block.lastRewardTime ", lastRewardTime);
+        console.log("rewardPeriodicity ", rewardPeriodicity);
+        console.log("result: ", (block.timestamp > lastRewardTime) ? ((block.timestamp - lastRewardTime)/rewardPeriodicity) * ratePerSecond * rewardPeriodicity : 0);
+        return (block.timestamp > lastRewardTime) ? ((block.timestamp - lastRewardTime)/rewardPeriodicity) * ratePerSecond * rewardPeriodicity : 0;
     }
 
     function applyTaper(
@@ -29,7 +32,7 @@ library RewardHelper {
         uint256 totalPaid,
         uint256 taperThreshold,
         uint256 taperPercent
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         while (totalPaid > taperThreshold) {
             rewardAmount -= rewardAmount.rate(taperPercent);
             totalPaid -= taperThreshold;

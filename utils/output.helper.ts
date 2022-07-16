@@ -32,7 +32,7 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 export const outputFormatKeyValue = (
   key: string,
   value: string | boolean | BigNumberish | Promise<BigNumberish> | undefined,
-): string | number | bigint =>
+): string | number | bigint | boolean =>
   key.match(/Period|duration/i)
     ? moment.duration(Number(value), "s").humanize()
     : key.match(/Last|Next|Time/i)
@@ -41,7 +41,7 @@ export const outputFormatKeyValue = (
     ? Number(Number(ethers.utils.formatEther(value)).toFixed(7))
     : value instanceof Promise
     ? outputFormatKeyValue(key, Promise.resolve(value))
-    : typeof value === "number"
+    : typeof value === "number" || typeof value === "boolean"
     ? value
     : typeof value === "undefined"
     ? "-"

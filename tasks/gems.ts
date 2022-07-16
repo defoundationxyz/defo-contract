@@ -65,7 +65,7 @@ export default task("gems", "get gems info and balance information for the deplo
             (<Array<keyof CompleteGemData>>Object.keys(gem)).filter(filterPredicate.func).sort(),
           ) as Partial<CompleteGemData>;
 
-          const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint>;
+          const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint | boolean>;
           Object.keys({ gemId: gemWithFieldsToShow.gemId, ...gemWithFieldsToShow }).map(key => {
             if (isKey(gemWithFieldsToShow, key))
               formattedGem[key] = outputFormatKeyValue(key, gemWithFieldsToShow[key]);
