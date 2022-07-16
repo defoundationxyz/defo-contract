@@ -53,7 +53,10 @@ export default task("claim", "claim rewards for gem(s)")
                   "claimedReward",
                   "stakedReward",
                 ]) as Partial<CompleteGemData>;
-                const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint> & {
+                const formattedGem = {} as Record<
+                  keyof Partial<CompleteGemData>,
+                  string | number | bigint | boolean
+                > & {
                   claimed: string | number;
                 };
                 Object.keys(pickedGem).map(key => {

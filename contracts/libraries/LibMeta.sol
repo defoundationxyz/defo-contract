@@ -56,8 +56,8 @@ library LibMeta {
         IERC20Joe PaymentToken;
         IERC20Joe DefoToken;
         uint256[] RewardTaxTable;
-        uint256 MinReward;
-        uint256 RewardTime;
+        uint256 MinReward;  //minimum reward amount that's possible to withdraw
+        uint256 RewardTime; //reward accrual periodicity - initially it's equal to one week in seconds
         uint256 MintLimitPeriod;
         /// @dev probably will be changed to treasury or distrubitor contract
         address Treasury;

@@ -55,7 +55,7 @@ export const TAPER_RATE = percent(20);
 export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
   MaintenanceFee: monthlyInPerSecond(1.5),
-  RewardRate: weeklyInPerSecond(0.29),
+  RewardRate: weeklyInPerSecond(0.29).add(1),
   DailyLimit: 32,
   MintCount: "0",
   DefoPrice: toWei(5),
@@ -67,7 +67,7 @@ export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {
 export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
   MaintenanceFee: monthlyInPerSecond(6),
-  RewardRate: weeklyInPerSecond(1.2),
+  RewardRate: weeklyInPerSecond(1.2).add(1),
   DailyLimit: 8,
   MintCount: 0,
   DefoPrice: toWei(20),
@@ -79,7 +79,7 @@ export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
 export const DIAMOND_GEM: LibGem.GemTypeMetadataStruct = {
   LastMint: 0,
   MaintenanceFee: monthlyInPerSecond(24),
-  RewardRate: weeklyInPerSecond(5),
+  RewardRate: weeklyInPerSecond(5).add(1),
   DailyLimit: 2,
   MintCount: 0,
   DefoPrice: toWei(80),
