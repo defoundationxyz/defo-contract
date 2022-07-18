@@ -22,6 +22,7 @@ contract GemFacet {
     using TaxHelper for TaxHelper.TaxTier;
     using TaxHelper for uint256;
     using PercentHelper for uint256;
+    using RewardHelper for uint256;
 
     event DonationEvent(address indexed user, uint256 indexed charityAmount);
     event WithdrawEvent(address indexed user, uint256 indexed treasuryWithdrawAmount);
@@ -61,7 +62,7 @@ contract GemFacet {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(
             (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) ||
-                (gemType.MintCount + 1 <= gemType.DailyLimit),
+            (gemType.MintCount + 1 <= gemType.DailyLimit),
             "Gem mint restriction"
         );
         _;
@@ -164,7 +165,7 @@ contract GemFacet {
     @param _tokenId gem id
     */
     function ClaimRewards(uint256 _tokenId) external onlyGemOwner(_tokenId) onlyClaimable(_tokenId) returns (uint256) {
-       return _sendRewardTokens(_tokenId, 0);
+        return _sendRewardTokens(_tokenId, 0);
     }
 
     /*
@@ -283,14 +284,17 @@ contract GemFacet {
         return LibGem._isClaimable(_tokenId);
     }
 
+    /// @notice gives a raw untaxed and untapered reward
     function checkRawReward(uint256 _tokenid) public view returns (uint256) {
         return LibGem._checkRawReward(_tokenid);
     }
 
+    /// @notice gives a tapered reward before tax and charity decuction
     function checkTaperedReward(uint256 _tokenid) public view returns (uint256) {
         return LibGem._taperedReward(_tokenid);
     }
 
+    /// @notice gives a final reward to be recieved by a user - tapered, then taxed and the charity is deducted
     function checkTaxedReward(uint256 _tokenid) public view returns (uint256) {
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 _rewardDefo = LibGem._taperedReward(_tokenid);
@@ -306,14 +310,17 @@ contract GemFacet {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         uint256 _fee = gemType.MaintenanceFee;
         uint256 _lastTime = gem.LastMaintained;
         uint256 _passedTime;
         if (_lastTime > block.timestamp) {
             return 0;
         } else {
-            _passedTime = block.timestamp - _lastTime;
-            uint256 _amount = _passedTime * _fee;
+            uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
+            console.log("discountedRate: ", discountedRate);
+            uint256 _amount = discountedRate.calculatePeriodic(_lastTime, metads.MaintenancePeriod);
+            console.log("_amount: ", _amount);
             return _amount;
         }
     }
@@ -410,7 +417,7 @@ contract GemFacet {
         LibGem.Gem memory gem;
         gem.GemType = _type;
         gem.LastReward = block.timestamp;
-        gem.LastMaintained = block.timestamp + ds.GetGemTypeMetadata[_type].freeMaintenancePeriod;
+        gem.LastMaintained = block.timestamp + ds.GetGemTypeMetadata[_type].maintenancePeriod;
         gem.MintTime = block.timestamp;
         ds.GemOf[tokenId] = gem;
         return tokenId;
@@ -477,29 +484,29 @@ contract GemFacet {
         }
     }
 
-    // TODO: Add grace period ?
     function _maintenance(uint256 _tokenid, uint256 _time) internal {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         LibGem.Gem storage gem = ds.GemOf[_tokenid];
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        console.log("__maintenance");
 
         uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
         uint256 _fee = discountedRate;
+        console.log("discountedRate: ", discountedRate);
 
         uint256 _lastTime = gem.LastMaintained;
-
+        console.log("_lastTime: ", _lastTime);
         require(_lastTime < block.timestamp, "upfront is paid already");
 
         uint256 _sinceLastMaintained = block.timestamp - _lastTime;
         require(_sinceLastMaintained > metads.MaintenancePeriod, "Too soon");
-
-        uint256 _totalTimeForMaintaince = _sinceLastMaintained + _time;
-        uint256 _amount = _totalTimeForMaintaince * _fee;
+        uint256 _amount = discountedRate.calculatePeriodic(_lastTime - _time, metads.MaintenancePeriod);
+        console.log("_amount: ", _amount);
         require(metads.PaymentToken.balanceOf(msg.sender) > _amount, "Not enough funds to pay");
 
         metads.PaymentToken.transferFrom(msg.sender, metads.Treasury, _amount);
-        gem.LastMaintained = block.timestamp + _totalTimeForMaintaince;
+        gem.LastMaintained = block.timestamp + _sinceLastMaintained + _time;
     }
 
 

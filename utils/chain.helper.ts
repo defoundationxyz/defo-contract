@@ -32,7 +32,7 @@ export const getContractWithSigner = async <T extends Contract>(
 ): Promise<T> => hre.ethers.getContract<T>(contractName, await namedSigner(hre, namedAccountId ?? "deployer"));
 
 export const getTime = (formatter: (timestamp: number) => string) => async (provider: providers.JsonRpcProvider) =>
-  formatter((await provider.getBlock(provider.blockNumber)).timestamp);
+  formatter((await provider.getBlock("latest")).timestamp);
 
 export const advanceBlock = async (provider: providers.JsonRpcProvider) => provider.send("evm_mine", []);
 

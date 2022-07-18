@@ -16,7 +16,7 @@ library TaxHelper {
 
     /// @dev gets an index to RewardTaxTable from LibMeta.DiamondStorage
     /// @param timeFromLastRewardWithdrawal time in seconds passed from the last claim or stake
-    /// @return tax tier, can be a configurable mapping, now it's 0- 30%, 1-20%, 2- 10%, 3-0%.
+    /// @return tax tier, can be a configurable mapping, now it's 0- 100% (rewards have not accrued yet), 1- 30%, 2-20%, 3- 10%, 4-0%.
     function getTaxTier(uint256 timeFromLastRewardWithdrawal) internal pure returns (TaxTier) {
         TaxTier _taxTier = TaxTier.NO_TAX;
         if (timeFromLastRewardWithdrawal < 4 weeks) _taxTier = TaxTier.TIER3_SMALL_TAX;
