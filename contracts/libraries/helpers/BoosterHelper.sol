@@ -10,10 +10,10 @@ library BoosterHelper {
     /// @notice boosting rewards rate (which is an amount per second), 50% for omega, 25% for delta
     function boostRewardsRate(LibGem.Booster booster, uint256 rate) internal pure returns (uint256) {
         if (booster == LibGem.Booster.Omega) {
-            return rate * 150 / 100;
+            return rate * 15000 / 10000;
             //50% more
         } else if (booster == LibGem.Booster.Delta) {
-            return rate * 125 / 100;
+            return rate * 12500 / 10000;
             //25% more
         } else return rate;
     }
