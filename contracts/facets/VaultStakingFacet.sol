@@ -62,8 +62,8 @@ contract VaultStakingFacet {
         gem.stakedReward += amount;
         gem.unclaimedRewardBalance = _pendingRewards - amount;
         gem.LastReward = block.timestamp;
-        ds.StakedFrom[_tokenId] += amount;
-        ds.totalAmount += amount;
+        ds.StakedFrom[_tokenId] += amountLessCharity;
+        ds.totalAmount += amountLessCharity;
         emit AddedToVault(LibMeta.msgSender(), amount);
     }
 

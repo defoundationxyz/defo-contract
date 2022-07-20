@@ -7,7 +7,7 @@ export default task("jump-in-time", "Jump given time ahead or backwards")
   .addParam(
     "time",
     "Time to skip in a human-readable format: '1y', '10d', '20h', etc. Negative value lets jumps in the past",
-    "6d",
+    "1week",
     types.string,
   )
   .setAction(async ({ time }, hre) => {
