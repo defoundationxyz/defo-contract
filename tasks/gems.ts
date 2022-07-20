@@ -4,19 +4,18 @@ import {
   announce,
   getChainTime,
   info,
-  success,
   isKey,
   outputFormatKeyValue,
   outputFormatter,
   table,
   warning,
 } from "@utils/output.helper";
+import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
-import chalk from "chalk";
 
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
