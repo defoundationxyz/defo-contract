@@ -4,6 +4,7 @@ import {
   announce,
   getChainTime,
   info,
+  success,
   isKey,
   outputFormatKeyValue,
   outputFormatter,
@@ -15,6 +16,7 @@ import _ from "lodash";
 
 import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 import { LibGem } from "../types/contracts/facets/GemGettersFacet";
+import chalk from "chalk";
 
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
@@ -28,7 +30,7 @@ export default task("gems", "get gems info and balance information for the deplo
     } = hre;
     const { deployer } = await getNamedAccounts();
     info("\n 📡 Querying gems...");
-    info(`Current block time: ${await getChainTime(hre.ethers.provider)}`);
+    info(`Current block time: ${chalk.green(await getChainTime(hre.ethers.provider))}`);
 
     const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];

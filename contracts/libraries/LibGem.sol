@@ -34,7 +34,6 @@ library LibGem {
         uint256 LastMaintained; // timestamp of last maintenance (could be a date in the future in case of upfront payment)
         uint8 GemType; // node type right now 0 -> Ruby , 1 -> Sapphire and 2 -> Diamond
         uint8 TaperCount; // Count of how much taper applied
-        /// @dev i'm not sure if enums are packed as uint8 in here
         Booster booster; // Node Booster 0 -> None , 1 -> Delta , 2 -> Omega
         uint256 claimedReward; // previously claimed rewards (before tax and charity)
         uint256 stakedReward; // rewards previously added to vault (before tax and charity).
@@ -52,7 +51,7 @@ library LibGem {
         uint256 DefoPrice; //amount in wei:  Required Defo tokens while minting
         uint256 StablePrice; //amount in wei:  Required StableCoin tokens while minting
         uint256 TaperRewardsThreshold; //amount in wei: Taper threshold, decreasing rate every given amount of rewards in DEFO
-        uint256 maintenancePeriod; //maintenance period, one month, also used to apply to the first free period
+        uint256 maintenancePeriod; //maintenance period, one month, no free period in reality - it's getting accrued for one month and on the first day of the next month shoul d be paid
     }
 
     struct DiamondStorage {
@@ -83,7 +82,7 @@ library LibGem {
         console.log("taperedReward", taperedReward);
 
         //returning tapered less paid and staked
-        return taperedReward-gem.claimedReward-gem.stakedReward;
+        return taperedReward - gem.claimedReward - gem.stakedReward;
     }
 
     function _checkRawReward(uint256 _tokenid) internal view returns (uint256 defoRewards) {
@@ -112,10 +111,27 @@ library LibGem {
 
     // View Functions
     function _isActive(uint256 _tokenid) internal view returns (bool) {
-        DiamondStorage storage ds = LibGem.diamondStorage();
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        return (LibGem._getMaintenanceFee(_tokenid) == 0);
+    }
+
+    // View Functions
+    function _getMaintenanceFee(uint256 _tokenid) internal view returns (uint256) {
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        return (gem.LastMaintained.notPassedFromOrNotHappenedYet(metads.MaintenancePeriod));
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
+        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
+        uint256 _fee = gemType.MaintenanceFee;
+        uint256 _lastTime = gem.LastMaintained;
+        uint256 _passedTime;
+        if (_lastTime > block.timestamp) {
+            return 0;
+        } else {
+            uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
+            console.log("discountedRate: ", discountedRate);
+            uint256 _amount = discountedRate.calculatePeriodic(_lastTime, metads.MaintenancePeriod);
+            console.log("_amount: ", _amount);
+            return _amount;
+        }
     }
 
     // @notice checks if the gem is claimable

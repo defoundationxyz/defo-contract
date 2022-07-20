@@ -51,7 +51,7 @@ contract GemFacet {
 
 
     modifier onlyClaimable(uint256 _tokenId) {
-        require(LibGem._isClaimable(_tokenId), "Gem is notclaimable");
+        require(LibGem._isClaimable(_tokenId), "Gem is not claimable");
         _;
     }
 
@@ -307,22 +307,7 @@ contract GemFacet {
     }
 
     function checkPendingMaintenance(uint256 _tokenid) public view returns (uint256) {
-        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.Gem memory gem = ds.GemOf[_tokenid];
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[gem.GemType];
-        LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
-        uint256 _fee = gemType.MaintenanceFee;
-        uint256 _lastTime = gem.LastMaintained;
-        uint256 _passedTime;
-        if (_lastTime > block.timestamp) {
-            return 0;
-        } else {
-            uint256 discountedRate = gem.booster.reduceMaintenanceFee(gemType.MaintenanceFee);
-            console.log("discountedRate: ", discountedRate);
-            uint256 _amount = discountedRate.calculatePeriodic(_lastTime, metads.MaintenancePeriod);
-            console.log("_amount: ", _amount);
-            return _amount;
-        }
+        return LibGem._getMaintenanceFee(_tokenid);
     }
 
     function getGemIdsOf(address _user) public view returns (uint256[] memory) {
@@ -417,7 +402,7 @@ contract GemFacet {
         LibGem.Gem memory gem;
         gem.GemType = _type;
         gem.LastReward = block.timestamp;
-        gem.LastMaintained = block.timestamp + ds.GetGemTypeMetadata[_type].maintenancePeriod;
+        gem.LastMaintained = block.timestamp; //no free period in one month + ds.GetGemTypeMetadata[_type].maintenancePeriod;
         gem.MintTime = block.timestamp;
         ds.GemOf[tokenId] = gem;
         return tokenId;
@@ -506,7 +491,7 @@ contract GemFacet {
         require(metads.PaymentToken.balanceOf(msg.sender) > _amount, "Not enough funds to pay");
 
         metads.PaymentToken.transferFrom(msg.sender, metads.Treasury, _amount);
-        gem.LastMaintained = block.timestamp + _sinceLastMaintained + _time;
+        gem.LastMaintained = block.timestamp + _time;
     }
 
 
