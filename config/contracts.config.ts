@@ -28,7 +28,7 @@ export const SECONDS_IN_A_DAY = SECONDS_IN_AN_HOUR * 24;
 export const SECONDS_IN_A_WEEK = SECONDS_IN_A_DAY * 7;
 export const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY;
 
-export const REWARD_TAX_TABLE = [percent(100), percent(30), percent(20), percent(10), 0];
+export const REWARD_TAX_TABLE = [percent(100), percent(30), percent(30), percent(15), 0];
 export const REWARDS_RELEASE_PERIOD = SECONDS_IN_A_WEEK;
 
 export const weeklyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_WEEK);
