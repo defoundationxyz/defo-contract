@@ -150,4 +150,5 @@ library LibERC721Enumerable {
         delete ds._allTokensIndex[tokenId];
         ds._allTokens.pop();
     }
+
 }

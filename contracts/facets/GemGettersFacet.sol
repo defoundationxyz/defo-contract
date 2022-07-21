@@ -36,6 +36,12 @@ contract GemGettersFacet {
         return ds.TotalCharity;
     }
 
+    /// @notice Rewards xearned by all users in total. Both charity and tax are not considered.
+    function getTotalEarned() external view returns (uint256) {
+        LibMeta.DiamondStorage storage ds = LibMeta.diamondStorage();
+        return ds.TotalCharity;
+    }
+
     function getExpiredTimeSinceLock(uint8 _gemType) external view returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
