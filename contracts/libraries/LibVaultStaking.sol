@@ -5,9 +5,9 @@ import "./LibERC721.sol";
 
 library LibVaultStaking {
     struct DiamondStorage {
-        mapping(uint256 => uint256) StakedFrom; //amounts staked to Vault per gemID (charity and taxes deducted)
-        mapping(address => uint256) StakedAmount; // address -> amount mapping
-        uint256 totalAmount;
+        mapping(uint256 => uint256) StakedFrom; //amounts staked to Vault per gemID (charity deducted)
+        mapping(address => uint256) StakedAmount; // address -> amount mapping (charity deducted)
+        uint256 totalAmount; // total amount in the vault
     }
 
     // Returns the struct from a specified position in contract storage

@@ -341,22 +341,37 @@ contract GemFacet {
         return gemIds;
     }
 
-    /* ============ Internal Functions ============ */
 
-    /// @notice get total rewards earned
-    function getTotalRewardEarned() internal view returns (uint256) {
+    /// @notice get total rewards earned  FOR USER including already claimed, staked, and unclaimed. Returns value before tax.
+    function getUserRewardEarned() public view returns (uint256) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
         uint256 totalReward = 0;
         uint256[] memory userGemIds = getGemIdsOf(msg.sender);
         for (uint256 i = 0; i < userGemIds.length; i++) {
             LibGem.Gem storage gem = ds.GemOf[userGemIds[i]];
-            totalReward += LibGem._taperedReward(userGemIds[i]).lessRate(LibGem._rewardTax(userGemIds[i]));
+            totalReward += LibGem._taperedReward(userGemIds[i]);
+            //.lessRate(LibGem._rewardTax(userGemIds[i]));
             totalReward += gem.claimedReward + gem.stakedReward;
         }
-
         return totalReward;
     }
 
+    /// @notice get total rewards earned FOR ALL USERS including already claimed, staked, and unclaimed. Returns value before tax.
+    function getTotalRewardEarned() public view returns (uint256) {
+        console.log("---_getTotalRewardEarned");
+        LibERC721Enumerable.DiamondStorage storage dsEnumerable = LibERC721Enumerable.diamondStorage();
+        LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
+        uint256 totalReward = 0;
+        uint256[] memory userGemIds = getGemIdsOf(msg.sender);
+        for (uint256 i = 0; i < dsEnumerable._allTokens.length; i++) {
+            LibGem.Gem storage gem = ds.GemOf[i];
+            totalReward += LibGem._taperedReward(i);
+            totalReward += gem.claimedReward + gem.stakedReward;
+            console.log("gem %s, totalReward: %s", i, totalReward);
+        }
+        return totalReward;
+    }
+    /* ============ Internal Functions ============ */
     // internal functions
 
     /// @dev sends the gem payment to other wallets
@@ -402,7 +417,8 @@ contract GemFacet {
         LibGem.Gem memory gem;
         gem.GemType = _type;
         gem.LastReward = block.timestamp;
-        gem.LastMaintained = block.timestamp; //no free period in one month + ds.GetGemTypeMetadata[_type].maintenancePeriod;
+        gem.LastMaintained = block.timestamp;
+        //no free period in one month + ds.GetGemTypeMetadata[_type].maintenancePeriod;
         gem.MintTime = block.timestamp;
         ds.GemOf[tokenId] = gem;
         return tokenId;
