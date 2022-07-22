@@ -57,7 +57,7 @@ contract GemGettersFacet {
             block.timestamp - gemType.LastMint >= metads.MintLimitPeriod || gemType.MintCount + 1 < gemType.DailyLimit;
     }
 
-    ///checks if the a gem
+    /// @notice user's boosters of a given booster type
     function getAvailableBoosters(
         LibGem.Booster _booster,
         uint8 _type,
