@@ -98,8 +98,8 @@ class LibMeta {
   -msgSender() address
   -getChainID() uint
 }
-LibMeta --|> DiamondStorage
-class DiamondStorage {
+LibMeta --|> LibMetaDiamondStorage
+class LibMetaDiamondStorage {
   -MaintenancePeriod uint
   -TreasuryDefoRate uint
   -TreasuryDaiRate uint
@@ -128,7 +128,19 @@ class DiamondStorage {
   -TotalCharity uint
 }
 
-
+class GemGettersFacet {
+  +GemOf(tokenId) LibGem.Gem
+  +GetGemTypeMetadata(type) LibGem.GemTypeMetadata
+  +getUserTotalCharity(user) uint
+  +getMeta() LibMeta.DiamondStorage
+  +getTotalCharity() uint
+  +getExpiredTimeSinceLock(gemType) uint
+  +isMintAvailableForGem(gemType) bool
+  +getAvailableBoosters(booster, type, user) uint
+}
+GemGettersFacet --> LibGem: Composition
+GemGettersFacet --> LibMeta: Composition
+GemGettersFacet --> LibUser: Composition
 
 class OwnerFacet {
   +initialize(_redeemContract, _defoToken, _paymentToken, _treasury, _limiter, _rewardPool, _donation) ~onlyOnwer()
@@ -136,6 +148,62 @@ class OwnerFacet {
   +setAddressAndDistTeam(newAddress, daiRate, DefoRate) ~onlyOwner()
   +setOther~Params~
 }
+
+
+
+class LibGem {
+  -_taperedReward(tokenId) uint
+  -_checkRawReward(tokenId) uint
+  -_getTaxTier(tokenId) uint
+  -_rewardTax(tokenId) uint
+  -_isActive(tokenId) bool
+  -_getMaintenanceFee(tokenId) uint
+  -_isClaimable(tokenId) bool
+  -diamondStorage() LibGemDiamondStorage
+}
+LibGem --|> LibGemDiamondStorage
+class LibGemDiamondStorage {
+  +GemOf[tokenId] Gem
+  +GemTypeMetadata[gemType] GemTypeMetadata
+  +MinterAddr address
+  +taperRate uint
+}
+
+LibGem --|> LibGemDiamondStorage
+class LibGemDiamondStorage {
+  +GemOf[tokenId] Gem
+  +GemTypeMetadata[gemType] GemTypeMetadata
+  +MinterAddr address
+  +taperRate uint
+}
+
+LibGemDiamondStorage "1" --o "*" Gem : has
+class Gem {
+  +MintTime uint
+  +LastReward uint
+  +LastMaintained uint
+  +GemType uint
+  +TaperCount uint
+  +claimedReward uint
+  +stakedReward uint
+  +unclaimedRewardBalance uint
+  +taperedRewardRate uint
+  +booster Booster
+}
+
+LibGemDiamondStorage "1" --o "n" GemTypeMetadata : has
+class GemTypeMetadata {
+  +LastMint uint
+  +MaintenanceFee uint
+  +RewardRate uint
+  +DailyLimit uint
+  +MintCount uint
+  +DefoPrice uint
+  +StablePrice uint
+  +TaperRewardsThreshold uint
+  +maintenancePeriod uint
+}
+
 
 
 GemFacet --* DEFODiamond
