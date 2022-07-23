@@ -91,8 +91,62 @@ class GemFacet {
   -_compound(tokenId, gemType) uint ~mintLimit(gemType)
   -_maintenance(tokenId, time)
 }
-GemFacet --> LibMeta: Composition
+GemFacet --> LibMeta: uses
+GemFacet --> LibUser: uses
+GemFacet --> LibGem: uses
+GemFacet --> LibERC721Enumerable: uses
 
+
+class GemGettersFacet {
+  +GemOf(tokenId) LibGem.Gem
+  +GetGemTypeMetadata(type) LibGem.GemTypeMetadata
+  +getUserTotalCharity(user) uint
+  +getMeta() LibMeta.DiamondStorage
+  +getTotalCharity() uint
+  +getExpiredTimeSinceLock(gemType) uint
+  +isMintAvailableForGem(gemType) bool
+  +getAvailableBoosters(booster, type, user) uint
+}
+GemGettersFacet --> LibGem: uses
+GemGettersFacet --> LibMeta: uses
+GemGettersFacet --> LibUser: uses
+
+class OwnerFacet {
+  +initialize(_redeemContract, _defoToken, _paymentToken, _treasury, _limiter, _rewardPool, _donation) ~onlyOnwer()
+  +setGemSettings(type, gemData) ~onlyOwner()
+  +setAddressAndDistTeam(newAddress, daiRate, DefoRate) ~onlyOwner()
+  +setOther~Params~
+}
+OwnerFacet --> LibGem: uses
+OwnerFacet --> LibMeta: uses
+OwnerFacet --> LibERC721: uses
+
+class VaultStakingFacet {
+  +batchAddToVault(tokenIds, amounts)
+  +addToVault(tokenId, amount)
+  +showStakedAmount() uint
+  +showTotalAmount() uint
+  +gemVaultAmount(tokenId) uint
+  +getAllVaultAmounts(user) uint[]
+  +removeAllFromVault(user)
+  +removeFromVault(tokenId, amount)
+  +removeFromVault(tokenId, amount)
+}
+VaultStakingFacet --> LibGem: uses
+VaultStakingFacet --> LibUser: uses
+VaultStakingFacet --> LibMeta: uses
+VaultStakingFacet --> LibVaultStaking: uses
+
+class LibVaultStaking {
+  -diamondStorage() LibVaultStakingDiamondStorage
+}
+
+LibVaultStakingDiamondStorage --|>LibVaultStaking
+class LibVaultStakingDiamondStorage {
+  StakedFrom uint[uint]
+  StakedAmount uint[uint]
+  totalAmount uint
+}
 
 class LibMeta {
   -msgSender() address
@@ -128,29 +182,6 @@ class LibMetaDiamondStorage {
   -TotalCharity uint
 }
 
-class GemGettersFacet {
-  +GemOf(tokenId) LibGem.Gem
-  +GetGemTypeMetadata(type) LibGem.GemTypeMetadata
-  +getUserTotalCharity(user) uint
-  +getMeta() LibMeta.DiamondStorage
-  +getTotalCharity() uint
-  +getExpiredTimeSinceLock(gemType) uint
-  +isMintAvailableForGem(gemType) bool
-  +getAvailableBoosters(booster, type, user) uint
-}
-GemGettersFacet --> LibGem: Composition
-GemGettersFacet --> LibMeta: Composition
-GemGettersFacet --> LibUser: Composition
-
-class OwnerFacet {
-  +initialize(_redeemContract, _defoToken, _paymentToken, _treasury, _limiter, _rewardPool, _donation) ~onlyOnwer()
-  +setGemSettings(type, gemData) ~onlyOwner()
-  +setAddressAndDistTeam(newAddress, daiRate, DefoRate) ~onlyOwner()
-  +setOther~Params~
-}
-
-
-
 class LibGem {
   -_taperedReward(tokenId) uint
   -_checkRawReward(tokenId) uint
@@ -169,15 +200,8 @@ class LibGemDiamondStorage {
   +taperRate uint
 }
 
-LibGem --|> LibGemDiamondStorage
-class LibGemDiamondStorage {
-  +GemOf[tokenId] Gem
-  +GemTypeMetadata[gemType] GemTypeMetadata
-  +MinterAddr address
-  +taperRate uint
-}
 
-LibGemDiamondStorage "1" --o "*" Gem : has
+LibGemDiamondStorage "1" --o "*" Gem : contains
 class Gem {
   +MintTime uint
   +LastReward uint
@@ -191,7 +215,7 @@ class Gem {
   +booster Booster
 }
 
-LibGemDiamondStorage "1" --o "n" GemTypeMetadata : has
+LibGemDiamondStorage "1" --o "n" GemTypeMetadata : contains
 class GemTypeMetadata {
   +LastMint uint
   +MaintenanceFee uint
@@ -202,6 +226,74 @@ class GemTypeMetadata {
   +StablePrice uint
   +TaperRewardsThreshold uint
   +maintenancePeriod uint
+}
+
+class LibERC721 {
+  -msgSender() address
+  -checkOnERC721Received(operator, from, to, tokenId, data)
+  -_balanceOf(owner) uint
+  -_ownerOf(tokenId) address
+  -_getApproved(tokenId) address
+  -_isApprovedForAll(owner, operator) bool
+  -_safeMint(to, tokenId)
+  -_safeMint(to, tokenId, _data)
+  -_exists(tokenId) bool
+  -_isApprovedOrOwner(speder, tokenId) bool
+  -_mint(to, tokenId)
+  -_burn(tokenId)
+  -_transfer(from, to, tokenId)
+  -_setApprovalForAll(owner, operator, approved)
+  -_beforeTokenTransfer(from, to, tokenId)
+  -diamondStorage(): LibERC721DiamondStorage
+}
+LibERC721 --|> LibERC721DiamondStorage: contains
+LibERC721 --> LibERC721Enumerable: uses
+class LibERC721DiamondStorage {
+  -name string
+  -_symbol string
+  -_owners address[uint]
+  -_balances uint[address]
+  -_tokenApprovals address[uint]
+  -_operatorApprovals bool[address[address]]
+  -baseURI string
+  -Limiter address
+  -init bool
+}
+
+class LibUser {
+  -diamondStorage() LibUserDiamondStorage
+}
+LibUser--|>LibUserDiamondStorage
+
+class LibUserDiamondStorage {
+  -users address[]
+  -GetUserData UserData[address]
+}
+
+LibUserDiamondStorage "1" --o "*" UserData: contains
+class UserData {
+  -OmegaClaims uint[uint]
+  -DeltaClaims uint[uint]
+  -charityContribution uint
+  -blacklisted bool
+}
+
+class LibGem {
+  -_taperedReward(tokenId) uint
+  -_checkRawReward(tokenId) uint
+  -_getTaxTier(tokenId) uint
+  -_rewardTax(tokenId) uint
+  -_isActive(tokenId) bool
+  -_getMaintenanceFee(tokenId) uint
+  -_isClaimable(tokenId) bool
+  -diamondStorage() LibGemDiamondStorage
+}
+LibGem --|> LibGemDiamondStorage
+class LibGemDiamondStorage {
+  +GemOf[tokenId] Gem
+  +GemTypeMetadata[gemType] GemTypeMetadata
+  +MinterAddr address
+  +taperRate uint
 }
 
 
