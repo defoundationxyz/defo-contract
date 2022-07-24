@@ -1,27 +1,32 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "../helpers/OwnerRecovery.sol";
-import "../implementations/LpManagerImplementationPoint.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title DEFO Token
 /// @author crypt0grapher, © Copyright 2022 Decentralized Foundation
-/// @notice ERC20 with gasless approvals on EIP712 signatures
-contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
+/// @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, ownable, and recoverable if tokens are mistakely sent
+contract DEFOToken {
     mapping(address => uint256) private _balances;
 
-    // --- Auth ---
+    // @notice Admins list
     mapping(address => uint256) public wards;
 
+    // @notice Grant access
+    // @param guy admin to granth auth
     function rely(address guy) external auth {
         wards[guy] = 1;
     }
 
+    // @notice Deny access
+    // @param guy deny auth for
     function deny(address guy) external auth {
         wards[guy] = 0;
+    }
+
+    // Transfer ownership update with authorization
+    function transferOwnership(address newOwner) external auth {
+        wards[msg.sender] = 0;
+        wards[newOwner] = 1;
     }
 
     modifier auth() {
@@ -70,13 +75,6 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
         );
     }
 
-    // Transfer ownership update with authorization
-    function transferOwnership(address newOwner) public override auth {
-        wards[msg.sender] = 0;
-        wards[newOwner] = 1;
-        super.transferOwnership(newOwner);
-    }
-
     // --- Token ---
     function transfer(address dst, uint256 wad) external returns (bool) {
         return transferFrom(msg.sender, dst, wad);
@@ -121,23 +119,6 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
         return true;
     }
 
-    // --- Alias ---
-    function push(address usr, uint256 wad) external {
-        transferFrom(msg.sender, usr, wad);
-    }
-
-    function pull(address usr, uint256 wad) external {
-        transferFrom(usr, msg.sender, wad);
-    }
-
-    function move(
-        address src,
-        address dst,
-        uint256 wad
-    ) external {
-        transferFrom(src, dst, wad);
-    }
-
     // --- Approve by signature ---
     function permit(
         address holder,
@@ -165,4 +146,17 @@ contract DEFOToken is Ownable, OwnerRecovery, LpManagerImplementationPoint {
         allowance[holder][spender] = wad;
         emit Approval(holder, spender, wad);
     }
+
+    // Recovering lost tokens and avax
+    function recoverLostDEFO(
+        address _token,
+        address _to,
+        uint256 _amount
+    ) external auth {
+        IERC20(_token).transfer(_to, _amount);
+    }
+
+     function recoverLostAVAX(address _to) external auth {
+         payable(_to).transfer(address(this).balance);
+     }
 }
