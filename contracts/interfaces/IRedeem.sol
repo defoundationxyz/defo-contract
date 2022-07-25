@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-/** @title  IRedeem, stand-alone contract
+/** @title  IRedeem, a interface for stand-alone contract
   * @author Decentralized Foundation Team
   * @notice Redeem contract responsible for exchange of the pre-sold tokens to a real yield gems with benefits, not part of the Diamond Facet
 */

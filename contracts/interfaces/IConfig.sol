@@ -59,7 +59,6 @@ uint256 constant TAX_TIERS = 4;
         // @dev All periods are in seconds
         uint32 maintenancePeriod;
         uint32 rewardPeriod;
-        uint32 mintCountResetPeriod;
         uint32 taxScaleSinceLastClaimPeriod;
     }
 

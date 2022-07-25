@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import { PAYMENT_TOKENS } from "./IConfig.sol";
+import {PAYMENT_TOKENS} from "./IConfig.sol";
 
 /** @title  IConfig EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -21,10 +21,21 @@ import { PAYMENT_TOKENS } from "./IConfig.sol";
     struct GemTypeConfig {
         uint256 maintenanceFeeDai;
         uint256 rewardAmountDefo;
-        uint8 dailyMintLimit;
         uint256[PAYMENT_TOKENS] price;
         uint256 taperRewardsThresholdDefo;
         uint256 maintenancePeriod;
+        uint8 mintLimit;
+        uint32 mintLimitPeriod;
+    }
+
+/**
+ * @notice A struct containing current mutable status for gemType
+     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
+     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
+     */
+    struct GemTypeMintWindow {
+        uint256 mintCount;
+        uint32 endOfMintLimitWindow;
     }
 
 
@@ -36,6 +47,6 @@ interface IGemType {
 
     function isMintAvailableForGem(uint8 _gemType) external view returns (bool);
 
-    function getExpiredTimeSinceLock(uint8 _gemType) external view returns (uint256);
+    function getMintWindow(uint8 _gemType) external view returns (GemTypeMintWindow memory);
 
 }
