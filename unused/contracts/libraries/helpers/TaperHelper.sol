@@ -31,7 +31,7 @@ library TaperHelper {
         // b_1 = taperThreshold/(ratePerPeriod*taperedPercent^1)  (which is 120/(5*0.8)= 30 weeks from the previous point to get 120 $DEFO by the tapered rate of 4)
         // b_2 = taperThreshold/(ratePerPeriod*taperedPercent^2)
         // ....
-        // b_n = taperThreshold/(ratePerPeriod*taperedPercent^n)
+        // b_n = taperThreshold/(ratePerPeriod  *taperedPercent^n)
         // b_(n+1) = taperThreshold/(ratePerPeriod*taperedPercent^(n+1))
         // So that SUM_n_from_1_to_n(b_n)<=timePeriod, but SUM_n_from_1_to_(n+1)(b_n)>timePeriod
         //

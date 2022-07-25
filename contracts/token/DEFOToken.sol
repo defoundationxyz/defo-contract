@@ -2,9 +2,10 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/// @title DEFO Token
-/// @author crypt0grapher, © Copyright 2022 Decentralized Foundation
-/// @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, ownable, and recoverable if tokens are mistakely sent
+/** @title  DEFO Token
+  * @author Decentralized Foundation Team
+  * @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, ownable, and recoverable if tokens are mistakely sent
+*/
 contract DEFOToken {
     mapping(address => uint256) private _balances;
 
@@ -76,6 +77,7 @@ contract DEFOToken {
     }
 
     // --- Token ---
+
     function transfer(address dst, uint256 wad) external returns (bool) {
         return transferFrom(msg.sender, dst, wad);
     }
