@@ -2,19 +2,16 @@
 
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
 import "./ERC721Facet.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
+  * @notice The Contract uses diamond storage providing functionality of ERC721Enumerable
 */
 contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
+
+    /* ============ External and Public Functions ============ */
     function totalSupply() external view returns (uint256){
         return s.nft.allTokens.length;
     }
@@ -28,6 +25,7 @@ contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
         return s.nft.allTokens[index];
     }
 
+    /* ============ Internal Functions ============ */
 
     function _beforeTokenTransfer(
         address from,
@@ -47,26 +45,12 @@ contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
         }
     }
 
-    /**
-     * @dev Hook that is called after any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
     function _afterTokenTransfer(
         address from,
         address to,
         uint256 tokenId
     ) internal virtual override {}
 
-    /**
- * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
-     */
     function _tokenOfOwnerByIndex(address owner, uint256 index) internal view returns (uint256) {
         require(index < _balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
         return s.nft.ownedTokens[owner][index];

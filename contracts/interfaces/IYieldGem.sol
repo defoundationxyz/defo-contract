@@ -39,14 +39,20 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
   * @notice The Yield Gem Interface, minting, getting, and maintenance
 */
 interface IYieldGem is IERC721 {
-    function getGemDetails(uint256 _tokenId) external view returns (Gem memory);
-
-    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256);
-
+    /**
+    * @notice Mints a gem, requires appropriate balance of DEFO and DAI and also approvals granted to the diamond contract to spent them
+    */
     function mintGem(uint8 _gemType) external;
 
+    /**
+    * @notice Pays for maintenance till block.timestamp
+    */
     function maintain(uint256 _tokenId) external;
 
     function batchMaintain(uint256[] calldata _tokenIds) external;
+
+    function getGemDetails(uint256 _tokenId) external view returns (Gem memory);
+
+    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256);
 
 }
