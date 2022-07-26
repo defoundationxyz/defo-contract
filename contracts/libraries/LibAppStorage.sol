@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts/utils/Counters.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
 import {Gem, GemTypeMintWindow} from "../interfaces/IYieldGem.sol";
 import {ProtocolConfig, GemTypeConfig} from "../interfaces/IConfig.sol";
@@ -43,11 +44,16 @@ import {ILimiter} from "../interfaces/ILimiter.sol";
 *   @param gems mapping indexed by tokenId
 */
     struct AppStorage {
+        // configuration
         ProtocolConfig config;
         GemTypeConfig[] gemTypesConfig;
+        // current state
         GemTypeMintWindow[] gemTypesMintWindows;
         mapping(uint256 => Gem) gems;
         ERC721Storage nft;
+        // Participant data
+        address[] participants;
+
     }
 
 library LibAppStorage {

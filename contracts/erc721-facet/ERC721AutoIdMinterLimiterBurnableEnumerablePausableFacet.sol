@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.9;
 
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "./ERC721EnumerableFacet.sol";
 import "./ERC721BurnableFacet.sol";
 import "./ERC721Facet.sol";
@@ -13,15 +14,20 @@ import "./PausableFacet.sol";
 */
 contract ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet is
 ERC721EnumerableFacet, ERC721BurnableFacet, PausableFacet {
+    using Counters for Counters.Counter;
 
     /* ============ Internal Functions ============ */
 
-    function _safeMint(address _to) internal {
+    function _safeMint(address _to) internal returns (uint256 tokenId_) {
         address sender = _msgSender();
-        uint tokenId = s.nft.tokenIdTracker.current();
-        _mint(_to, tokenId);
+        tokenId_ = _mint(_to);
+        _checkOnERC721Received(sender, address(0), _to, tokenId_, "");
+    }
+
+    function _mint(address _to) internal returns (uint256 tokenId_)  {
+        tokenId_ = s.nft.tokenIdTracker.current();
+        _mint(_to, tokenId_);
         s.nft.tokenIdTracker.increment();
-        _checkOnERC721Received(sender, address(0), _to, tokenId, "");
     }
 
     function _mint(address to, uint256 tokenId) internal {

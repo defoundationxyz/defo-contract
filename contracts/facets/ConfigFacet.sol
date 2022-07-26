@@ -12,9 +12,12 @@ import "../erc721-facet/ERC721MinterLimiterBurnableEnumerablePausableFacet.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract ConfigFacet is IConfig {
+
+    /* ============ External and Public Functions ============ */
+
     function setConfig(ProtocolConfig calldata _config) external {
 //        LibMintLimitManager._initialize()
-
+//initializeERC721Facet hardcode name and
     }
 
     function getConfig() external pure returns (ProtocolConfig memory) {
@@ -28,5 +31,5 @@ contract ConfigFacet is IConfig {
     function getGemTypeConfig(uint8 _gemType) external view returns (GemTypeConfig memory) {
 
     }
-
+    /* ============ Internal Functions ============ */
 }

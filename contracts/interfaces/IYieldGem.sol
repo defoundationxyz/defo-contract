@@ -34,8 +34,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
         uint256 cumulatedAddedToVaultAmount;
     }
 
-    /**
-     * @notice A struct containing current mutable status for gemType
+/**
+ * @notice A struct containing current mutable status for gemType
      * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
      * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
      */
@@ -53,7 +53,7 @@ interface IYieldGem is IERC721 {
     /**
     * @notice Mints a gem, requires appropriate balance of DEFO and DAI and also approvals granted to the diamond contract to spent them
     */
-    function mintGem(uint8 _gemType) external;
+    function mint(uint8 _gemType) external;
 
     /**
     * @notice Pays for maintenance till block.timestamp
@@ -62,12 +62,16 @@ interface IYieldGem is IERC721 {
 
     function batchMaintain(uint256[] calldata _tokenIds) external;
 
-    function getGemDetails(uint256 _tokenId) external view returns (Gem memory);
+    function gem(uint256 _tokenId) external view returns (Gem memory);
 
-    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256);
+    function gemIds() external view returns (uint256[] memory);
 
-    function isMintAvailableForGem(uint8 _gemType) external view returns (bool);
+    function gems() external view returns (uint256[] memory, Gem[] memory);
 
-    function getMintAvailabilityWindow(uint8 _gemType) external view returns (GemTypeMintWindow memory);
+    function pendingMaintenance(uint256 _tokenId) external view returns (uint256);
+
+    function isMintAvailable(uint8 _gemType) external view returns (bool);
+
+    function mintWindow(uint8 _gemType) external view returns (GemTypeMintWindow memory);
 
 }

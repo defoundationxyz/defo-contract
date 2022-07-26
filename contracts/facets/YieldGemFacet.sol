@@ -21,12 +21,17 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         _;
     }
 
+    modifier onlyRedeemContract() {
+        require(s.config.wallets[Wallets.RedeemContract] == _msgSender(), "Only from Redemption contract");
+        _;
+    }
     /* ============ External and Public Functions ============ */
 
-    function mintGem(uint8 _gemType) external mintAvailable(_gemType) {
+    function mint(uint8 _gemType) external mintAvailable(_gemType) {
         GemTypeConfig memory gemType = s.gemTypesConfig[_gemType];
         ProtocolConfig memory config = s.config;
         address minter = _msgSender();
+
         // check if there's enough DAI and DEFO
         for (uint8 paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
             require(
@@ -45,28 +50,49 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
                 );
             }
         }
+        _mint(_gemType, minter);
+    }
 
-        //mint and update the counter
-        _mintGem(_type, minter());
-        LibMintLimitManager._updateMintCount(_gemType);
+    function mint(uint8 _gemType, address _to) public onlyRedeemContract {
+        //no payment, already paid on presale
+        _mint(_gemType, _to);
     }
 
     function maintain(uint256 _tokenId) external {
 
     }
 
-    function batchMaintain(uint256[] calldata _tokenIds) external {
+    function batchMaintain(uint256[] calldata _tokenIds) external;
 
-    }
+    function gem(uint256 _tokenId) external view returns (Gem memory);
 
-    function getGemDetails(uint256 _tokenId) external view returns (Gem memory) {
+    function gemIds() external view returns (uint256[] memory);
 
-    }
+    function gems() external view returns (uint256[] memory, Gem[] memory);
 
-    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256) {
+    function pendingMaintenance(uint256 _tokenId) external view returns (uint256);
 
-    }
+    function isMintAvailable(uint8 _gemType) external view returns (bool);
+
+    function mintWindow(uint8 _gemType) external view returns (GemTypeMintWindow memory);
 
     /* ============ Internal Functions ============ */
 
+    function _mint(uint8 _gemType, address _to) private {
+        // mint and update the counter
+        uint256 tokenId = _safeMint(_to);
+        LibMintLimitManager.updateMintCount(_gemType);
+
+        // update user details
+        if (balanceOf(_to) == 0)
+            s.participants.push(_to);
+
+        // save the gem
+        Gem memory gem;
+        gem.gemType = _gemType;
+        gem.lastMaintenanceTime = block.timestamp;
+        gem.lastRewardWithdrawalTime = block.timestamp;
+        gem.mintTime = block.timestamp;
+        s.gems[tokenId] = gem;
+    }
 }
