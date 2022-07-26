@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import {FacetReady} from "../storage/StorageAndModifiers.sol";
+import {FacetReady} from "../storage/FacetReady.sol";
 
 /** @title  ERC721PausableFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -19,6 +19,28 @@ contract ERC721Facet is FacetReady, ERC165, IERC721, IERC721Metadata {
     using Strings for uint256;
 
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
+
+    modifier nftNotInitialized() {
+        require(!(s.nft.init), "ERC721: already initialized");
+        _;
+    }
+
+    modifier nftInitialized() {
+        require(s.nft.init, "ERC721: not initialized");
+        _;
+    }
+
+    function initializeERC721Facet(string memory _name, string memory _symbol) onlyOwner nftNotInitialized public {
+        s.nft.name = _name;
+        s.nft.symbol = _symbol;
+        LibDiamond.DiamondStorage storage dsMain = LibDiamond.diamondStorage();
+        dsMain.supportedInterfaces[type(IERC721).interfaceId] = true;
+        dsMain.supportedInterfaces[type(IERC721Metadata).interfaceId] = true;
+    }
+
+    function completeInitializationERC721Facet() onlyOwner nftNotInitialized public {
+        s.nft.init = true;
+    }
 
     function safeTransferFrom(
         address _from,
@@ -88,15 +110,15 @@ contract ERC721Facet is FacetReady, ERC165, IERC721, IERC721Metadata {
         return s.nft.operatorApprovals[owner][operator];
     }
 
-    function name() public view virtual returns (string memory) {
+    function name() public view virtual nftInitialized returns (string memory) {
         return s.nft.name;
     }
 
-    function symbol() public view virtual returns (string memory) {
+    function symbol() public view virtual nftInitialized returns (string memory) {
         return s.nft.symbol;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual exists(tokenId) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual nftInitialized exists(tokenId) returns (string memory) {
         string memory baseURI = s.nft.baseURI;
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
     }
@@ -159,6 +181,10 @@ contract ERC721Facet is FacetReady, ERC165, IERC721, IERC721Metadata {
 
     function _ownerOf(uint256 _tokenId) internal view exists(_tokenId) returns (address) {
         return s.nft.owners[_tokenId];
+    }
+
+    function _balanceOf(address owner) internal view nonZeroAddress(owner) returns (uint256) {
+        return s.nft.balances[owner];
     }
 
     function _getApproved(uint256 _tokenId) internal view exists(_tokenId) returns (address) {

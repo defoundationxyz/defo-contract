@@ -10,26 +10,12 @@ contract Storage is Context {
     AppStorage internal s;
 }
 
-
-contract Pausable is Storage {
-    modifier whenNotPaused() {
-        require(!(s.paused), "Pausable: paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require(s.paused, "Pausable: not paused");
-        _;
-    }
-}
-
-
 /**
  * @title  FacetReady
  * @author Decentralized Foundation Team
- * @notice FacetReady is a base contract facets to inherit from, - it includes Storage (see AppStorage pattern), modifiers, and reusable internal view functions
+ * @notice FacetReady is a base contract all facets to inherit from, - it includes Storage (see AppStorage pattern), modifiers, and reusable internal view functions
  */
-contract FacetReady is Pausable {
+contract FacetReady is Storage {
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;
@@ -38,13 +24,18 @@ contract FacetReady is Pausable {
         require(_owner != address(0), "ERC721: address zero is not a valid owner");
         _;
     }
+
     modifier exists(uint256 _tokenId) {
         _requireExists(_tokenId);
         _;
     }
 
     function _requireExists(uint256 _tokenId) internal view {
-        require(s.nft.owners[_tokenId] != address(0), "ERC721: tokenId is not valid");
+        require(_exists(_tokenId), "ERC721: tokenId is not valid");
+    }
+
+    function _exists(uint256 _tokenId) internal view returns (bool) {
+        return (s.nft.owners[_tokenId] != address(0));
     }
 
     function _msgSender() internal override view returns (address sender_) {
