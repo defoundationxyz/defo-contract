@@ -6,24 +6,24 @@ import "../interfaces/IYieldGem.sol";
 import "../interfaces/IConfig.sol";
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
-import "../erc721-facet/ERC721MinterLimiterBurnableEnumerablePausableFacet.sol";
+import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
-contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
+contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
 
     /* ============ Modifiers ============ */
 
     modifier mintAvailable(uint8 _gemType) {
-        require(LibMintLimitManager._isMintAvailableForGem(_gemType), "Gem mint restriction");
+        require(LibMintLimitManager.isMintAvailableForGem(_gemType), "Gem mint restriction");
         _;
     }
 
     /* ============ External and Public Functions ============ */
 
-    function mintGem(uint8 _gemType) external mintAvailable(_type) {
+    function mintGem(uint8 _gemType) external mintAvailable(_gemType) {
         GemTypeConfig memory gemType = s.gemTypesConfig[_gemType];
         ProtocolConfig memory config = s.config;
         address minter = _msgSender();
@@ -48,17 +48,24 @@ contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IY
 
         //mint and update the counter
         _mintGem(_type, minter());
+        LibMintLimitManager._updateMintCount(_gemType);
+    }
 
+    function maintain(uint256 _tokenId) external {
 
     }
 
-    function maintain(uint256 _tokenId) external;
+    function batchMaintain(uint256[] calldata _tokenIds) external {
 
-    function batchMaintain(uint256[] calldata _tokenIds) external;
+    }
 
-    function getGemDetails(uint256 _tokenId) external view returns (Gem memory);
+    function getGemDetails(uint256 _tokenId) external view returns (Gem memory) {
 
-    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256);
+    }
+
+    function getPendingMaintenance(uint256 _tokenId) external view returns (uint256) {
+
+    }
 
     /* ============ Internal Functions ============ */
 

@@ -13,6 +13,7 @@ import "../erc721-facet/ERC721MinterLimiterBurnableEnumerablePausableFacet.sol";
 */
 contract ConfigFacet is IConfig {
     function setConfig(ProtocolConfig calldata _config) external {
+//        LibMintLimitManager._initialize()
 
     }
 

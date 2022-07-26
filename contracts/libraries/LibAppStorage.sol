@@ -3,9 +3,8 @@
 pragma solidity 0.8.9;
 
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import {Gem} from "../interfaces/IYieldGem.sol";
-import {ProtocolConfig} from "../interfaces/IConfig.sol";
-import {GemTypeConfig, GemTypeMintWindow} from "../interfaces/IGemType.sol";
+import {Gem, GemTypeMintWindow} from "../interfaces/IYieldGem.sol";
+import {ProtocolConfig, GemTypeConfig} from "../interfaces/IConfig.sol";
 import {ILimiter} from "../interfaces/ILimiter.sol";
 
 /**
@@ -24,6 +23,7 @@ import {ILimiter} from "../interfaces/ILimiter.sol";
     struct ERC721Storage {
         string name;
         string symbol;
+        Counters.Counter tokenIdTracker;
         mapping(uint256 => address) owners;
         mapping(address => uint256) balances;
         mapping(uint256 => address) tokenApprovals;
