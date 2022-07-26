@@ -15,11 +15,22 @@ library LibMintLimitManager {
     */
     function _isMintAvailableForGem(uint8 _gemType) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        GemTypeConfig memory gemType = s.getGemTypeConfig[_gemType];
-        GemTypeMintWindow memory gemTypeMintWindow = s.GemTypeMintWindow[_gemType];
+        GemTypeConfig memory gemType = s.gemTypeConfig[_gemType];
+        GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemType];
         return !(s.config.mintLock) &&
-        ((GemTypeMintWindow.mintCount < gemType.DailyLimit) &&
-        (block.timestamp <= endOfMintLimitWindow) ||
-        (block.timestamp > endOfMintLimitWindow));
+        ((gemTypeMintWindow.mintCount < gemType.DailyLimit) &&
+        (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow) ||
+        (block.timestamp > gemTypeMintWindow.endOfMintLimitWindow));
+    }
+
+    function _incrementMintCount(uint8 _gemType) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        if (block.timestamp > s.gemTypesMintWindows[_gemType].endOfMintLimitWindow) {
+            s.gemTypesMintWindows[_gemType].endOfMintLimitWindow += s.config.mintLimitPeriod;
+            s.GemTypeMintWindow[_gemType].mintCount = 1;
+        }
+        else {
+            s.GemTypeMintWindow[_gemType].mintCount++;
+        }
     }
 }

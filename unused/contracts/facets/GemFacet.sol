@@ -152,6 +152,7 @@ contract GemFacet {
         _distributePayment(gemType.DefoPrice, true);
         _distributePayment(gemType.StablePrice, false);
         _mintGem(_type, msg.sender);
+
         if (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) {
             gemType.LastMint = block.timestamp;
             gemType.MintCount = 1;

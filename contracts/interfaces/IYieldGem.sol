@@ -34,6 +34,17 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
         uint256 cumulatedAddedToVaultAmount;
     }
 
+    /**
+     * @notice A struct containing current mutable status for gemType
+     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
+     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
+     */
+    struct GemTypeMintWindow {
+        uint256 mintCount;
+        uint32 endOfMintLimitWindow;
+    }
+
+
 /** @title  IYieldGem, EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice The Yield Gem Interface, minting, getting, and maintenance
@@ -54,5 +65,9 @@ interface IYieldGem is IERC721 {
     function getGemDetails(uint256 _tokenId) external view returns (Gem memory);
 
     function getPendingMaintenance(uint256 _tokenId) external view returns (uint256);
+
+    function isMintAvailableForGem(uint8 _gemType) external view returns (bool);
+
+    function getMintAvailabilityWindow(uint8 _gemType) external view returns (GemTypeMintWindow memory);
 
 }

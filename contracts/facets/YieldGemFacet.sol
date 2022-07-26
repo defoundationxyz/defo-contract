@@ -4,7 +4,6 @@ pragma solidity 0.8.9;
 
 import "../interfaces/IYieldGem.sol";
 import "../interfaces/IConfig.sol";
-import "../interfaces/IGemType.sol";
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
 import "../erc721-facet/ERC721MinterLimiterBurnableEnumerablePausableFacet.sol";
@@ -13,7 +12,7 @@ import "../erc721-facet/ERC721MinterLimiterBurnableEnumerablePausableFacet.sol";
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
-contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IYieldGem, IGemType {
+contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
 
     /* ============ Modifiers ============ */
 
@@ -27,10 +26,11 @@ contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IY
     function mintGem(uint8 _gemType) external mintAvailable(_type) {
         GemTypeConfig memory gemType = s.gemTypesConfig[_gemType];
         ProtocolConfig memory config = s.config;
+        address minter = _msgSender();
         // check if there's enough DAI and DEFO
         for (uint8 paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
             require(
-                config.paymentTokens[paymentToken].balanceOf(_msgSender()) > gemType.price[paymentToken],
+                config.paymentTokens[paymentToken].balanceOf(minter) > gemType.price[paymentToken],
                 "Insufficient balance"
             );
         }
@@ -39,18 +39,16 @@ contract YieldGemFacet is ERC721MinterLimiterBurnableEnumerablePausableFacet, IY
         for (uint receiver = 0; receiver < PAYMENT_RECEIVERS; receiver++) {
             for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
                 config.paymentTokens[paymentToken].transferFrom(
-                    _msgSender(),
+                    minter,
                     config.wallets[receiver],
                     PercentHelper.rate(gemType.price[paymentToken], config.incomeDistributionOnMint[receiver][paymentToken])
                 );
             }
         }
 
-        uint256 reward = amount.rate(metads.TreasuryDefoRate);
-        uint256 liq = amount.rate(metads.LiquidityDefoRate);
-        token = metads.DefoToken;
-        token.transfer(metads.RewardPool, reward);
-        token.transfer(metads.Liquidity, liq);
+        //mint and update the counter
+        _mintGem(_type, minter());
+
 
     }
 
