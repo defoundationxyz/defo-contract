@@ -14,7 +14,7 @@ import {StorageWithModifiers} from "../libraries/LibAppStorage.sol";
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
-contract ERC721Facet is FacetReady, IERC721, IERC721Metadata {
+contract ERC721Compliant is StorageWithModifiers, IERC721, IERC721Metadata {
     event Paused(address account);
     event Unpaused(address account);
 

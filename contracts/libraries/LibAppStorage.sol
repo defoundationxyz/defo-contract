@@ -48,8 +48,7 @@ import {ILimiter} from "../interfaces/ILimiter.sol";
         GemTypeMintWindow[] gemTypesMintWindows;
         mapping(uint256 => Gem) gems;
         ERC721Storage nft;
-
-
+        bool paused;
     }
 
 library LibAppStorage {
@@ -57,14 +56,5 @@ library LibAppStorage {
         assembly {
             ds.slot := 0
         }
-    }
-}
-
-contract WithStorage {
-    AppStorage internal s;
-
-    modifier onlyOwner() {
-        LibDiamond.enforceIsContractOwner();
-        _;
     }
 }

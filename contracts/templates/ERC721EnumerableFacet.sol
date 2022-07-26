@@ -5,7 +5,7 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
 import {StorageWithModifiers} from "../libraries/LibAppStorage.sol";
@@ -14,7 +14,7 @@ import {StorageWithModifiers} from "../libraries/LibAppStorage.sol";
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
-contract ERC721Facet is FacetReady, IERC721, IERC721Metadata {
+contract ERC721EnumerableFacet is IERC721Enumerable {
     event Paused(address account);
     event Unpaused(address account);
 
