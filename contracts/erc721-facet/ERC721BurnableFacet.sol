@@ -9,12 +9,17 @@ import "./ERC721Facet.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract ERC721BurnableFacet is ERC721Facet {
+
+    /* ============ External and Public Functions ============ */
+
     function burn(uint256 tokenId) public {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner nor approved");
         _burn(tokenId);
     }
+
     /* ============ Internal Functions ============ */
+
     function _burn(uint256 tokenId) internal {
         address owner = _ownerOf(tokenId);
         _beforeTokenTransfer(owner, address(0), tokenId);

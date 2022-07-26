@@ -11,7 +11,9 @@ import "./PausableFacet.sol";
   * @author Decentralized Foundation Team
   * @dev This is a reusable ERC721 preset to be used in the facet, prerequisites is s.nft structure in the AppStorage
 */
-contract ERC721MinterLimiterBurnableEnumerablePausableFacet is ERC721EnumerableFacet, ERC721BurnableFacet, PausableFacet {
+contract ERC721MinterLimiterBurnableEnumerablePausableFacet is 
+ERC721EnumerableFacet, ERC721BurnableFacet, PausableFacet {
+
     /* ============ Internal Functions ============ */
 
     function _safeMint(address to, uint256 tokenId) internal {
@@ -33,7 +35,7 @@ contract ERC721MinterLimiterBurnableEnumerablePausableFacet is ERC721EnumerableF
         require(!_exists(tokenId), "ERC721: token already minted");
         _beforeTokenTransfer(address(0), to, tokenId);
 
-        s.nft.balances[to] += 1;
+        s.nft.balances[to]++;
         s.nft.owners[tokenId] = to;
 
         emit Transfer(address(0), to, tokenId);

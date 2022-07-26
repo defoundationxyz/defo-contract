@@ -5,6 +5,7 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 uint256 constant PAYMENT_TOKENS = 2;
+uint256 constant PAYMENT_RECEIVERS = 4;
 uint256 constant WALLETS = 6;
 uint256 constant TAX_TIERS = 4;
 
@@ -19,8 +20,8 @@ uint256 constant TAX_TIERS = 4;
         Treasury,
         RewardPool,
         LiquidityPair,
-        Charity,
         Team,
+        Charity,
         RedeemContract
     }
 
@@ -32,20 +33,6 @@ uint256 constant TAX_TIERS = 4;
         TIER2_MEDIUM_TAX,
         TIER3_SMALL_TAX,
         NO_TAX
-    }
-
-
-    struct Addresses {
-        IERC20[PAYMENT_TOKENS] paymentTokens;
-        address payable[WALLETS] wallets;
-    }
-
-    /**
-     * @notice A struct containing IncomeDistribution details on yield gem mint
-     * @param onMint distribution of the payment among tokens in percent rates, all values use percentage multiplier (see percent helper), here addresses are from the Addresses
-     */
-    struct IncomeDistribution {
-        uint256[WALLETS][PAYMENT_TOKENS] onMint;
     }
 
     /**
@@ -86,15 +73,20 @@ uint256 constant TAX_TIERS = 4;
 
     /**
      * @notice Main Protocol Configuration structure
+     * @param mintLock no mint for all gems, no minting if set
+     * @param transferLock no transfer if set, including no minting
+     * @param incomeDistributionOnMint distribution of the payment among tokens in percent rates, all values use percentage multiplier (see percent helper), here addresses are from the Addresses
      */
 
     struct ProtocolConfig {
-        Addresses addresses;
-        IncomeDistribution incomeDistribution;
+        IERC20[PAYMENT_TOKENS] paymentTokens;
+        address payable[WALLETS] wallets;
+        uint256[WALLETS][PAYMENT_TOKENS] incomeDistributionOnMint;
         TimePeriods timePeriods;
         TaxesAndContributions taxesAndContributions;
-        Locks locks;
-    }
+        bool mintLock;
+        bool transferLock;
+}
 
 /** @title  IConfig EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team

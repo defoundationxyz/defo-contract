@@ -6,7 +6,7 @@ import {FacetReady} from "../storage/FacetReady.sol";
 
 /**
 *   @notice Pausable contract
-*   @dev should start with s.pause = false which is default
+*   @dev should start with  s.config.transferLock = false which is default
 */
 contract PausableFacet is FacetReady {
     event Paused(address account);
@@ -23,11 +23,11 @@ contract PausableFacet is FacetReady {
     }
 
     function paused() public view virtual returns (bool) {
-        return s.paused;
+        return s.config.transferLock;
     }
 
     function _requireNotPaused() internal view virtual {
-        require(!paused(), "Pausable: paused");
+        require(!paused(), "Pausable: paused, transfer is locked");
     }
 
     function _requirePaused() internal view virtual {
@@ -35,15 +35,14 @@ contract PausableFacet is FacetReady {
     }
 
     function _pause() internal whenNotPaused {
-        s.paused = true;
+        s.config.transferLock = true;
         emit Paused(_msgSender());
     }
 
     function _unpause() internal whenPaused {
-        s.paused = false;
+        s.config.transferLock = false;
         emit Unpaused(_msgSender());
     }
-
 
 
 }

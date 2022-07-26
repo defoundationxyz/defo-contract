@@ -12,6 +12,7 @@ import "./ERC721Facet.sol";
 contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
 
     /* ============ External and Public Functions ============ */
+
     function totalSupply() external view returns (uint256){
         return s.nft.allTokens.length;
     }
