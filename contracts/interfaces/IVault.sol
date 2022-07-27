@@ -22,8 +22,8 @@ interface IVault {
     * @param _tokenId yield gem id
     * @param _amount amount to remove from the vault in DEFO (wei precision)
     */
-    function configureLottery(uint256 _numberOfWinners, uint32 _periodicity) external;
-    
+    function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external;
+
     /**
     * @notice get amount currently in the vault for a specific yield gem
     * @param _tokenId yield gem id
@@ -46,6 +46,7 @@ interface IVault {
     /**
     * @notice gets lottery winners
     * @return addresses of the lottery winners
+    * @dev the ones related to the requested period are put to the storage to return the same number in the future
     */
     function lotteryWinners(uint32 timestamp) external view returns (address[]);
 
