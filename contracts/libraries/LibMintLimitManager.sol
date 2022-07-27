@@ -3,40 +3,56 @@
 pragma solidity 0.8.9;
 
 import "./LibAppStorage.sol";
-import "../interfaces/IConfig.sol";
 
 // helper for limit daily mints
 library LibMintLimitManager {
+    event MintLocked();
+    event MintUnlocked();
 
-    function initialize(uint8 _gemType) internal {
-        s.GemTypeMintWindow[_gemType].mintCount = 0;
-        s.gemTypesMintWindows[_gemType].endOfMintLimitWindow = block.timestamp;
+    function initialize(uint8 _gemTypeId) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        s.gemTypesMintWindows[_gemTypeId].mintCount = 0;
+        s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow = uint32(block.timestamp);
     }
 
     /**
     *   @notice checks if a gem is mintable
-    *   @param _gemType type of a gem, initially it's 0,1,2 for sapphire, ruby, and diamond, respectively
+    *   @param _gemTypeId type of a gem, initially it's 0,1,2 for sapphire, ruby, and diamond, respectively
     *   @return true if mint is available, no revert
     *   @dev checks mintLock config and daily mintcount limit
     */
-    function isMintAvailableForGem(uint8 _gemType) internal view returns (bool) {
+    function isMintAvailableForGem(uint8 _gemTypeId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        GemTypeConfig memory gemType = s.gemTypeConfig[_gemType];
-        GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemType];
+        GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
+        GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
         return !(s.config.mintLock) &&
-        ((gemTypeMintWindow.mintCount < gemType.DailyLimit) &&
+        ((gemTypeMintWindow.mintCount < gemType.maxMintsPerWindow) &&
         (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow) ||
         (block.timestamp > gemTypeMintWindow.endOfMintLimitWindow));
     }
 
-    function updateMintCount(uint8 _gemType) internal {
+    function updateMintCount(uint8 _gemTypeId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        if (block.timestamp > s.gemTypesMintWindows[_gemType].endOfMintLimitWindow) {
-            s.gemTypesMintWindows[_gemType].endOfMintLimitWindow += s.config.mintLimitPeriod;
-            s.GemTypeMintWindow[_gemType].mintCount = 1;
+        if (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow) {
+            s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+            s.gemTypesMintWindows[_gemTypeId].mintCount = 1;
         }
         else {
-            s.GemTypeMintWindow[_gemType].mintCount++;
+            s.gemTypesMintWindows[_gemTypeId].mintCount++;
         }
     }
+
+
+    function lockMint() internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        s.config.mintLock = true;
+        emit MintLocked();
+    }
+    function unlockMint() internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        s.config.mintLock = false;
+        emit MintUnlocked();
+    }
+
+
 }

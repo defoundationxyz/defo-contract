@@ -8,13 +8,13 @@ import "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import {FacetReady} from "../storage/FacetReady.sol";
+import "../base-facet/BaseFacet.sol";
 
 /** @title  ERC721PausableFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721 token with metadata, uses AppStorage pattern inherited from FacetReady for ERC721 storage (s.nft)
 */
-contract ERC721Facet is FacetReady, ERC165, IERC721, IERC721Metadata {
+contract ERC721Facet is BaseFacet, ERC165, IERC721, IERC721Metadata {
     using Strings for uint256;
 
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;

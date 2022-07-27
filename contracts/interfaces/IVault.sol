@@ -31,9 +31,9 @@ interface IVault {
     function vaultAmount() external view returns (uint256);
 
     /**
-    * @notice get amount currently in the vault for all protocol participants
+    * @notice get amount currently in the vault for all protocol users
     * @return amount in DEFO (wei precision)
     */
-    function vaultAmountAllParticipants() external view returns (uint256);
+    function vaultAmountAllUsers() external view returns (uint256);
 
 }

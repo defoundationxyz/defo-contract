@@ -43,16 +43,16 @@ interface IRewards {
     function rewardForAllTime() external view returns (uint256);
 
     /**
-    *   @notice amount of pre-taxed reward earned by all the participants for all time
+    *   @notice amount of pre-taxed reward earned by all the users for all time
     *   @return amount in Dai (in wei precision)
     */
-    function rewardForAllTimeAllParticipants() external view returns (uint256);
+    function rewardForAllTimeAllUsers() external view returns (uint256);
 
     /**
     *   @notice amount donated by all the users for all time
     *   @return amount in Dai (in wei precision)
     */
-    function donatedForAllTimeAllParticipants() external view returns (uint256);
+    function donatedForAllTimeAllUsers() external view returns (uint256);
 
     /**
     *   @notice amount of pre-taxed reward that are currently in the vault for the sender, so if put and then taken from the vault, it's not the return of the function
@@ -61,10 +61,10 @@ interface IRewards {
     function amountPutIntoVaultAndStillThere() external view returns (uint256);
 
     /**
-    *   @notice amount of pre-taxed reward that are currently in the vault for all participants, so if put and then taken from the vault, it's not the return of the function
+    *   @notice amount of pre-taxed reward that are currently in the vault for all users, so if put and then taken from the vault, it's not the return of the function
     *   @return total amount in Dai (in wei precision)
     */
-    function amountPutIntoVaultAndStillThereAllParticipants() external view returns (uint256);
+    function amountPutIntoVaultAndStillThereAllUsers() external view returns (uint256);
 
     /**
     *   @notice gets tax tier for a gem

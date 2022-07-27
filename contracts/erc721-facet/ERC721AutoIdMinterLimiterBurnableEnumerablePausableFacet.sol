@@ -6,14 +6,12 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./ERC721EnumerableFacet.sol";
 import "./ERC721BurnableFacet.sol";
 import "./ERC721Facet.sol";
-import "./PausableFacet.sol";
 
 /** @title  ERC721MinterBurnableEnumerablePausableFacet EIP-2535 Diamond Facet, implements ERC721 with internal minting
   * @author Decentralized Foundation Team
   * @dev This is a reusable ERC721 preset to be used in the facet, prerequisites is s.nft structure in the AppStorage
 */
-contract ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet is
-ERC721EnumerableFacet, ERC721BurnableFacet, PausableFacet {
+contract ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet is ERC721EnumerableFacet, ERC721BurnableFacet {
     using Counters for Counters.Counter;
 
     /* ============ Internal Functions ============ */

@@ -35,20 +35,20 @@ library PercentHelper {
         return value * HUNDRED_PERCENT / (HUNDRED_PERCENT - ratio);
     }
 
-    function oneHundredLessPercent(uint256 ratio) internal view returns (uint256) {
+    function oneHundredLessPercent(uint256 ratio) internal pure returns (uint256) {
         return (HUNDRED_PERCENT - ratio);
     }
 
-    function minusHundredPercent(uint256 ratio) internal view returns (uint256) {
+    function minusHundredPercent(uint256 ratio) internal pure returns (uint256) {
         return (ratio - HUNDRED_PERCENT);
     }
 
 
-    function reversePercent(uint256 ratio) internal view returns (uint256) {
+    function reversePercent(uint256 ratio) internal pure returns (uint256) {
         return PERCENTAGE_PRECISION_MULTIPLIER / ratio;
     }
 
-    function percentPower(uint256 value, uint256 ratio, uint pow) internal view returns (uint256) {
+    function percentPower(uint256 value, uint256 ratio, uint pow) internal pure returns (uint256) {
         return value * PERCENTAGE_PRECISION_MULTIPLIER ** pow / ratio ** pow;
     }
 

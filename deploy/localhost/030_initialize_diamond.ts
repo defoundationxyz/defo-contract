@@ -38,6 +38,7 @@ const func: DeployFunction = async hre => {
 
   const diamondDeployment = await deployments.get("DEFODiamond");
   const defoTokenDeployment = await deployments.get("DEFOToken");
+  // initializeERC721Facet
 
   const ownerFacetInstance = await ethers.getContractAt<OwnerFacet>("OwnerFacet", diamondDeployment.address);
   await ownerFacetInstance.initialize(

@@ -4,18 +4,14 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import {AppStorage} from "../libraries/LibAppStorage.sol";
-
-contract Storage is Context {
-    AppStorage internal s;
-}
+import "./Pause.sol";
 
 /**
  * @title  FacetReady
  * @author Decentralized Foundation Team
  * @notice FacetReady is a base contract all facets to inherit from, - it includes Storage (see AppStorage pattern), modifiers, and reusable internal view functions
  */
-contract FacetReady is Storage {
+contract BaseFacet is Pause {
     modifier onlyOwner() {
         LibDiamond.enforceIsContractOwner();
         _;

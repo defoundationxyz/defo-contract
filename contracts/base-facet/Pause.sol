@@ -2,13 +2,13 @@
 
 pragma solidity 0.8.9;
 
-import {FacetReady} from "../storage/FacetReady.sol";
+import "./Storage.sol";
 
 /**
 *   @notice Pausable contract
 *   @dev should start with  s.config.transferLock = false which is default
 */
-contract PausableFacet is FacetReady {
+contract Pause is Storage {
     event Paused(address account);
     event Unpaused(address account);
 
