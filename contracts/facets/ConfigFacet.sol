@@ -21,36 +21,42 @@ contract ConfigFacet is BaseFacet, IConfig {
     event GemTypeConfigurationChange(GemTypeConfig _gemTypeConfig);
 
     /* ============ External and Public Functions ============ */
-    function setConfig(ProtocolConfig calldata _config) external {
-        s.config = _config;
+    function setConfig(ProtocolConfig calldata _config) external onlyOwner {
+        ProtocolConfig memory calldataToStorage = _config;
+        s.config = calldataToStorage;
         emit ConfigurationChange(_config);
     }
 
-    function setGemTypeConfig(uint8 _gemTypeId, GemTypeConfig calldata _gemTypeConfig) external {
-        // LibMintLimitManager.initialize();
+    function setGemTypesConfig(GemTypeConfig[] calldata _gemTypeConfig) external onlyOwner {
+        // fill in the storage and reset mint limit window counter for every gem type
+        delete s.gemTypes;
+        for (uint8 gemTypeId = 0; gemTypeId < uint8(_gemTypeConfig.length); gemTypeId++) {
+            s.gemTypes.push(_gemTypeConfig[gemTypeId]);
+            LibMintLimitManager.initialize(gemTypeId);
+        }
     }
 
     function getConfig() external view returns (ProtocolConfig memory) {
         return s.config;
     }
 
-    function getGemTypeConfig(uint8 _gemTypeId) external view returns (GemTypeConfig memory) {
-
+    function getGemTypesConfig() external view returns (GemTypeConfig[] memory) {
+        return s.gemTypes;
     }
 
-    function lockMint() public {
+    function lockMint() public onlyOwner {
         LibMintLimitManager.lockMint();
     }
 
-    function unlockMint() public {
+    function unlockMint() public onlyOwner {
         LibMintLimitManager.unlockMint();
     }
 
-    function pause() external {
+    function pause() external onlyOwner {
         _pause();
     }
 
-    function unpause() external {
+    function unpause() external onlyOwner {
         _unpause();
     }
 

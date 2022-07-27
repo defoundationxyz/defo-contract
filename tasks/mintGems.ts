@@ -1,5 +1,5 @@
 import { GEMS, gemName } from "@config";
-import { ERC721Facet, GemFacet, GemGettersFacet } from "@contractTypes/index";
+import { YieldGemFacet } from "@contractTypes/index";
 import { gemsGroupedByType } from "@utils/gems.helper";
 import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
@@ -11,7 +11,7 @@ export default task("get-some-gems", "mint NFT gems")
     const { getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
+    const gemContract = await ethers.getContract<YieldGemFacet>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
 
     const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, deployer);
@@ -23,8 +23,8 @@ export default task("get-some-gems", "mint NFT gems")
       try {
         await Promise.all(
           Array.from({ length: amount }, async () => {
-            if (await gemContract.isMintAvailableForGem(gemType)) {
-              await gemContract.MintGem(gemType);
+            if (await gemContract.isMintAvailable(gemType)) {
+              await gemContract.mint(gemType);
               info(`Minted +1 ${name}`);
             } else {
               throw new Error("Mint not available");

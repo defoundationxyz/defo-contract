@@ -14,9 +14,9 @@ interface IConfig {
 
     function getConfig() external view returns (ProtocolConfig memory);
 
-    function setGemTypeConfig(uint8 _gemTypeId, GemTypeConfig calldata _gemTypeConfig) external;
+    function setGemTypesConfig(GemTypeConfig[] calldata _gemTypesConfig) external;
 
-    function getGemTypeConfig(uint8 _gemTypeId) external view returns (GemTypeConfig memory);
+    function getGemTypesConfig() external view returns (GemTypeConfig[] memory);
 
     function lockMint() external;
 

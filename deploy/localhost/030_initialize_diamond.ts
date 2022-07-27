@@ -1,3 +1,5 @@
+import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG } from "@config";
+import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { getContractWithSigner, namedSigner } from "@utils/chain.helper";
 import { deployAnnounce, deployInfo, deploySuccess } from "@utils/output.helper";
 import assert from "assert";
@@ -7,7 +9,7 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { namedAccountsIndex } from "../../hardhat.accounts";
-import { DEFOToken, ERC721Facet, OwnerFacet } from "../../types";
+import { ConfigFacet, DEFOToken, ERC721Facet } from "../../types";
 
 const func: DeployFunction = async hre => {
   const {
@@ -40,17 +42,22 @@ const func: DeployFunction = async hre => {
   const defoTokenDeployment = await deployments.get("DEFOToken");
   // initializeERC721Facet
 
-  const ownerFacetInstance = await ethers.getContractAt<OwnerFacet>("OwnerFacet", diamondDeployment.address);
-  await ownerFacetInstance.initialize(
-    deployer, /// TODO it's _redeemContract, shouldn't be the deployer probably
-    defoTokenDeployment.address, //_defoToken
-    dai, //_paymentToken
-    treasury, //_treasury
-    diamondDeployment.address, //_limiter ?
-    rewardPool, //_rewardPool
-    donations, //_donatio
-  );
-  deployInfo("OwnerFacet initialized with preconfigured facet addresses.");
+  PROTOCOL_CONFIG.paymentTokens = [MAINNET_DAI_ADDRESS, defoTokenDeployment.address];
+  PROTOCOL_CONFIG.wallets = [
+    treasury,
+    rewardPool,
+    diamondDeployment.address, //liquidity pair goes here
+    team,
+    donations,
+    deployer, //redeem contract goes here
+  ];
+
+  const configFacetInstance = await ethers.getContractAt<ConfigFacet>("DEFODiamond", diamondDeployment.address);
+  await configFacetInstance.setConfig(PROTOCOL_CONFIG);
+  deployInfo("DEFODiamond configured.");
+
+  await configFacetInstance.setGemTypesConfig(GEM_TYPES_CONFIG);
+  deployInfo("Gem types configured.");
 
   for (const tokensOwner of ["treasury", "vault", "rewardPool", "donations"]) {
     deployAnnounce(`\nApproving Diamond to spend on behalf of ${chalk.yellow(tokensOwner)}`);
@@ -88,7 +95,8 @@ const func: DeployFunction = async hre => {
   }
 
   const erc721FacetInstance = await ethers.getContractAt<ERC721Facet>("ERC721Facet", diamondDeployment.address);
-  await erc721FacetInstance.initialize("DEFO Node", "DFN");
+  await erc721FacetInstance.initializeERC721Facet("DEFO Node", "DFN");
+  deployInfo("DEFO Node configured.");
 
   deploySuccess("Success");
 };

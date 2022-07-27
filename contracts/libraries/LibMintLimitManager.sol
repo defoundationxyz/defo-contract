@@ -26,7 +26,7 @@ library LibMintLimitManager {
         GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
         GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
         return !(s.config.mintLock) &&
-        ((gemTypeMintWindow.mintCount < gemType.maxMintsPerWindow) &&
+        ((gemTypeMintWindow.mintCount < gemType.maxMintsPerLimitWindow) &&
         (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow) ||
         (block.timestamp > gemTypeMintWindow.endOfMintLimitWindow));
     }

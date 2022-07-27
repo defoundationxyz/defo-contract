@@ -5,6 +5,10 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "./ILimiter.sol";
+/**
+*   @dev The only source for all the data structures used in the protocol storage
+*   @dev This includes general config, gem type config, and mutable data
+*/
 
 /// @dev number of payment tokens to enumerate the error, initially it's Defo and Dai,
 /// @dev see PaymentTokens enum
@@ -17,7 +21,38 @@ uint256 constant PAYMENT_RECEIVERS = 4;
 uint256 constant WALLETS = 6;
 
 /// @dev total number of supported tax tiers
-uint256 constant TAX_TIERS = 4;
+uint256 constant TAX_TIERS = 5;
+
+/**
+*   @notice a struct for data compliance with erc721 standard
+*   @param name Token name
+*   @param symbol Token symbol
+*   @param owners Mapping from token ID to owner address
+*   @param balances Mapping owner address to token count
+*   @param tokenApprovals Mapping from token ID to approved address
+*   @param operatorApprovals Mapping from owner to operator approvals
+*   @param ownedTokens Mapping from owner to list of owned token IDs
+*   @param ownedTokensIndex Mapping from token ID to index of the owner tokens list
+*   @param allTokens Array with all token ids, used for enumeration
+*   @param allTokensIndex Mapping from token id to position in the allTokens array
+*/
+    struct ERC721Storage {
+        string name;
+        string symbol;
+        Counters.Counter tokenIdTracker;
+        mapping(uint256 => address) owners;
+        mapping(address => uint256) balances;
+        mapping(uint256 => address) tokenApprovals;
+        mapping(address => mapping(address => bool)) operatorApprovals;
+        string baseURI;
+        mapping(address => mapping(uint256 => uint256)) ownedTokens;
+        mapping(uint256 => uint256) ownedTokensIndex;
+        uint256[] allTokens;
+        mapping(uint256 => uint256) allTokensIndex;
+        ILimiter limiter;
+        bool init;
+    }
+
 
 /// @notice token enum to index arrays of rates and addresses, the convention is that Dai is at place 0, Defo is at 1
 /// @dev the order is extremely important once deployed
@@ -61,7 +96,7 @@ uint256 constant TAX_TIERS = 4;
      * @param taperRate taper rate, initially 20%
      * @param mintLock no mint for all gems, no minting if set
      * @param transferLock no transfer if set
-     * @param mintLimitWindow a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs, see GemTypeConfig.maxMintsPerWindow
+     * @param mintLimitWindow a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs, see GemTypeConfig.maxMintsPerLimitWindow
      */
 
     struct ProtocolConfig {
@@ -89,19 +124,26 @@ uint256 constant TAX_TIERS = 4;
      * @param rewardAmountDefo Reward in DEFO for the node type, amount in wei per week
      * @param price Price in DEFO and DAI (in wei), respectively, according to the PaymentTokens enum
      * @param taperRewardsThresholdDefo Taper threshold, in wei, decreasing rate every given amount of rewards in DEFO
-     * @param maintenancePeriod Maintenance period, usually one month, no free period - it's getting accrued for one month and on the first day of the next month should be paid
-     * @param maxMintsPerWindow number of gems, mint limit for a node type, see ProtocolConfig.mintLimitWindow
+     * @param maxMintsPerLimitWindow number of gems, mint limit for a node type, see ProtocolConfig.mintLimitWindow
      */
     struct GemTypeConfig {
         uint256 maintenanceFeeDai;
         uint256 rewardAmountDefo;
         uint256[PAYMENT_TOKENS] price;
         uint256 taperRewardsThresholdDefo;
-        uint256 maintenancePeriod;
-        uint8 maxMintsPerWindow;
+        uint8 maxMintsPerLimitWindow;
     }
 
-///todo add events
+/**
+ * @notice A struct containing current mutable status for gemType
+     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
+     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
+     */
+    struct GemTypeMintWindow {
+        uint256 mintCount;
+        uint32 endOfMintLimitWindow;
+    }
+
     enum Booster {
         None,
         Delta,
@@ -131,49 +173,9 @@ uint256 constant TAX_TIERS = 4;
     }
 
 /**
- * @notice A struct containing current mutable status for gemType
-     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
-     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
-     */
-    struct GemTypeMintWindow {
-        uint256 mintCount;
-        uint32 endOfMintLimitWindow;
-    }
-
-/**
-*   @notice a struct for data compliance with erc721 standard
-*   @param name Token name
-*   @param symbol Token symbol
-*   @param owners Mapping from token ID to owner address
-*   @param balances Mapping owner address to token count
-*   @param tokenApprovals Mapping from token ID to approved address
-*   @param operatorApprovals Mapping from owner to operator approvals
-*   @param ownedTokens Mapping from owner to list of owned token IDs
-*   @param ownedTokensIndex Mapping from token ID to index of the owner tokens list
-*   @param allTokens Array with all token ids, used for enumeration
-*   @param allTokensIndex Mapping from token id to position in the allTokens array
-*/
-    struct ERC721Storage {
-        string name;
-        string symbol;
-        Counters.Counter tokenIdTracker;
-        mapping(uint256 => address) owners;
-        mapping(address => uint256) balances;
-        mapping(uint256 => address) tokenApprovals;
-        mapping(address => mapping(address => bool)) operatorApprovals;
-        string baseURI;
-        mapping(address => mapping(uint256 => uint256)) ownedTokens;
-        mapping(uint256 => uint256) ownedTokensIndex;
-        uint256[] allTokens;
-        mapping(uint256 => uint256) allTokensIndex;
-        ILimiter limiter;
-        bool init;
-    }
-
-/**
 *   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization
 *   @param config main configuration, basically everything except gemType specific
-*   @param gemTypes supported gem types with their details
+*   @param gemTypes supported gem types with their details, gemTypeId is the index of the array
 *   @param gems mapping indexed by tokenId, where tokenId is in the nft.allTokens
 *   @param nft ERC721 standard related storage
 */

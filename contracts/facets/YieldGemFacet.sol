@@ -16,7 +16,7 @@ import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet
 contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
     /* ======================== Events ======================= */
 
-    event MaintenancePaid(address _user, uint256 _feeToPay);
+    event MaintenancePaid(address _user, uint256 _tokenId, uint256 _feeToPay);
 
     /* ====================== Modifiers ====================== */
 
@@ -66,48 +66,32 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         _mint(_gemType, minter);
     }
 
-    function mint(uint8 _gemType, address _to) public onlyRedeemContract {
+    function mintTo(uint8 _gemType, address _to) public onlyRedeemContract {
         //just mint with no payment, already paid on presale
         _mint(_gemType, _to);
     }
 
-    function maintain(uint256 _tokenId, address _user) public {
+    function maintain(uint256 _tokenId) public {
         console.log("=== maintain ===");
-        Gem memory gem = s.gems[_tokenId];
-        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        address user = _msgSender();
 
-        // time period checks - if it's not necessary or too early
-        require(gem.lastMaintenanceTime < block.timestamp, "Maintenance is already paid upfront");
-        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
-        require(feePaymentPeriod > gemType.maintenancePeriod, "Too soon, maintenance fee has not been yet accrued");
-
-        // amount calculation
-        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, gemType.maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, gemType.maintenancePeriod);
+        uint256 feeAmount = getPendingMaintenanceFee(_tokenId);
 
         // payment
         IERC20 dai = s.config.paymentTokens[uint(PaymentTokens.Dai)];
-        require(dai.balanceOf(_user) > feeAmount, "Not enough funds to pay");
-        dai.transferFrom(_user, s.config.wallets[uint(Wallets.Treasury)], feeAmount);
+        require(dai.balanceOf(user) > feeAmount, "Not enough funds to pay");
+        dai.transferFrom(user, s.config.wallets[uint(Wallets.Treasury)], feeAmount);
 
         // data update
-        gem.lastMaintenanceTime = uint32(block.timestamp);
-        emit MaintenancePaid(_user, feeAmount);
+        s.gems[_tokenId].lastMaintenanceTime = uint32(block.timestamp);
+        emit MaintenancePaid(user, _tokenId, feeAmount);
 
-    }
-
-    function maintain(uint256 _tokenId) external onlyGemHolder(_tokenId) {
-        address user = _msgSender();
-        maintain(_tokenId, user);
     }
 
     function batchMaintain(uint256[] calldata _tokenIds) external {
-        address user = _msgSender();
         for (uint256 index = 0; index < _tokenIds.length; index++) {
-            require(_ownerOf(_tokenIds[index]) == user, "You don't own this gem");
-            maintain(_tokenIds[index], user);
+            maintain(_tokenIds[index]);
         }
-
     }
 
     function getGemData(uint256 _tokenId) external view returns (Gem memory) {
@@ -135,8 +119,20 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         return (gemIds, gems);
     }
 
-    function getPendingMaintenanceFee(uint256 _tokenId) external view returns (uint256) {
+    function getPendingMaintenanceFee(uint256 _tokenId) public view returns (uint256) {
+        Gem memory gem = s.gems[_tokenId];
+        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        uint32 maintenancePeriod = s.config.maintenancePeriod;
 
+        // time period checks - if it's not necessary or too early
+        require(gem.lastMaintenanceTime < block.timestamp, "Maintenance is already paid upfront");
+        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
+        require(feePaymentPeriod > maintenancePeriod, "Too soon, maintenance fee has not been yet accrued");
+
+        // amount calculation
+        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, gemType.maintenanceFeeDai);
+        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, maintenancePeriod);
+        return feeAmount;
     }
 
     function isMintAvailable(uint8 _gemType) external view returns (bool) {
