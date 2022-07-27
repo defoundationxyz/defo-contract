@@ -5,6 +5,9 @@ pragma solidity 0.8.9;
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
 import "./Pause.sol";
+import "../libraries/PercentHelper.sol";
+import "../libraries/BoosterHelper.sol";
+import "../libraries/PeriodicHelper.sol";
 
 /**
  * @title  FacetReady
@@ -63,6 +66,25 @@ contract BaseFacet is Pause {
         assembly {
             id := chainid()
         }
+    }
+
+    function _getPendingMaintenanceFee(uint256 _tokenId) public view returns (uint256) {
+        Gem memory gem = s.gems[_tokenId];
+        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        uint32 maintenancePeriod = s.config.maintenancePeriod;
+
+        // time period checks - if it's not necessary or too early
+        if (gem.lastMaintenanceTime >= block.timestamp)
+            return 0;
+        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
+        //"Too soon, maintenance fee has not been yet accrued");
+        if (feePaymentPeriod <= maintenancePeriod)
+            return 0;
+
+        // amount calculation
+        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, gemType.maintenanceFeeDai);
+        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, maintenancePeriod);
+        return feeAmount;
     }
 
 }

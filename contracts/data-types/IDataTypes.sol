@@ -172,6 +172,14 @@ uint256 constant TAX_TIERS = 5;
         uint256 cumulatedAddedToVaultDefo;
     }
 
+    struct UserData {
+        uint256 donated;
+        uint256 claimedGross;
+        uint256 claimedNet;
+        ///todo
+        uint256 staked;
+    }
+
 /**
 *   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization
 *   @param config main configuration, basically everything except gemType specific
@@ -187,6 +195,9 @@ uint256 constant TAX_TIERS = 5;
         GemTypeMintWindow[] gemTypesMintWindows;
         mapping(uint256 => Gem) gems;
         ERC721Storage nft;
+        // Cumulations
+        uint256 totalDonated;
         // User data
         address[] users;
+        mapping(address => UserData) usersData;
     }
