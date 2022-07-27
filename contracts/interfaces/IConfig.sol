@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity 0.8.9;
+
 import "./IDataStructures.sol";
 
 
@@ -9,6 +10,8 @@ import "./IDataStructures.sol";
   * @notice The Yield Gem Configuration, setters and getters
 */
 interface IConfig {
+    event ConfigurationChange(ProtocolConfig config);
+    event GemTypeConfigurationChange(GemTypeConfig _gemTypeConfig);
 
     function setConfig(ProtocolConfig calldata _config) external;
 

@@ -15,12 +15,8 @@ import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet
 */
 contract ConfigFacet is BaseFacet, IConfig {
 
-    /* ======================== Events ======================= */
-
-    event ConfigurationChange(ProtocolConfig config);
-    event GemTypeConfigurationChange(GemTypeConfig _gemTypeConfig);
-
     /* ============ External and Public Functions ============ */
+
     function setConfig(ProtocolConfig calldata _config) external onlyOwner {
         ProtocolConfig memory calldataToStorage = _config;
         s.config = calldataToStorage;

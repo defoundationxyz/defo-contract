@@ -17,21 +17,11 @@ interface IYieldGem is IERC721 {
     */
     function mint(uint8 _gemTypeId) external;
 
-    /**
-    * @notice Pays for maintenance till block.timestamp, also allowing to pay for someone else since no check if a caller is the owner of the gem
-    * @param _tokenId gem Id
-    */
-    function maintain(uint256 _tokenId) external;
-
-    function batchMaintain(uint256[] calldata _tokenIds) external;
-
     function getGemData(uint256 _tokenId) external view returns (Gem memory);
 
     function getGemIds() external view returns (uint256[] memory);
 
     function getGemsData() external view returns (uint256[] memory, Gem[] memory);
-
-    function getPendingMaintenanceFee(uint256 _tokenId) external view returns (uint256);
 
     function isMintAvailable(uint8 _gemTypeId) external view returns (bool);
 

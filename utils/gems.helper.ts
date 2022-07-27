@@ -1,36 +1,33 @@
-import { GemFacet } from "@contractTypes/contracts/facets";
-import { GemGettersFacet, LibGem } from "@contractTypes/contracts/facets/GemGettersFacet";
+import { YieldGemFacet } from "@contractTypes/contracts/facets";
+import { GemStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
 import { BigNumber } from "ethers";
 import { Address } from "hardhat-deploy/dist/types";
 
-export type CompleteGemData = LibGem.GemStruct & {
+export type CompleteGemData = GemStruct & {
   gemId: number;
-  taxedReward: BigNumber;
-  rawReward: BigNumber;
-  taperedReward: BigNumber;
+  reward: BigNumber;
   pendingMaintenance: BigNumber;
   isClaimable: boolean;
 };
 
-export const gemsIdsWithData =
-  (gemContract: GemFacet & GemGettersFacet, account: Address) => async (): Promise<Array<CompleteGemData>> =>
-    Promise.all(
-      (await gemContract.getGemIdsOf(account)).map(async gemId => {
-        const gem = await gemContract.GemOf(gemId);
-        return {
-          gemId: Number(gemId),
-          rawReward: await gemContract.checkRawReward(gemId),
-          taxedReward: await gemContract.checkTaxedReward(gemId),
-          taperedReward: await gemContract.checkTaperedReward(gemId),
-          pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
-          isClaimable: await gemContract.isClaimable(gemId),
-          isActive: await gemContract.isActive(gemId),
-          taxTier: ["No pay", "30%", "30%", "15%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
-          nextTier: await gemContract.wenNextTaxTier(gem.LastReward),
-          ...gem,
-        };
-      }),
-    );
+export const gemsIdsWithData = (gemContract: YieldGemFacet) => async (): Promise<Array<CompleteGemData>> =>
+  Promise.all(
+    (await gemContract.getGemIds()).map(async gemId => {
+      const gem = await gemContract.getGemData(gemId);
+      return {
+        gemId: Number(gemId),
+        reward: await gemContract.checkRawReward(gemId),
+        taxedReward: await gemContract.checkTaxedReward(gemId),
+        taperedReward: await gemContract.checkTaperedReward(gemId),
+        pendingMaintenance: await gemContract.checkPendingMaintenance(gemId),
+        isClaimable: await gemContract.isClaimable(gemId),
+        isActive: await gemContract.isActive(gemId),
+        taxTier: ["No pay", "30%", "30%", "15%", "No tax"][(await gemContract.getTaxTier(gemId)).toNumber()],
+        nextTier: await gemContract.wenNextTaxTier(gem.LastReward),
+        ...gem,
+      };
+    }),
+  );
 
 export const gemsGroupedByType = async (gemContract: GemFacet & GemGettersFacet, account: Address) =>
   (await gemsIdsWithData(gemContract, account)()).reduce(
