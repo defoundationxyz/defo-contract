@@ -37,19 +37,7 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
-        Gem memory gem = s.gems[_tokenId];
-        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
-        uint256 boostedRate = BoosterHelper.boostRewardsRate(gem.booster, gemType.rewardAmountDefo);
-        uint256 totalReward;
-        if (gem.boostTime == 0) {
-            totalReward = PeriodicHelper.calculatePeriodic(boostedRate, gem.mintTime, s.config.rewardPeriod);
-        }
-        else {
-            require(gem.mintTime < gem.boostTime, "Mint time is later than boost time");
-            uint256 unboostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.mintTime, gem.boostTime, s.config.rewardPeriod);
-            uint256 boostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.boostTime, s.config.rewardPeriod);
-            totalReward = unboostedReward + boostedReward;
-        }
+        uint256 totalReward = getCumulatedRewardAmount(_tokenId);
         totalReward -= gem.cumulatedClaimedRewardDefo;
         totalReward -= gem.cumulatedAddedToVaultDefo;
         return totalReward;
@@ -60,7 +48,13 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     function rewardForAllTime() external view returns (uint256) {
-
+        address user = _msgSender();
+        uint256 gemIds = _getGemIds(user);
+        uint256 reward = 0;
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            reward += getCumulatedRewardAmount(gemIds[i]);
+        }
+        return reward;
     }
 
     function rewardForAllTimeAllUsers() external view returns (uint256) {
@@ -99,8 +93,6 @@ contract RewardsFacet is BaseFacet, IRewards {
             uint256 boostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.boostTime, s.config.rewardPeriod);
             totalReward = unboostedReward + boostedReward;
         }
-        totalReward -= gem.cumulatedClaimedRewardDefo;
-        totalReward -= gem.cumulatedAddedToVaultDefo;
         return totalReward;
     }
 

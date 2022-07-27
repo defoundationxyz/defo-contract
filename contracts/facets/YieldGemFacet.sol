@@ -68,14 +68,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
 
     function getGemIds() public view returns (uint256[] memory) {
         address user = _msgSender();
-        uint256 numberOfGems = _balanceOf(user);
-        uint256[] memory gemIds = new uint256[](numberOfGems);
-        for (uint256 i = 0; i < numberOfGems; i++) {
-            uint256 gemId = _tokenOfOwnerByIndex(user, i);
-            require(_exists(gemId), "A gem doesn't exists");
-            gemIds[i] = gemId;
-        }
-        return gemIds;
+        return _getGemIds(user);
     }
 
     function getGemsData() external view returns (uint256[] memory, Gem[] memory) {

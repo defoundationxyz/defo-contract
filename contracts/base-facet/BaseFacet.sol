@@ -47,6 +47,18 @@ contract BaseFacet is Pause {
         }
     }
 
+    ///todo ensure passing memory array here to the public functions is pretty optimal
+    function _getGemIds(address _user) internal view returns (uint256[] memory) {
+        uint256 numberOfGems = s.nft.balances[_user];
+        uint256[] memory gemIds = new uint256[](numberOfGems);
+        for (uint256 i = 0; i < numberOfGems; i++) {
+            uint256 gemId = s.nft.ownedTokens[_user][i];
+            require(_exists(gemId), "A gem doesn't exists");
+            gemIds[i] = gemId;
+        }
+        return gemIds;
+    }
+
     function _getChainID() internal view returns (uint256 id) {
         assembly {
             id := chainid()
