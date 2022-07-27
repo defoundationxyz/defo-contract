@@ -24,11 +24,11 @@ interface IRewards {
     function batchPutRewardIntoVault(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external;
 
     /**
-    *   @notice free reward earned by the sender to the moment
+    *   @notice reward earned by the sender to the moment ready to be claimed or put to vault
     *   @param _tokenId unique NFT gem id
     *   @return pre-tax unclaimed reward in DEFO,- before deducting tax or charity, ready to be claimed or put to vault
     */
-    function reward(uint256 _tokenId) external view returns (uint256);
+    function getRewardAmount(uint256 _tokenId) external view returns (uint256);
 
     /**
     *   @notice amount donated by the sender for all time

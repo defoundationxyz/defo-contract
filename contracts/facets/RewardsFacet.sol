@@ -14,13 +14,10 @@ import "../libraries/PeriodicHelper.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract RewardsFacet is BaseFacet, IRewards {
-    function claimReward(uint256 _tokenId) external {
-        Gem memory gem = s.gems[_tokenId];
-        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
-        uint256 boostedRate = BoosterHelper.boostRewardsRate(gem.booster, gemType.RewardRate);
-        uint256 reward = PeriodicHelper.calculatePeriodic(boostedRate, gem.LastReward, metads.RewardTime) + gem.unclaimedRewardBalance;
-        return reward;
 
+    /* ============ External and Public Functions ============ */
+    function claimReward(uint256 _tokenId) external {
+        uint256 reward = getRewardAmount(_tokenId);
     }
 
     function batchClaimReward(uint256[] calldata _tokenids) external {
@@ -39,8 +36,23 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     }
 
-    function reward(uint256 _tokenId) external view returns (uint256) {
-
+    function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
+        Gem memory gem = s.gems[_tokenId];
+        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        uint256 boostedRate = BoosterHelper.boostRewardsRate(gem.booster, gemType.rewardAmountDefo);
+        uint256 totalReward;
+        if (gem.boostTime == 0) {
+            totalReward = PeriodicHelper.calculatePeriodic(boostedRate, gem.mintTime, s.config.rewardPeriod);
+        }
+        else {
+            require(gem.mintTime < gem.boostTime, "Mint time is later than boost time");
+            uint256 unboostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.mintTime, gem.boostTime, s.config.rewardPeriod);
+            uint256 boostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.boostTime, s.config.rewardPeriod);
+            totalReward = unboostedReward + boostedReward;
+        }
+        totalReward -= gem.cumulatedClaimedRewardDefo;
+        totalReward -= gem.cumulatedAddedToVaultDefo;
+        return totalReward;
     }
 
     function donatedForAllTime() external view returns (uint256) {
@@ -70,5 +82,27 @@ contract RewardsFacet is BaseFacet, IRewards {
     function getTaxTier(uint256 _tokenId) external view returns (uint256) {
 
     }
+
+    /* ============ Internal Functions ============ */
+
+    function getCumulatedRewardAmount(uint256 _tokenId) internal view returns (uint256) {
+        Gem memory gem = s.gems[_tokenId];
+        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        uint256 boostedRate = BoosterHelper.boostRewardsRate(gem.booster, gemType.rewardAmountDefo);
+        uint256 totalReward;
+        if (gem.boostTime == 0) {
+            totalReward = PeriodicHelper.calculatePeriodic(boostedRate, gem.mintTime, s.config.rewardPeriod);
+        }
+        else {
+            require(gem.mintTime < gem.boostTime, "Mint time is later than boost time");
+            uint256 unboostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.mintTime, gem.boostTime, s.config.rewardPeriod);
+            uint256 boostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.boostTime, s.config.rewardPeriod);
+            totalReward = unboostedReward + boostedReward;
+        }
+        totalReward -= gem.cumulatedClaimedRewardDefo;
+        totalReward -= gem.cumulatedAddedToVaultDefo;
+        return totalReward;
+    }
+
 
 }

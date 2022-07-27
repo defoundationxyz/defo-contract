@@ -9,20 +9,22 @@ import "hardhat/console.sol";
 library PeriodicHelper {
     using PercentHelper for uint256;
 
+    /// @dev calculates rewards with a second precision to a given date, not prorated to date
+    function calculatePeriodicToDate(
+        uint256 ratePerPeriod,
+        uint32 lastEventTime,
+        uint32 toDate,
+        uint32 payOrDeductPeriod
+    ) internal pure returns (uint) {
+        return (toDate > lastEventTime) ? ((toDate - lastEventTime) / payOrDeductPeriod) * ratePerPeriod : 0;
+    }
+
     /// @dev calculates rewards with a second precision, not prorated to date
     function calculatePeriodic(
-        uint ratePerPeriod,
-        uint lastEventTime,
-        uint payOrDeductPeriod
-    ) internal view returns (uint) {
-        console.log("-- calculateReward");
-        console.log("ratePerPeriod ", ratePerPeriod);
-        console.log("lastEventTime ", lastEventTime);
-        console.log("lastEventTime ", lastEventTime);
-        console.log("block.timestamp ", block.timestamp);
-        console.log("block.timestamp - lastEventTime (0 if neg): ", (block.timestamp > lastEventTime) ? (block.timestamp - lastEventTime) : 0);
-        console.log("rewardPeriodicity ", payOrDeductPeriod);
-        console.log("result: ", (block.timestamp > lastEventTime) ? ((block.timestamp - lastEventTime) / payOrDeductPeriod) * ratePerPeriod : 0);
-        return (block.timestamp > lastEventTime) ? ((block.timestamp - lastEventTime) / payOrDeductPeriod) * ratePerPeriod : 0;
+        uint256 ratePerPeriod,
+        uint32 lastEventTime,
+        uint32 payOrDeductPeriod
+    ) internal pure returns (uint) {
+        return (uint32(block.timestamp) > lastEventTime) ? ((uint32(block.timestamp) - lastEventTime) / payOrDeductPeriod) * ratePerPeriod : 0;
     }
 }
