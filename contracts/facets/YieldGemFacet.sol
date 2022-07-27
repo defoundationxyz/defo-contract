@@ -15,11 +15,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
 
     /* ====================== Modifiers ====================== */
 
-    modifier mintAvailable(uint8 _gemType) {
-        require(LibMintLimitManager.isMintAvailableForGem(_gemType), "Gem mint restriction");
-        _;
-    }
-
     modifier onlyRedeemContract() {
         require(s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Only from Redemption contract");
         _;
@@ -34,7 +29,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
     /* ============ External and Public Functions ============ */
 
     /// @dev takes payment for mint and passes to the internal _mint function
-    function mint(uint8 _gemType) external mintAvailable(_gemType) {
+    function mint(uint8 _gemType) external {
+        require(LibMintLimitManager.isMintAvailableForGem(_gemType), "Gem mint restriction");
         GemTypeConfig memory gemType = s.gemTypes[_gemType];
         ProtocolConfig memory config = s.config;
         address minter = _msgSender();
@@ -92,11 +88,11 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
     }
 
     function isMintAvailable(uint8 _gemType) external view returns (bool) {
-
+        return LibMintLimitManager.isMintAvailableForGem(_gemType);
     }
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
-
+        return s.gemTypesMintWindows[_gemTypeId];
     }
 
     /* ============ Internal Functions ============ */
