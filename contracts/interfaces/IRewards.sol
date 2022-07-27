@@ -13,7 +13,7 @@ interface IRewards {
 
     function claimReward(uint256 _tokenId) external;
 
-    function claimReward(uint256 _tokenId, uint256 _amount) external;
+//    function claimReward(uint256 _tokenId, uint256 _amount) external;
 
     function batchClaimReward(uint256[] calldata _tokenids) external;
 

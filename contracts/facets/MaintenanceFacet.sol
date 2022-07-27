@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import "../interfaces/IDataStructures.sol";
+import "../data-types/IDataTypes.sol";
 import "../interfaces/IMaintenence.sol";
 import "../base-facet/BaseFacet.sol";
 import "../libraries/PercentHelper.sol";

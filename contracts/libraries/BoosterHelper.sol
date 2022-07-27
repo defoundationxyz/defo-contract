@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.9;
 
-import {Booster} from "../interfaces/IDataStructures.sol";
+import {Booster} from "../data-types/IDataTypes.sol";
 import "./PercentHelper.sol";
 
 /// @notice Library to boost rates and fees

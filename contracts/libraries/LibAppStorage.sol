@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import "../interfaces/IDataStructures.sol";
+import "../data-types/IDataTypes.sol";
 
 /** @title  LibAppStorage EIP-2535 Diamond Facet Storage
   * @author Decentralized Foundation Team

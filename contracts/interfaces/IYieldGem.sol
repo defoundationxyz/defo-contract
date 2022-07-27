@@ -4,11 +4,11 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "./IDataStructures.sol";
+import "../data-types/IDataTypes.sol";
 
 /** @title  IYieldGem, EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Yield Gem Interface, minting, getting data, and maintenance
+  * @notice The Yield Gem Interface, minting and queries
 */
 interface IYieldGem is IERC721 {
     /**

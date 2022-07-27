@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.9;
 
-import "./IDataStructures.sol";
+import "../data-types/IDataTypes.sol";
 
 
 /** @title  IConfig EIP-2535 Diamond Facet
