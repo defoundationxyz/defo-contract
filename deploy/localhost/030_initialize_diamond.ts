@@ -49,6 +49,7 @@ const func: DeployFunction = async hre => {
     diamondDeployment.address, //liquidity pair goes here
     team,
     donations,
+    vault,
     deployer, //redeem contract goes here
   ];
 

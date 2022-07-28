@@ -7,9 +7,9 @@ import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
 
-/** @title  ERC721Facet EIP-2535 Diamond Facet
+/** @title  YieldGemFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
+  * @notice Basic Node DEFO-specific functionality on top of the ERC721 standard,- minting and getters
 */
 contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
 

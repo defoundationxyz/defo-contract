@@ -8,7 +8,7 @@ import "../data-types/IDataTypes.sol";
 
 /** @title  IYieldGem, EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Yield Gem Interface, minting and queries
+  * @notice The Yield Gem Interface on top of the ERC721 standard,- minting and getters
 */
 interface IYieldGem is IERC721 {
     /**

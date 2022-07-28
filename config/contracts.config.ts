@@ -107,6 +107,7 @@ export const PROTOCOL_CONFIG: ProtocolConfigStruct = {
   taxScaleSinceLastClaimPeriod: SECONDS_IN_A_WEEK,
   taxRates: [percent(100), percent(30), percent(30), percent(15), 0],
   charityContributionRate: percent(5),
+  vaultWithdrawalRate: percent(10),
   taperRate: percent(20),
   mintLock: false,
   transferLock: false,

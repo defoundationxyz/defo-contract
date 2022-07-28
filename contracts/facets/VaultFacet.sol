@@ -11,45 +11,36 @@ import "../libraries/PeriodicHelper.sol";
 import "../libraries/TimeHelper.sol";
 import "../libraries/TaxHelper.sol";
 
-/** @title  ERC721Facet EIP-2535 Diamond Facet
+/** @title  VaultFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
+  * @notice Vault functionality - unstake, lottery, and getters
 */
-contract RewardsFacet is BaseFacet, IRewards {
+contract VaultFacet is BaseFacet, IRewards {
 
     /* ============ External and Public Functions ============ */
-    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) {
-        Gem storage gem = s.gems[_tokenId];
+    function unstakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder {
+        address user = _msgSender();
+        require(s.usersData[usersData].stakedGross >= _amount, "not enough amount in the vault");
+
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address payable[WALLETS] storage wallets = s.config.wallets;
 
-        require(
-            TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-            _getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
-        uint256 rewardGross = getRewardAmount(_tokenId);
-
-        TaxTiers taxTier = getTaxTier(_tokenId);
-        uint256 reward = rewardGross - PercentHelper.lessRate(rewardGross, s.config.taxRates[uint256(taxTier)]);
-
-        uint256 charityAmount = PercentHelper.rate(rewardGross, s.config.charityContributionRate);
-        reward -= charityAmount;
-
-        address user = _msgSender();
+        uint256 charityAmount = PercentHelper.rate(_amount, s.config.charityContributionRate);
+        amount = _amount - charityAmount;
         defo.transferFrom(
-            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Vault)],
             wallets[uint(Wallets.Charity)],
             charityAmount);
         s.totalDonated += charityAmount;
         s.usersData[user].donated += charityAmount;
         emit Donated(user, charityAmount);
 
+
+
         defo.transferFrom(
+            wallets[uint(Wallets.Vault)],
             wallets[uint(Wallets.RewardPool)],
-            user,
             reward);
-        gem.lastRewardWithdrawalTime = uint32(block.timestamp);
-        gem.claimedGross += rewardGross;
-        gem.claimedNet += reward;
         s.usersData[user].claimedGross += rewardGross;
         s.usersData[user].claimedNet += reward;
         s.totalClaimedGross += rewardGross;

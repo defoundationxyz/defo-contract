@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-/** @title  IYieldGem, EIP-2535 Diamond Facet
+/** @title  IVault EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice Rewards Interface, this is the core functionality of the DEFO Protocol, taxation, charity, claiming and staking
+  * @notice Vault Interface functionality - unstake, lottery, and getters
 */
 interface IVault {
     event Donated(address indexed user, uint256 amount);
@@ -15,7 +15,7 @@ interface IVault {
     * @param _tokenId yield gem id
     * @param _amount amount to remove from the vault in DEFO (wei precision)
     */
-    function removeFromVault(uint256 _tokenId, uint256 _amount) external;
+    function unstakeReward(uint256 _tokenId, uint256 _amount) external;
 
     /**
     * @notice vault lottery configuration
@@ -26,23 +26,23 @@ interface IVault {
     function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external;
 
     /**
-    * @notice get amount currently in the vault for a specific yield gem
+    * @notice get DEFO amount currently in the vault for a specific yield gem
     * @param _tokenId yield gem id
     * @return amount in DEFO (wei precision)
     */
-    function gemVaultAmount(uint256 _tokenId) external view returns (uint256);
+    function getStaked(uint256 _tokenId) external view returns (uint256);
 
     /**
     * @notice get amount currently in the vault for sender
     * @return amount in DEFO (wei precision)
     */
-    function vaultAmount() external view returns (uint256);
+    function getTotalStaked() external view returns (uint256);
 
     /**
     * @notice get amount currently in the vault for all protocol users
     * @return amount in DEFO (wei precision)
     */
-    function vaultAmountAllUsers() external view returns (uint256);
+    function getTotalStakedAllUsers() external view returns (uint256);
 
     /**
     * @notice gets lottery winners in the lottery interval containing _timestamp

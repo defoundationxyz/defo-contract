@@ -94,6 +94,7 @@ uint256 constant TAX_TIERS = 5;
      * @param taxScaleSinceLastClaimPeriod a period in seconds for a tax scale to work out, initially one week
      * @param taxRates tax rates in percent (with percent multiplier, see percent helper contract), initially 30%, 30%, 15%, 0
      * @param charityContributionRate charity rate (w multiplier as all percent values in the project), initially 5%
+     * @param vaultWithdrawalRate fee paid to withdraw amount from the vault back to the earned rewards, initially 10%
      * @param taperRate taper rate, initially 20%
      * @param mintLock no mint for all gems, no minting if set
      * @param transferLock no transfer if set
@@ -111,6 +112,7 @@ uint256 constant TAX_TIERS = 5;
         // taxes and contributions
         uint256[TAX_TIERS] taxRates;
         uint256 charityContributionRate;
+        uint256 vaultWithdrawalRate;
         uint256 taperRate;
         // locks
         bool mintLock;
