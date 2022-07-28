@@ -168,16 +168,20 @@ uint256 constant TAX_TIERS = 5;
         uint32 boostTime;
         uint32 lastRewardWithdrawalTime;
         uint32 lastMaintenanceTime;
-        uint256 cumulatedClaimedRewardDefo;
-        uint256 cumulatedAddedToVaultDefo;
+        uint256 cumulatedClaimedRewardGrossDefo; //earned
+        uint256 cumulatedClaimedRewardNetDefo; //paid
+        uint256 cumulatedAddedToVaultGrossDefo; //earned
+        uint256 cumulatedAddedToVaultNetDefo; //vault amount
+        uint256 cumulatedRemovedFromToVaultGrossDefo; //vault amount
+        uint256 cumulatedRemovedFromToVaultNetDefo; //back to earned amount
     }
 
     struct UserData {
         uint256 donated;
         uint256 claimedGross;
         uint256 claimedNet;
-        ///todo
-        uint256 staked;
+        uint256 stakedGross;
+        uint256 stakedNet;
     }
 
 /**
