@@ -27,6 +27,17 @@ library PercentHelper {
         return tax > 0 ? (value * tax) / HUNDRED_PERCENT : 0;
     }
 
+    /**
+    * @dev simple gross-up, gives back gross for net value, if charity is 5%, then gross up of 95 gives 100
+     * @param netValue Net value to gross up
+     * @param tax Percent that was applied
+     */
+    ///todo make pure once got rid of the console.log
+    function grossUp(uint256 netValue, uint256 tax) internal view returns (uint256) {
+        return tax > 0 ? (netValue * HUNDRED_PERCENT) / tax  : 0;
+    }
+
+
     /// @dev received inverted percent for taper calc, if ratio is 20%, then 1/(1-20%) = 25%
     function invertedRate(uint256 value, uint256 ratio) internal view returns (uint256) {
         console.log("--invertedPercent");

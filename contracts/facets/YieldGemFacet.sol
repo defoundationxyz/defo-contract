@@ -102,7 +102,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         uint256 tokenId
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) whenNotPaused() {
         super._beforeTokenTransfer(from, to, tokenId);
-        s.usersData[to] = s.usersData[from];
+        s.usersFi[to] = s.usersFi[from];
     }
 
     function _afterTokenTransfer(
@@ -111,6 +111,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         uint256 tokenId
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
-        delete s.usersData[from];
+        delete s.usersFi[from];
     }
 }

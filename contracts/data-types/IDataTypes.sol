@@ -112,7 +112,7 @@ uint256 constant TAX_TIERS = 5;
         // taxes and contributions
         uint256[TAX_TIERS] taxRates;
         uint256 charityContributionRate;
-        uint256 vaultWithdrawalRate;
+        uint256 vaultWithdrawalTaxRate;
         uint256 taperRate;
         // locks
         bool mintLock;
@@ -154,15 +154,37 @@ uint256 constant TAX_TIERS = 5;
     }
 
 /**
+ * @notice A struct describing financial state, provides the complete state for user, gem, or protocol total.
+ * @notice It gives the current exact balance of the Vault, Rewards, and Charity.
+ * @param claimedGross rewards amount previously claimed for all time, gross amount - before tax and charity
+ * @param claimedNet rewards claimed and to user, net amount after tax and charity
+ * @param stakedGross amount removed from rewards to stake, charity not yet deducted
+ * @param stakedNet amount put to the vault - charity has been deducted
+ * @param unStakedGross  amount removed from the vault, pre withdraw tax and charity
+ * @param unStakedNet  amount returned to the earned rewards, post withdraw tax and charity
+ * @param donated sent to charity
+ * @param claimTaxPaid claim tax deducted - 30%, 15%, 15%
+ * @param vaultTaxPaid vault withdrawal tax deducted
+     */
+    struct Fi {
+        uint256 claimedGross;
+        uint256 claimedNet;
+        uint256 stakedGross;
+        uint256 stakedNet;
+        uint256 unStakedGross;
+        uint256 unStakedNet;
+        uint256 donated;
+        uint256 claimTaxPaid;
+        uint256 vaultTaxPaid;
+    }
+
+/**
  * @notice current state of a gem, a gem is an instance with consistent yield and fee rates specified by the pair (gemType, booster)
  * @param gemType node type, initially it's  0 -> Ruby , 1 -> Sapphire, 2 -> Diamond, and boosters
  * @param booster node Booster 0 -> None , 1 -> Delta , 2 -> Omega
  * @param mintTime timestamp of the mint time
  * @param lastRewardWithdrawalTime timestamp of last reward claim OR stake. Same as mintTime if not yet claimed.
  * @param lastMaintenanceTime timestamp of the last maintenance (could be a date in the future in case of the upfront payment)
- * @param cumulatedClaimedRewardAmount rewards amount previously claimed for all time (before tax and charity)
- * @param cumulatedAddedToVaultAmount rewards amount previously added to vault (less returned back)
- * @param cumulatedAddedToVault rewards previously added to vault  for all time (before tax and charity).
 */
     struct Gem {
         uint8 gemTypeId;
@@ -171,20 +193,7 @@ uint256 constant TAX_TIERS = 5;
         uint32 boostTime;
         uint32 lastRewardWithdrawalTime;
         uint32 lastMaintenanceTime;
-        uint256 claimedGross; //earned, cumulated in defo
-        uint256 claimedNet; //paid in def
-        uint256 stakedGross; //earned
-        uint256 stakedNet; //vault amount, actually added to vault which is earned less charity
-        uint256 unstakedGross; //vault amount, actually located in the vault
-        uint256 unstakedNet; //back to earned amount, less 10% or smth withdraw tax
-    }
-
-    struct UserData {
-        uint256 donated;
-        uint256 claimedGross;
-        uint256 claimedNet;
-        uint256 stakedGross;
-        uint256 stakedNet;
+        Fi fi;
     }
 
 /**
@@ -193,6 +202,7 @@ uint256 constant TAX_TIERS = 5;
 *   @param gemTypes supported gem types with their details, gemTypeId is the index of the array
 *   @param gems mapping indexed by tokenId, where tokenId is in the nft.allTokens
 *   @param nft ERC721 standard related storage
+*   @param totals cumulated amounts for all operations
 */
     struct AppStorage {
         // configuration
@@ -203,11 +213,7 @@ uint256 constant TAX_TIERS = 5;
         mapping(uint256 => Gem) gems;
         ERC721Storage nft;
         // Cumulations
-        uint256 totalDonated;
-        uint256 totalStakedGross;
-        uint256 totalStakedNet;
-        uint256 totalClaimedGross;
-        uint256 totalClaimedNet;
+        Fi total;
         // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)
-        mapping(address => UserData) usersData;
+        mapping(address => Fi) usersFi;
     }

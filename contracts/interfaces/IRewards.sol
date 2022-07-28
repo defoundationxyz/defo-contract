@@ -23,6 +23,7 @@ interface IRewards {
     //maybe I'll add that feat later: puts all the reward into vault
 //    function putRewardIntoVault(uint256 _tokenId) external;
 
+    ///todo decide whether move this to the vault facet (to keep all staking/unstaking in one place), or to leave it here (this is a facet working with rewards  which can be either claimed or staked)
     function stakeReward(uint256 _tokenId, uint256 _amount) external;
 
     function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external;

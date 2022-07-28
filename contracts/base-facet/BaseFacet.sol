@@ -76,5 +76,22 @@ contract BaseFacet is Utils {
         return feeAmount;
     }
 
+    function _stake(uint256 _tokenId) public view returns (uint256) {
+        Gem storage gem = s.gems[_tokenId];
+
+        // time period checks - if it's not necessary or too early
+        if (gem.lastMaintenanceTime >= block.timestamp)
+            return 0;
+        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
+        //"Too soon, maintenance fee has not been yet accrued");
+        if (feePaymentPeriod <= s.config.maintenancePeriod)
+            return 0;
+
+        // amount calculation
+        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
+        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, s.config.maintenancePeriod);
+        return feeAmount;
+    }
+
 
 }

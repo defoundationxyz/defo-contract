@@ -10,12 +10,14 @@ import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
 import "../libraries/TimeHelper.sol";
 import "../libraries/TaxHelper.sol";
+import "../libraries/FiHelper.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract RewardsFacet is BaseFacet, IRewards {
+    using FiHelper for Fi;
 
     /* ============ External and Public Functions ============ */
     function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) {
@@ -26,35 +28,29 @@ contract RewardsFacet is BaseFacet, IRewards {
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
             _getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
-        uint256 rewardGross = getRewardAmount(_tokenId);
+        Fi memory op;
+        op.claimedGross = getRewardAmount(_tokenId);
 
         TaxTiers taxTier = getTaxTier(_tokenId);
-        uint256 reward = rewardGross - PercentHelper.lessRate(rewardGross, s.config.taxRates[uint256(taxTier)]);
-
-        uint256 charityAmount = PercentHelper.rate(rewardGross, s.config.charityContributionRate);
-        reward -= charityAmount;
+        op.claimTaxPaid = PercentHelper.lessRate(op.claimedGross, s.config.taxRates[uint256(taxTier)]);
+        op.donated = PercentHelper.rate(op.claimedGross, s.config.charityContributionRate);
+        op.claimedNet = op.claimedGross - op.claimTaxPaid - op.donated;
 
         address user = _msgSender();
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
-            charityAmount);
-        s.totalDonated += charityAmount;
-        s.usersData[user].donated += charityAmount;
-        emit Donated(user, charityAmount);
+            op.donated);
+        emit Donated(user, op.donated);
 
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
             user,
-            reward);
+            op.claimedNet);
         gem.lastRewardWithdrawalTime = uint32(block.timestamp);
-        gem.claimedGross += rewardGross;
-        gem.claimedNet += reward;
-        s.usersData[user].claimedGross += rewardGross;
-        s.usersData[user].claimedNet += reward;
-        s.totalClaimedGross += rewardGross;
-        s.totalClaimedNet += reward;
-        emit Claimed(user, rewardGross, reward);
+        emit Claimed(user, op.claimedGross, op.claimedNet);
+
+        op.updateStorage(_tokenId, user);
     }
 
     function batchClaimReward(uint256[] calldata _tokenids) external {
@@ -68,33 +64,29 @@ contract RewardsFacet is BaseFacet, IRewards {
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address payable[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
+        Fi memory op;
 
         uint256 rewardGross = getRewardAmount(_tokenId);
         require(_amount <= rewardGross, "Not enough pending rewards");
 
-        uint256 charityAmount = PercentHelper.rate(_amount, s.config.charityContributionRate);
-        uint amountLessCharity = _amount - charityAmount;
+        op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
+        op.stakedGross = _amount;
+        op.stakedNet = _amount - op.donated;
 
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
-            charityAmount);
-        s.totalDonated += charityAmount;
-        s.usersData[user].donated += charityAmount;
-        emit Donated(user, charityAmount);
+            op.donated);
+        emit Donated(user, op.donated);
 
 
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Vault)],
-            amountLessCharity);
-        gem.stakedGross += _amount;
-        gem.stakedNet += amountLessCharity;
-        s.usersData[user].stakedGross += _amount;
-        s.usersData[user].stakedNet += amountLessCharity;
-        s.totalStakedGross += _amount;
-        s.totalStakedNet += amountLessCharity;
-        emit Staked(user, _amount, amountLessCharity);
+            op.donated);
+        emit Staked(user, op.stakedGross, op.stakedNet);
+
+        op.updateStorage(_tokenId, user);
     }
 
 
@@ -107,18 +99,19 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
         uint256 rewardToDate = _getCumulatedRewardAmountGross(_tokenId);
-        rewardToDate -= s.gems[_tokenId].claimedGross;
-        rewardToDate -= s.gems[_tokenId].stakedGross;
+        rewardToDate -= s.gems[_tokenId].fi.claimedGross;
+        rewardToDate -= s.gems[_tokenId].fi.stakedGross;
+        rewardToDate += s.gems[_tokenId].fi.unStakedNet;
         return rewardToDate;
     }
 
     function getTotalDonated() external view returns (uint256) {
         address user = _msgSender();
-        return s.usersData[user].donated;
+        return s.usersFi[user].donated;
     }
 
     function getTotalDonatedAllUsers() external view returns (uint256) {
-        return s.totalDonated;
+        return s.total.donated;
     }
 
     function getCumulatedReward() external view returns (uint256) {
@@ -138,13 +131,12 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
 
-
     function getStakedGross() external view returns (uint256) {
-        return s.usersData[_msgSender()].stakedGross;
+        return s.usersFi[_msgSender()].stakedGross - s.usersFi[_msgSender()].unStakedGross;
     }
 
     function getStakedGrossAllUsers() external view returns (uint256) {
-        return s.totalStakedGross;
+        return s.total.stakedGross - s.total.unStakedGross;
     }
 
     function getTaxTier(uint256 _tokenId) public view returns (TaxTiers) {

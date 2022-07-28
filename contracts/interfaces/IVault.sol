@@ -4,11 +4,14 @@ pragma solidity 0.8.15;
 
 /** @title  IVault EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice Vault Interface functionality - unstake, lottery, and getters
+  * @notice Vault Interface - unstake, lottery, and getters
 */
 interface IVault {
     event Donated(address indexed user, uint256 amount);
-    event RemovedFromVault(address indexed user, uint256 amount);
+    // @dev here if we unstake, say, 100 DEFO from the vault, the  amountGross is unstaked, amountNet comes back to earned rewards
+    event RemovedFromVault(address indexed user, uint256 amountGross, uint256 amountNet);
+    event LotteryConfigured(uint256 numberOfWinners, uint32 lotteryStart, uint32 periodicity);
+    event Winner(uint256[] winners);
 
     /**
     * @notice remove DEFO amount from the vault back to the unclaimed rewards
