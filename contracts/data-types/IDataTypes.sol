@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "./ILimiter.sol";
+import "../interfaces/ILimiter.sol";
 /**
 *   @dev The only source for all the data structures used in the protocol storage
 *   @dev This includes general config, gem type config, and mutable data
@@ -18,7 +18,7 @@ uint256 constant PAYMENT_TOKENS = 2;
 uint256 constant PAYMENT_RECEIVERS = 4;
 
 /// @dev total wallets on the protocol, see Wallets enum
-uint256 constant WALLETS = 6;
+uint256 constant WALLETS = 7;
 
 /// @dev total number of supported tax tiers
 uint256 constant TAX_TIERS = 5;
@@ -69,6 +69,7 @@ uint256 constant TAX_TIERS = 5;
         LiquidityPair,
         Team,
         Charity,
+        Vault,
         RedeemContract
     }
 
@@ -168,12 +169,12 @@ uint256 constant TAX_TIERS = 5;
         uint32 boostTime;
         uint32 lastRewardWithdrawalTime;
         uint32 lastMaintenanceTime;
-        uint256 cumulatedClaimedRewardGrossDefo; //earned
-        uint256 cumulatedClaimedRewardNetDefo; //paid
-        uint256 cumulatedAddedToVaultGrossDefo; //earned
-        uint256 cumulatedAddedToVaultNetDefo; //vault amount
-        uint256 cumulatedRemovedFromToVaultGrossDefo; //vault amount
-        uint256 cumulatedRemovedFromToVaultNetDefo; //back to earned amount
+        uint256 claimedGross; //earned, cumulated in defo
+        uint256 claimedNet; //paid in def
+        uint256 stakedGross; //earned
+        uint256 stakedNet; //vault amount, actually added to vault which is earned less charity
+        uint256 unstakedGross; //vault amount, actually located in the vault
+        uint256 unstakedNet; //back to earned amount, less 10% or smth withdraw tax
     }
 
     struct UserData {
@@ -201,7 +202,10 @@ uint256 constant TAX_TIERS = 5;
         ERC721Storage nft;
         // Cumulations
         uint256 totalDonated;
-        // User data
-        address[] users;
+        uint256 totalStakedGross;
+        uint256 totalStakedNet;
+        uint256 totalClaimedGross;
+        uint256 totalClaimedNet;
+        // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)
         mapping(address => UserData) usersData;
     }

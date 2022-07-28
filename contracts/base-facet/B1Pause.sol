@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.15;
 
-import "./0Storage.sol";
+import "./B0Storage.sol";
 
 /**
 *   @notice Pausable contract

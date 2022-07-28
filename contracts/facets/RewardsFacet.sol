@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.15;
 
 import "../data-types/IDataTypes.sol";
 import "../interfaces/IRewards.sol";
@@ -18,113 +18,148 @@ import "../libraries/TaxHelper.sol";
 contract RewardsFacet is BaseFacet, IRewards {
 
     /* ============ External and Public Functions ============ */
-    function claimReward(uint256 _tokenId) external {
-        Gem memory gem = s.gems[_tokenId];
-        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) {
+        Gem storage gem = s.gems[_tokenId];
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        address payable[WALLETS] storage wallets = s.config.wallets;
+
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
             _getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
-        uint256 baseReward = getRewardAmount(_tokenId);
+        uint256 rewardGross = getRewardAmount(_tokenId);
 
-        uint256 taxTier = getTaxTier(_tokenId);
-        uint256 reward = baseReward - PercentHelper.lessRate(baseReward, s.taxRates[taxTier]);
+        TaxTiers taxTier = getTaxTier(_tokenId);
+        uint256 reward = rewardGross - PercentHelper.lessRate(rewardGross, s.config.taxRates[uint256(taxTier)]);
 
-        uint256 charityAmount = PercentHelper.rate(baseReward, s.config.charityContributionRate);
+        uint256 charityAmount = PercentHelper.rate(rewardGross, s.config.charityContributionRate);
         reward -= charityAmount;
 
         address user = _msgSender();
-        config.paymentTokens[uint(PaymentTokens.Defo)].transferFrom(
-            config.wallets[uint(Wallets.RewardPool)],
-            config.wallets[uint(Wallets.Charity)],
+        defo.transferFrom(
+            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Charity)],
             charityAmount);
         s.totalDonated += charityAmount;
         s.usersData[user].donated += charityAmount;
-        emit DonationEvent(user, charityAmount);
+        emit Donated(user, charityAmount);
 
-
-        config.paymentTokens[uint(PaymentTokens.Defo)].transferFrom(
-            config.wallets[uint(Wallets.Treasury)],
+        defo.transferFrom(
+            wallets[uint(Wallets.Treasury)],
             user,
             reward);
-        s.totalDonated += charityAmount;
-        s.usersData[user].donated += charityAmount;
-        emit DonationEvent(user, charityAmount);
-
-        s.gems[_tokenId].claimedReward += _rewardToClaim;
-        s.gems[_tokenId].lastRewardWithdrawalTime = block.timestamp;
-        s.gems[_tokenId].cumulatedClaimedRewardDefo += baseReward;
-        s.usersData[user].claimedGross += baseReward;
+        gem.lastRewardWithdrawalTime = uint32(block.timestamp);
+        gem.claimedGross += rewardGross;
+        gem.claimedNet += reward;
+        s.usersData[user].claimedGross += rewardGross;
         s.usersData[user].claimedNet += reward;
-        emit WithdrawEvent(user, reward);
+        s.totalClaimedGross += rewardGross;
+        s.totalClaimedNet += reward;
+        emit Claimed(user, rewardGross, reward);
     }
 
     function batchClaimReward(uint256[] calldata _tokenids) external {
-
+        for (uint256 index = 0; index < _tokenids.length; index++) {
+            claimReward(_tokenids[index]);
+        }
     }
 
-    function putRewardIntoVault(uint256 _tokenId) external {
+    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) public {
+        Gem storage gem = s.gems[_tokenId];
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        address payable[WALLETS] storage wallets = s.config.wallets;
+        address user = _msgSender();
 
+        uint256 rewardGross = getRewardAmount(_tokenId);
+        require(_amount <= rewardGross, "Not enough pending rewards");
+
+        uint256 charityAmount = PercentHelper.rate(_amount, s.config.charityContributionRate);
+        uint amountLessCharity = _amount - charityAmount;
+
+        defo.transferFrom(
+            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Charity)],
+            charityAmount);
+        s.totalDonated += charityAmount;
+        s.usersData[user].donated += charityAmount;
+        emit Donated(user, charityAmount);
+
+
+        defo.transferFrom(
+            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Vault)],
+            amountLessCharity);
+        gem.stakedGross += _amount;
+        gem.stakedNet += amountLessCharity;
+        s.usersData[user].stakedGross += _amount;
+        s.usersData[user].stakedNet += amountLessCharity;
+        s.totalStakedGross += _amount;
+        s.totalStakedNet += amountLessCharity;
+        emit Staked(user, _amount, amountLessCharity);
     }
 
-    function putRewardIntoVault(uint256 _tokenId, uint256 _amount) external {
 
-    }
-
-    function batchPutRewardIntoVault(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external {
-
+    function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external {
+        require(_tokenIds.length == _amounts.length, "_tokendIds and _amounts should have the same length");
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            stakeReward(_tokenIds[i], _amounts[i]);
+        }
     }
 
     function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
-        uint256 totalReward = getCumulatedRewardAmount(_tokenId);
-        totalReward -= gem.cumulatedClaimedRewardDefo;
-        totalReward -= gem.cumulatedAddedToVaultDefo;
-        return totalReward;
+        uint256 rewardToDate = _getCumulatedRewardAmountGross(_tokenId);
+        rewardToDate -= s.gems[_tokenId].claimedGross;
+        rewardToDate -= s.gems[_tokenId].stakedGross;
+        return rewardToDate;
     }
 
-    function donatedForAllTime() external view returns (uint256) {
-
-    }
-
-    function rewardForAllTime() external view returns (uint256) {
+    function getTotalDonated() external view returns (uint256) {
         address user = _msgSender();
-        uint256 gemIds = _getGemIds(user);
+        return s.usersData[user].donated;
+    }
+
+    function getTotalDonatedAllUsers() external view returns (uint256) {
+        return s.totalDonated;
+    }
+
+    function getCumulatedReward() external view returns (uint256) {
+        address user = _msgSender();
+        uint256[] memory gemIds = _getGemIds(user);
         uint256 reward = 0;
         for (uint256 i = 0; i < gemIds.length; i++) {
-            reward += getCumulatedRewardAmount(gemIds[i]);
+            reward += _getCumulatedRewardAmountGross(gemIds[i]);
         }
         return reward;
     }
 
-    function rewardForAllTimeAllUsers() external view returns (uint256) {
-
+    function getCumulatedRewardAllUsers() external view returns (uint256 allForAllTotalReward_) {
+        for (uint256 tokenId = 0; tokenId < s.nft.allTokens.length; tokenId++) {
+            allForAllTotalReward_ += _getCumulatedRewardAmountGross(tokenId);
+        }
     }
 
-    function donatedForAllTimeAllUsers() external view returns (uint256) {
 
+
+    function getStakedGross() external view returns (uint256) {
+        return s.usersData[_msgSender()].stakedGross;
     }
 
-    function amountPutIntoVaultAndStillThere() external view returns (uint256) {
-
+    function getStakedGrossAllUsers() external view returns (uint256) {
+        return s.totalStakedGross;
     }
 
-    function amountPutIntoVaultAndStillThereAllUsers() external view returns (uint256) {
-
-    }
-
-    function getTaxTier(uint256 _tokenId) public view returns (uint256) {
-        return TaxHelper.getTaxTier(block.timestamp - s.gems[_tokenId].lastRewardWithdrawalTime);
+    function getTaxTier(uint256 _tokenId) public view returns (TaxTiers) {
+        return TaxHelper.getTaxTier(uint32(block.timestamp) - s.gems[_tokenId].lastRewardWithdrawalTime);
     }
 
     /* ============ Internal Functions ============ */
 
-    function getCumulatedRewardAmount(uint256 _tokenId) internal view returns (uint256) {
+    function _getCumulatedRewardAmountGross(uint256 _tokenId) internal view returns (uint256) {
         Gem memory gem = s.gems[_tokenId];
         GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
-        uint256 boostedAmountDefo = BoosterHelper.boostRewardsRate(gem.booster, gemType.rewardAmountDefo);
         uint256 totalReward;
         if (gem.boostTime == 0) {
-            totalReward = PeriodicHelper.calculateTaperedReward(
-                block.timestamp - gem.mintTime,
+            (totalReward,) = PeriodicHelper.calculateTaperedRewardAndRate(
+                block.timestamp - gem.mintTime, //period to calculate
                 gemType.taperRewardsThresholdDefo,
                 s.config.taperRate,
                 gemType.rewardAmountDefo,
@@ -132,17 +167,14 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
         else {
             require(gem.mintTime < gem.boostTime, "Mint time is later than boost time");
-            ///todo should calculate unboostedReward, then add boosted, both considered in a single taper
-            uint256 unboostedReward = PeriodicHelper.calculatePeriodic(gemType.rewardAmountDefo, gem.mintTime, gem.boostTime, s.config.rewardPeriod);
-            uint256 boostedReward = PeriodicHelper.calculatePeriodic(boostedAmountDefo, gem.boostTime, s.config.rewardPeriod);
-            //            uint256 unboostedReward = PeriodicHelper.calculateTaperedReward(
-            //                gem.boostTime - gem.mintTime,
-            //                gemType.taperRewardsThresholdDefo,
-            //                s.config.taperRate,
-            //                gemType.rewardAmountDefo,
-            //                s.config.rewardPeriod);
-
-            totalReward = unboostedReward + boostedReward;
+            totalReward = PeriodicHelper.calculateTaperedRewardWithIntermediateBoost(
+                gem.boostTime - gem.mintTime,
+                gemType.taperRewardsThresholdDefo,
+                s.config.taperRate,
+                gemType.rewardAmountDefo,
+                gem.booster,
+                gem.boostTime - gem.mintTime, //unboostedPeriod
+                s.config.rewardPeriod);
         }
         return totalReward;
     }

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.15;
 
 import "../interfaces/IYieldGem.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
@@ -20,41 +20,33 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         _;
     }
 
-    modifier onlyGemHolder(uint256 _tokenId) {
-        require(_ownerOf(_tokenId) == _msgSender(), "You don't own this gem");
-        _;
-    }
-
-
     /* ============ External and Public Functions ============ */
 
     /// @dev takes payment for mint and passes to the internal _mint function
-    function mint(uint8 _gemType) external {
-        require(LibMintLimitManager.isMintAvailableForGem(_gemType), "Gem mint restriction");
-        GemTypeConfig memory gemType = s.gemTypes[_gemType];
-        ProtocolConfig memory config = s.config;
+    function mint(uint8 _gemTypeId) external {
+        require(LibMintLimitManager.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
         address minter = _msgSender();
 
         // check if there's enough DAI and DEFO
         for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
             require(
-                config.paymentTokens[paymentToken].balanceOf(minter) > gemType.price[paymentToken],
+                s.config.paymentTokens[paymentToken].balanceOf(minter) > s.gemTypes[_gemTypeId].price[paymentToken],
                 "Insufficient balance"
             );
         }
         // distribute payment according to the distribution setup
         for (uint receiver = 0; receiver < PAYMENT_RECEIVERS; receiver++) {
             for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
-                config.paymentTokens[paymentToken].transferFrom(
+                s.config.paymentTokens[paymentToken].transferFrom(
                     minter,
-                    config.wallets[receiver],
-                    PercentHelper.rate(gemType.price[paymentToken], config.incomeDistributionOnMint[receiver][paymentToken])
+                    s.config.wallets[receiver],
+                    PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[receiver][paymentToken])
                 );
             }
         }
 
         // finally mint a yield gem
-        _mint(_gemType, minter);
+        _mint(_gemTypeId, minter);
     }
 
     function mintTo(uint8 _gemType, address _to) public onlyRedeemContract {
@@ -95,11 +87,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         // mint and update the counter
         uint256 tokenId = _safeMint(_to);
         LibMintLimitManager.updateMintCount(_gemType);
-
-        // update user details
-        if (_balanceOf(_to) == 0)
-            s.users.push(_to);
-
         // save the gem
         Gem memory gem;
         gem.gemTypeId = _gemType;
@@ -107,5 +94,23 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         gem.lastRewardWithdrawalTime = uint32(block.timestamp);
         gem.mintTime = uint32(block.timestamp);
         s.gems[tokenId] = gem;
+    }
+///todo test transfer
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) whenNotPaused() {
+        super._beforeTokenTransfer(from, to, tokenId);
+        s.usersData[to] = s.usersData[from];
+    }
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) {
+        super._afterTokenTransfer(from, to, tokenId);
+        delete s.usersData[from];
     }
 }

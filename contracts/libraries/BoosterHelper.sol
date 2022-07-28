@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.9;
+pragma solidity 0.8.15;
 
 import {Booster} from "../data-types/IDataTypes.sol";
 import "./PercentHelper.sol";

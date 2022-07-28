@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity 0.8.9;
+pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import "./1Pause.sol";
+import "./B1Pause.sol";
 import "../libraries/PercentHelper.sol";
 import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
@@ -22,19 +22,6 @@ contract Utils is Pause {
     modifier nonZeroAddress(address _owner) {
         require(_owner != address(0), "ERC721: address zero is not a valid owner");
         _;
-    }
-
-    modifier exists(uint256 _tokenId) {
-        _requireExists(_tokenId);
-        _;
-    }
-
-    function _requireExists(uint256 _tokenId) internal view {
-        require(_exists(_tokenId), "ERC721: tokenId is not valid");
-    }
-
-    function _exists(uint256 _tokenId) internal view returns (bool) {
-        return (s.nft.owners[_tokenId] != address(0));
     }
 
     function _msgSender() internal override view returns (address sender_) {

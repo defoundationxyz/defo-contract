@@ -63,6 +63,7 @@ enum Wallets {
   LiquidityPair,
   Team,
   Charity,
+  Vault,
   RedeemContract,
 }
 
