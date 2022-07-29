@@ -32,7 +32,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         op.claimedGross = getRewardAmount(_tokenId);
 
         TaxTiers taxTier = getTaxTier(_tokenId);
-        op.claimTaxPaid = PercentHelper.lessRate(op.claimedGross, s.config.taxRates[uint256(taxTier)]);
+        op.claimTaxPaid = PercentHelper.rate(op.claimedGross, s.config.taxRates[uint256(taxTier)]);
         op.donated = PercentHelper.rate(op.claimedGross, s.config.charityContributionRate);
         op.claimedNet = op.claimedGross - op.claimTaxPaid - op.donated;
 
@@ -82,7 +82,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Vault)],
-            op.donated);
+            op.stakedNet);
         emit Staked(user, op.stakedGross, op.stakedNet);
 
         op.updateStorage(_tokenId, user);

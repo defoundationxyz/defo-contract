@@ -37,9 +37,9 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
       return {
         name: accountName,
         address: accountAddress,
-        AVAX: Number(fromWei(await ethers.provider.getBalance(accountAddress))),
-        DAI: Number(fromWei(await daiContract.balanceOf(accountAddress))),
-        DEFO: defoContract && Number(fromWei(await defoContract.balanceOf(accountAddress))),
+        AVAX: Number(Number(fromWei(await ethers.provider.getBalance(accountAddress))).toFixed(3)),
+        DAI: Number(Number(fromWei(await daiContract.balanceOf(accountAddress))).toFixed(3)),
+        DEFO: defoContract && Number(Number(fromWei(await defoContract.balanceOf(accountAddress))).toFixed(3)),
       };
     }),
   );

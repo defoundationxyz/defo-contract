@@ -43,7 +43,7 @@ const func: DeployFunction = async hre => {
   const wallets = [
     treasury,
     rewardPool,
-    diamondDeployment.address, //liquidity pair goes here
+    deployer, //liquidity pair goes here
     team,
     donations,
     vault,
@@ -66,7 +66,12 @@ const func: DeployFunction = async hre => {
     for (const token of [defoContract, daiContract]) {
       const name = await token.name();
       deployAnnounce(`🔑 Approving spending of ${name}...`);
-      deployInfo(`Current allowance is ${fromWei(await token.allowance(signer.address, diamondDeployment.address))}`);
+      const initialAllowance = await token.allowance(signer.address, diamondDeployment.address);
+      deployInfo(
+        `Current allowance is ${
+          initialAllowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : fromWei(initialAllowance)
+        }`,
+      );
       if (token == defoContract) {
         deployInfo(`Signing for ${name}`);
         const result = await signDaiPermit(ethers.provider, token.address, signer.address, diamondDeployment.address);

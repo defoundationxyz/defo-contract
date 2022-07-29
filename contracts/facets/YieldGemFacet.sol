@@ -6,6 +6,7 @@ import "../interfaces/IYieldGem.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
+import "hardhat/console.sol";
 
 /** @title  YieldGemFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -26,22 +27,26 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
     function mint(uint8 _gemTypeId) external {
         require(LibMintLimitManager.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
         address minter = _msgSender();
-
+        console.log("=== mint");
+        console.log("minter %s");
         // check if there's enough DAI and DEFO
-        for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
+        for (uint i = 0; i < PAYMENT_TOKENS; i++) {
+            IERC20 paymentToken = s.config.paymentTokens[i];
+            uint256 userBalance = s.config.paymentTokens[i].balanceOf(minter);
+            console.log("token %s, balance %s", address(paymentToken), userBalance);
             require(
-                s.config.paymentTokens[paymentToken].balanceOf(minter) > s.gemTypes[_gemTypeId].price[paymentToken],
+                s.config.paymentTokens[i].balanceOf(minter) > s.gemTypes[_gemTypeId].price[i],
                 "Insufficient balance"
             );
         }
         // distribute payment according to the distribution setup
         for (uint receiver = 0; receiver < PAYMENT_RECEIVERS; receiver++) {
             for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
-                s.config.paymentTokens[paymentToken].transferFrom(
-                    minter,
-                    s.config.wallets[receiver],
-                    PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[receiver][paymentToken])
-                );
+                console.log("receiver %s: %s", receiver, s.config.wallets[receiver]);
+                console.log("paymentToken %s: %s", paymentToken, address(s.config.paymentTokens[paymentToken]));
+                uint256 amountToTransfer = PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[paymentToken][receiver]);
+                if (amountToTransfer != 0)
+                    s.config.paymentTokens[paymentToken].transferFrom(minter, s.config.wallets[receiver], amountToTransfer);
             }
         }
 

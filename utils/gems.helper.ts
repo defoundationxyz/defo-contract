@@ -5,15 +5,16 @@ import {
   VaultFacet,
   YieldGemFacet,
 } from "@contractTypes/contracts/facets";
-import { GemStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
+import { FiStruct, GemStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
 import { BigNumber } from "ethers";
 
-export type CompleteGemData = GemStruct & {
-  gemId: number;
-  reward: BigNumber;
-  pendingMaintenance: BigNumber;
-  isClaimable: boolean;
-};
+export type CompleteGemData = GemStruct &
+  FiStruct & {
+    gemId: number;
+    reward: BigNumber;
+    pendingMaintenance: BigNumber;
+    isClaimable: boolean;
+  };
 
 export const gemsIdsWithData =
   (gemContract: YieldGemFacet & RewardsFacet & MaintenanceFacet) => async (): Promise<Array<CompleteGemData>> =>
@@ -26,6 +27,7 @@ export const gemsIdsWithData =
           pendingMaintenance: await gemContract.getPendingMaintenanceFee(gemId),
           isClaimable: await gemContract.isClaimable(gemId),
           taxTier: ["No pay", "30%", "30%", "15%", "No tax"][await gemContract.getTaxTier(gemId)],
+          ...gem.fi,
           ...gem,
         };
       }),

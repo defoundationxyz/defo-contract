@@ -45,15 +45,8 @@ export default task("claim", "claim rewards for gem(s)")
           await Promise.all(
             gemsOfDeployerGroupedByType[type]?.map(async gem => {
               if (gemIdParam == -1 || gem.gemId == gemIdParam) {
-                const pickedGem = _.pick(gem, ["gemId", "reward", "fi"]) as Partial<CompleteGemData>;
-                const formattedGem = {} as Record<
-                  keyof Partial<CompleteGemData>,
-                  string | number | bigint | boolean
-                > & {
-                  claimedGross: string | number;
-                  claimedNet: string | number;
-                  claimTaxPaid: string | number;
-                };
+                const pickedGem = _.pick(gem, ["gemId", "reward"]) as Partial<CompleteGemData>;
+                const formattedGem = {} as Record<keyof Partial<CompleteGemData>, string | number | bigint | boolean>;
                 Object.keys(pickedGem).map(key => {
                   formattedGem[key as keyof Partial<CompleteGemData>] = outputFormatKeyValue(
                     key,

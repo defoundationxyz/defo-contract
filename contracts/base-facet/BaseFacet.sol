@@ -72,7 +72,7 @@ contract BaseFacet is Utils {
 
         // amount calculation
         uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, s.config.maintenancePeriod);
+        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.lastMaintenanceTime, s.config.maintenancePeriod);
         return feeAmount;
     }
 

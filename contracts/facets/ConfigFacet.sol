@@ -8,6 +8,7 @@ import "../libraries/LibAppStorage.sol";
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
+import "hardhat/console.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -20,6 +21,7 @@ contract ConfigFacet is BaseFacet, IConfig {
     function setConfig(ProtocolConfig calldata _config) external onlyOwner {
         ProtocolConfig memory calldataToStorage = _config;
         s.config = calldataToStorage;
+        console.log("configured", s.config.wallets[0]);
         emit ConfigurationChange(_config);
     }
 
