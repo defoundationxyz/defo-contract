@@ -26,9 +26,12 @@ contract ConfigFacet is BaseFacet, IConfig {
     function setGemTypesConfig(GemTypeConfig[] calldata _gemTypeConfig) external onlyOwner {
         // fill in the storage and reset mint limit window counter for every gem type
         delete s.gemTypes;
-        for (uint8 gemTypeId = 0; gemTypeId < uint8(_gemTypeConfig.length); gemTypeId++) {
-            s.gemTypes.push(_gemTypeConfig[gemTypeId]);
-            LibMintLimitManager.initialize(gemTypeId);
+        delete s.gemTypesMintWindows;
+        for (uint gemTypeId = 0; gemTypeId < _gemTypeConfig.length; gemTypeId++) {
+            GemTypeConfig memory cur = _gemTypeConfig[gemTypeId];
+            s.gemTypes.push(cur);
+            GemTypeMintWindow memory initWindow = GemTypeMintWindow(0, uint32(block.timestamp));
+            s.gemTypesMintWindows.push(initWindow);
         }
     }
 

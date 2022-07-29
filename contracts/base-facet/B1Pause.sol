@@ -22,16 +22,16 @@ contract Pause is Storage {
         _;
     }
 
-    function paused() public view virtual returns (bool) {
+    function _paused() internal view returns (bool) {
         return s.config.transferLock;
     }
 
     function _requireNotPaused() internal view virtual {
-        require(!paused(), "Pausable: paused, transfer is locked");
+        require(!_paused(), "Pausable: paused, transfer is locked");
     }
 
     function _requirePaused() internal view virtual {
-        require(paused(), "Pausable: not paused");
+        require(_paused(), "Pausable: not paused");
     }
 
     function _pause() internal whenNotPaused {

@@ -9,12 +9,6 @@ library LibMintLimitManager {
     event MintLocked();
     event MintUnlocked();
 
-    function initialize(uint8 _gemTypeId) internal {
-        AppStorage storage s = LibAppStorage.diamondStorage();
-        s.gemTypesMintWindows[_gemTypeId].mintCount = 0;
-        s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow = uint32(block.timestamp);
-    }
-
     /**
     *   @notice checks if a gem is mintable
     *   @param _gemTypeId type of a gem, initially it's 0,1,2 for sapphire, ruby, and diamond, respectively

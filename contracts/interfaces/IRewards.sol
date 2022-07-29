@@ -36,17 +36,11 @@ interface IRewards {
     function getRewardAmount(uint256 _tokenId) external view returns (uint256);
 
     /**
-    *   @notice amount donated by the sender for all time
-    *   @return amount in Dai (in wei precision)
+*   @notice checks if rewards can be claimed or not
+    *   @param _tokenId unique NFT gem id
+    *   @return true or false, checks for the pending maintenance and time passed since last claim
     */
-    function getTotalDonated() external view returns (uint256);
-
-    /**
-    *   @notice amount donated by all the users for all time
-    *   @return amount in Dai (in wei precision)
-    */
-    function getTotalDonatedAllUsers() external view returns (uint256);
-
+    function isClaimable(uint256 _tokenId) external view returns (bool);
 
     /**
     *   @notice amount of pre-taxed total reward earned by the sender for all time
@@ -79,5 +73,6 @@ interface IRewards {
     *   @return current tax tier of the gem might be configurable, now it's a number in the range starting from 0 when 0 means nothing is payed out since there's no rewards in the first week, 4 is no tax, 1,2,3 - % in between (currently 30,30,15)
     */
     function getTaxTier(uint256 _tokenId) external view returns (TaxTiers);
+
 
 }

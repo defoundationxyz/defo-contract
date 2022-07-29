@@ -1,5 +1,6 @@
 import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG } from "@config";
 import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
+import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, namedSigner } from "@utils/chain.helper";
 import { deployAnnounce, deployInfo, deploySuccess } from "@utils/output.helper";
 import assert from "assert";
@@ -9,7 +10,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import DAI_ABI from "../../abi/erc20-abi.json";
 import { namedAccountsIndex } from "../../hardhat.accounts";
-import { ConfigFacet, DEFOToken, ERC721Facet } from "../../types";
 
 const func: DeployFunction = async hre => {
   const {
@@ -23,9 +23,7 @@ const func: DeployFunction = async hre => {
   const { deployer, dai, treasury, vault, rewardPool, donations, team } = await getNamedAccounts();
   const signers = await ethers.getSigners();
 
-  deployAnnounce(
-    "\n\nInitializing OwnerFacet and ERC721Facet with preconfigured account addresses, and giving pemission to DEFO and DAI to spend on behalf of treasury and vault ...",
-  );
+  deployAnnounce("\n\nConfiguring the protocol...");
 
   assert(
     treasury === signers[namedAccountsIndex.treasury as number].address &&
@@ -40,10 +38,9 @@ const func: DeployFunction = async hre => {
 
   const diamondDeployment = await deployments.get("DEFODiamond");
   const defoTokenDeployment = await deployments.get("DEFOToken");
-  // initializeERC721Facet
 
-  PROTOCOL_CONFIG.paymentTokens = [MAINNET_DAI_ADDRESS, defoTokenDeployment.address];
-  PROTOCOL_CONFIG.wallets = [
+  const paymentTokens: [string, string] = [MAINNET_DAI_ADDRESS, defoTokenDeployment.address!];
+  const wallets = [
     treasury,
     rewardPool,
     diamondDeployment.address, //liquidity pair goes here
@@ -53,10 +50,11 @@ const func: DeployFunction = async hre => {
     deployer, //redeem contract goes here
   ];
 
-  const configFacetInstance = await ethers.getContractAt<ConfigFacet>("DEFODiamond", diamondDeployment.address);
-  await configFacetInstance.setConfig(PROTOCOL_CONFIG);
+  const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
+  await configFacetInstance.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG });
   deployInfo("DEFODiamond configured.");
 
+  deployAnnounce("\n\nConfiguring gem types...");
   await configFacetInstance.setGemTypesConfig(GEM_TYPES_CONFIG);
   deployInfo("Gem types configured.");
 

@@ -54,7 +54,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         _mint(_gemType, _to);
     }
 
-    function getGemData(uint256 _tokenId) external view returns (Gem memory) {
+    function getGemInfo(uint256 _tokenId) external view returns (Gem memory) {
         return s.gems[_tokenId];
     }
 
@@ -63,7 +63,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         return _getGemIds(user);
     }
 
-    function getGemsData() external view returns (uint256[] memory, Gem[] memory) {
+    function getGemsInfo() external view returns (uint256[] memory, Gem[] memory) {
         uint256[] memory gemIds = getGemIds();
         Gem[] memory gems = new Gem[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
@@ -78,6 +78,14 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
         return s.gemTypesMintWindows[_gemTypeId];
+    }
+
+    function getTotalDonated() external view returns (uint256) {
+        return s.usersFi[_msgSender()].donated;
+    }
+
+    function getTotalDonatedAllUsers() external view returns (uint256) {
+        return s.total.donated;
     }
 
     /* ============ Internal Functions ============ */
@@ -95,7 +103,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         gem.mintTime = uint32(block.timestamp);
         s.gems[tokenId] = gem;
     }
-///todo test transfer
+    ///todo test transfer
     function _beforeTokenTransfer(
         address from,
         address to,

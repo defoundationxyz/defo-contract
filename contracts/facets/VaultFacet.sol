@@ -10,20 +10,22 @@ import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
 import "../libraries/TimeHelper.sol";
 import "../libraries/TaxHelper.sol";
+import "../libraries/FiHelper.sol";
 
 /** @title  VaultFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice Vault functionality - unstake, lottery, and getters
+  * @notice Vault functionality - unStake, lottery, and getters
 */
 contract VaultFacet is BaseFacet, IVault {
+    using FiHelper for Fi;
 
     /* ============ External and Public Functions ============ */
-    function unstakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) {
+    function unStakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) {
         address user = _msgSender();
         require(s.usersFi[user].stakedGross >= _amount, "not enough amount in the vault");
-
+        Gem storage gem = s.gems[_tokenId];
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        address payable[WALLETS] storage wallets = s.config.wallets;
+        address[WALLETS] storage wallets = s.config.wallets;
         Fi memory op;
 
         op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
@@ -35,7 +37,8 @@ contract VaultFacet is BaseFacet, IVault {
         emit Donated(user, op.donated);
 
         // sending withdrawal tax to the reward wallet
-        op.vaultTaxPaid = PercentHelper.rate(_amount, s.config.vaultWithdrawalTaxRate);
+        uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);
+        op.vaultTaxPaid = PercentHelper.rate(_amount, discountedFee);
         defo.transferFrom(
             wallets[uint(Wallets.Vault)],
             wallets[uint(Wallets.RewardPool)],
@@ -47,7 +50,9 @@ contract VaultFacet is BaseFacet, IVault {
             wallets[uint(Wallets.Vault)],
             wallets[uint(Wallets.RewardPool)],
             op.unStakedNet);
-        emit RemovedFromVault(user, op.unStakedGross, op.unStakedNet);
+
+        emit UnStaked(user, op.unStakedGross, op.unStakedNet);
+        op.updateStorage(_tokenId, user);
     }
 
     function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external {

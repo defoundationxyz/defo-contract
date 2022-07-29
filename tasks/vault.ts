@@ -1,7 +1,7 @@
 import { announce, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
-import { VaultStakingFacet } from "../types";
+import { RewardsFacet, VaultFacet } from "../types";
 
 task("vault", "Get the vault state")
   .addOptionalParam("id", "gem id to add to the vault", undefined, types.int)
@@ -18,17 +18,17 @@ task("vault", "Get the vault state")
         utils: { formatEther: fromWei, parseEther: toWei },
       },
     } = hre;
-    const vaultStakingFacet = await ethers.getContract<VaultStakingFacet>("DEFODiamond_DiamondProxy");
+    const vaultStakingFacet = await ethers.getContract<RewardsFacet & VaultFacet>("DEFODiamond_DiamondProxy");
 
     announce("Current vault stats");
-    info(`Total staked ${fromWei(await vaultStakingFacet.showTotalAmount())}`);
-    info(`Deployer staked ${fromWei(await vaultStakingFacet.showStakedAmount())}`);
+    info(`Total staked ${fromWei(await vaultStakingFacet.getStakedGrossAllUsers())}`);
+    info(`Deployer staked ${fromWei(await vaultStakingFacet.getStakedGross())}`);
 
     if (id || amount) {
       announce("Staking to vault...");
-      await vaultStakingFacet.addToVault(id ?? 0, amount ? toWei(amount.toString()) : 0);
-      info(`Total staked ${fromWei(await vaultStakingFacet.showTotalAmount())}`);
-      info(`Deployer staked ${fromWei(await vaultStakingFacet.showStakedAmount())}`);
+      await vaultStakingFacet.stakeReward(id ?? 0, amount ? toWei(amount.toString()) : 0);
+      info(`Total staked ${fromWei(await vaultStakingFacet.getStakedGrossAllUsers())}`);
+      info(`Deployer staked ${fromWei(await vaultStakingFacet.getStakedGross())}`);
       success("Done");
     }
   });

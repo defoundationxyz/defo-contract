@@ -1,5 +1,5 @@
 import { GEMS, gemName } from "@config";
-import { YieldGemFacet } from "@contractTypes/index";
+import { MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/index";
 import { gemsGroupedByType } from "@utils/gems.helper";
 import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
@@ -11,10 +11,12 @@ export default task("get-some-gems", "mint NFT gems")
     const { getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const gemContract = await ethers.getContract<YieldGemFacet>("DEFODiamond_DiamondProxy");
+    const gemContract = await ethers.getContract<YieldGemFacet & RewardsFacet & MaintenanceFacet>(
+      "DEFODiamond_DiamondProxy",
+    );
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
 
-    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, deployer);
+    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);
 
     announce(`Deployer ${deployer} has ${await gemContract.balanceOf(deployer)} gem(s)`);
     for (const gemType of types) {

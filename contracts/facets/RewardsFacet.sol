@@ -23,7 +23,7 @@ contract RewardsFacet is BaseFacet, IRewards {
     function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) {
         Gem storage gem = s.gems[_tokenId];
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        address payable[WALLETS] storage wallets = s.config.wallets;
+        address[WALLETS] storage wallets = s.config.wallets;
 
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
@@ -60,9 +60,8 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) public {
-        Gem storage gem = s.gems[_tokenId];
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        address payable[WALLETS] storage wallets = s.config.wallets;
+        address[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
         Fi memory op;
 
@@ -105,13 +104,9 @@ contract RewardsFacet is BaseFacet, IRewards {
         return rewardToDate;
     }
 
-    function getTotalDonated() external view returns (uint256) {
-        address user = _msgSender();
-        return s.usersFi[user].donated;
-    }
-
-    function getTotalDonatedAllUsers() external view returns (uint256) {
-        return s.total.donated;
+    function isClaimable(uint256 _tokenId) external view returns (bool) {
+        return (TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
+        _getPendingMaintenanceFee(_tokenId) == 0);
     }
 
     function getCumulatedReward() external view returns (uint256) {

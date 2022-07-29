@@ -39,7 +39,7 @@ library PeriodicHelper {
         uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
         uint ratePerPeriod, //5 for diamond
         uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal view returns (uint taperedReward, uint updatedRewardRate) {
+    ) internal pure returns (uint taperedReward, uint updatedRewardRate) {
 //        console.log("-- calcTaperedReward");
 //        console.log("timePeriod ", timePeriod);
 //        console.log("taperThreshold ", taperThreshold);

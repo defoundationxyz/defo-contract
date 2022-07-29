@@ -28,4 +28,12 @@ library BoosterHelper {
             return fee * 100 / 75;
         } else return fee;
     }
+
+    function reduceVaultWithdrawalFee(Booster booster, uint256 fee) internal pure returns (uint256) {
+        if (booster == Booster.Omega) {
+            return fee * 100 / 90;
+        } else if (booster == Booster.Delta) {
+            return fee /2;
+        } else return fee;
+    }
 }

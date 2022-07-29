@@ -1,10 +1,9 @@
 import { GEMS, gemName } from "@config";
+import { ConfigFacet, MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/index";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
 import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
-
-import { ERC721Facet, GemFacet, GemGettersFacet } from "../types";
 
 export default task("claim", "claim rewards for gem(s)")
   .addOptionalParam("id", "gem id to claim rewards for a specific gemId", -1, types.int)
@@ -24,13 +23,15 @@ export default task("claim", "claim rewards for gem(s)")
     } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const gemContract = await ethers.getContract<GemFacet & GemGettersFacet & ERC721Facet>("DEFODiamond_DiamondProxy");
-    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, deployer);
+    const gemContract = await ethers.getContract<RewardsFacet & YieldGemFacet & MaintenanceFacet>(
+      "DEFODiamond_DiamondProxy",
+    );
+    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);
 
     const types: number[] =
       gemTypeParam === -1
         ? gemIdParam > -1
-          ? [(await gemContract.GemOf(gemIdParam)).GemType]
+          ? [(await gemContract.getGemInfo(gemIdParam)).gemTypeId]
           : Object.values(GEMS)
         : [gemTypeParam];
 
@@ -44,20 +45,14 @@ export default task("claim", "claim rewards for gem(s)")
           await Promise.all(
             gemsOfDeployerGroupedByType[type]?.map(async gem => {
               if (gemIdParam == -1 || gem.gemId == gemIdParam) {
-                const pickedGem = _.pick(gem, [
-                  "gemId",
-                  "rawReward",
-                  "taxTier",
-                  "taxedReward",
-                  "taperedReward",
-                  "claimedReward",
-                  "stakedReward",
-                ]) as Partial<CompleteGemData>;
+                const pickedGem = _.pick(gem, ["gemId", "reward", "fi"]) as Partial<CompleteGemData>;
                 const formattedGem = {} as Record<
                   keyof Partial<CompleteGemData>,
                   string | number | bigint | boolean
                 > & {
-                  claimed: string | number;
+                  claimedGross: string | number;
+                  claimedNet: string | number;
+                  claimTaxPaid: string | number;
                 };
                 Object.keys(pickedGem).map(key => {
                   formattedGem[key as keyof Partial<CompleteGemData>] = outputFormatKeyValue(
@@ -66,10 +61,18 @@ export default task("claim", "claim rewards for gem(s)")
                   );
                 });
                 if (gem.isClaimable) {
-                  await gemContract.ClaimRewards(gem.gemId);
-                  formattedGem.claimed = Number(fromWei((await gemContract.GemOf(gem.gemId)).claimedReward));
+                  await gemContract.claimReward(gem.gemId);
+                  formattedGem.claimedGross = Number(
+                    fromWei((await gemContract.getGemInfo(gem.gemId)).fi.claimedGross),
+                  );
+                  formattedGem.claimedNet = Number(fromWei((await gemContract.getGemInfo(gem.gemId)).fi.claimedNet));
+                  formattedGem.claimTaxPaid = Number(
+                    fromWei((await gemContract.getGemInfo(gem.gemId)).fi.claimTaxPaid),
+                  );
                 } else {
-                  formattedGem.claimed = "Not claimable";
+                  formattedGem.claimedGross = "Not claimable";
+                  formattedGem.claimedNet = "Not claimable";
+                  formattedGem.claimTaxPaid = "Not claimable";
                 }
                 return formattedGem;
               }

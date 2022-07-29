@@ -8,7 +8,7 @@ import "../data-types/IDataTypes.sol";
 
 /** @title  IYieldGem, EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
-  * @notice The Yield Gem Interface on top of the ERC721 standard,- minting and getters
+  * @notice The Yield Gem Interface on top of the ERC721 standard,- minting, state and donation getters
 */
 interface IYieldGem is IERC721 {
     /**
@@ -17,14 +17,26 @@ interface IYieldGem is IERC721 {
     */
     function mint(uint8 _gemTypeId) external;
 
-    function getGemData(uint256 _tokenId) external view returns (Gem memory);
+    function getGemInfo(uint256 _tokenId) external view returns (Gem memory);
 
     function getGemIds() external view returns (uint256[] memory);
 
-    function getGemsData() external view returns (uint256[] memory, Gem[] memory);
+    function getGemsInfo() external view returns (uint256[] memory, Gem[] memory);
 
     function isMintAvailable(uint8 _gemTypeId) external view returns (bool);
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory);
+
+    /**
+    *   @notice amount donated by the sender for all time
+    *   @return amount in Dai (in wei precision)
+    */
+    function getTotalDonated() external view returns (uint256);
+
+    /**
+    *   @notice amount donated by all the users for all time
+    *   @return amount in Dai (in wei precision)
+    */
+    function getTotalDonatedAllUsers() external view returns (uint256);
 
 }

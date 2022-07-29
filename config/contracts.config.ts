@@ -1,8 +1,7 @@
 import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
+import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
 import { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
-
-import { GemTypeConfigStruct, ProtocolConfigStruct } from "../types/contracts/interfaces/IConfig";
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
@@ -77,11 +76,9 @@ enum TaxTiers {
 
 //====== Protocol Config ========
 
-export const PROTOCOL_CONFIG: ProtocolConfigStruct = {
-  // add dai address once deployed
-  paymentTokens: [MAINNET_DAI_ADDRESS, "defo address goes here"],
-  // add wallets from hardhat runtime
-  wallets: ["wallets in the enum order"],
+export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets"> = {
+  // export const PROTOCOL_CONFIG: Omit<ProtocolConfigDTOStruct, "paymentTokens" | "wallets"> = {
+  //   add paymentTokens and wallets once deployed
   incomeDistributionOnMint: [
     //DAI distribution
     [
@@ -107,7 +104,7 @@ export const PROTOCOL_CONFIG: ProtocolConfigStruct = {
   taxScaleSinceLastClaimPeriod: SECONDS_IN_A_WEEK,
   taxRates: [percent(100), percent(30), percent(30), percent(15), 0],
   charityContributionRate: percent(5),
-  vaultWithdrawalRate: percent(10),
+  vaultWithdrawalTaxRate: percent(10),
   taperRate: percent(20),
   mintLock: false,
   transferLock: false,

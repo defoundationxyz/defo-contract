@@ -13,7 +13,7 @@ import "../libraries/PeriodicHelper.sol";
 /**
  * @title  BaseFacet
  * @author Decentralized Foundation Team
- * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils for DEFO functionality
+ * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils and  common reusable functions for DEFO Diamond
  */
 contract BaseFacet is Utils {
 
@@ -59,7 +59,7 @@ contract BaseFacet is Utils {
     }
 
 
-    function _getPendingMaintenanceFee(uint256 _tokenId) public view returns (uint256) {
+    function _getPendingMaintenanceFee(uint256 _tokenId) internal view returns (uint256) {
         Gem storage gem = s.gems[_tokenId];
 
         // time period checks - if it's not necessary or too early
@@ -75,23 +75,5 @@ contract BaseFacet is Utils {
         uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, s.config.maintenancePeriod);
         return feeAmount;
     }
-
-    function _stake(uint256 _tokenId) public view returns (uint256) {
-        Gem storage gem = s.gems[_tokenId];
-
-        // time period checks - if it's not necessary or too early
-        if (gem.lastMaintenanceTime >= block.timestamp)
-            return 0;
-        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
-        //"Too soon, maintenance fee has not been yet accrued");
-        if (feePaymentPeriod <= s.config.maintenancePeriod)
-            return 0;
-
-        // amount calculation
-        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, feePaymentPeriod, s.config.maintenancePeriod);
-        return feeAmount;
-    }
-
 
 }

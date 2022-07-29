@@ -15,7 +15,7 @@ import "../interfaces/ILimiter.sol";
 uint256 constant PAYMENT_TOKENS = 2;
 
 /// @dev number of income recievers on yield gem mint
-uint256 constant PAYMENT_RECEIVERS = 4;
+uint256 constant PAYMENT_RECEIVERS = 3;
 
 /// @dev total wallets on the protocol, see Wallets enum
 uint256 constant WALLETS = 7;
@@ -103,8 +103,8 @@ uint256 constant TAX_TIERS = 5;
 
     struct ProtocolConfig {
         IERC20[PAYMENT_TOKENS] paymentTokens;
-        address payable[WALLETS] wallets;
-        uint256[WALLETS][PAYMENT_TOKENS] incomeDistributionOnMint;
+        address[WALLETS] wallets;
+        uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] incomeDistributionOnMint;
         // time periods
         uint32 maintenancePeriod;
         uint32 rewardPeriod;

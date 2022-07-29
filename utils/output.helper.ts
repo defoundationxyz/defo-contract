@@ -1,3 +1,4 @@
+import { FiStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
 import { getTime } from "@utils/chain.helper";
 import chalk from "chalk";
 import { BigNumber, BigNumberish, ethers } from "ethers";
@@ -31,7 +32,7 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 
 export const outputFormatKeyValue = (
   key: string,
-  value: string | boolean | BigNumberish | Promise<BigNumberish> | undefined,
+  value: string | boolean | BigNumberish | Promise<BigNumberish> | FiStruct | undefined,
 ): string | number | bigint | boolean =>
   key.match(/Period|duration/i)
     ? moment.duration(Number(value), "s").humanize()
