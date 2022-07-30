@@ -74,3 +74,9 @@ graph TD;
    R -- Stake<br/>DEFO charity --> C
    V -- Unstake<br/>DEFO staked - vault tax --> R
 ```
+
+## Fuji testnet deployments
+
+DAI - 0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a
+DEFO - 0xD44C8E9ACD1532f8B4487477176b2ad2E4b0c355
+Diamond - 0xf281929CAb1B0d9550b3F96Cd1B14722E68CA7BB
