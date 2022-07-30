@@ -56,9 +56,9 @@ contract GemFacet {
     }
 
 
-    modifier mintLimit(uint8 _gemType) {
+    modifier mintLimit(uint8 _gemTypeId) {
         LibGem.DiamondStorage storage ds = LibGem.diamondStorage();
-        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemType];
+        LibGem.GemTypeMetadata memory gemType = ds.GetGemTypeMetadata[_gemTypeId];
         LibMeta.DiamondStorage storage metads = LibMeta.diamondStorage();
         require(
             (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) ||
@@ -152,6 +152,7 @@ contract GemFacet {
         _distributePayment(gemType.DefoPrice, true);
         _distributePayment(gemType.StablePrice, false);
         _mintGem(_type, msg.sender);
+
         if (block.timestamp - gemType.LastMint >= metads.MintLimitPeriod) {
             gemType.LastMint = block.timestamp;
             gemType.MintCount = 1;

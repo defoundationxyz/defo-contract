@@ -22,8 +22,7 @@ describe("VaultStakingFacet", () => {
     await run("jump-in-time", { time: "8d" });
 
     contract = await ethers.getContract("DEFODiamond_DiamondProxy");
-    [wallet] = await ethers.getSigners();
-    getGemsIds = gemsIdsWithData(contract, wallet.address);
+    getGemsIds = gemsIdsWithData(contract);
   });
 
   describe(`addToVault()`, () => {

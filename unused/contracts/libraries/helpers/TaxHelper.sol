@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import "./PercentHelper.sol";
+import "./LibAppStorage.sol";
 
 /// @notice Library for withdrawal tax operations
 library TaxHelper {
@@ -41,8 +42,8 @@ library TaxHelper {
     }
 
     /// function retrieves tax rate for given tax tier
-    function getTaxRate(TaxTier taxTier) internal view returns (uint256) {
-        LibMeta.DiamondStorage storage metaDiamondStorage = LibMeta.diamondStorage();
-        return metaDiamondStorage.RewardTaxTable[uint256(taxTier)];
+    function getTaxRate(TaxTiers taxTier) internal view returns (uint256) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.taxRates[uint256(taxTier)];
     }
 }

@@ -1,6 +1,7 @@
+import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
+import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
+import { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
-
-import { LibGem } from "../types/contracts/facets/OwnerFacet";
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
@@ -28,62 +29,113 @@ export const SECONDS_IN_A_DAY = SECONDS_IN_AN_HOUR * 24;
 export const SECONDS_IN_A_WEEK = SECONDS_IN_A_DAY * 7;
 export const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY;
 
-export const REWARD_TAX_TABLE = [percent(100), percent(30), percent(30), percent(15), 0];
-export const REWARDS_RELEASE_PERIOD = SECONDS_IN_A_WEEK;
-
 export const weeklyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_WEEK);
 export const monthlyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_MONTH);
 
-export const TREASURY_DEFO_RATE = percent(50);
-export const TREASURY_DAI_RATE = percent(HUNDRED_PERCENT) - TREASURY_DEFO_RATE;
+export const TREASURY_DAI_RATE = percent(75);
+export const TREASURY_DEFO_RATE = 0;
 
-///TODO verify since it's zero in the whitepaper
-export const TEAM_DEFO_RATE = 0;
-export const TEAM_DAI_RATE = 0;
+export const REWARD_DAI_RATE = 0;
+export const REWARD_DEFO_RATE = percent(75);
 
-export const LIQUIDITY_DEFO_RATE = percent(50);
-export const LIQUIDITY_DAI_RATE = percent(HUNDRED_PERCENT) - LIQUIDITY_DEFO_RATE;
+export const LIQUIDITY_DAI_RATE = percent(25);
+export const LIQUIDITY_DEFO_RATE = percent(25);
 
-export const CHARITY_RATE = percent(5);
+strict(percent(HUNDRED_PERCENT) === LIQUIDITY_DAI_RATE + REWARD_DAI_RATE + TREASURY_DAI_RATE);
+strict(percent(HUNDRED_PERCENT) === TREASURY_DEFO_RATE + REWARD_DEFO_RATE + LIQUIDITY_DEFO_RATE);
 
 export const MINT_LIMIT_PERIOD = 12 * SECONDS_IN_AN_HOUR;
 
 export const MAINTENANCE_PERIOD = 30 * SECONDS_IN_A_DAY;
 
-export const TAPER_RATE = percent(20);
+// the order for wallets, paymentTokens is extremely important, which is also the same in incomeDistributionOnMint
+enum PaymentTokens {
+  Dai,
+  Defo,
+}
 
-export const SAPHIRE_GEM: LibGem.GemTypeMetadataStruct = {
-  LastMint: 0,
-  MaintenanceFee: toWei(1.5),
-  RewardRate: toWei(0.29),
-  DailyLimit: 32,
-  MintCount: "0",
-  DefoPrice: toWei(5),
-  StablePrice: toWei(25),
-  TaperRewardsThreshold: toWei(7.5),
+// paymentTokens: DAI goes first, DEFO goes second.
+// wallets:
+enum Wallets {
+  Treasury,
+  RewardPool,
+  LiquidityPair,
+  Team,
+  Charity,
+  Vault,
+  RedeemContract,
+}
+
+enum TaxTiers {
+  Tier0NoPayment,
+  Tier1HugeTax,
+  Tier2MediumTax,
+  Tier3SmallTax,
+  Tier4NoTax,
+}
+
+//====== Protocol Config ========
+
+export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets"> = {
+  // export const PROTOCOL_CONFIG: Omit<ProtocolConfigDTOStruct, "paymentTokens" | "wallets"> = {
+  //   add paymentTokens and wallets once deployed
+  incomeDistributionOnMint: [
+    //DAI distribution
+    [
+      //Treasury,
+      TREASURY_DAI_RATE,
+      //   RewardPool,
+      REWARD_DAI_RATE,
+      //   LiquidityPair,
+      LIQUIDITY_DAI_RATE,
+    ],
+    //DEFO distribution
+    [
+      //Treasury,
+      TREASURY_DEFO_RATE,
+      //   RewardPool,
+      REWARD_DEFO_RATE,
+      //   LiquidityPair,
+      LIQUIDITY_DEFO_RATE,
+    ],
+  ],
   maintenancePeriod: SECONDS_IN_A_MONTH,
+  rewardPeriod: SECONDS_IN_A_WEEK,
+  taxScaleSinceLastClaimPeriod: SECONDS_IN_A_WEEK,
+  taxRates: [percent(100), percent(30), percent(30), percent(15), 0],
+  charityContributionRate: percent(5),
+  vaultWithdrawalTaxRate: percent(10),
+  taperRate: percent(20),
+  mintLock: false,
+  transferLock: false,
+  mintLimitWindow: 12 * SECONDS_IN_AN_HOUR,
 };
 
-export const RUBY_GEM: LibGem.GemTypeMetadataStruct = {
-  LastMint: 0,
-  MaintenanceFee: toWei(6),
-  RewardRate: toWei(1.2),
-  DailyLimit: 8,
-  MintCount: 0,
-  DefoPrice: toWei(20),
-  StablePrice: toWei(100),
-  TaperRewardsThreshold: toWei(30),
-  maintenancePeriod: SECONDS_IN_A_MONTH,
+//====== Gem Types Config ========
+
+//note in price DAI goes first, DEFO goes second
+export const SAPHIRE_GEM: GemTypeConfigStruct = {
+  maintenanceFeeDai: toWei(1.5),
+  rewardAmountDefo: toWei(0.29),
+  price: [toWei(25), toWei(5)],
+  taperRewardsThresholdDefo: toWei(7.5),
+  maxMintsPerLimitWindow: 32,
 };
 
-export const DIAMOND_GEM: LibGem.GemTypeMetadataStruct = {
-  LastMint: 0,
-  MaintenanceFee: toWei(24),
-  RewardRate: toWei(5),
-  DailyLimit: 2,
-  MintCount: 0,
-  DefoPrice: toWei(80),
-  StablePrice: toWei(400),
-  TaperRewardsThreshold: toWei(120),
-  maintenancePeriod: SECONDS_IN_A_MONTH,
+export const RUBY_GEM: GemTypeConfigStruct = {
+  maintenanceFeeDai: toWei(6),
+  rewardAmountDefo: toWei(1.2),
+  price: [toWei(100), toWei(20)],
+  taperRewardsThresholdDefo: toWei(30),
+  maxMintsPerLimitWindow: 8,
 };
+
+export const DIAMOND_GEM: GemTypeConfigStruct = {
+  maintenanceFeeDai: toWei(24),
+  rewardAmountDefo: toWei(5),
+  price: [toWei(400), toWei(80)],
+  taperRewardsThresholdDefo: toWei(120),
+  maxMintsPerLimitWindow: 2,
+};
+
+export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];

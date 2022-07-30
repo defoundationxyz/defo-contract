@@ -73,6 +73,7 @@ library LibGem {
         uint currentTime = block.timestamp - gem.MintTime;
         uint256 _taperThreshold = gemType.TaperRewardsThreshold;
 
+        ///todo add period if boosted - so thre should be two calls - one for not boosted till boosttime, second for boosted since boosttime
         //calculating tapered reward from the early beginning, the mint time
         uint taperedReward = currentTime.calcTaperedReward(_taperThreshold,
             ds.taperRate.oneHundredLessPercent(), //80% usually, NOTE this is 80% but not 20%

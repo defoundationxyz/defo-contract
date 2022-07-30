@@ -53,3 +53,24 @@ yarn jump-in-time   # optional with human-readable time without spaces, e.g. --t
 yarn claim          # claim all claimable gems rewards, optional with gem id --id
 yarn vault          # showing vault stats without changes, puts to vault with params --id --amount
 ```
+
+## Contracts
+The contract uses EIP-2535 Diamond pattern, with the project's facets.
+In order to interact with the deployed contracts, see `contracts/interfaces`.
+
+## Cash flow
+```mermaid
+graph TD;
+   L((Liquidity Pair)) --Buy<br/>DEFO --> User(User)
+   User -- Sell<br/>DAI --> L
+   User -- Mint<br/>25% DAI --> L
+   User -- Mint<br/>75% DAI --> T((Treasury))
+   User -- Mint<br/>25% DEFO --> L
+   User -- Mint<br/>75% DEFO --> R((Rewards Pool))
+   R -- Claim<br/>DEFO Reward - charity - tax --> User
+   R -- Claim<br/>DEFO charity --> C((Charity))
+   R -- Claim<br/>DEFO tax --> R
+   R -- Stake<br/>DEFO Amount - charity --> V((Vault))
+   R -- Stake<br/>DEFO charity --> C
+   V -- Unstake<br/>DEFO staked - vault tax --> R
+```
