@@ -5,7 +5,7 @@ import assert from "assert";
 import { DeployFunction } from "hardhat-deploy/types";
 import { DEFOToken } from "types";
 
-import { namedAccountsIndex } from "../../hardhat.accounts";
+import { namedAccountsIndex } from "../hardhat.accounts";
 
 const func: DeployFunction = async hre => {
   const {
