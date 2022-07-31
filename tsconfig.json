@@ -17,6 +17,8 @@
     "baseUrl": "./",
     "paths": {
       "@config": ["config/contracts.config"],
+      "@config-fuji": ["config/contracts.config.fuji"],
+      "@config-mainnet": ["config/contracts.config.mainnet"],
       "@contractTypes/*": ["types/*"],
       "@utils/*": ["utils/*"],
       "@constants/*": ["constants/*"]

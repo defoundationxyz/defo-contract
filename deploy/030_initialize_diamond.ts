@@ -8,8 +8,8 @@ import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import DAI_ABI from "../../abi/erc20-abi.json";
-import { namedAccountsIndex } from "../../hardhat.accounts";
+import DAI_ABI from "../abi/erc20-abi.json";
+import { namedAccountsIndex } from "../hardhat.accounts";
 
 const func: DeployFunction = async hre => {
   const {

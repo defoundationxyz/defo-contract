@@ -20,6 +20,7 @@ const networks: NetworksUserConfig = {
   fuji: {
     chainId: 43113,
     url: avalancheFujiJsonRPCUrl,
+    accounts: { mnemonic: process.env.LIVENET_MNEMONIC },
   },
 };
 
