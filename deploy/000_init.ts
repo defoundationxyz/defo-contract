@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   deployInfo("Decentralized Foundation Contracts - Deploy Script");
   deployInfo("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
   deployInfo(
-    `Network:  ${await chainName(hre)} (${chalk.yellow((await isTestEnvironment(hre)) ? "local" : "remote")})`,
+    `Network:  ${await chainName(hre)} (${(await isTestEnvironment(hre)) ? chalk.yellow("local") : chalk.red("remote")})`,
   );
   deployInfo(`Deployer: ${chalk.yellow(deployer)}`);
 };
