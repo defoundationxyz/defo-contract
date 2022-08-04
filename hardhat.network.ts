@@ -17,11 +17,11 @@ const networks: NetworksUserConfig = {
     url: "http://127.0.0.1:8545",
     allowUnlimitedContractSize: true,
   },
-  fuji: {
-    chainId: 43113,
-    url: avalancheFujiJsonRPCUrl,
-    accounts: { mnemonic: process.env.LIVENET_MNEMONIC },
-  },
+  // fuji: {
+  //   chainId: 43113,
+  //   url: avalancheFujiJsonRPCUrl,
+  //   accounts: { mnemonic: process.env.LIVENET_MNEMONIC },
+  // },
 };
 
 if (process.env.FORK_ENABLED) {

@@ -111,6 +111,7 @@
     "get-some-dai": "hardhat --network localhost fork:get-some-dai",
     "get-some-defo": "hardhat --network localhost get-some-defo",
     "get-some-gems": "hardhat --network localhost get-some-gems",
+    "helper-task": "hardhat --network localhost helper-task",
     "mint-some-gems": "yarn get-some-gems",
     "claim": "hardhat --network localhost claim",
     "jump-in-time": "hardhat --network localhost jump-in-time",
