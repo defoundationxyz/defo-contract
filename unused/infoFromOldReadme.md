@@ -1,5 +1,5 @@
 ` `
-Be sure you create .env file (see .env-example)
+Be sure you create .env file (see .env.example)
 
 Following are the Deployed contracts on Fuji Testnet:
 

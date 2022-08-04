@@ -1,11 +1,10 @@
-import { DEFO_TOKEN_REWARD_POOL, DEFO_TOKEN_TOTAL_SUPPLY, DEFO_TOKEN_TREASURY } from "@config";
 import { deployAndTell } from "@utils/deployFunc";
-import { deployInfo, deploySuccess } from "@utils/output.helper";
+import { deploySuccess } from "@utils/output.helper";
 import assert from "assert";
 import { DeployFunction } from "hardhat-deploy/types";
-import { DEFOToken } from "types";
 
 import { namedAccountsIndex } from "../hardhat.accounts";
+
 
 const func: DeployFunction = async hre => {
   const {
@@ -17,7 +16,8 @@ const func: DeployFunction = async hre => {
       utils: { parseEther: toWei },
     },
   } = hre;
-  const { defoTokenOwner, rewardPool, treasury } = await getNamedAccounts();
+
+  const { defoTokenOwner } = await getNamedAccounts();
   const chainId = await getChainId();
 
   await deployAndTell(deploy, "DEFOToken", {
@@ -31,15 +31,6 @@ const func: DeployFunction = async hre => {
 
   assert(defoTokenOwnerSigner.address === defoTokenOwner);
 
-  const contract = await ethers.getContract<DEFOToken>("DEFOToken", defoTokenOwnerSigner);
-
-  deployInfo(
-    `Minting ${DEFO_TOKEN_TOTAL_SUPPLY.toLocaleString()} DEFO tokens and distributing to treasury and reward pool`,
-  );
-  await contract.mint(defoTokenOwner, toWei(DEFO_TOKEN_TOTAL_SUPPLY.toString()));
-  await contract.transfer(rewardPool, toWei(DEFO_TOKEN_REWARD_POOL.toString()));
-  await contract.transfer(treasury, toWei(DEFO_TOKEN_TREASURY.toString()));
-  /// TODO distribute to liquidity pool as well
   deploySuccess(`Done`);
 };
 
