@@ -6,6 +6,7 @@ import { DeployResult } from "hardhat-deploy/dist/types";
 import _ from "lodash";
 import moment from "moment";
 
+
 type MutableObject<T> = { -readonly [P in keyof T]: T[P] };
 
 const suppresableLogger = (hide: boolean | string | undefined, logger: (message: any) => void) => (message: any) =>
@@ -21,6 +22,7 @@ export const error = (message: string) => taskLogger(chalk.red(message));
 
 const deployLogger = suppresableLogger(process.env.HIDE_DEPLOY_LOG, console.log);
 export const deployInfo = (message: string) => deployLogger(chalk.dim(message));
+export const deployError = (message: string) => deployLogger(chalk.red(message));
 export const deployAnnounce = (message: string) => deployLogger(chalk.cyan(message));
 export const deployWarning = (message: string) => deployLogger(chalk.yellow(message));
 export const deploySuccess = (message: string) => deployLogger(chalk.green(message));

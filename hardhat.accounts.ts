@@ -18,34 +18,36 @@ type NamedAccounts<AccountName extends string = string, NetworkName extends stri
   string | number | Record<NetworkName, null | number | string>
 >;
 
+const balance = "10000000000000000000000";
+
 const accounts: HardhatNetworkAccountsUserConfig = [
   {
     privateKey: process.env.DEPLOYER_PRIVATE_KEY || "",
-    balance: "10000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.TREASURY_WALLET_PRIVATE_KEY || "",
-    balance: "20000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.DONATIONS_WALLET_PRIVATE_KEY || "",
-    balance: "10000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.TEAM_WALLET_PRIVATE_KEY || "",
-    balance: "20000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.VAULT_PRIVATE_KEY || "",
-    balance: "10000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.REWARD_POOL_PRIVATE_KEY || "",
-    balance: "10000000000000000000000",
+    balance,
   },
   {
     privateKey: process.env.DEFO_TOKEN_PRIVATE_KEY || "",
-    balance: "10000000000000000000000",
+    balance,
   },
 ];
 
@@ -63,6 +65,7 @@ const namedAccountsIndex: NamedAccounts = {
     43113: FUJI_DAI_ADDRESS,
     1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DAI_ADDRESS : MAINNET_DAI_ADDRESS)) ?? null,
   },
+  ///todo get rid of this, should be one variable - both for deployed in deploy script and forked
   forkedDefoToken: {
     43114: MAINNET_DEFO_ADDRESS,
     43113: FUJI_DEFO_ADDRESS,
