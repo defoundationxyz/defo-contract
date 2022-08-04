@@ -42,6 +42,7 @@
     "debug": "^4.3.4",
     "eslint": "^8.19.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "eth-permit": "^0.2.1",
     "ethereum-waffle": "^3.4.4",
     "ethereumjs-util": "^7.1.5",
