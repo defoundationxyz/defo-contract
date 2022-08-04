@@ -29,17 +29,15 @@ const func: DeployFunction = async hre => {
     (await isFuji(hre)) ? FUJI_DAI_ADDRESS : MAINNET_DAI_ADDRESS,
     defoTokenDeployment.address!,
   ];
-  const wallets = hre.network.live
-    ? [
-        treasury,
-        rewardPool,
-        deployer, //liquidity pair goes here
-        team,
-        donations,
-        vault,
-        deployer, //redeem contract goes here
-      ]
-    : [deployer, deployer, deployer, deployer, deployer, deployer, deployer];
+  const wallets = [
+    treasury,
+    rewardPool,
+    deployer, //liquidity pair goes here
+    team,
+    donations,
+    vault,
+    deployer, //redeem contract goes here
+  ];
 
   const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
   await configFacetInstance.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG });
