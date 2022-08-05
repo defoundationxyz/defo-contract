@@ -1,6 +1,7 @@
 import { deployAndTell } from "@utils/deployFunc";
 import { DeployFunction } from "hardhat-deploy/types";
 
+
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;
   const { diamond } = deployments;
@@ -11,8 +12,9 @@ const func: DeployFunction = async hre => {
     "YieldGemFacet",
     "RewardsFacet",
     "VaultFacet",
+    "DonationsFacet",
     "MaintenanceFacet",
-    // "NodeLimiterFacet",
+    "TransferLimitFacet",
   ];
 
   await deployAndTell(diamond.deploy, "DEFODiamond", {

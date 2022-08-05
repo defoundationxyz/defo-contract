@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "../data-types/IDataTypes.sol";
 import "../interfaces/IRewards.sol";
 import "../base-facet/BaseFacet.sol";
+import "../libraries/LibDonations.sol";
 import "../libraries/LibMaintainer.sol";
 import "../libraries/PercentHelper.sol";
 import "../libraries/BoosterHelper.sol";
@@ -48,7 +49,7 @@ contract RewardsFacet is BaseFacet, IRewards {
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
             op.donated);
-        emit Donated(user, op.donated);
+        emit LibDonations.Donated(user, op.donated);
 
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
@@ -83,7 +84,7 @@ contract RewardsFacet is BaseFacet, IRewards {
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
             op.donated);
-        emit Donated(user, op.donated);
+        emit LibDonations.Donated(user, op.donated);
 
 
         defo.transferFrom(

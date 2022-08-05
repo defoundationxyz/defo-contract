@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.15;
 
-import "../data-types/IDataTypes.sol";
 import "../interfaces/IVault.sol";
 import "../base-facet/BaseFacet.sol";
+import "../libraries/LibDonations.sol";
 import "../libraries/PercentHelper.sol";
 import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
@@ -34,7 +34,7 @@ contract VaultFacet is BaseFacet, IVault {
             wallets[uint(Wallets.Vault)],
             wallets[uint(Wallets.Charity)],
             op.donated);
-        emit Donated(user, op.donated);
+        emit LibDonations.Donated(user, op.donated);
 
         // sending withdrawal tax to the reward wallet
         uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);

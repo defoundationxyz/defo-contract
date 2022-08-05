@@ -3,7 +3,7 @@
 pragma solidity 0.8.15;
 
 import "../data-types/IDataTypes.sol";
-import "../interfaces/IMaintenence.sol";
+import "../interfaces/IMaintenance.sol";
 import "../libraries/LibMaintainer.sol";
 import "../base-facet/BaseFacet.sol";
 

@@ -3,10 +3,9 @@
 pragma solidity 0.8.15;
 
 import "../interfaces/IYieldGem.sol";
-import "../interfaces/ILimiter.sol";
+import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
-import "../libraries/LibPauser.sol";
 import "../libraries/PercentHelper.sol";
 import "hardhat/console.sol";
 
@@ -86,15 +85,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
         return s.gemTypesMintWindows[_gemTypeId];
     }
-
-    function getTotalDonated() external view returns (uint256) {
-        return s.usersFi[_msgSender()].donated;
-    }
-
-    function getTotalDonatedAllUsers() external view returns (uint256) {
-        return s.total.donated;
-    }
-
+    
     /* ============ Internal Functions ============ */
 
     /// @dev mint only, no payment, covers yield gem related mint functions, minting itself and event firing is part of super contract from erc721-facet directory
@@ -116,8 +107,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         address to,
         uint256 tokenId
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
-        require(!LibPauser._paused(), "Pausable: paused, transfer is locked");
-        ILimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
+        require(!s.config.transferLock, "Pausable: paused, transfer is locked");
+        ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
         s.usersFi[to] = s.usersFi[from];
     }

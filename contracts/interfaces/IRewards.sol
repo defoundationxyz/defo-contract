@@ -9,19 +9,18 @@ import "../data-types/IDataTypes.sol";
   * @notice Rewards Interface, operation with rewards: taxation, charity, claiming and putting to the vault
 */
 interface IRewards {
-    event Donated(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 amountGross, uint256 amountNet);
     event Staked(address indexed user, uint256 amountGross, uint256 amountNet);
 
     function claimReward(uint256 _tokenId) external;
 
     //maybe I'll add that feat later: selects an amount to claim
-//    function claimReward(uint256 _tokenId, uint256 _amount) external;
+    //    function claimReward(uint256 _tokenId, uint256 _amount) external;
 
     function batchClaimReward(uint256[] calldata _tokenids) external;
 
     //maybe I'll add that feat later: puts all the reward into vault
-//    function stakeReward(uint256 _tokenId) external;
+    //    function stakeReward(uint256 _tokenId) external;
 
     ///todo decide whether move this to the vault facet or not - (to keep all staking/unstaking in one place), or to leave it here (this is a facet working with rewards  which can be either claimed or staked)
     function stakeReward(uint256 _tokenId, uint256 _amount) external;

@@ -7,7 +7,6 @@ pragma solidity 0.8.15;
   * @notice Vault Interface - unStake, lottery, and getters
 */
 interface IVault {
-    event Donated(address indexed user, uint256 amount);
     // @dev here if we unStake, say, 100 DEFO from the vault, the  amountGross is unStaked, amountNet comes back to earned rewards
     event UnStaked(address indexed user, uint256 amountGross, uint256 amountNet);
     event LotteryConfigured(uint256 numberOfWinners, uint32 lotteryStart, uint32 periodicity);

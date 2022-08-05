@@ -6,7 +6,7 @@ pragma solidity 0.8.15;
   * @author Decentralized Foundation Team
 */
 
-interface ILimiter {
+interface ITransferLimiter {
     function yieldGemTransferLimit(
         address to,
         address from,

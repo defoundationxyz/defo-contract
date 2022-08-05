@@ -55,6 +55,7 @@
     "hardhat-erc1820": "^0.1.0",
     "hardhat-ethernal": "^1.0.0",
     "hardhat-gas-reporter": "^1.0.8",
+    "hardhat-log-remover": "^2.0.2",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
     "lodash": "^4.17.21",
