@@ -4,12 +4,7 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import "../data-types/IDataTypes.sol";
 import "./Storage.sol";
-import "../libraries/PercentHelper.sol";
-import "../libraries/BoosterHelper.sol";
-import "../libraries/PeriodicHelper.sol";
-
 /**
  * @title  BaseFacet
  * @author Decentralized Foundation Team
@@ -52,7 +47,7 @@ contract BaseFacet is Storage {
             sender_ = msg.sender;
         }
     }
-    
+
     function _getChainID() internal view returns (uint256 id) {
         assembly {
             id := chainid()
@@ -84,24 +79,6 @@ contract BaseFacet is Storage {
         for (uint256 tokenId = 0; tokenId < s.nft.allTokens.length; tokenId++) {
             users_[tokenId] = s.nft.owners[tokenId];
         }
-    }
-
-
-    function _getPendingMaintenanceFee(uint256 _tokenId) internal view returns (uint256) {
-        Gem storage gem = s.gems[_tokenId];
-
-        // time period checks - if it's not necessary or too early
-        if (gem.lastMaintenanceTime >= block.timestamp)
-            return 0;
-        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
-        //"Too soon, maintenance fee has not been yet accrued");
-        if (feePaymentPeriod <= s.config.maintenancePeriod)
-            return 0;
-
-        // amount calculation
-        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.lastMaintenanceTime, s.config.maintenancePeriod);
-        return feeAmount;
     }
 
 }

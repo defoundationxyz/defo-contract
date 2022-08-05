@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "../interfaces/IYieldGem.sol";
 import "../interfaces/ILimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
-import "../libraries/LibMintLimitManager.sol";
+import "../libraries/LibMintLimiter.sol";
 import "../libraries/LibPauser.sol";
 import "../libraries/PercentHelper.sol";
 import "hardhat/console.sol";
@@ -27,7 +27,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
 
     /// @dev takes payment for mint and passes to the internal _mint function
     function mint(uint8 _gemTypeId) external {
-        require(LibMintLimitManager.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
+        require(LibMintLimiter.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
         address minter = _msgSender();
         console.log("=== mint");
         console.log("minter %s");

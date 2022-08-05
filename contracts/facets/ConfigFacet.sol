@@ -6,7 +6,7 @@ import "../interfaces/IConfig.sol";
 import "../base-facet/BaseFacet.sol";
 import "../libraries/LibAppStorage.sol";
 import "../libraries/LibPauser.sol";
-import "../libraries/LibMintLimitManager.sol";
+import "../libraries/LibMintLimiter.sol";
 import "../libraries/PercentHelper.sol";
 import "hardhat/console.sol";
 

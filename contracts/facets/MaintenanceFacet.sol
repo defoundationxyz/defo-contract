@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 
 import "../data-types/IDataTypes.sol";
 import "../interfaces/IMaintenence.sol";
+import "../libraries/LibMaintainer.sol";
 import "../base-facet/BaseFacet.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
@@ -11,11 +12,12 @@ import "../base-facet/BaseFacet.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract MaintenanceFacet is BaseFacet, IMaintenance {
-
+    /* ============ External and Public Functions ============ */
     function maintain(uint256 _tokenId) public {
         address user = _msgSender();
 
         uint256 feeAmount = getPendingMaintenanceFee(_tokenId);
+        require(feeAmount > 0, "No maintenance fee accrued,- either already paid or to soon.");
 
         // payment
         IERC20 dai = s.config.paymentTokens[uint(PaymentTokens.Dai)];
@@ -35,6 +37,6 @@ contract MaintenanceFacet is BaseFacet, IMaintenance {
     }
 
     function getPendingMaintenanceFee(uint256 _tokenId) public view returns (uint256) {
-        return _getPendingMaintenanceFee(_tokenId);
+        return LibMaintainer._getPendingMaintenanceFee(_tokenId);
     }
 }

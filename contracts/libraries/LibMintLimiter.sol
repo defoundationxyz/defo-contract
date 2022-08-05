@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "./LibAppStorage.sol";
 
 // helper for limit daily mints
-library LibMintLimitManager {
+library LibMintLimiter {
     event MintLocked();
     event MintUnlocked();
 
@@ -42,6 +42,7 @@ library LibMintLimitManager {
         s.config.mintLock = true;
         emit MintLocked();
     }
+
     function unlockMint() internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s.config.mintLock = false;
