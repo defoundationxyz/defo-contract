@@ -4,7 +4,7 @@ DEFO is a DeFi protocol on AVAX. If you buy a Yield Gem NFT with our DEFO token,
 
 ## Preparation
 
-Copy `.env-example` to `.env`.
+Copy `.env.example` to `.env`.
 
 ```sh
 $ yarn install
@@ -55,10 +55,13 @@ yarn vault          # showing vault stats without changes, puts to vault with pa
 ```
 
 ## Contracts
-The contract uses EIP-2535 Diamond pattern, with the project's facets.
+
+The contract is built as an EIP-2535 Diamond, implementing ERC-1155 functionality covering both DEFO Token and Yield Gem
+NFTs.
 In order to interact with the deployed contracts, see `contracts/interfaces`.
 
 ## Cash flow
+
 ```mermaid
 graph TD;
    L((Liquidity Pair)) --Buy<br/>DEFO --> User(User)
