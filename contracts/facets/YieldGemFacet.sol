@@ -3,8 +3,10 @@
 pragma solidity 0.8.15;
 
 import "../interfaces/IYieldGem.sol";
-import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
+import "../interfaces/ILimiter.sol";
+import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimitManager.sol";
+import "../libraries/LibPauser.sol";
 import "../libraries/PercentHelper.sol";
 import "hardhat/console.sol";
 
@@ -12,7 +14,7 @@ import "hardhat/console.sol";
   * @author Decentralized Foundation Team
   * @notice Basic Node DEFO-specific functionality on top of the ERC721 standard,- minting and getters
 */
-contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
+contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYieldGem {
 
     /* ====================== Modifiers ====================== */
 
@@ -113,7 +115,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) whenNotPaused() {
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
+        require(!LibPauser._paused(), "Pausable: paused, transfer is locked");
+        ILimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
         s.usersFi[to] = s.usersFi[from];
     }
@@ -122,7 +126,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) {
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
         delete s.usersFi[from];
     }

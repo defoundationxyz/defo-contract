@@ -11,7 +11,7 @@ import "./ERC721Facet.sol";
   * @author Decentralized Foundation Team
   * @dev This is a reusable ERC721 preset to be used in the facet, prerequisites is s.nft structure in the AppStorage
 */
-contract ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet is ERC721EnumerableFacet, ERC721BurnableFacet {
+contract ERC721AutoIdMinterLimiterBurnableEnumerableFacet is ERC721EnumerableFacet, ERC721BurnableFacet {
     using Counters for Counters.Counter;
 
     /* ============ Internal Functions ============ */
@@ -45,11 +45,8 @@ contract ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet is ERC721Enume
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721EnumerableFacet, ERC721Facet) whenNotPaused() {
+    ) internal virtual override(ERC721EnumerableFacet, ERC721Facet) {
         super._beforeTokenTransfer(from, to, tokenId);
-        if (address(s.nft.limiter) != address(0)) {
-            s.nft.limiter.transferLimit(from, to, tokenId);
-        }
     }
 
     function _afterTokenTransfer(

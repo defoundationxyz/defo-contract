@@ -5,9 +5,9 @@ pragma solidity 0.8.15;
 import "../interfaces/IConfig.sol";
 import "../base-facet/BaseFacet.sol";
 import "../libraries/LibAppStorage.sol";
+import "../libraries/LibPauser.sol";
 import "../libraries/LibMintLimitManager.sol";
 import "../libraries/PercentHelper.sol";
-import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
 import "hardhat/console.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
@@ -54,11 +54,11 @@ contract ConfigFacet is BaseFacet, IConfig {
     }
 
     function pause() external onlyOwner {
-        _pause();
+        LibPauser._pause();
     }
 
     function unpause() external onlyOwner {
-        _unpause();
+        LibPauser._unpause();
     }
 
 }

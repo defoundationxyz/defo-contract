@@ -5,7 +5,7 @@ pragma solidity 0.8.15;
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
 import "../data-types/IDataTypes.sol";
-import "./B2Utils.sol";
+import "./Storage.sol";
 import "../libraries/PercentHelper.sol";
 import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
@@ -15,7 +15,7 @@ import "../libraries/PeriodicHelper.sol";
  * @author Decentralized Foundation Team
  * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils and  common reusable functions for DEFO Diamond
  */
-contract BaseFacet is Utils {
+contract BaseFacet is Storage {
 
     /* ====================== Modifiers ====================== */
 
@@ -29,7 +29,35 @@ contract BaseFacet is Utils {
         _;
     }
 
+    modifier onlyOwner() {
+        LibDiamond.enforceIsContractOwner();
+        _;
+    }
+    modifier nonZeroAddress(address _owner) {
+        require(_owner != address(0), "ERC721: address zero is not a valid owner");
+        _;
+    }
+
     /* ============ Internal Functions ============ */
+
+    function _msgSender() internal override view returns (address sender_) {
+        if (Context._msgSender() == address(this)) {
+            bytes memory array = msg.data;
+            uint256 index = msg.data.length;
+            assembly {
+            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+                sender_ := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)
+            }
+        } else {
+            sender_ = msg.sender;
+        }
+    }
+    
+    function _getChainID() internal view returns (uint256 id) {
+        assembly {
+            id := chainid()
+        }
+    }
 
     function _requireExists(uint256 _tokenId) internal view {
         require(_exists(_tokenId), "ERC721: tokenId is not valid");
