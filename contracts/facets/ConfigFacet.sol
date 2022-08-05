@@ -46,11 +46,11 @@ contract ConfigFacet is BaseFacet, IConfig {
     }
 
     function lockMint() public onlyOwner {
-        LibMintLimitManager.lockMint();
+        LibMintLimiter.lockMint();
     }
 
     function unlockMint() public onlyOwner {
-        LibMintLimitManager.unlockMint();
+        LibMintLimiter.unlockMint();
     }
 
     function pause() external onlyOwner {

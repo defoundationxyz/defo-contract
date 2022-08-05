@@ -80,7 +80,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     }
 
     function isMintAvailable(uint8 _gemType) external view returns (bool) {
-        return LibMintLimitManager.isMintAvailableForGem(_gemType);
+        return LibMintLimiter.isMintAvailableForGem(_gemType);
     }
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
@@ -101,7 +101,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function _mint(uint8 _gemType, address _to) private {
         // mint and update the counter
         uint256 tokenId = _safeMint(_to);
-        LibMintLimitManager.updateMintCount(_gemType);
+        LibMintLimiter.updateMintCount(_gemType);
         // save the gem
         Gem memory gem;
         gem.gemTypeId = _gemType;
