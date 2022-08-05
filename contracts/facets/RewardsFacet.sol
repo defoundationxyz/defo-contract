@@ -21,6 +21,10 @@ contract RewardsFacet is BaseFacet, IRewards {
     using FiHelper for Fi;
 
     /* ====================== Modifiers ====================== */
+    modifier onlyClaimable(uint256 _tokenId) {
+        require(isClaimable(_tokenId), "The gem is not claimable");
+        _;
+    }
 
     /* ============ External and Public Functions ============ */
     function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) {
