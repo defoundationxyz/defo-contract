@@ -22,11 +22,15 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         _;
     }
 
+    modifier onlyMintAvailable(uint8 _gemTypeId) {
+        require(LibMintLimiter.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
 
     /// @dev takes payment for mint and passes to the internal _mint function
-    function mint(uint8 _gemTypeId) external {
-        require(LibMintLimiter.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
+    function mint(uint8 _gemTypeId) external onlyMintAvailable(_gemTypeId) {
         address minter = _msgSender();
         console.log("=== mint");
         console.log("minter %s");
@@ -85,7 +89,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
         return s.gemTypesMintWindows[_gemTypeId];
     }
-    
+
     /* ============ Internal Functions ============ */
 
     /// @dev mint only, no payment, covers yield gem related mint functions, minting itself and event firing is part of super contract from erc721-facet directory

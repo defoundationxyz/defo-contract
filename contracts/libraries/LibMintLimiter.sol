@@ -28,18 +28,25 @@ library LibMintLimiter {
         console.log("block.timestamp ", block.timestamp);
 
         return !(s.config.mintLock) &&
+        //checking if the limit in the current mint window has not been reached yet
         (((gemTypeMintWindow.mintCount < gemType.maxMintsPerLimitWindow) &&
         (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow)) ||
+        //or we're already in another window ahead
         (block.timestamp > gemTypeMintWindow.endOfMintLimitWindow));
     }
 
     function updateMintCount(uint8 _gemTypeId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         if (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow) {
-            s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+            //setting up new mint window
+            do {
+                s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+            }
+            while (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow);
             s.gemTypesMintWindows[_gemTypeId].mintCount = 1;
         }
         else {
+            //current window
             s.gemTypesMintWindows[_gemTypeId].mintCount++;
         }
     }
