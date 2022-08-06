@@ -4,7 +4,6 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "../interfaces/ILimiter.sol";
 /**
 *   @dev The only source for all the data structures used in the protocol storage
 *   @dev This includes general config, gem type config, and mutable data
@@ -49,7 +48,6 @@ uint256 constant TAX_TIERS = 5;
         mapping(uint256 => uint256) ownedTokensIndex;
         uint256[] allTokens;
         mapping(uint256 => uint256) allTokensIndex;
-        ILimiter limiter;
         bool init;
     }
 

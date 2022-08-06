@@ -3,8 +3,9 @@
 pragma solidity 0.8.15;
 
 import "../interfaces/IYieldGem.sol";
-import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet.sol";
-import "../libraries/LibMintLimitManager.sol";
+import "../interfaces/ITransferLimiter.sol";
+import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
+import "../libraries/LibMintLimiter.sol";
 import "../libraries/PercentHelper.sol";
 import "hardhat/console.sol";
 
@@ -12,7 +13,7 @@ import "hardhat/console.sol";
   * @author Decentralized Foundation Team
   * @notice Basic Node DEFO-specific functionality on top of the ERC721 standard,- minting and getters
 */
-contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet, IYieldGem {
+contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYieldGem {
 
     /* ====================== Modifiers ====================== */
 
@@ -21,11 +22,15 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         _;
     }
 
+    modifier onlyMintAvailable(uint8 _gemTypeId) {
+        require(LibMintLimiter.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
 
     /// @dev takes payment for mint and passes to the internal _mint function
-    function mint(uint8 _gemTypeId) external {
-        require(LibMintLimitManager.isMintAvailableForGem(_gemTypeId), "Gem mint restriction");
+    function mint(uint8 _gemTypeId) external onlyMintAvailable(_gemTypeId) {
         address minter = _msgSender();
         console.log("=== mint");
         console.log("minter %s");
@@ -78,19 +83,11 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
     }
 
     function isMintAvailable(uint8 _gemType) external view returns (bool) {
-        return LibMintLimitManager.isMintAvailableForGem(_gemType);
+        return LibMintLimiter.isMintAvailableForGem(_gemType);
     }
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
         return s.gemTypesMintWindows[_gemTypeId];
-    }
-
-    function getTotalDonated() external view returns (uint256) {
-        return s.usersFi[_msgSender()].donated;
-    }
-
-    function getTotalDonatedAllUsers() external view returns (uint256) {
-        return s.total.donated;
     }
 
     /* ============ Internal Functions ============ */
@@ -99,7 +96,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
     function _mint(uint8 _gemType, address _to) private {
         // mint and update the counter
         uint256 tokenId = _safeMint(_to);
-        LibMintLimitManager.updateMintCount(_gemType);
+        LibMintLimiter.updateMintCount(_gemType);
         // save the gem
         Gem memory gem;
         gem.gemTypeId = _gemType;
@@ -113,7 +110,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) whenNotPaused() {
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
+        require(!s.config.transferLock, "Pausable: paused, transfer is locked");
+        ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
         s.usersFi[to] = s.usersFi[from];
     }
@@ -122,7 +121,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerablePausableFac
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerablePausableFacet) {
+    ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
         delete s.usersFi[from];
     }

@@ -46,18 +46,5 @@ interface IYieldGem is IERC721 {
     * @notice mint count limitations details
     * @return GemTypeMintWindow mint window structure
     */
-        function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory);
-
-    /**
-    *   @notice amount donated by the sender for all time
-    *   @return amount in Dai (in wei precision)
-    */
-    function getTotalDonated() external view returns (uint256);
-
-    /**
-    *   @notice amount donated by all the users for all time
-    *   @return amount in Dai (in wei precision)
-    */
-    function getTotalDonatedAllUsers() external view returns (uint256);
-
+    function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory);
 }

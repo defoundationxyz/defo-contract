@@ -3,9 +3,10 @@
 pragma solidity 0.8.15;
 
 import "./LibAppStorage.sol";
+import "hardhat/console.sol";
 
 // helper for limit daily mints
-library LibMintLimitManager {
+library LibMintLimiter {
     event MintLocked();
     event MintUnlocked();
 
@@ -19,19 +20,33 @@ library LibMintLimitManager {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
         GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
+        console.log("=== isMintAvailableForGem");
+        console.log("s.config.mintLock ", s.config.mintLock);
+        console.log("gemTypeMintWindow.mintCount ", gemTypeMintWindow.mintCount);
+        console.log("gemType.maxMintsPerLimitWindow ", gemType.maxMintsPerLimitWindow);
+        console.log("gemTypeMintWindow.endOfMintLimitWindow ", gemTypeMintWindow.endOfMintLimitWindow);
+        console.log("block.timestamp ", block.timestamp);
+
         return !(s.config.mintLock) &&
-        ((gemTypeMintWindow.mintCount < gemType.maxMintsPerLimitWindow) &&
-        (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow) ||
+        //checking if the limit in the current mint window has not been reached yet
+        (((gemTypeMintWindow.mintCount < gemType.maxMintsPerLimitWindow) &&
+        (block.timestamp <= gemTypeMintWindow.endOfMintLimitWindow)) ||
+        //or we're already in another window ahead
         (block.timestamp > gemTypeMintWindow.endOfMintLimitWindow));
     }
 
     function updateMintCount(uint8 _gemTypeId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         if (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow) {
-            s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+            //setting up new mint window
+            do {
+                s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+            }
+            while (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow);
             s.gemTypesMintWindows[_gemTypeId].mintCount = 1;
         }
         else {
+            //current window
             s.gemTypesMintWindows[_gemTypeId].mintCount++;
         }
     }
@@ -42,6 +57,7 @@ library LibMintLimitManager {
         s.config.mintLock = true;
         emit MintLocked();
     }
+
     function unlockMint() internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         s.config.mintLock = false;

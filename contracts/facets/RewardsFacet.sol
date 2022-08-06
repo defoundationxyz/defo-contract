@@ -5,6 +5,8 @@ pragma solidity 0.8.15;
 import "../data-types/IDataTypes.sol";
 import "../interfaces/IRewards.sol";
 import "../base-facet/BaseFacet.sol";
+import "../libraries/LibDonations.sol";
+import "../libraries/LibMaintainer.sol";
 import "../libraries/PercentHelper.sol";
 import "../libraries/BoosterHelper.sol";
 import "../libraries/PeriodicHelper.sol";
@@ -19,15 +21,21 @@ import "../libraries/FiHelper.sol";
 contract RewardsFacet is BaseFacet, IRewards {
     using FiHelper for Fi;
 
+    /* ====================== Modifiers ====================== */
+    modifier onlyClaimable(uint256 _tokenId) {
+        require(isClaimable(_tokenId), "The gem is not claimable");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
-    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) {
+    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) {
         Gem storage gem = s.gems[_tokenId];
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
 
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-            _getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
+            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
         Fi memory op;
         op.claimedGross = getRewardAmount(_tokenId);
 
@@ -41,7 +49,7 @@ contract RewardsFacet is BaseFacet, IRewards {
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
             op.donated);
-        emit Donated(user, op.donated);
+        emit LibDonations.Donated(user, op.donated);
 
         defo.transferFrom(
             wallets[uint(Wallets.RewardPool)],
@@ -76,7 +84,7 @@ contract RewardsFacet is BaseFacet, IRewards {
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
             op.donated);
-        emit Donated(user, op.donated);
+        emit LibDonations.Donated(user, op.donated);
 
 
         defo.transferFrom(
@@ -104,9 +112,9 @@ contract RewardsFacet is BaseFacet, IRewards {
         return rewardToDate;
     }
 
-    function isClaimable(uint256 _tokenId) external view returns (bool) {
+    function isClaimable(uint256 _tokenId) public view returns (bool) {
         return (TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-        _getPendingMaintenanceFee(_tokenId) == 0);
+        LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0);
     }
 
     function getCumulatedReward() external view returns (uint256) {

@@ -2,13 +2,14 @@
 
 pragma solidity 0.8.15;
 
-import "./B0Storage.sol";
+import "./LibAppStorage.sol";
 
 /**
 *   @notice Pausable contract
 *   @dev should start with  s.config.transferLock = false which is default
 */
-contract Pause is Storage {
+
+library LibPauser {
     event Paused(address account);
     event Unpaused(address account);
 
@@ -23,25 +24,28 @@ contract Pause is Storage {
     }
 
     function _paused() internal view returns (bool) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
         return s.config.transferLock;
     }
 
-    function _requireNotPaused() internal view virtual {
+    function _requireNotPaused() internal view {
         require(!_paused(), "Pausable: paused, transfer is locked");
     }
 
-    function _requirePaused() internal view virtual {
+    function _requirePaused() internal view {
         require(_paused(), "Pausable: not paused");
     }
 
     function _pause() internal whenNotPaused {
+        AppStorage storage s = LibAppStorage.diamondStorage();
         s.config.transferLock = true;
-        emit Paused(_msgSender());
+        emit Paused(msg.sender);
     }
 
     function _unpause() internal whenPaused {
+        AppStorage storage s = LibAppStorage.diamondStorage();
         s.config.transferLock = false;
-        emit Unpaused(_msgSender());
+        emit Unpaused(msg.sender);
     }
 
 

@@ -1,9 +1,10 @@
 import { GEMS, gemName } from "@config";
-import { ConfigFacet, MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/index";
+import { IDEFODiamond } from "@contractTypes/index";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
 import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
+
 
 export default task("claim", "claim rewards for gem(s)")
   .addOptionalParam("id", "gem id to claim rewards for a specific gemId", -1, types.int)
@@ -23,9 +24,7 @@ export default task("claim", "claim rewards for gem(s)")
     } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const gemContract = await ethers.getContract<RewardsFacet & YieldGemFacet & MaintenanceFacet>(
-      "DEFODiamond_DiamondProxy",
-    );
+    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);
 
     const types: number[] =
