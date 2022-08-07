@@ -20,12 +20,12 @@ library LibMintLimiter {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
         GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
-        console.log("=== isMintAvailableForGem");
-        console.log("s.config.mintLock ", s.config.mintLock);
-        console.log("gemTypeMintWindow.mintCount ", gemTypeMintWindow.mintCount);
-        console.log("gemType.maxMintsPerLimitWindow ", gemType.maxMintsPerLimitWindow);
-        console.log("gemTypeMintWindow.endOfMintLimitWindow ", gemTypeMintWindow.endOfMintLimitWindow);
-        console.log("block.timestamp ", block.timestamp);
+        //        console.log("=== isMintAvailableForGem");
+        //        console.log("s.config.mintLock ", s.config.mintLock);
+        //        console.log("gemTypeMintWindow.mintCount ", gemTypeMintWindow.mintCount);
+        //        console.log("gemType.maxMintsPerLimitWindow ", gemType.maxMintsPerLimitWindow);
+        //        console.log("gemTypeMintWindow.endOfMintLimitWindow ", gemTypeMintWindow.endOfMintLimitWindow);
+        //        console.log("block.timestamp ", block.timestamp);
 
         return !(s.config.mintLock) &&
         //checking if the limit in the current mint window has not been reached yet
@@ -37,18 +37,30 @@ library LibMintLimiter {
 
     function updateMintCount(uint8 _gemTypeId) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        if (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow) {
+        GemTypeMintWindow storage windowStorage = s.gemTypesMintWindows[_gemTypeId];
+        if (block.timestamp > windowStorage.endOfMintLimitWindow) {
             //setting up new mint window
             do {
-                s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow += s.config.mintLimitWindow;
+                windowStorage.endOfMintLimitWindow += s.config.mintLimitWindow;
             }
-            while (block.timestamp > s.gemTypesMintWindows[_gemTypeId].endOfMintLimitWindow);
-            s.gemTypesMintWindows[_gemTypeId].mintCount = 1;
+            while (block.timestamp > windowStorage.endOfMintLimitWindow);
+            windowStorage.mintCount = 0;
         }
-        else {
-            //current window
-            s.gemTypesMintWindows[_gemTypeId].mintCount++;
+        windowStorage.mintCount++;
+    }
+
+    function getCurrentMintWindow(uint8 _gemTypeId) internal view returns (GemTypeMintWindow memory) {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        GemTypeMintWindow memory window = s.gemTypesMintWindows[_gemTypeId];
+        if (block.timestamp > window.endOfMintLimitWindow) {
+            //setting up new mint window
+            do {
+                window.endOfMintLimitWindow += s.config.mintLimitWindow;
+            }
+            while (block.timestamp > window.endOfMintLimitWindow);
+            window.mintCount = 0;
         }
+        return window;
     }
 
 

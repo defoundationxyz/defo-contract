@@ -87,7 +87,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     }
 
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
-        return s.gemTypesMintWindows[_gemTypeId];
+        return LibMintLimiter.getCurrentMintWindow(_gemTypeId);
     }
 
     /* ============ Internal Functions ============ */
