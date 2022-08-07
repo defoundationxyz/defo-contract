@@ -9,7 +9,8 @@ import "./ERC721Facet.sol";
   * @author Decentralized Foundation Team
   * @notice The Contract uses diamond storage providing functionality of ERC721Enumerable
 */
-contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
+contract ERC721EnumerableFacet is ERC721Facet {
+    //contract ERC721EnumerableFacet is ERC721Facet, IERC721Enumerable {
 
     /* ============ External and Public Functions ============ */
 

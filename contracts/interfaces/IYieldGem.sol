@@ -10,7 +10,8 @@ import "../data-types/IDataTypes.sol";
   * @author Decentralized Foundation Team
   * @notice The Yield Gem Interface on top of the ERC721 standard,- minting, state and donation getters
 */
-interface IYieldGem is IERC721 {
+//interface IYieldGem is IERC721 {
+interface IYieldGem {
     /**
     * @notice Mints a gem, requires appropriate balance of DEFO and DAI and also approvals granted to the diamond contract to spent them
     * @param _gemTypeId gem type according to the enumeration, initially it's 0 for sapphire, 1 for ruby, 2 for diamond
