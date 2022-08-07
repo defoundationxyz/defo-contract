@@ -4,18 +4,13 @@ pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/utils/Context.sol";
 import {LibDiamond} from "hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol";
-import "../data-types/IDataTypes.sol";
-import "./B2Utils.sol";
-import "../libraries/PercentHelper.sol";
-import "../libraries/BoosterHelper.sol";
-import "../libraries/PeriodicHelper.sol";
-
+import "./Storage.sol";
 /**
  * @title  BaseFacet
  * @author Decentralized Foundation Team
  * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils and  common reusable functions for DEFO Diamond
  */
-contract BaseFacet is Utils {
+contract BaseFacet is Storage {
 
     /* ====================== Modifiers ====================== */
 
@@ -29,7 +24,35 @@ contract BaseFacet is Utils {
         _;
     }
 
+    modifier onlyOwner() {
+        LibDiamond.enforceIsContractOwner();
+        _;
+    }
+    modifier nonZeroAddress(address _owner) {
+        require(_owner != address(0), "ERC721: address zero is not a valid owner");
+        _;
+    }
+
     /* ============ Internal Functions ============ */
+
+    function _msgSender() internal override view returns (address sender_) {
+        if (Context._msgSender() == address(this)) {
+            bytes memory array = msg.data;
+            uint256 index = msg.data.length;
+            assembly {
+            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.
+                sender_ := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)
+            }
+        } else {
+            sender_ = msg.sender;
+        }
+    }
+
+    function _getChainID() internal view returns (uint256 id) {
+        assembly {
+            id := chainid()
+        }
+    }
 
     function _requireExists(uint256 _tokenId) internal view {
         require(_exists(_tokenId), "ERC721: tokenId is not valid");
@@ -56,24 +79,6 @@ contract BaseFacet is Utils {
         for (uint256 tokenId = 0; tokenId < s.nft.allTokens.length; tokenId++) {
             users_[tokenId] = s.nft.owners[tokenId];
         }
-    }
-
-
-    function _getPendingMaintenanceFee(uint256 _tokenId) internal view returns (uint256) {
-        Gem storage gem = s.gems[_tokenId];
-
-        // time period checks - if it's not necessary or too early
-        if (gem.lastMaintenanceTime >= block.timestamp)
-            return 0;
-        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
-        //"Too soon, maintenance fee has not been yet accrued");
-        if (feePaymentPeriod <= s.config.maintenancePeriod)
-            return 0;
-
-        // amount calculation
-        uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.lastMaintenanceTime, s.config.maintenancePeriod);
-        return feeAmount;
     }
 
 }

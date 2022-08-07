@@ -1,7 +1,6 @@
 import { GEMS, gemName } from "@config";
-import { PromiseOrValue } from "@contractTypes/common";
 import { GemTypeConfigStructOutput } from "@contractTypes/contracts/facets/ConfigFacet";
-import { ConfigFacet, MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/index";
+import { IDEFODiamond } from "@contractTypes/index";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
 import {
   announce,
@@ -14,7 +13,6 @@ import {
   warning,
 } from "@utils/output.helper";
 import chalk from "chalk";
-import { BigNumberish } from "ethers";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -32,9 +30,7 @@ export default task("gems", "get gems info and balance information for the deplo
     info("\n 📡 Querying gems...");
     info(`Current block time: ${chalk.green(await getChainTime(hre.ethers.provider))}`);
 
-    const gemContract = await ethers.getContract<YieldGemFacet & RewardsFacet & MaintenanceFacet & ConfigFacet>(
-      "DEFODiamond_DiamondProxy",
-    );
+    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
     const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);
 

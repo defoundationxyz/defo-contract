@@ -1,8 +1,9 @@
 import { GEMS, gemName } from "@config";
-import { MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/index";
+import { IDEFODiamond } from "@contractTypes/index";
 import { gemsGroupedByType } from "@utils/gems.helper";
 import { announce, error, info, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
+
 
 export default task("get-some-gems", "mint NFT gems")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - mint all three", -1, types.int)
@@ -11,9 +12,7 @@ export default task("get-some-gems", "mint NFT gems")
     const { getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
 
-    const gemContract = await ethers.getContract<YieldGemFacet & RewardsFacet & MaintenanceFacet>(
-      "DEFODiamond_DiamondProxy",
-    );
+    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
 
     const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);

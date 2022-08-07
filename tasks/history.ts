@@ -5,7 +5,8 @@ import { BigNumber } from "ethers";
 import { task, types } from "hardhat/config";
 import moment from "moment";
 
-import { RewardsFacet, VaultFacet } from "../types";
+import { IDEFODiamond } from "../types";
+
 
 export default task("history", "get events for the past days")
   .addOptionalParam("time", "Time period in a human-readable format: '1y', '10d', '20h', etc.", "7days", types.string)
@@ -21,7 +22,7 @@ export default task("history", "get events for the past days")
     const { seconds, human } = parseTimeInput(time);
     announce(`Getting events history for ${time} (${human}) ago.`);
 
-    const gemContract = await ethers.getContract<VaultFacet & RewardsFacet>("DEFODiamond_DiamondProxy");
+    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     //event signature to filter
     const donationTopic = await gemContract.filters.Donated();
 

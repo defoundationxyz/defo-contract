@@ -6009,6 +6009,7 @@ __metadata:
     hardhat-erc1820: ^0.1.0
     hardhat-ethernal: ^1.0.0
     hardhat-gas-reporter: ^1.0.8
+    hardhat-log-remover: ^2.0.2
     husky: ^8.0.1
     lint-staged: ^13.0.3
     lodash: ^4.17.21
@@ -8932,6 +8933,15 @@ __metadata:
   peerDependencies:
     hardhat: ^2.0.2
   checksum: bf18aacd08e0bdef81b180f3c97f76fcab885de3e92ed2dc014712e671c83ee7f77755c0e6c0f923a95f8372714cfcb7cdaa019afc42984c159603f8a8d724cf
+  languageName: node
+  linkType: hard
+
+"hardhat-log-remover@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "hardhat-log-remover@npm:2.0.2"
+  peerDependencies:
+    hardhat: ^2.0.0
+  checksum: 4e161ca0458bea34039af9839a69afbd7322b366dc7fec26d3c05b3558a3fbefe858cbf52f77b5566eb054c1ff8e7055ca4477d1a94bc5c7b16028bed64d329e
   languageName: node
   linkType: hard
 
