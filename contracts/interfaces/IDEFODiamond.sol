@@ -10,10 +10,11 @@ import "./IRedeem.sol";
 import "./IRewards.sol";
 import "./ITransferLimiter.sol";
 import "./IVault.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 /** @title EIP-2535 Diamond Interface
   * @author Decentralized Foundation Team
   * @notice Combines all facets, used to generate single abi and a Typechain type for easy import
 */
-interface IDEFODiamond is IConfig, IYieldGem, IDonations, IMaintenance, IRedeem, IRewards, ITransferLimiter, IVault {
+interface IDEFODiamond is IConfig, IYieldGem, IDonations, IMaintenance, IRedeem, IRewards, ITransferLimiter, IVault, IERC721 {
 }
