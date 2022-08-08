@@ -8,8 +8,8 @@ const func: DeployFunction = async hre => {
   const { deployer } = await getNamedAccounts();
 
   const facetNames = [
-    "ConfigFacet",
     "YieldGemFacet",
+    "ConfigFacet",
     "RewardsFacet",
     "VaultFacet",
     "DonationsFacet",
