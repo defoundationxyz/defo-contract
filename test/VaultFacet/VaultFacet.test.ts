@@ -6,9 +6,10 @@
 // import { BigNumber } from "ethers";
 // import { deployments, ethers, run } from "hardhat";
 //
-// const debug = newDebug("defo:VaultStakingFacet.test.ts");
 //
-// describe("VaultStakingFacet", () => {
+// const debug = newDebug("defo:VaultFacet.test.ts");
+//
+// describe("VaultFacet", () => {
 //   let contract: VaultStakingFacet & GemFacet & GemGettersFacet;
 //   let wallet: SignerWithAddress;
 //   let getGemsIds: () => Promise<Array<CompleteGemData>>;
@@ -19,7 +20,7 @@
 //     await run("get-some-defo");
 //     await run("permit");
 //     await run("get-some-gems");
-//     await run("jump-in-time", { time: "8d" });
+//     await run("jump-in-time", { time: "7d" });
 //
 //     contract = await ethers.getContract("DEFODiamond_DiamondProxy");
 //     getGemsIds = gemsIdsWithData(contract);
