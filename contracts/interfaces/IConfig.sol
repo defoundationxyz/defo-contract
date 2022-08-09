@@ -13,7 +13,7 @@ interface IConfig {
     event ConfigurationChange(ProtocolConfig config);
     event GemTypeConfigurationChange(GemTypeConfig _gemTypeConfig);
 
-//    function setConfig(ProtocolConfig calldata _config) external;
+    function setConfig(ProtocolConfig calldata _config) external;
 
     function getConfig() external view returns (ProtocolConfig memory);
 
