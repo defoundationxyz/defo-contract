@@ -3,24 +3,17 @@ import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet } from "@contractTypes/contracts/facets";
 import { ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
 import { DEFOToken } from "@contractTypes/contracts/token";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
 import newDebug from "debug";
-import hardhat, { deployments, ethers } from "hardhat";
+import hardhat, { deployments } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
 
 
 const debug = newDebug("defo:Config.test.ts");
 
-const {
-  utils: { parseEther: toWei },
-  getContractAt,
-} = ethers;
-
 describe("ConfigFacet", () => {
   let contract: ConfigFacet;
-  let wallet: SignerWithAddress;
   let paymentTokens: [string, string];
   let namedAccounts: { [name: string]: Address };
 
@@ -57,6 +50,7 @@ describe("ConfigFacet", () => {
         const index = key as keyof ProtocolConfigStruct;
         const etalon = etalonConfig[index];
         const toCompare = config[index];
+        debug(`comparing ${key}`);
         expect(etalon.toString().toUpperCase()).to.be.equal(toCompare.toString().toUpperCase());
       });
     });
