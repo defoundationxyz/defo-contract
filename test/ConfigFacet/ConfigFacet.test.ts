@@ -1,7 +1,7 @@
-import { PROTOCOL_CONFIG } from "@config";
+import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG } from "@config";
 import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet } from "@contractTypes/contracts/facets";
-import { ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
+import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
 import { DEFOToken } from "@contractTypes/contracts/token";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
@@ -16,32 +16,32 @@ describe("ConfigFacet", () => {
   let contract: ConfigFacet;
   let paymentTokens: [string, string];
   let namedAccounts: { [name: string]: Address };
+  let wallets: string[];
 
-  before(async () => {
+  beforeEach(async () => {
     await deployments.fixture(["DEFOToken", "DEFODiamond"]);
     contract = await getContractWithSigner<ConfigFacet>(hardhat, "DEFODiamond");
     const defoTokenDeploymentAddress = (await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken")).address;
     paymentTokens = [MAINNET_DAI_ADDRESS, defoTokenDeploymentAddress];
     namedAccounts = await hardhat.getNamedAccounts();
+    wallets = [
+      namedAccounts.treasury,
+      namedAccounts.rewardPool,
+      namedAccounts.deployer, //liquidity pair goes here
+      namedAccounts.team,
+      namedAccounts.donations,
+      namedAccounts.vault,
+      namedAccounts.deployer, //redeem contract goes here
+    ];
   });
 
   describe("setConfig()", () => {
-    let wallets: string[];
-    beforeEach(async () => {
-      wallets = [
-        namedAccounts.treasury,
-        namedAccounts.rewardPool,
-        namedAccounts.deployer, //liquidity pair goes here
-        namedAccounts.team,
-        namedAccounts.donations,
-        namedAccounts.vault,
-        namedAccounts.deployer, //redeem contract goes here
-      ];
-    });
-    it("should set configuration to the protocol", async () => {
+    it("should set configuration of the protocol", async () => {
       expect(await contract.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG }));
     });
+  });
 
+  describe("getConfig()", () => {
     it("should get the configuration from the contract, should equal to the one set", async () => {
       const etalonConfig = { paymentTokens, wallets, ...PROTOCOL_CONFIG };
       await contract.setConfig(etalonConfig);
@@ -53,6 +53,28 @@ describe("ConfigFacet", () => {
         debug(`comparing ${key}`);
         expect(etalon.toString().toUpperCase()).to.be.equal(toCompare.toString().toUpperCase());
       });
+    });
+  });
+
+  describe("setGemTypesConfig()", () => {
+    it("should set configuration of the gem type", async () => {
+      expect(await contract.setGemTypesConfig(GEM_TYPES_CONFIG));
+    });
+  });
+
+  describe("getGemTypesConfig()", () => {
+    it("should get the configuration from the contract, should equal to the one set", async () => {
+      await contract.setGemTypesConfig(GEM_TYPES_CONFIG);
+      const config = await contract.getGemTypesConfig();
+      for (const i in GEM_TYPES_CONFIG) {
+        debug(`\nGem type ${i}`);
+        Object.keys(GEM_TYPES_CONFIG[i]).forEach(key => {
+          debug(`comparing ${key}`);
+          expect(GEM_TYPES_CONFIG[i][key as keyof GemTypeConfigStruct].toString().toUpperCase()).to.be.equal(
+            config[i][key as keyof GemTypeConfigStruct].toString().toUpperCase(),
+          );
+        });
+      }
     });
   });
 });
