@@ -28,6 +28,7 @@ contract VaultFacet is BaseFacet, IVault {
         address[WALLETS] storage wallets = s.config.wallets;
         Fi memory op;
 
+        op.unStakedGross = _amount;
         op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
         op.unStakedNet = _amount - op.donated;
         defo.transferFrom(
