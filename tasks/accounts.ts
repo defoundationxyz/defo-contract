@@ -1,8 +1,8 @@
 import { announce, info } from "@utils/output.helper";
+import DAI_ABI from "abi/dai-abi.json";
 import chalk from "chalk";
 import { task } from "hardhat/config";
 
-import DAI_ABI from "../abi/dai-abi.json";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
   const {

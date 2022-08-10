@@ -3,11 +3,10 @@ import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, isFuji, namedSigner } from "@utils/chain.helper";
 import { deployAnnounce, deployInfo, deploySuccess } from "@utils/output.helper";
+import DAI_ABI from "abi/erc20-abi.json";
 import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
 import { DeployFunction } from "hardhat-deploy/types";
-
-import DAI_ABI from "../abi/erc20-abi.json";
 
 
 const func: DeployFunction = async hre => {
