@@ -55,7 +55,7 @@ describe("YieldGemFacet", () => {
       }
     });
 
-    it("should charge the right price in DAI and DEFO", async () => {
+    it("should charge the correct price in DAI and DEFO", async () => {
       await hardhat.run("fork:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
