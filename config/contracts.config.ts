@@ -1,7 +1,7 @@
-import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
-import { strict } from "assert";
+import assert, { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
+
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
@@ -21,7 +21,7 @@ export const gemName = (gemNumber: number) =>
   (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
 
 const HUNDRED_PERCENT = 100;
-const PERCENTAGE_PRECISION_MULTIPLIER = 100;
+export const PERCENTAGE_PRECISION_MULTIPLIER = 100;
 const percent = (value: number) => value * PERCENTAGE_PRECISION_MULTIPLIER;
 
 export const SECONDS_IN_AN_HOUR = 3600;
@@ -49,14 +49,14 @@ export const MINT_LIMIT_PERIOD = 12 * SECONDS_IN_AN_HOUR;
 export const MAINTENANCE_PERIOD = 30 * SECONDS_IN_A_DAY;
 
 // the order for wallets, paymentTokens is extremely important, which is also the same in incomeDistributionOnMint
-enum PaymentTokens {
+export enum PaymentTokens {
   Dai,
   Defo,
 }
 
 // paymentTokens: DAI goes first, DEFO goes second.
 // wallets:
-enum Wallets {
+export enum Wallets {
   Treasury,
   RewardPool,
   LiquidityPair,
@@ -66,7 +66,7 @@ enum Wallets {
   RedeemContract,
 }
 
-enum TaxTiers {
+export enum TaxTiers {
   Tier0NoPayment,
   Tier1HugeTax,
   Tier2MediumTax,
@@ -117,6 +117,7 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
 export const SAPHIRE_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(1.5),
   rewardAmountDefo: toWei(0.29),
+  //dai goes first, defo second
   price: [toWei(25), toWei(5)],
   taperRewardsThresholdDefo: toWei(7.5),
   maxMintsPerLimitWindow: 32,
@@ -125,6 +126,7 @@ export const SAPHIRE_GEM: GemTypeConfigStruct = {
 export const RUBY_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(6),
   rewardAmountDefo: toWei(1.2),
+  //dai goes first, defo second
   price: [toWei(100), toWei(20)],
   taperRewardsThresholdDefo: toWei(30),
   maxMintsPerLimitWindow: 8,
@@ -133,9 +135,12 @@ export const RUBY_GEM: GemTypeConfigStruct = {
 export const DIAMOND_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(24),
   rewardAmountDefo: toWei(5),
+  //dai goes first, defo second
   price: [toWei(400), toWei(80)],
   taperRewardsThresholdDefo: toWei(120),
   maxMintsPerLimitWindow: 2,
 };
 
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
+
+assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration error");
