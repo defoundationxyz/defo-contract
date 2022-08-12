@@ -1,9 +1,8 @@
 import { toWei } from "@config";
 import { DEFOToken } from "@contractTypes/contracts/token";
+import { getLiquidityPairInfo } from "@utils/liquidity.helper";
 import { announce, success } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
-import JOE_FACTORY_ABI from "abi/joe-factory.json";
-import JOE_PAIR_ABI from "abi/joe-pair.json";
 import JOE_ROUTER_ABI from "abi/joe-router.json";
 import { task, types } from "hardhat/config";
 
@@ -33,16 +32,6 @@ export default task("add-liquidity", "adds DAI and DEFO liquidity to the pair us
       MaxUint256,
     );
 
-    const factoryAddress = await joeRouterContact.factory();
-    const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
-
-    const pairAddress = factoryContract.getPair(daiContract.address, defoContract.address);
-    const pairContract = await ethers.getContractAt(JOE_PAIR_ABI, pairAddress);
-
-    const [reservesDai, reservesDefo] = await pairContract.getReserves();
-    success(
-      `Added. Current reserves: DAI ${ethers.utils.formatEther(reservesDai)}, DEFO ${ethers.utils.formatEther(
-        reservesDefo,
-      )}`,
-    );
+    const { daiReserve, defoReserve } = await getLiquidityPairInfo(hre);
+    success(`Added. Current reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
   });

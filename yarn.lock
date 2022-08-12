@@ -2045,6 +2045,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@traderjoe-xyz/core@npm:^2.4.6":
+  version: 2.4.6
+  resolution: "@traderjoe-xyz/core@npm:2.4.6"
+  checksum: 5a66c469245fdb6921be2edccee6c8a5faca473c77b62df01fbdc058f155245bfbc7d19b5a78a072d73a14e985c9c711f984cf9d1d4fbb8a7841bd27843977a2
+  languageName: node
+  linkType: hard
+
 "@trivago/prettier-plugin-sort-imports@npm:^3.2.0":
   version: 3.2.0
   resolution: "@trivago/prettier-plugin-sort-imports@npm:3.2.0"
@@ -5969,6 +5976,7 @@ __metadata:
     "@openzeppelin/contracts": ^4.7.1
     "@openzeppelin/contracts-upgradeable": ^4.5.2
     "@openzeppelin/test-helpers": ^0.5.15
+    "@traderjoe-xyz/core": ^2.4.6
     "@trivago/prettier-plugin-sort-imports": ^3.2.0
     "@typechain/ethers-v5": ^10.1.0
     "@typechain/hardhat": ^6.1.2

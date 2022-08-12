@@ -8,6 +8,9 @@ import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
 import { DeployFunction } from "hardhat-deploy/types";
 
+import JOE_FACTORY_ABI from "../abi/joe-factory.json";
+import JOE_ROUTER_ABI from "../abi/joe-router.json";
+
 
 const func: DeployFunction = async hre => {
   const {
@@ -18,11 +21,26 @@ const func: DeployFunction = async hre => {
       utils: { formatEther: fromWei },
     },
   } = hre;
-  const { deployer, dai, treasury, vault, rewardPool, donations, team } = await getNamedAccounts();
+  const {
+    deployer,
+    dai: daiAddress,
+    treasury,
+    joeRouter,
+    vault,
+    rewardPool,
+    donations,
+    team,
+  } = await getNamedAccounts();
   deployAnnounce("\n\nConfiguring the protocol...");
 
   const diamondDeployment = await deployments.get("DEFODiamond");
   const defoTokenDeployment = await deployments.get("DEFOToken");
+
+  const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
+  const joeRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
+  const factoryAddress = await joeRouterContact.factory();
+  const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
+  const pairAddress = factoryContract.getPair(daiContract.address, defoTokenDeployment.address);
 
   const paymentTokens: [string, string] = [
     (await isFuji(hre)) ? FUJI_DAI_ADDRESS : MAINNET_DAI_ADDRESS,
@@ -31,7 +49,7 @@ const func: DeployFunction = async hre => {
   const wallets = [
     treasury,
     rewardPool,
-    deployer, //liquidity pair goes here
+    pairAddress,
     team,
     donations,
     vault,
@@ -50,7 +68,8 @@ const func: DeployFunction = async hre => {
     deployAnnounce(`\nApproving Diamond to spend on behalf of ${chalk.yellow(tokensOwner)}`);
     const defoContract = await getContractWithSigner<DEFOToken>(hre, "DEFOToken", tokensOwner);
     const signer = await namedSigner(hre, tokensOwner);
-    const daiContract = await ethers.getContractAt(DAI_ABI, dai, signer);
+    const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress, signer);
+
     for (const token of [defoContract, daiContract]) {
       const name = await token.name();
       deployAnnounce(`🔑 Approving spending of ${name}...`);
