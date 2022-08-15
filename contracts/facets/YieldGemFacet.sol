@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.15;
 
+import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeERC20.sol";
 import "../interfaces/IYieldGem.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";

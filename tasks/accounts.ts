@@ -1,8 +1,10 @@
+import { getLiquidityPairInfo } from "@utils/liquidity.helper";
 import { announce, info } from "@utils/output.helper";
+import DAI_ABI from "abi/dai-abi.json";
+import assert from "assert";
 import chalk from "chalk";
 import { task } from "hardhat/config";
 
-import DAI_ABI from "../abi/dai-abi.json";
 
 task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for the accounts.", async (_, hre) => {
   const {
@@ -14,7 +16,7 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
     },
   } = hre;
   const namedAccounts = await getNamedAccounts();
-  const { dai, forkedDefoToken } = namedAccounts;
+  const { dai, forkedDefoToken, joeRouter } = namedAccounts;
   info("\n 📡 Querying balances...");
   const daiContract = await ethers.getContractAt(DAI_ABI, dai);
   const defoTokenDeployment = (await deployments.getOrNull("DEFOToken"))?.address || "";
@@ -26,10 +28,11 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
     forkedDefoToken || defoTokenDeployment
       ? await ethers.getContractAt("DEFOToken", forkedDefoToken || defoTokenDeployment)
       : null;
+  assert(defoContract, "defoContract is null");
   announce(
     `DEFO token was ${chalk.yellow(
       forkedDefoToken ? "forked" : defoTokenDeployment ? "deployed locally" : chalk.red("not deployed!"),
-    )}. Address: ${defoContract?.address}`,
+    )}. Address: ${defoContract.address}`,
   );
 
   const table = await Promise.all(
@@ -44,4 +47,6 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
     }),
   );
   console.table(table);
+  const { pairAddress, daiReserve, defoReserve } = await getLiquidityPairInfo(hre);
+  info(`Liquidity pair (${pairAddress})reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
 });

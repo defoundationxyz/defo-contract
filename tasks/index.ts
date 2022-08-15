@@ -8,5 +8,5 @@ export * as getSomeDefo from "./getSomeDefo";
 export * as permit from "./permit";
 export * as vault from "./vault";
 export * as history from "./history";
-export * as abi from "./abi";
+export * as addLiquidity from "./addLiquidity";
 export * from "./fork";

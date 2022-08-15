@@ -1,8 +1,9 @@
+import DAI_ABI from "abi/erc20-abi.json";
 import { Address } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-import DAI_ABI from "../../abi/erc20-abi.json";
 import { MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from "../../constants/addresses";
+
 
 export const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: Address, amountToTransfer?: number) => {
   const accountToInpersonate = MAINNET_DAI_WHALE_ADDRESS;
