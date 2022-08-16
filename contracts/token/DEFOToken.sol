@@ -2,34 +2,31 @@
 pragma solidity 0.8.15;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "../interfaces/ITransferLimiter.sol";
 
 /** @title  DEFO Token
   * @author Decentralized Foundation Team
-  * @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, ownable, and recoverable if tokens are mistakely sent
-  * @dev The
+  * @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, admin access, black lists, burnable, pausable, and recoverable if tokens are mistakely sent
 */
-contract DEFOToken is IERC20 {
+
+contract DEFOToken is Pausable, IERC20, IERC20Metadata {
+    ITransferLimiter transferLimiter;
+
     mapping(address => uint256) private _balances;
 
     // @notice Admins list
     mapping(address => uint256) public wards;
 
-    // @notice Grant access
-    // @param guy admin to grant auth
-    function rely(address guy) external auth {
-        wards[guy] = 1;
-    }
+    // @notice Blacklist
+    mapping(address => bool) public blacklist;
 
-    // @notice Deny access
-    // @param guy deny auth for
-    function deny(address guy) external auth {
-        wards[guy] = 0;
-    }
-
-    modifier auth() {
-        require(wards[msg.sender] == 1, "DEFO/not-authorized");
-        _;
-    }
+    // @notice this is for the 1000 DEFO per 24h sale limitation, can be changes with setTransferLimit
+    mapping(address => uint256) public tokensTransferred;
+    mapping(address => uint256) public timeOfLastTransfer;
+    uint256 public transferLimitPeriod = 1 days;
+    uint256 public transferLimit = 1000;
 
     // --- ERC20 Data ---
     string public constant name = "DEFO Token";
@@ -42,22 +39,34 @@ contract DEFOToken is IERC20 {
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
 
-    // --- Math ---
-    function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x + y) >= x);
-    }
-
-    function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        require((z = x - y) <= x);
-    }
 
     // --- EIP712 niceties ---
     bytes32 public DOMAIN_SEPARATOR;
     // bytes32 public constant PERMIT_TYPEHASH = keccak256("Permit(address holder,address spender,uint256 nonce,uint256 expiry,bool allowed)");
     bytes32 public constant PERMIT_TYPEHASH = 0xea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb;
 
+    /* ============ External and Public Functions ============ */
+
+    modifier auth() {
+        require(wards[_msgSender()] == 1, "DEFO/not-authorized");
+        _;
+    }
+
     constructor(uint256 chainId_) {
-        wards[msg.sender] = 1;
+        wards[_msgSender()] = 1;
+        DOMAIN_SEPARATOR = keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes(name)),
+                keccak256(bytes(version)),
+                chainId_,
+                address(this)
+            )
+        );
+    }
+
+    function initialize(uint256 chainId_) external {
+        wards[_msgSender()] = 1;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -72,7 +81,7 @@ contract DEFOToken is IERC20 {
     // --- Token ---
 
     function transfer(address dst, uint256 wad) external returns (bool) {
-        return transferFrom(msg.sender, dst, wad);
+        return transferFrom(_msgSender(), dst, wad);
     }
 
     function transferFrom(
@@ -80,10 +89,26 @@ contract DEFOToken is IERC20 {
         address dst,
         uint256 wad
     ) public returns (bool) {
+        require(!paused(), "DEFO/token transfer while paused");
         require(balanceOf[src] >= wad, "DEFO/insufficient-balance");
-        if (src != msg.sender && allowance[src][msg.sender] != type(uint256).max) {
-            require(allowance[src][msg.sender] >= wad, "DEFO/insufficient-allowance");
-            allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
+        require(!blacklist[src] && !blacklist[dst], "DEFO/Address is not permitted");
+        if (wards[_msgSender()] != 1) {
+            uint256 endOfLimitWindow = timeOfLastTransfer[src] + transferLimitPeriod;
+            require(
+                (tokensTransferred[src] + wad <= transferLimit) || (block.timestamp > endOfLimitWindow),
+                "DEFO/transfer limit"
+            );
+            if (block.timestamp > endOfLimitWindow)
+                tokensTransferred[src] = wad;
+            else
+                tokensTransferred[src] += wad;
+            timeOfLastTransfer[src] = block.timestamp;
+            if (address(transferLimiter) != address(0))
+                transferLimiter.DEFOTokenTransferLimit(src, dst, wad);
+        }
+        if (src != _msgSender() && allowance[src][_msgSender()] != type(uint256).max) {
+            require(allowance[src][_msgSender()] >= wad, "DEFO/insufficient-allowance");
+            allowance[src][_msgSender()] = sub(allowance[src][_msgSender()], wad);
         }
         balanceOf[src] = sub(balanceOf[src], wad);
         balanceOf[dst] = add(balanceOf[dst], wad);
@@ -91,17 +116,12 @@ contract DEFOToken is IERC20 {
         return true;
     }
 
-    function mint(address usr, uint256 wad) external auth {
-        balanceOf[usr] = add(balanceOf[usr], wad);
-        totalSupply = add(totalSupply, wad);
-        emit Transfer(address(0), usr, wad);
-    }
 
     function burn(address usr, uint256 wad) external {
         require(balanceOf[usr] >= wad, "DEFO/insufficient-balance");
-        if (usr != msg.sender && allowance[usr][msg.sender] != type(uint256).max) {
-            require(allowance[usr][msg.sender] >= wad, "DEFO/insufficient-allowance");
-            allowance[usr][msg.sender] = sub(allowance[usr][msg.sender], wad);
+        if (usr != _msgSender() && allowance[usr][_msgSender()] != type(uint256).max) {
+            require(allowance[usr][_msgSender()] >= wad, "DEFO/insufficient-allowance");
+            allowance[usr][_msgSender()] = sub(allowance[usr][_msgSender()], wad);
         }
         balanceOf[usr] = sub(balanceOf[usr], wad);
         totalSupply = sub(totalSupply, wad);
@@ -109,8 +129,8 @@ contract DEFOToken is IERC20 {
     }
 
     function approve(address usr, uint256 wad) external returns (bool) {
-        allowance[msg.sender][usr] = wad;
-        emit Approval(msg.sender, usr, wad);
+        allowance[_msgSender()][usr] = wad;
+        emit Approval(_msgSender(), usr, wad);
         return true;
     }
 
@@ -142,6 +162,36 @@ contract DEFOToken is IERC20 {
         emit Approval(holder, spender, wad);
     }
 
+    /* ============ External and Public Admin Functions ============ */
+
+    function linkDiamond(ITransferLimiter _transferLimiter) external auth {
+        transferLimiter = _transferLimiter;
+    }
+
+    function setTransferLimit(uint256 _transferLimit, uint256 _transferLimitPeriod) external auth {
+        transferLimitPeriod = _transferLimitPeriod;
+        transferLimit = _transferLimit;
+    }
+
+    function mint(address usr, uint256 wad) external auth {
+        balanceOf[usr] = add(balanceOf[usr], wad);
+        totalSupply = add(totalSupply, wad);
+        emit Transfer(address(0), usr, wad);
+    }
+
+    // @notice Grant access
+    // @param guy admin to grant auth
+    function rely(address guy) external auth {
+        wards[guy] = 1;
+    }
+
+    // @notice Deny access
+    // @param guy deny auth for
+    function deny(address guy) external auth {
+        wards[guy] = 0;
+    }
+
+
     // Recovering lost tokens and avax
     function recoverLostDEFO(
         address _token,
@@ -154,4 +204,28 @@ contract DEFOToken is IERC20 {
     function recoverLostAVAX(address _to) external auth {
         payable(_to).transfer(address(this).balance);
     }
+
+    function updateBlacklist(address _address, bool _allow) external auth {
+        blacklist[_address] = _allow;
+    }
+
+    function pause() external auth {
+        _pause();
+    }
+
+    function unpause() external auth {
+        _unpause();
+    }
+
+    /* ============ Internal Functions ============ */
+
+    // --- Math ---
+    function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        require((z = x + y) >= x);
+    }
+
+    function sub(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        require((z = x - y) <= x);
+    }
+
 }

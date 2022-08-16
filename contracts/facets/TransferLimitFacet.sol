@@ -11,6 +11,7 @@ import "../base-facet/BaseFacet.sol";
 */
 contract TransferLimitFacet is BaseFacet, ITransferLimiter {
     /* ============ External and Public Functions ============ */
+    ///todo refactor transfer limiting operations to this facet
     function yieldGemTransferLimit(
         address to,
         address from,
@@ -23,6 +24,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
         address from,
         uint256 amount
     ) public {
+        
 
     }
 }

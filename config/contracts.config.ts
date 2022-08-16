@@ -5,11 +5,6 @@ import { BigNumber, ethers } from "ethers";
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
-export const DEFO_TOKEN_TOTAL_SUPPLY = 1e6;
-export const DEFO_TOKEN_REWARD_POOL = 875_000;
-export const DEFO_TOKEN_TREASURY = 115_000;
-export const DEFO_TOKEN_LIQUIDITY_POOL = DEFO_TOKEN_TOTAL_SUPPLY - DEFO_TOKEN_REWARD_POOL - DEFO_TOKEN_TREASURY;
-
 export const toWei = (value: number | string | BigNumber) => ethers.utils.parseEther(value.toString());
 
 export const GEMS: Record<GemNames, number> = {
@@ -31,6 +26,13 @@ export const SECONDS_IN_A_MONTH = 30.44 * SECONDS_IN_A_DAY;
 
 export const weeklyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_WEEK);
 export const monthlyInPerSecond = (value: number | string | BigNumber) => toWei(value).div(SECONDS_IN_A_MONTH);
+
+export const DEFO_TOKEN_TOTAL_SUPPLY = 1e6;
+export const DEFO_TOKEN_REWARD_POOL = 875_000;
+export const DEFO_TOKEN_TREASURY = 115_000;
+export const DEFO_TOKEN_LIQUIDITY_POOL = DEFO_TOKEN_TOTAL_SUPPLY - DEFO_TOKEN_REWARD_POOL - DEFO_TOKEN_TREASURY;
+export const DEFO_TOKEN_TRANSFER_LIMIT = 1_000;
+export const DEFO_TOKEN_TRANSFER_LIMIT_PERIOD = SECONDS_IN_A_DAY;
 
 export const TREASURY_DAI_RATE = percent(75);
 export const TREASURY_DEFO_RATE = 0;
