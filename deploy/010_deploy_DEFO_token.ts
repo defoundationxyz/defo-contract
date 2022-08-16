@@ -12,9 +12,6 @@ const func: DeployFunction = async hre => {
     deployments: { deploy },
     getChainId,
     ethers,
-    ethers: {
-      utils: { parseEther: toWei },
-    },
   } = hre;
 
   const { defoTokenOwner } = await getNamedAccounts();
@@ -22,6 +19,7 @@ const func: DeployFunction = async hre => {
 
   await deployAndTell(deploy, "DEFOToken", {
     from: defoTokenOwner,
+    proxy: true,
     owner: defoTokenOwner,
     args: [chainId],
   });

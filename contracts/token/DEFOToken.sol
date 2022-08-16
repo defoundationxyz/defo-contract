@@ -1,19 +1,21 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /** @title  DEFO Token
   * @author Decentralized Foundation Team
   * @notice ERC20 with Dai-like gas-less approvals with EIP712 signatures, ownable, and recoverable if tokens are mistakely sent
+  * @dev The
 */
-contract DEFOToken {
+contract DEFOToken is IERC20 {
     mapping(address => uint256) private _balances;
 
     // @notice Admins list
     mapping(address => uint256) public wards;
 
     // @notice Grant access
-    // @param guy admin to granth auth
+    // @param guy admin to grant auth
     function rely(address guy) external auth {
         wards[guy] = 1;
     }
@@ -22,12 +24,6 @@ contract DEFOToken {
     // @param guy deny auth for
     function deny(address guy) external auth {
         wards[guy] = 0;
-    }
-
-    // Transfer ownership update with authorization
-    function transferOwnership(address newOwner) external auth {
-        wards[msg.sender] = 0;
-        wards[newOwner] = 1;
     }
 
     modifier auth() {
@@ -45,9 +41,6 @@ contract DEFOToken {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
-
-    event Approval(address indexed src, address indexed guy, uint256 wad);
-    event Transfer(address indexed src, address indexed dst, uint256 wad);
 
     // --- Math ---
     function add(uint256 x, uint256 y) internal pure returns (uint256 z) {
@@ -158,7 +151,7 @@ contract DEFOToken {
         IERC20(_token).transfer(_to, _amount);
     }
 
-     function recoverLostAVAX(address _to) external auth {
-         payable(_to).transfer(address(this).balance);
-     }
+    function recoverLostAVAX(address _to) external auth {
+        payable(_to).transfer(address(this).balance);
+    }
 }
