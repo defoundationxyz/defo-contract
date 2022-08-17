@@ -37,13 +37,13 @@ describe("ConfigFacet", () => {
 
   describe("setConfig()", () => {
     it("should set configuration of the protocol", async () => {
-      expect(await contract.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG }));
+      expect(await contract.setConfig({paymentTokens, wallets, ...PROTOCOL_CONFIG}));
     });
   });
 
   describe("getConfig()", () => {
     it("should get the configuration from the contract, should equal to the one set", async () => {
-      const etalonConfig = { paymentTokens, wallets, ...PROTOCOL_CONFIG };
+      const etalonConfig = {paymentTokens, wallets, ...PROTOCOL_CONFIG};
       await contract.setConfig(etalonConfig);
       const config = await contract.getConfig();
       Object.keys(etalonConfig).forEach(key => {
@@ -51,7 +51,15 @@ describe("ConfigFacet", () => {
         const etalon = etalonConfig[index];
         const toCompare = config[index];
         debug(`comparing ${key}`);
-        expect(etalon.toString().toUpperCase()).to.be.equal(toCompare.toString().toUpperCase());
+        if (typeof (etalon) === "object") {
+          Object.keys(etalon).forEach(etalonKey =>
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            expect(etalon[etalonKey].toString().toUpperCase()).to.be.equal(toCompare[etalonKey].toString().toUpperCase())
+          );
+        } else {
+          expect(etalon.toString().toUpperCase()).to.be.equal(toCompare.toString().toUpperCase());
+        }
       });
     });
   });

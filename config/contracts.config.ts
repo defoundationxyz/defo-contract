@@ -31,8 +31,6 @@ export const DEFO_TOKEN_TOTAL_SUPPLY = 1e6;
 export const DEFO_TOKEN_REWARD_POOL = 875_000;
 export const DEFO_TOKEN_TREASURY = 115_000;
 export const DEFO_TOKEN_LIQUIDITY_POOL = DEFO_TOKEN_TOTAL_SUPPLY - DEFO_TOKEN_REWARD_POOL - DEFO_TOKEN_TREASURY;
-export const DEFO_TOKEN_TRANSFER_LIMIT = 1_000;
-export const DEFO_TOKEN_TRANSFER_LIMIT_PERIOD = SECONDS_IN_A_DAY;
 
 export const TREASURY_DAI_RATE = percent(75);
 export const TREASURY_DEFO_RATE = 0;
@@ -45,10 +43,6 @@ export const LIQUIDITY_DEFO_RATE = percent(25);
 
 strict(percent(HUNDRED_PERCENT) === LIQUIDITY_DAI_RATE + REWARD_DAI_RATE + TREASURY_DAI_RATE);
 strict(percent(HUNDRED_PERCENT) === TREASURY_DEFO_RATE + REWARD_DEFO_RATE + LIQUIDITY_DEFO_RATE);
-
-export const MINT_LIMIT_PERIOD = 12 * SECONDS_IN_AN_HOUR;
-
-export const MAINTENANCE_PERIOD = 30 * SECONDS_IN_A_DAY;
 
 // the order for wallets, paymentTokens is extremely important, which is also the same in incomeDistributionOnMint
 export enum PaymentTokens {
@@ -111,6 +105,12 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
   mintLock: false,
   transferLock: false,
   mintLimitWindow: 12 * SECONDS_IN_AN_HOUR,
+  defoTokenLimitConfig: {
+    saleLimitPeriod: SECONDS_IN_A_DAY,
+    saleLimitAmount: 1_000,
+    limitByReward: true
+  }
+
 };
 
 //====== Gem Types Config ========

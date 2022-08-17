@@ -22,12 +22,6 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     // @notice Blacklist
     mapping(address => bool) public blacklist;
 
-    // @notice this is for the 1000 DEFO per 24h sale limitation, can be changes with setTransferLimit
-    mapping(address => uint256) public tokensTransferred;
-    mapping(address => uint256) public timeOfLastTransfer;
-    uint256 public transferLimitPeriod = 1 days;
-    uint256 public transferLimit = 1000;
-
     // --- ERC20 Data ---
     string public constant name = "DEFO Token";
     string public constant symbol = "DEFO";
@@ -48,7 +42,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     /* ============ External and Public Functions ============ */
 
     modifier auth() {
-        require(wards[_msgSender()] == 1, "DEFO/not-authorized");
+        require(wards[_msgSender()] == 1, "DEFOToken:not-authorized");
         _;
     }
 
@@ -89,25 +83,13 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         address dst,
         uint256 wad
     ) public returns (bool) {
-        require(!paused(), "DEFO/token transfer while paused");
-        require(balanceOf[src] >= wad, "DEFO/insufficient-balance");
-        require(!blacklist[src] && !blacklist[dst], "DEFO/Address is not permitted");
-        if (wards[_msgSender()] != 1) {
-            uint256 endOfLimitWindow = timeOfLastTransfer[src] + transferLimitPeriod;
-            require(
-                (tokensTransferred[src] + wad <= transferLimit) || (block.timestamp > endOfLimitWindow),
-                "DEFO/transfer limit"
-            );
-            if (block.timestamp > endOfLimitWindow)
-                tokensTransferred[src] = wad;
-            else
-                tokensTransferred[src] += wad;
-            timeOfLastTransfer[src] = block.timestamp;
-            if (address(transferLimiter) != address(0))
-                transferLimiter.DEFOTokenTransferLimit(src, dst, wad);
-        }
+        require(!paused(), "DEFOToken:paused");
+        require(balanceOf[src] >= wad, "DEFOToken:insufficient-balance");
+        require(!blacklist[src] && !blacklist[dst], "DEFOToken:blacklisted");
+        if (wards[_msgSender()] != 1 && address(transferLimiter) != address(0))
+            transferLimiter.DEFOTokenTransferLimit(src, dst, wad);
         if (src != _msgSender() && allowance[src][_msgSender()] != type(uint256).max) {
-            require(allowance[src][_msgSender()] >= wad, "DEFO/insufficient-allowance");
+            require(allowance[src][_msgSender()] >= wad, "DEFOToken:insufficient-allowance");
             allowance[src][_msgSender()] = sub(allowance[src][_msgSender()], wad);
         }
         balanceOf[src] = sub(balanceOf[src], wad);
@@ -118,9 +100,9 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
 
 
     function burn(address usr, uint256 wad) external {
-        require(balanceOf[usr] >= wad, "DEFO/insufficient-balance");
+        require(balanceOf[usr] >= wad, "DEFOToken:insufficient-balance");
         if (usr != _msgSender() && allowance[usr][_msgSender()] != type(uint256).max) {
-            require(allowance[usr][_msgSender()] >= wad, "DEFO/insufficient-allowance");
+            require(allowance[usr][_msgSender()] >= wad, "DEFOToken:insufficient-allowance");
             allowance[usr][_msgSender()] = sub(allowance[usr][_msgSender()], wad);
         }
         balanceOf[usr] = sub(balanceOf[usr], wad);
@@ -153,10 +135,10 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
             )
         );
 
-        require(holder != address(0), "DEFO/invalid-address-0");
-        require(holder == ecrecover(digest, v, r, s), "DEFO/invalid-permit");
-        require(expiry == 0 || block.timestamp <= expiry, "DEFO/permit-expired");
-        require(nonce == nonces[holder]++, "DEFO/invalid-nonce");
+        require(holder != address(0), "DEFOToken:invalid-address-0");
+        require(holder == ecrecover(digest, v, r, s), "DEFOToken:invalid-permit");
+        require(expiry == 0 || block.timestamp <= expiry, "DEFOToken:permit-expired");
+        require(nonce == nonces[holder]++, "DEFOToken:invalid-nonce");
         uint256 wad = allowed ? type(uint256).max : 0;
         allowance[holder][spender] = wad;
         emit Approval(holder, spender, wad);
@@ -167,12 +149,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     function linkDiamond(ITransferLimiter _transferLimiter) external auth {
         transferLimiter = _transferLimiter;
     }
-
-    function setTransferLimit(uint256 _transferLimit, uint256 _transferLimitPeriod) external auth {
-        transferLimitPeriod = _transferLimitPeriod;
-        transferLimit = _transferLimit;
-    }
-
+    
     function mint(address usr, uint256 wad) external auth {
         balanceOf[usr] = add(balanceOf[usr], wad);
         totalSupply = add(totalSupply, wad);

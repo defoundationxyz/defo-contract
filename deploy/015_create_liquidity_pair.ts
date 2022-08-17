@@ -51,7 +51,7 @@ const func: DeployFunction = async hre => {
       )}, DEFO ${ethers.utils.formatEther(reservesDefo)}`,
     );
   } else {
-    deployInfo("Scipping liquidity pair creation on live network");
+    deployInfo("Skipping liquidity pair creation on live network");
   }
 };
 
