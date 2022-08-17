@@ -20,7 +20,6 @@ import { Address } from "hardhat-deploy/dist/types";
 
 
 const debug = newDebug("defo:YieldGemFacet.test.ts");
-
 describe("YieldGemFacet", () => {
   let contract: YieldGemFacet;
   let paymentTokenContracts: [Contract, Contract];
@@ -62,7 +61,7 @@ describe("YieldGemFacet", () => {
 
       for (const i of Object.values(GEMS)) {
         debug(`minting ${gemName(i)}`);
-        const balanceBefore: [BigNumber, BigNumber] = [BigNumber.from(0), BigNumber.from(0)];
+        const balanceBefore: [BigNumber, BigNumber] = [ethers.constants.Zero, ethers.constants.Zero];
         for (const token of [0, 1]) {
           balanceBefore[token] = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
         }
@@ -86,8 +85,8 @@ describe("YieldGemFacet", () => {
         for (const i of Object.values(GEMS)) {
           debug(`minting ${gemName(i)}`);
           const balanceBefore: Array<[BigNumber, BigNumber]> = new Array(receiversNumber).fill([
-            BigNumber.from(0),
-            BigNumber.from(0),
+            ethers.constants.Zero,
+            ethers.constants.Zero,
           ]);
           for (const token of [0, 1]) {
             for (let wallet = 0; wallet < receiversNumber; wallet++) {
