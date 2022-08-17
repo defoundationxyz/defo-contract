@@ -21,6 +21,7 @@ const func: DeployFunction = async hre => {
     from: deployer,
     owner: deployer,
     facets: facetNames,
+    deterministicDeployment: true,
   });
 };
 

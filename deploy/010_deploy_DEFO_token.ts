@@ -1,5 +1,4 @@
 import { deployAndTell } from "@utils/deployFunc";
-import { deploySuccess } from "@utils/output.helper";
 import assert from "assert";
 import { DeployFunction } from "hardhat-deploy/types";
 
@@ -12,9 +11,6 @@ const func: DeployFunction = async hre => {
     deployments: { deploy },
     getChainId,
     ethers,
-    ethers: {
-      utils: { parseEther: toWei },
-    },
   } = hre;
 
   const { defoTokenOwner } = await getNamedAccounts();
@@ -22,6 +18,10 @@ const func: DeployFunction = async hre => {
 
   await deployAndTell(deploy, "DEFOToken", {
     from: defoTokenOwner,
+    proxy: {
+      owner: defoTokenOwner,
+      methodName: "initialize",
+    },
     owner: defoTokenOwner,
     args: [chainId],
   });
@@ -30,8 +30,6 @@ const func: DeployFunction = async hre => {
   const defoTokenOwnerSigner = (await ethers.getSigners())[defoSignerIndex];
 
   assert(defoTokenOwnerSigner.address === defoTokenOwner);
-
-  deploySuccess(`Done`);
 };
 
 export default func;

@@ -41,6 +41,9 @@ const config: HardhatUserConfig = {
     currency: "USD",
     gasPrice: 100,
     enabled: !!process.env.REPORT_GAS,
+    coinmarketcap: "399a40d3-ac4e-4c92-8f6d-fe901ef01ef0",
+    gasPriceApi: "https://api.snowtrace.io/api?module=proxy&action=eth_gasPrice",
+    token: "AVAX",
   },
   mocha: {
     timeout: 30000,

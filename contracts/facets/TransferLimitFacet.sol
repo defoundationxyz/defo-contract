@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.15;
 
+import "../data-types/IDataTypes.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../base-facet/BaseFacet.sol";
 
@@ -11,6 +12,7 @@ import "../base-facet/BaseFacet.sol";
 */
 contract TransferLimitFacet is BaseFacet, ITransferLimiter {
     /* ============ External and Public Functions ============ */
+    ///todo refactor transfer limiting operations to this facet
     function yieldGemTransferLimit(
         address to,
         address from,
@@ -23,6 +25,32 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
         address from,
         uint256 amount
     ) public {
+        if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {
+            uint256 endOfLimitWindow = s.defoTokenLimitWindow.timeOfLastSale[from] + s.config.defoTokenLimitConfig.saleLimitPeriod;
+            require(
+                (s.defoTokenLimitWindow.tokensSold[from] + amount <= s.config.defoTokenLimitConfig.saleLimitAmount) || (block.timestamp > endOfLimitWindow),
+                "DEFOToken:transfer-limit"
+            );
+            if (block.timestamp > endOfLimitWindow)
+                s.defoTokenLimitWindow.tokensSold[from] = amount;
+            else
+                s.defoTokenLimitWindow.tokensSold[from] += amount;
+            s.defoTokenLimitWindow.timeOfLastSale[from] = block.timestamp;
 
+            if (s.config.defoTokenLimitConfig.limitByReward) {
+                uint256[] memory gemIds = _getGemIds(from);
+                require(gemIds.length > 0, "DEFOTransferLimit:no-gems");
+                uint256 allowedSellAmount = 0;
+
+                for (uint256 i = 0; i < gemIds.length; i++) {
+                    uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;
+                    allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;
+                }
+
+                require(amount <= allowedSellAmount, "DEFOTransferLimit:greater-than-total-rewards-per-week");
+            }
+
+        }
     }
+
 }

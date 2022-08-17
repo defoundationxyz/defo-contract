@@ -23,7 +23,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     /* ====================== Modifiers ====================== */
     modifier onlyClaimable(uint256 _tokenId) {
-        require(isClaimable(_tokenId), "The gem is not claimable");
+        require(isClaimable(_tokenId), "DEFORewards:not-claimable");
         _;
     }
 
@@ -35,7 +35,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
+            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0, "DEFORewards:not-claimable");
         Fi memory op;
         op.claimedGross = getRewardAmount(_tokenId);
 
@@ -74,7 +74,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         Fi memory op;
 
         uint256 rewardGross = getRewardAmount(_tokenId);
-        require(_amount <= rewardGross, "Not enough pending rewards");
+        require(_amount <= rewardGross, "DEFORewards:not-enough-rewards");
 
         op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
         op.stakedGross = _amount;
@@ -98,7 +98,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
 
     function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external {
-        require(_tokenIds.length == _amounts.length, "_tokendIds and _amounts should have the same length");
+        require(_tokenIds.length == _amounts.length, "DEFORewards:_tokendIds-_amounts-inconsistent");
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stakeReward(_tokenIds[i], _amounts[i]);
         }
@@ -161,7 +161,7 @@ contract RewardsFacet is BaseFacet, IRewards {
                 s.config.rewardPeriod);
         }
         else {
-            require(gem.mintTime < gem.boostTime, "Mint time is later than boost time");
+            require(gem.mintTime < gem.boostTime, "DEFORewards:mint-later-than-boost");
             totalReward = PeriodicHelper.calculateTaperedRewardWithIntermediateBoost(
                 gem.boostTime - gem.mintTime,
                 gemType.taperRewardsThresholdDefo,
