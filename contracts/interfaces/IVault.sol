@@ -35,6 +35,13 @@ interface IVault {
     function getStaked(uint256 _tokenId) external view returns (uint256);
 
     /**
+    * @notice get DEFO amount currently in the vault for all user's yield gems
+    * @return tokenIds_ array of staked tokenIds
+    * @return amounts_ array of amounts (gross, currently in the vault)
+    */
+    function getStakedAllGems() external view returns (uint256[] memory tokenIds_, uint256[] memory amounts_);
+
+    /**
     * @notice get amount currently in the vault for sender
     * @return amount in DEFO (wei precision)
     */

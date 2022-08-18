@@ -6,6 +6,7 @@ import { BigNumber, ethers } from "ethers";
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
 export const toWei = (value: number | string | BigNumber) => ethers.utils.parseEther(value.toString());
+export const fromWei = ethers.utils.formatEther;
 
 export const GEMS: Record<GemNames, number> = {
   sapphire: 0,
@@ -108,9 +109,8 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
   defoTokenLimitConfig: {
     saleLimitPeriod: SECONDS_IN_A_DAY,
     saleLimitAmount: 1_000,
-    limitByReward: true
-  }
-
+    limitByReward: true,
+  },
 };
 
 //====== Gem Types Config ========

@@ -68,8 +68,8 @@ export default task("gems", "get gems info and balance information for the deplo
       // gem details
       for (const filterPredicate of [
         { message: "Main info", func: allDetailsExceptRewardFilter },
-        { message: "Financial Info", func: onlyFi },
-        { message: "Rewards related info", func: onlyRewardFilter },
+        { message: "Totals", func: onlyFi },
+        { message: "Pending Rewards", func: onlyRewardFilter },
       ]) {
         const userGemsOfTypeForOutput = userGemsOfType?.map(gem => {
           const gemWithFieldsToShow = _.pick(

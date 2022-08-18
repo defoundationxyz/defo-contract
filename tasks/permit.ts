@@ -1,6 +1,5 @@
-import { announce, info, success } from "@utils/output.helper";
+import { announce, info, sayMaximumForMaxUint, success } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
-import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
 import { task } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -39,9 +38,9 @@ export default task(
     }
     const allowance = await token.allowance(deployer, spenderAddress);
     success(
-      `Permission to spend granted to DEFO Diamond Contract deployed to ${spenderAddress}. Now allowance is ${
-        allowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : fromWei(allowance)
-      }`,
+      `Permission to spend granted to DEFO Diamond Contract deployed to ${spenderAddress}. Now allowance is ${sayMaximumForMaxUint(
+        allowance,
+      )}`,
     );
   }
 });
