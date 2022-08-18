@@ -124,7 +124,7 @@
     "vault": "hardhat --network localhost vault",
     "add-liquidity": "hardhat --network localhost add-liquidity",
     "history": "hardhat --network localhost history --time 7days",
-    "dev": "yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time --time 8d && yarn claim --id 0 && yarn vault --id 2 --amount 5 && yarn gems && yarn accounts",
+    "dev": "yarn get-some-dai && yarn get-some-defo && yarn permit && yarn get-some-gems && yarn jump-in-time --time 8d && yarn claim --id 0 && yarn vault --op stake --id 1 --amount 1 && yarn vault --op stake --id 2 --amount 5 && yarn vault --op unstake --id 2 --amount 4.75 && yarn gems && yarn accounts",
     "test": "cross-env HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true DEBUG='defo:*' hardhat test",
     "gas": "cross-env REPORT_GAS=true HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true hardhat test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network"
