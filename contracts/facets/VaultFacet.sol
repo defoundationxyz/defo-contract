@@ -64,6 +64,18 @@ contract VaultFacet is BaseFacet, IVault {
         return s.gems[_tokenId].fi.stakedNet - s.gems[_tokenId].fi.unStakedGross;
     }
 
+    function getStakedAllGems() external view returns (uint256[] memory tokenIds_, uint256[] memory amounts_) {
+        address user = _msgSender();
+        tokenIds_ = _getGemIds(user);
+        amounts_ = new uint256[](tokenIds_.length);
+        for (uint256 i = 0; i < tokenIds_.length; i++) {
+            uint256 tokenId = tokenIds_[i];
+            amounts_[i] = s.gems[tokenId].fi.stakedNet - s.gems[tokenId].fi.unStakedGross;
+        }
+        return (tokenIds_, amounts_);
+    }
+
+
     function getTotalStaked() external view returns (uint256) {
         address user = _msgSender();
         return s.usersFi[user].stakedNet - s.usersFi[user].unStakedGross;

@@ -1,3 +1,4 @@
+import { fromWei } from "@config";
 import { FiStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
 import { getTime } from "@utils/chain.helper";
 import chalk from "chalk";
@@ -26,6 +27,9 @@ export const deployError = (message: string) => deployLogger(chalk.red(message))
 export const deployAnnounce = (message: string) => deployLogger(chalk.cyan(message));
 export const deployWarning = (message: string) => deployLogger(chalk.yellow(message));
 export const deploySuccess = (message: string) => deployLogger(chalk.green(message));
+
+export const sayMaximumForMaxUint = (allowance: BigNumber) =>
+  allowance.eq(ethers.constants.MaxUint256) ? chalk.magenta("Maximum") : fromWei(allowance);
 
 export const displayDeployResult = (name: string, result: DeployResult) =>
   !result.newlyDeployed
