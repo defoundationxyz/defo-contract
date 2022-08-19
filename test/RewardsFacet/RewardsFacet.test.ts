@@ -18,7 +18,7 @@ describe("RewardsFacet", () => {
   let wallets: string[];
 
   beforeEach(async () => {
-    await deployments.fixture(["DEFOToken", "DEFODiamond", "DiamondInitialized"]);
+    await deployments.fixture(["DEFOToken", "DEFODiamond", "DEFOTokenInit", "DiamondInitialized"]);
     contract = await getContractWithSigner<RewardsFacet>(hardhat, "DEFODiamond");
     const defoTokenDeploymentAddress = (await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken")).address;
     paymentTokens = [MAINNET_DAI_ADDRESS, defoTokenDeploymentAddress];

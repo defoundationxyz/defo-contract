@@ -29,13 +29,7 @@ contract VaultFacet is BaseFacet, IVault {
         Fi memory op;
 
         op.unStakedGross = _amount;
-        op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
-        op.unStakedNet = _amount - op.donated;
-        defo.transferFrom(
-            wallets[uint(Wallets.Vault)],
-            wallets[uint(Wallets.Charity)],
-            op.donated);
-        emit LibDonations.Donated(user, op.donated);
+        op.donated = 0;
 
         // sending withdrawal tax to the reward wallet
         uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);
@@ -45,7 +39,7 @@ contract VaultFacet is BaseFacet, IVault {
             wallets[uint(Wallets.RewardPool)],
             op.vaultTaxPaid);
 
-        op.unStakedNet -= op.vaultTaxPaid;
+        op.unStakedNet = _amount - op.vaultTaxPaid;
 
         defo.transferFrom(
             wallets[uint(Wallets.Vault)],
@@ -63,6 +57,18 @@ contract VaultFacet is BaseFacet, IVault {
     function getStaked(uint256 _tokenId) external view returns (uint256) {
         return s.gems[_tokenId].fi.stakedNet - s.gems[_tokenId].fi.unStakedGross;
     }
+
+    function getStakedAllGems() external view returns (uint256[] memory tokenIds_, uint256[] memory amounts_) {
+        address user = _msgSender();
+        tokenIds_ = _getGemIds(user);
+        amounts_ = new uint256[](tokenIds_.length);
+        for (uint256 i = 0; i < tokenIds_.length; i++) {
+            uint256 tokenId = tokenIds_[i];
+            amounts_[i] = s.gems[tokenId].fi.stakedNet - s.gems[tokenId].fi.unStakedGross;
+        }
+        return (tokenIds_, amounts_);
+    }
+
 
     function getTotalStaked() external view returns (uint256) {
         address user = _msgSender();

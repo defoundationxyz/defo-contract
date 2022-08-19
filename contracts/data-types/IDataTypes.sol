@@ -82,6 +82,17 @@ uint256 constant TAX_TIERS = 5;
     }
 
 /**
+ * @notice DefoTokenLimitConfig DEFO ERC20 Token transfer limiter, this is for the 1000 DEFO per 24h sale limitation, can be changes with setTransferLimit
+ * @param saleLimitPeriod initially 1 day
+ * @param saleLimitAmount initially 1000 tokens
+*/
+    struct DefoTokenLimitConfig {
+        uint256 saleLimitPeriod;
+        uint256 saleLimitAmount;
+        bool limitByReward;
+    }
+
+/**
  * @notice Main Protocol Configuration structure
      * @param mintLock no mint for all gems, no minting if set
      * @param transferLock no transfer if set, including no minting
@@ -117,6 +128,7 @@ uint256 constant TAX_TIERS = 5;
         bool transferLock;
         // mint limit period for coutner reset
         uint32 mintLimitWindow;
+        DefoTokenLimitConfig defoTokenLimitConfig;
     }
 
 /**
@@ -143,6 +155,16 @@ uint256 constant TAX_TIERS = 5;
     struct GemTypeMintWindow {
         uint256 mintCount;
         uint32 endOfMintLimitWindow;
+    }
+
+/**
+ * @notice A struct describing current DEFO Token limiter input
+ * @param tokensSold DEFO tokens sold per limit window, "sold" = "transferred to liquidity pair except the mint"
+ * @param timeOfLastSale time of last sale
+     */
+    struct DEFOTokenLimitWindow {
+        mapping(address => uint256) tokensSold;
+        mapping(address => uint256) timeOfLastSale;
     }
 
     enum Booster {
@@ -199,8 +221,11 @@ uint256 constant TAX_TIERS = 5;
 *   @param config main configuration, basically everything except gemType specific
 *   @param gemTypes supported gem types with their details, gemTypeId is the index of the array
 *   @param gems mapping indexed by tokenId, where tokenId is in the nft.allTokens
+*   @param gemTypesMintWindows windows for limiting yield gem mints per gem type
+*   @param defoTokenLimitWindow window for limiting DEFO Token sale
 *   @param nft ERC721 standard related storage
-*   @param totals cumulated amounts for all operations
+*   @param total cumulated amounts for all operations
+*   @param usersFi financial info per each user
 */
     struct AppStorage {
         // configuration
@@ -208,6 +233,7 @@ uint256 constant TAX_TIERS = 5;
         GemTypeConfig[] gemTypes;
         // current state
         GemTypeMintWindow[] gemTypesMintWindows;
+        DEFOTokenLimitWindow defoTokenLimitWindow;
         mapping(uint256 => Gem) gems;
         ERC721Storage nft;
         // Cumulations

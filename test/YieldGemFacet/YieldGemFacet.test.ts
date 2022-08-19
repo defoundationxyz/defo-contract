@@ -27,7 +27,7 @@ describe("YieldGemFacet", () => {
   let wallets: SignerWithAddress[];
 
   beforeEach(async () => {
-    await deployments.fixture(["DEFOToken", "DEFODiamond", "DiamondInitialized"]);
+    await deployments.fixture(["DEFOToken", "DEFODiamond", "DEFOTokenInit", "DiamondInitialized"]);
     contract = await getContractWithSigner<YieldGemFacet>(hardhat, "DEFODiamond");
     const defoContract = await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken");
     const daiContract = await ethers.getContractAt(ERC20ABI, MAINNET_DAI_ADDRESS);
@@ -48,6 +48,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should not mint a gem if not enough balance", async () => {
+      await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
         debug(`minting ${gemName(i)}`);
         await expect(contract.mint(i)).to.be.revertedWith("Insufficient balance");
