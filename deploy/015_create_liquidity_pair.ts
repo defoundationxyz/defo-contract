@@ -41,10 +41,11 @@ const func: DeployFunction = async hre => {
     const factoryAddress = await joeRouterContact.factory();
     const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
 
-    const pairAddress = factoryContract.getPair(daiContract.address, defoContract.address);
+    const pairAddress = await factoryContract.getPair(daiContract.address, defoContract.address);
     const pairContract = await ethers.getContractAt(JOE_PAIR_ABI, pairAddress);
 
     const [reservesDai, reservesDefo] = await pairContract.getReserves();
+    deployInfo(`DEFO-DAI liquidity pair address: ${pairAddress}`);
     deploySuccess(
       `Liquidity Pair Created, Liquidity Added. Current reserves: DAI ${ethers.utils.formatEther(
         reservesDai,

@@ -51,8 +51,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
                 console.log("receiver %s: %s", receiver, s.config.wallets[receiver]);
                 console.log("paymentToken %s: %s", paymentToken, address(s.config.paymentTokens[paymentToken]));
                 uint256 amountToTransfer = PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[paymentToken][receiver]);
-                if (amountToTransfer != 0)
+                if (amountToTransfer != 0) {
+                    require(s.config.wallets[receiver] != address(0), "YieldGem: configuration error, zero address");
                     s.config.paymentTokens[paymentToken].transferFrom(minter, s.config.wallets[receiver], amountToTransfer);
+                }
             }
         }
 
