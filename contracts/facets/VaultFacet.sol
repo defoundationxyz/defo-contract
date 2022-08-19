@@ -29,14 +29,12 @@ contract VaultFacet is BaseFacet, IVault {
         Fi memory op;
 
         op.unStakedGross = _amount;
-        op.donated = 0;
-
         // sending withdrawal tax to the reward wallet
         uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);
         op.vaultTaxPaid = PercentHelper.rate(_amount, discountedFee);
         defo.transferFrom(
             wallets[uint(Wallets.Vault)],
-            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Treasury)],
             op.vaultTaxPaid);
 
         op.unStakedNet = _amount - op.vaultTaxPaid;

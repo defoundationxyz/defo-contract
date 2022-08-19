@@ -23,6 +23,10 @@ task("vault", "Get the vault state")
       info(`Staked by all users: ${fromWei(await vaultStakingFacet.getStakedGrossAllUsers())}`);
       info(`Rewards staked by deployer: ${fromWei(await vaultStakingFacet.getStakedGross())}`);
       info(`Final deployer's amount in the vault:  ${fromWei(await vaultStakingFacet.getTotalStaked())}`);
+      const { tokenIds_, amounts_ } = await vaultStakingFacet.getStakedAllGems();
+      for (let i = 0; i < tokenIds_.length; i++) {
+        if (!amounts_[i].isZero()) info(`gem id ${tokenIds_[i]}, staked ${fromWei(amounts_[i])}`);
+      }
     };
 
     announce("Current vault stats");
