@@ -2,7 +2,14 @@ import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG } from "@config";
 import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, isFuji, namedSigner } from "@utils/chain.helper";
-import { deployAnnounce, deployInfo, deploySuccess, sayMaximumForMaxUint } from "@utils/output.helper";
+import {
+  deployAnnounce,
+  deployError,
+  deployInfo,
+  deploySuccess,
+  deployWarning,
+  sayMaximumForMaxUint,
+} from "@utils/output.helper";
 import DAI_ABI from "abi/erc20-abi.json";
 import chalk from "chalk";
 import { signDaiPermit } from "eth-permit";
@@ -10,7 +17,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import JOE_FACTORY_ABI from "../abi/joe-factory.json";
 import JOE_ROUTER_ABI from "../abi/joe-router.json";
-
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments, ethers } = hre;
@@ -33,7 +39,12 @@ const func: DeployFunction = async hre => {
   const joeRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
   const factoryAddress = await joeRouterContact.factory();
   const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
-  const pairAddress = factoryContract.getPair(daiContract.address, defoTokenDeployment.address);
+  let pairAddress = await factoryContract.getPair(daiContract.address, defoTokenDeployment.address);
+  if (pairAddress === ethers.constants.AddressZero) {
+    deployWarning("Liquidity Pair has not been created, generating an address, don't forget to fund!");
+    await factoryContract.createPair(daiContract.address, defoTokenDeployment.address);
+    pairAddress = await factoryContract.getPair(daiContract.address, defoTokenDeployment.address);
+  }
 
   const paymentTokens: [string, string] = [
     (await isFuji(hre)) ? FUJI_DAI_ADDRESS : MAINNET_DAI_ADDRESS,
@@ -48,6 +59,14 @@ const func: DeployFunction = async hre => {
     vault,
     deployer, //redeem contract goes here
   ];
+
+  deployInfo("Configuration addresses:");
+  wallets.forEach(wallet => {
+    if (wallet === ethers.constants.AddressZero) {
+      deployError(wallet);
+      throw new Error("Attempt to pass zero address to the configuration.");
+    } else deployInfo(wallet);
+  });
 
   const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
   await configFacetInstance.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG });
