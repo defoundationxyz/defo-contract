@@ -36,7 +36,7 @@ contract VaultFacet is BaseFacet, IVault {
         op.vaultTaxPaid = PercentHelper.rate(_amount, discountedFee);
         defo.transferFrom(
             wallets[uint(Wallets.Vault)],
-            wallets[uint(Wallets.RewardPool)],
+            wallets[uint(Wallets.Treasury)],
             op.vaultTaxPaid);
 
         op.unStakedNet = _amount - op.vaultTaxPaid;
