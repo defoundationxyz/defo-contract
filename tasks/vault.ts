@@ -11,7 +11,7 @@ task("vault", "Get the vault state")
   .addOptionalParam("id", "gem id to stake or unstake", undefined, types.int)
   .addOptionalParam(
     "amount",
-    "amount of pending unclaimed (tapered) rewards to stake or the amount currently in the vault to unstake, if not defined the complete amount is being staked/unstaked",
+    "amount of pending unclaimed rewards to stake or the amount currently in the vault to unstake",
     0,
     types.float,
   )
