@@ -22,8 +22,8 @@ contract VaultFacet is BaseFacet, IVault {
     /* ============ External and Public Functions ============ */
     function unStakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) {
         address user = _msgSender();
-        require(s.usersFi[user].stakedGross >= _amount, "not enough amount in the vault");
         Gem storage gem = s.gems[_tokenId];
+        require(gem.fi.stakedGross >= _amount, "Vault: not enough amount in the vault for the gem");
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         Fi memory op;

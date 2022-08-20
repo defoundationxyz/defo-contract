@@ -28,12 +28,12 @@ library FiHelper {
         console.log("_add.stakedNet: ", _add.stakedNet);
 
 
-        //financial consisitency checks
-//        require(
-//            (_add.claimedGross - _add.claimTaxPaid - _add.donated == _add.claimedNet) &&
-//            (_add.unStakedGross - _add.vaultTaxPaid - _add.donated == _add.unStakedNet) &&
-//            (_add.stakedGross - _add.donated == _add.stakedNetstakedNet)
-//        , "wrong financial operation structure");
+        ///todo refactor financial consisitency checks into a separate function
+        //        require(
+        //            (_add.claimedGross - _add.claimTaxPaid - _add.donated == _add.claimedNet) &&
+        //            (_add.unStakedGross - _add.vaultTaxPaid - _add.donated == _add.unStakedNet) &&
+        //            (_add.stakedGross - _add.donated == _add.stakedNetstakedNet)
+        //        , "wrong financial operation structure");
 
         s.total.claimedGross += _add.claimedGross;
         s.total.claimedNet += _add.claimedNet;
