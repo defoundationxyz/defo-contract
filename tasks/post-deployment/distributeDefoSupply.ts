@@ -1,3 +1,4 @@
+///TODO this is a placeholder for distribution of the defo supply acoording to the whitepaper, refactored from deployment
 // import {DEFOToken} from '@contractTypes/contracts/token';
 // import {deployInfo} from '@utils/output.helper';
 // import {DEFO_TOKEN_REWARD_POOL, DEFO_TOKEN_TOTAL_SUPPLY, DEFO_TOKEN_TREASURY} from '@config';

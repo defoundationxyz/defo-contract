@@ -42,7 +42,7 @@ describe("RewardsFacet", () => {
 
   describe("getRewardAmount(uint256 _tokenId)", () => {
     it("should earn reward with a given amount after one week", async () => {
-      await hardhat.run("fork:get-some-dai");
+      await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -56,7 +56,7 @@ describe("RewardsFacet", () => {
 
   describe("claimReward(uint256 _tokenId)", () => {
     it("should claim reward for every configured type", async () => {
-      await hardhat.run("fork:get-some-dai");
+      await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");

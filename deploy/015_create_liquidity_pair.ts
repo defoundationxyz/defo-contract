@@ -19,7 +19,7 @@ const func: DeployFunction = async hre => {
     const defo = 10000;
     announce(`Adding liquidity to the DAI/DEFO pair and creating it if not exists: ${dai} DAI and ${defo} DEFO`);
 
-    await hre.run("fork:get-some-dai");
+    await hre.run("dev:get-some-dai");
     await hre.run("get-some-defo");
 
     const defoContract = await ethers.getContract<DEFOToken>("DEFOToken");
