@@ -108,6 +108,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         gem.mintTime = uint32(block.timestamp);
         s.gems[tokenId] = gem;
     }
+    
     ///todo test transfer
     function _beforeTokenTransfer(
         address from,

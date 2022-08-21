@@ -181,6 +181,7 @@ uint256 constant TAX_TIERS = 5;
  * @param stakedGross amount removed from rewards to stake, charity not yet deducted
  * @param stakedNet amount put to the vault - charity has been deducted
  * @param unStakedGross  amount removed from the vault, pre withdraw tax and charity
+ * @param unStakedGrossUpped  amount removed from the vault gross-upped with charity to equal to the stakedGross amount
  * @param unStakedNet  amount returned to the earned rewards, post withdraw tax and charity
  * @param donated sent to charity
  * @param claimTaxPaid claim tax deducted - 30%, 15%, 15%
@@ -192,6 +193,7 @@ uint256 constant TAX_TIERS = 5;
         uint256 stakedGross;
         uint256 stakedNet;
         uint256 unStakedGross;
+        uint256 unStakedGrossUp;
         uint256 unStakedNet;
         uint256 donated;
         uint256 claimTaxPaid;

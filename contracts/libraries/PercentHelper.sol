@@ -33,9 +33,8 @@ library PercentHelper {
      * @param netValue Net value to gross up
      * @param tax Percent that was applied
      */
-    ///todo make pure once got rid of the console.log
     function grossUp(uint256 netValue, uint256 tax) internal pure returns (uint256) {
-        return tax > 0 ? (netValue * HUNDRED_PERCENT) / tax : 0;
+        return tax > 0 ? (netValue * HUNDRED_PERCENT) / (HUNDRED_PERCENT - tax) : 0;
     }
 
 

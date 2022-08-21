@@ -12,7 +12,7 @@ task("vault", "Get the vault state")
   .addOptionalParam(
     "amount",
     "amount of pending unclaimed rewards to stake or the amount currently in the vault to unstake",
-    0,
+    undefined,
     types.float,
   )
   .setAction(async ({ id, op, amount }, hre) => {
@@ -34,7 +34,7 @@ task("vault", "Get the vault state")
 
     if (op === "stake" || !op) {
       announce("Staking to vault...");
-      assert(id && amount, "both id and amount should be provided for staking");
+      assert(id !== undefined && amount !== undefined, "both id and amount should be provided for staking");
       await vaultStakingFacet.stakeReward(id, toWei(amount));
       await vaultInfo();
       success("Done");
@@ -42,7 +42,7 @@ task("vault", "Get the vault state")
 
     if (op === "unstake") {
       announce("Unstaking from vault...");
-      assert(id && amount, "both id and amount should be provided for unstaking");
+      assert(id !== undefined && amount !== undefined, "both id and amount should be provided for unstaking");
       await vaultStakingFacet.unStakeReward(id, toWei(amount));
       await vaultInfo();
       success("Done");

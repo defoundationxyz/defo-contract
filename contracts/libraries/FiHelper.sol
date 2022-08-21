@@ -28,18 +28,19 @@ library FiHelper {
         console.log("_add.stakedNet: ", _add.stakedNet);
 
 
-        //financial consisitency checks
-//        require(
-//            (_add.claimedGross - _add.claimTaxPaid - _add.donated == _add.claimedNet) &&
-//            (_add.unStakedGross - _add.vaultTaxPaid - _add.donated == _add.unStakedNet) &&
-//            (_add.stakedGross - _add.donated == _add.stakedNetstakedNet)
-//        , "wrong financial operation structure");
+        ///todo refactor financial consisitency checks into a separate function
+        //        require(
+        //            (_add.claimedGross - _add.claimTaxPaid - _add.donated == _add.claimedNet) &&
+        //            (_add.unStakedGross - _add.vaultTaxPaid - _add.donated == _add.unStakedNet) &&
+        //            (_add.stakedGross - _add.donated == _add.stakedNetstakedNet)
+        //        , "wrong financial operation structure");
 
         s.total.claimedGross += _add.claimedGross;
         s.total.claimedNet += _add.claimedNet;
         s.total.stakedGross += _add.stakedGross;
         s.total.stakedNet += _add.stakedNet;
         s.total.unStakedGross += _add.unStakedGross;
+        s.total.unStakedGrossUp += _add.unStakedGrossUp;
         s.total.unStakedNet += _add.unStakedNet;
         s.total.donated += _add.donated;
         s.total.claimTaxPaid += _add.claimTaxPaid;
@@ -50,6 +51,7 @@ library FiHelper {
         gem.fi.stakedGross += _add.stakedGross;
         gem.fi.stakedNet += _add.stakedNet;
         gem.fi.unStakedGross += _add.unStakedGross;
+        gem.fi.unStakedGrossUp += _add.unStakedGrossUp;
         gem.fi.unStakedNet += _add.unStakedNet;
         gem.fi.donated += _add.donated;
         gem.fi.claimTaxPaid += _add.claimTaxPaid;
@@ -60,6 +62,7 @@ library FiHelper {
         s.usersFi[_user].stakedGross += _add.stakedGross;
         s.usersFi[_user].stakedNet += _add.stakedNet;
         s.usersFi[_user].unStakedGross += _add.unStakedGross;
+        s.usersFi[_user].unStakedGrossUp += _add.unStakedGrossUp;
         s.usersFi[_user].unStakedNet += _add.unStakedNet;
         s.usersFi[_user].donated += _add.donated;
         s.usersFi[_user].claimTaxPaid += _add.claimTaxPaid;
