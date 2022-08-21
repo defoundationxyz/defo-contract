@@ -12,7 +12,7 @@ task("vault", "Get the vault state")
   .addOptionalParam(
     "amount",
     "amount of pending unclaimed rewards to stake or the amount currently in the vault to unstake",
-    0,
+    undefined,
     types.float,
   )
   .setAction(async ({ id, op, amount }, hre) => {

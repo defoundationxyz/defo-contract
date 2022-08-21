@@ -135,11 +135,11 @@ contract RewardsFacet is BaseFacet, IRewards {
 
 
     function getStakedGross() external view returns (uint256) {
-        return s.usersFi[_msgSender()].stakedGross - s.usersFi[_msgSender()].unStakedGross;
+        return s.usersFi[_msgSender()].stakedGross - s.usersFi[_msgSender()].unStakedGrossUp;
     }
 
     function getStakedGrossAllUsers() external view returns (uint256) {
-        return s.total.stakedGross - s.total.unStakedGross;
+        return s.total.stakedGross - s.total.unStakedGrossUp;
     }
 
     function getTaxTier(uint256 _tokenId) public view returns (TaxTiers) {

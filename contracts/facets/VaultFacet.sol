@@ -29,6 +29,7 @@ contract VaultFacet is BaseFacet, IVault {
         Fi memory op;
 
         op.unStakedGross = _amount;
+        op.unStakedGrossUp = PercentHelper.grossUp(_amount, s.config.charityContributionRate);
         // sending withdrawal tax to the reward wallet
         uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);
         op.vaultTaxPaid = PercentHelper.rate(_amount, discountedFee);
