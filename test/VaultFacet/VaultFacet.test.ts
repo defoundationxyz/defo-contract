@@ -1,4 +1,4 @@
-import { DIAMOND_GEM, GEMS, HUNDRED_PERCENT, PROTOCOL_CONFIG } from "@config";
+import { DIAMOND_GEM, GEMS, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei } from "@config";
 import { VaultFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
@@ -31,8 +31,7 @@ describe("VaultFacet", () => {
     await hardhat.run("permit");
     await hardhat.run("get-some-gems");
     await hardhat.run("jump-in-time");
-    await hardhat.run("vault", { op: "stake", id: TEST_GEM_ID, amount: 5 });
-    // await hardhat.run("vault", { op: "stake", id: TEST_GEM_ID, amount: fromWei(TEST_AMOUNT_TO_STAKE) });
+    await hardhat.run("vault", { op: "stake", id: TEST_GEM_ID, amount: Number(fromWei(TEST_AMOUNT_TO_STAKE)) });
   });
 
   describe("getStaked(uint256 _tokenId)", () => {
@@ -46,6 +45,16 @@ describe("VaultFacet", () => {
       await expect(contract.unStakeReward(2, TEST_AMOUNT_STAKED))
         .to.emit(contract, "UnStaked")
         .withArgs(await contract.signer.getAddress(), TEST_AMOUNT_STAKED, TEST_AMOUNT_UNSTAKED);
+    });
+  });
+
+  describe("getTotalStaked()", () => {
+    it("should return correct staked amount after staking", async () => {
+      expect(await contract.getTotalStaked()).to.be.equal(TEST_AMOUNT_STAKED);
+    });
+    it("should return correct staked amount after staking and minting more gems", async () => {
+      await hardhat.run("get-some-gems");
+      expect(await contract.getTotalStaked()).to.be.equal(TEST_AMOUNT_STAKED);
     });
   });
 });
