@@ -72,6 +72,10 @@ contract VaultFacet is BaseFacet, IVault {
 
     function getTotalStaked() external view returns (uint256) {
         address user = _msgSender();
+        console.log("-- getTotalStaked()");
+        console.log("_msgSender(): ", user);
+        console.log("s.usersFi[user].stakedNet: ", s.usersFi[user].stakedNet);
+        console.log("s.usersFi[user].unStakedGross: ", s.usersFi[user].unStakedGross);
         return s.usersFi[user].stakedNet - s.usersFi[user].unStakedGross;
     }
 
