@@ -1,6 +1,7 @@
 import { fromWei, toWei } from "@config";
 import { announce, info, success } from "@utils/output.helper";
 import assert from "assert";
+import chalk from "chalk";
 import { task, types } from "hardhat/config";
 
 import { RewardsFacet, VaultFacet } from "../types";
@@ -20,9 +21,21 @@ task("vault", "Get the vault state")
     const vaultStakingFacet = await ethers.getContract<RewardsFacet & VaultFacet>("DEFODiamond_DiamondProxy");
 
     const vaultInfo = async () => {
-      info(`Staked by all users: ${fromWei(await vaultStakingFacet.getStakedGrossAllUsers())}`);
-      info(`Rewards staked by deployer: ${fromWei(await vaultStakingFacet.getStakedGross())}`);
-      info(`Final deployer's amount in the vault:  ${fromWei(await vaultStakingFacet.getTotalStaked())}`);
+      info(
+        `Rewards staked by all users ${chalk.yellow("getStakedGrossAllUsers()")}: ${fromWei(
+          await vaultStakingFacet.getStakedGrossAllUsers(),
+        )}`,
+      );
+      info(
+        `Rewards staked by deployer  ${chalk.yellow("getStakedGross()")}: ${fromWei(
+          await vaultStakingFacet.getStakedGross(),
+        )}`,
+      );
+      info(
+        `Final deployer's amount in the vault ${chalk.yellow("getTotalStaked()")}:  ${fromWei(
+          await vaultStakingFacet.getTotalStaked(),
+        )}`,
+      );
       const { tokenIds_, amounts_ } = await vaultStakingFacet.getStakedAllGems();
       for (let i = 0; i < tokenIds_.length; i++) {
         if (!amounts_[i].isZero()) info(`gem id ${tokenIds_[i]}, staked ${fromWei(amounts_[i])}`);

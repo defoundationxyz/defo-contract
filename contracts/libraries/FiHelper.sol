@@ -35,39 +35,22 @@ library FiHelper {
         //            (_add.stakedGross - _add.donated == _add.stakedNetstakedNet)
         //        , "wrong financial operation structure");
 
-        s.total.claimedGross += _add.claimedGross;
-        s.total.claimedNet += _add.claimedNet;
-        s.total.stakedGross += _add.stakedGross;
-        s.total.stakedNet += _add.stakedNet;
-        s.total.unStakedGross += _add.unStakedGross;
-        s.total.unStakedGrossUp += _add.unStakedGrossUp;
-        s.total.unStakedNet += _add.unStakedNet;
-        s.total.donated += _add.donated;
-        s.total.claimTaxPaid += _add.claimTaxPaid;
-        s.total.vaultTaxPaid += _add.vaultTaxPaid;
+        fiAdd(s.total, _add);
+        fiAdd(gem.fi, _add);
+        fiAdd(s.usersFi[_user], _add);
+    }
 
-        gem.fi.claimedGross += _add.claimedGross;
-        gem.fi.claimedNet += _add.claimedNet;
-        gem.fi.stakedGross += _add.stakedGross;
-        gem.fi.stakedNet += _add.stakedNet;
-        gem.fi.unStakedGross += _add.unStakedGross;
-        gem.fi.unStakedGrossUp += _add.unStakedGrossUp;
-        gem.fi.unStakedNet += _add.unStakedNet;
-        gem.fi.donated += _add.donated;
-        gem.fi.claimTaxPaid += _add.claimTaxPaid;
-        gem.fi.vaultTaxPaid += _add.vaultTaxPaid;
-
-        s.usersFi[_user].claimedGross += _add.claimedGross;
-        s.usersFi[_user].claimedNet += _add.claimedNet;
-        s.usersFi[_user].stakedGross += _add.stakedGross;
-        s.usersFi[_user].stakedNet += _add.stakedNet;
-        s.usersFi[_user].unStakedGross += _add.unStakedGross;
-        s.usersFi[_user].unStakedGrossUp += _add.unStakedGrossUp;
-        s.usersFi[_user].unStakedNet += _add.unStakedNet;
-        s.usersFi[_user].donated += _add.donated;
-        s.usersFi[_user].claimTaxPaid += _add.claimTaxPaid;
-        s.usersFi[_user].vaultTaxPaid += _add.vaultTaxPaid;
-
+    function fiAdd(Fi storage _initial, Fi memory _add) internal {
+        _initial.claimedGross += _add.claimedGross;
+        _initial.claimedNet += _add.claimedNet;
+        _initial.stakedGross += _add.stakedGross;
+        _initial.stakedNet += _add.stakedNet;
+        _initial.unStakedGross += _add.unStakedGross;
+        _initial.unStakedGrossUp += _add.unStakedGrossUp;
+        _initial.unStakedNet += _add.unStakedNet;
+        _initial.donated += _add.donated;
+        _initial.claimTaxPaid += _add.claimTaxPaid;
+        _initial.vaultTaxPaid += _add.vaultTaxPaid;
     }
 
 }

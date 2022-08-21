@@ -142,6 +142,10 @@ contract RewardsFacet is BaseFacet, IRewards {
 
 
     function getStakedGross() external view returns (uint256) {
+        console.log("-- getStakedGross()");
+        console.log("_msgSender: ", _msgSender());
+        console.log("s.usersFi[_msgSender()].stakedGross: ", s.usersFi[_msgSender()].stakedGross);
+        console.log("s.usersFi[_msgSender()].unStakedGrossUp: ", s.usersFi[_msgSender()].unStakedGrossUp);
         return s.usersFi[_msgSender()].stakedGross - s.usersFi[_msgSender()].unStakedGrossUp;
     }
 
