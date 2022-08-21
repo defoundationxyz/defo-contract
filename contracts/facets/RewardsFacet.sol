@@ -13,6 +13,7 @@ import "../libraries/PeriodicHelper.sol";
 import "../libraries/TimeHelper.sol";
 import "../libraries/TaxHelper.sol";
 import "../libraries/FiHelper.sol";
+import "hardhat/console.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -106,9 +107,15 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
         uint256 rewardToDate = _getCumulatedRewardAmountGross(_tokenId);
+        console.log("-- getRewardAmount");
+        console.log("rewardToDate: ", rewardToDate);
+        console.log("s.gems[_tokenId].fi.claimedGross: ", s.gems[_tokenId].fi.claimedGross);
+        console.log("s.gems[_tokenId].fi.stakedGross: ", s.gems[_tokenId].fi.stakedGross);
+        console.log("s.gems[_tokenId].fi.unStakedNet: ", s.gems[_tokenId].fi.unStakedNet);
+        rewardToDate += s.gems[_tokenId].fi.unStakedNet;
         rewardToDate -= s.gems[_tokenId].fi.claimedGross;
         rewardToDate -= s.gems[_tokenId].fi.stakedGross;
-        rewardToDate += s.gems[_tokenId].fi.unStakedNet;
+        console.log("return: ", rewardToDate);
         return rewardToDate;
     }
 
