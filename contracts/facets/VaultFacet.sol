@@ -22,13 +22,15 @@ contract VaultFacet is BaseFacet, IVault {
     /* ============ External and Public Functions ============ */
     function unStakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) {
         address user = _msgSender();
-        require(s.usersFi[user].stakedGross >= _amount, "not enough amount in the vault");
         Gem storage gem = s.gems[_tokenId];
+        uint256 vaultAmount = gem.fi.stakedNet - gem.fi.unStakedGross;
+        require(vaultAmount >= _amount, "Vault: not enough amount in the vault for the gem");
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         Fi memory op;
 
         op.unStakedGross = _amount;
+        op.unStakedGrossUp = PercentHelper.grossUp(_amount, s.config.charityContributionRate);
         // sending withdrawal tax to the reward wallet
         uint256 discountedFee = BoosterHelper.reduceVaultWithdrawalFee(gem.booster, s.config.vaultWithdrawalTaxRate);
         op.vaultTaxPaid = PercentHelper.rate(_amount, discountedFee);
@@ -70,6 +72,10 @@ contract VaultFacet is BaseFacet, IVault {
 
     function getTotalStaked() external view returns (uint256) {
         address user = _msgSender();
+        console.log("-- getTotalStaked()");
+        console.log("_msgSender(): ", user);
+        console.log("s.usersFi[user].stakedNet: ", s.usersFi[user].stakedNet);
+        console.log("s.usersFi[user].unStakedGross: ", s.usersFi[user].unStakedGross);
         return s.usersFi[user].stakedNet - s.usersFi[user].unStakedGross;
     }
 

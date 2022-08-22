@@ -10,4 +10,4 @@ export * as vault from "./vault";
 export * as history from "./history";
 export * as addLiquidity from "./addLiquidity";
 export * as abi from "./abi";
-export * from "./fork";
+export * from "./dev";

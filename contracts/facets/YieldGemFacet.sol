@@ -108,6 +108,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         gem.mintTime = uint32(block.timestamp);
         s.gems[tokenId] = gem;
     }
+
     ///todo test transfer
     function _beforeTokenTransfer(
         address from,
@@ -117,7 +118,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         require(!s.config.transferLock, "Pausable: paused, transfer is locked");
         ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
-        s.usersFi[to] = s.usersFi[from];
+        if (from != address(0))
+            s.usersFi[to] = s.usersFi[from];
     }
 
     function _afterTokenTransfer(
@@ -126,6 +128,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         uint256 tokenId
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
-        delete s.usersFi[from];
+        if (from != address(0))
+            delete s.usersFi[from];
     }
 }

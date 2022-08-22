@@ -3,7 +3,8 @@ import { task, types } from "hardhat/config";
 
 import { beTheWhale } from "./beTheWhale";
 
-export default task("fork:get-some-dai", "Distribute DAI from AAVE")
+
+export default task("dev:get-some-dai", "Distribute DAI from AAVE")
   .addOptionalParam(
     "account",
     "The account name to get DAI, e.g. 'treasury', 'vault', or 'all'",

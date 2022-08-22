@@ -114,7 +114,7 @@
     "accounts": "hardhat accounts --network localhost",
     "gems": "hardhat --network localhost gems",
     "deployments": "hardhat deployments --network localhost",
-    "get-some-dai": "hardhat --network localhost fork:get-some-dai",
+    "get-some-dai": "hardhat --network localhost dev:get-some-dai",
     "get-some-defo": "hardhat --network localhost get-some-defo",
     "get-some-gems": "hardhat --network localhost get-some-gems",
     "helper-task": "hardhat --network localhost helper-task",

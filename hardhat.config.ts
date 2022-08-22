@@ -45,7 +45,7 @@ const config: HardhatUserConfig = {
     token: "AVAX",
   },
   mocha: {
-    timeout: 30000,
+    timeout: 50000,
   },
   networks,
   namedAccounts: namedAccountsIndex,

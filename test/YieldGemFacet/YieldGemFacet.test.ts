@@ -38,7 +38,7 @@ describe("YieldGemFacet", () => {
 
   describe("mint()", () => {
     it("should mint a gem of every configured type", async () => {
-      await hardhat.run("fork:get-some-dai");
+      await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
@@ -56,7 +56,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should charge the correct price in DAI and DEFO", async () => {
-      await hardhat.run("fork:get-some-dai");
+      await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
 
@@ -78,7 +78,7 @@ describe("YieldGemFacet", () => {
 
     it("should distribute DAI and DEFO amount correctly on mint", async () => {
       it("should mint a gem of every configured type", async () => {
-        await hardhat.run("fork:get-some-dai");
+        await hardhat.run("dev:get-some-dai");
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         const receiversNumber = PROTOCOL_CONFIG.incomeDistributionOnMint.length;

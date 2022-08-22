@@ -16,9 +16,9 @@ export const GEMS: Record<GemNames, number> = {
 export const gemName = (gemNumber: number) =>
   (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
 
-const HUNDRED_PERCENT = 100;
 export const PERCENTAGE_PRECISION_MULTIPLIER = 100;
 const percent = (value: number) => value * PERCENTAGE_PRECISION_MULTIPLIER;
+export const HUNDRED_PERCENT = percent(100);
 
 export const SECONDS_IN_AN_HOUR = 3600;
 export const SECONDS_IN_A_DAY = SECONDS_IN_AN_HOUR * 24;
@@ -42,8 +42,8 @@ export const REWARD_DEFO_RATE = percent(75);
 export const LIQUIDITY_DAI_RATE = percent(25);
 export const LIQUIDITY_DEFO_RATE = percent(25);
 
-strict(percent(HUNDRED_PERCENT) === LIQUIDITY_DAI_RATE + REWARD_DAI_RATE + TREASURY_DAI_RATE);
-strict(percent(HUNDRED_PERCENT) === TREASURY_DEFO_RATE + REWARD_DEFO_RATE + LIQUIDITY_DEFO_RATE);
+strict(HUNDRED_PERCENT === LIQUIDITY_DAI_RATE + REWARD_DAI_RATE + TREASURY_DAI_RATE);
+strict(HUNDRED_PERCENT === TREASURY_DEFO_RATE + REWARD_DEFO_RATE + LIQUIDITY_DEFO_RATE);
 
 // the order for wallets, paymentTokens is extremely important, which is also the same in incomeDistributionOnMint
 export enum PaymentTokens {

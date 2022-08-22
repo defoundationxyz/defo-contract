@@ -43,13 +43,13 @@ library PeriodicHelper {
         uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
         uint ratePerPeriod, //5 for diamond
         uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal pure returns (uint taperedReward, uint updatedRewardRate) {
-        //        console.log("-- calcTaperedReward");
-        //        console.log("timePeriod ", timePeriod);
-        //        console.log("taperThreshold ", taperThreshold);
-        //        console.log("taperPercent ", taperPercent);
-        //        console.log("ratePerPeriod ", ratePerPeriod);
-        //        console.log("payOrDeductPeriod ", payOrDeductPeriod);
+    ) internal view returns (uint taperedReward, uint updatedRewardRate) {
+        console.log("-- calcTaperedReward");
+        console.log("timePeriod ", timePeriod);
+        console.log("taperThreshold ", taperThreshold);
+        console.log("taperPercent ", taperPercent);
+        console.log("ratePerPeriod ", ratePerPeriod);
+        console.log("payOrDeductPeriod ", payOrDeductPeriod);
         uint256 taperedPercent = taperPercent.oneHundredLessPercent();
         // Basically it's a geometric progression of the timestamps b_n = b_1*q_(n-1),
         // For simplicity startTime is zero, so timePeriod should be block.timestamp - startTime
@@ -107,7 +107,7 @@ library PeriodicHelper {
             finalRate = ratePerPeriod;
             finalAmount = timePeriod / payOrDeductPeriod * ratePerPeriod;
         }
-        //        console.log("---- result finalAmount %s", finalAmount);
+        console.log("---- result finalAmount %s", finalAmount);
         return (finalAmount, finalRate);
     }
 
