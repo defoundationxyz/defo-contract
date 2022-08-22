@@ -25,6 +25,7 @@ describe("YieldGemFacet", () => {
   let paymentTokenContracts: [Contract, Contract];
   let namedAccounts: { [name: string]: Address };
   let wallets: SignerWithAddress[];
+  let otherUser: Address;
 
   beforeEach(async () => {
     await deployments.fixture(["DEFOToken", "DEFODiamond", "DEFOTokenInit", "DiamondInitialized"]);
@@ -34,6 +35,8 @@ describe("YieldGemFacet", () => {
     paymentTokenContracts = [daiContract, defoContract];
     namedAccounts = await hardhat.getNamedAccounts();
     wallets = await hardhat.ethers.getSigners();
+    const ANY_NUMBER_NOT_0 = 3;
+    otherUser = wallets[ANY_NUMBER_NOT_0].address;
   });
 
   describe("mint()", () => {
@@ -111,6 +114,21 @@ describe("YieldGemFacet", () => {
           }
         }
       });
+    });
+  });
+
+  describe("safeTransferFrom(address _from, address _to, uint256 _tokenId)", () => {
+    it("should transfer a gem to any other user", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      for (const i of Object.values(GEMS)) {
+        debug(`transferring ${gemName(i)}`);
+        await expect(contract["safeTransferFrom(address,address,uint256)"](namedAccounts.deployer, otherUser, i))
+          .to.emit(contract, "Transfer")
+          .withArgs(namedAccounts.deployer, otherUser, i);
+      }
     });
   });
 });
