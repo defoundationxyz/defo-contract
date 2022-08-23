@@ -3,7 +3,6 @@
 pragma solidity 0.8.15;
 
 import "./LibAppStorage.sol";
-import "hardhat/console.sol";
 
 // helper for limit daily mints
 library LibMintLimiter {
@@ -20,12 +19,6 @@ library LibMintLimiter {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
         GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
-        //        console.log("=== isMintAvailableForGem");
-        //        console.log("s.config.mintLock ", s.config.mintLock);
-        //        console.log("gemTypeMintWindow.mintCount ", gemTypeMintWindow.mintCount);
-        //        console.log("gemType.maxMintsPerLimitWindow ", gemType.maxMintsPerLimitWindow);
-        //        console.log("gemTypeMintWindow.endOfMintLimitWindow ", gemTypeMintWindow.endOfMintLimitWindow);
-        //        console.log("block.timestamp ", block.timestamp);
 
         return !(s.config.mintLock) &&
         //checking if the limit in the current mint window has not been reached yet

@@ -14,18 +14,21 @@ interface IRewards {
 
     function claimReward(uint256 _tokenId) external;
 
-    //maybe I'll add that feat later: selects an amount to claim
-    //    function claimReward(uint256 _tokenId, uint256 _amount) external;
-
     function batchClaimReward(uint256[] calldata _tokenids) external;
-
-    //maybe I'll add that feat later: puts all the reward into vault
-    //    function stakeReward(uint256 _tokenId) external;
 
     ///todo decide whether move this to the vault facet or not - (to keep all staking/unstaking in one place), or to leave it here (this is a facet working with rewards  which can be either claimed or staked)
     function stakeReward(uint256 _tokenId, uint256 _amount) external;
 
+    /**
+*   @notice This is used for the Vault Strategy, it puts the percent of all rewards to the vault and claims the rest
+    *   @param _tokenId unique NFT gem id
+    *   @param _percent percent of what to put into the vault, as usual uses PRECISION_MULTIPLIER (which is 100 by defualt, e.g. 500 for 5%)
+    */
+    function stakeAndClaim(uint256 _tokenId, uint256 _percent) external;
+
     function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external;
+
+    function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external;
 
     /**
     *   @notice reward earned by the sender to the moment ready to be claimed or put to vault

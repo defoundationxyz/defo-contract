@@ -3,7 +3,6 @@
 pragma solidity 0.8.15;
 
 import "./LibAppStorage.sol";
-import "hardhat/console.sol";
 
 // helper for limit daily mints
 library LibDonations {
