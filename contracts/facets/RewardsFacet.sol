@@ -50,6 +50,7 @@ contract RewardsFacet is BaseFacet, IRewards {
             wallets[uint(Wallets.RewardPool)],
             wallets[uint(Wallets.Charity)],
             op.donated);
+        console.log("emitting Donated %s, %s", user, op.donated);
         emit LibDonations.Donated(user, op.donated);
 
         defo.transferFrom(
@@ -57,6 +58,8 @@ contract RewardsFacet is BaseFacet, IRewards {
             user,
             op.claimedNet);
         gem.lastRewardWithdrawalTime = uint32(block.timestamp);
+
+        console.log("emitting Claimed %s, %s, %s", user, op.claimedGross, op.claimedNet);
         emit Claimed(user, op.claimedGross, op.claimedNet);
 
         op.updateStorage(_tokenId, user);
