@@ -150,8 +150,10 @@ describe("YieldGemFacet", () => {
 
   describe("getMintWindow(uint8 _gemTypeId)", () => {
     it("should return correct mint window initial details", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
       for (const gemId of Object.values(GEMS)) {
-        await contract.mint(gemId);
         const mintWindow = await contract.getMintWindow(gemId);
         expect(mintWindow.mintCount).to.be.equal(ethers.constants.Zero);
         const variance = mintWindow.endOfMintLimitWindow - (await ethers.provider.getBlock("latest")).timestamp;
@@ -162,6 +164,9 @@ describe("YieldGemFacet", () => {
     });
 
     it("should return correct mintCount", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
           debug(`minting ${gemName(i)}`);
@@ -173,6 +178,9 @@ describe("YieldGemFacet", () => {
     });
 
     it("should reset mintCount for the next mintWindow", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
           debug(`minting ${gemName(i)}`);
