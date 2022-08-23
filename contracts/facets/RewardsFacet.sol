@@ -24,7 +24,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     /* ====================== Modifiers ====================== */
     modifier onlyClaimable(uint256 _tokenId) {
-        require(isClaimable(_tokenId), "DEFORewards:not-claimable");
+        require(isClaimable(_tokenId), "Not claimable");
         _;
     }
 
@@ -36,9 +36,10 @@ contract RewardsFacet is BaseFacet, IRewards {
 
         require(
             TimeHelper.hasPassedFromOrNotHappenedYet(gem.lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0, "DEFORewards:not-claimable");
+            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0, "Not claimable");
         Fi memory op;
         op.claimedGross = getRewardAmount(_tokenId);
+        require(op.claimedGross > 0, "No rewards to claim");
 
         TaxTiers taxTier = getTaxTier(_tokenId);
         op.claimTaxPaid = PercentHelper.rate(op.claimedGross, s.config.taxRates[uint256(taxTier)]);
@@ -78,7 +79,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         Fi memory op;
 
         uint256 rewardGross = getRewardAmount(_tokenId);
-        require(_amount <= rewardGross, "DEFORewards:not-enough-rewards");
+        require(_amount <= rewardGross, "Not enough rewards");
 
         op.donated = PercentHelper.rate(_amount, s.config.charityContributionRate);
         op.stakedGross = _amount;
