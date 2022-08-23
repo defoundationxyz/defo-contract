@@ -74,9 +74,18 @@ describe("RewardsFacet", () => {
       }
     });
 
-    it("should revert if no rewards to claim", async () => {
+    it("should revert if a week has not passed after mint", async () => {
       for (const i of Object.values(GEMS)) {
         debug(`claiming gem type ${gemName(i)}`);
+        await expect(contract.claimReward(i)).to.be.revertedWith("Not claimable");
+      }
+    });
+
+    it("should revert if no rewards to claim", async () => {
+      await hardhat.run("jump-in-time");
+      for (const i of Object.values(GEMS)) {
+        debug(`claiming gem type ${gemName(i)}`);
+        await contract.claimReward(i);
         await expect(contract.claimReward(i)).to.be.reverted;
       }
     });
@@ -100,19 +109,19 @@ describe("RewardsFacet", () => {
     });
 
     it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 2", async () => {
-      await hardhat.run("jump-in-time", {time: "2weeks"});
+      await hardhat.run("jump-in-time", { time: "2weeks" });
       debug(`tax tier 2`);
       await testClaim(2);
     });
 
     it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 3", async () => {
-      await hardhat.run("jump-in-time", {time: "3weeks"});
+      await hardhat.run("jump-in-time", { time: "3weeks" });
       debug(`tax tier 3`);
       await testClaim(3);
     });
 
     it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 4 (no tax)", async () => {
-      await hardhat.run("jump-in-time", {time: "4weeks"});
+      await hardhat.run("jump-in-time", { time: "4weeks" });
       debug(`tax tier 4`);
       await testClaim(4);
     });
@@ -125,6 +134,22 @@ describe("RewardsFacet", () => {
         debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
         expect(await contract.stakeReward(i, testAmountToStake(i)));
         expect(await contract.getRewardAmount(i)).to.be.equal(ethers.constants.Zero);
+      }
+    });
+
+    it("should revert on staking if a week has not passed after mint", async () => {
+      for (const i of Object.values(GEMS)) {
+        debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
+        await expect(contract.stakeReward(i, testAmountToStake(i))).to.be.reverted;
+      }
+    });
+
+    it("should revert on staking if no claimable rewards", async () => {
+      await hardhat.run("jump-in-time");
+      for (const i of Object.values(GEMS)) {
+        debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
+        await contract.stakeReward(i, testAmountToStake(i));
+        await expect(contract.stakeReward(i, testAmountToStake(i))).to.be.reverted;
       }
     });
   });
