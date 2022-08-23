@@ -1,4 +1,4 @@
-import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName } from "@config";
+import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
 import { RewardsFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
@@ -47,14 +47,14 @@ describe("RewardsFacet", () => {
     it("should earn reward with a given amount after one week", async () => {
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
-        debug(`getting reward amount of gem type ${gemName(i)}`);
+        debug(`testing reward amount of gem type: ${gemName(i)}`);
         expect(await contract.getRewardAmount(i)).to.be.equal(testAmountToStake(i));
       }
     });
     it("should show zero amount for the gems once staked", async () => {
       await hardhat.run("jump-in-time");
       for (const id of Object.values(GEMS)) {
-        debug(`getting reward amount of gem type ${gemName(id)}`);
+        debug(`testing staking for gem type: ${gemName(id)}`);
         await hardhat.run("vault", {
           op: "stake",
           id,
@@ -69,14 +69,14 @@ describe("RewardsFacet", () => {
     it("should claim reward for every configured gem type", async () => {
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
-        debug(`claiming gem type ${gemName(i)}`);
+        debug(`claiming gem type: ${gemName(i)}`);
         expect(await contract.claimReward(i));
       }
     });
 
     it("should revert if a week has not passed after mint", async () => {
       for (const i of Object.values(GEMS)) {
-        debug(`claiming gem type ${gemName(i)}`);
+        debug(`claiming gem type: ${gemName(i)}`);
         await expect(contract.claimReward(i)).to.be.revertedWith("Not claimable");
       }
     });
@@ -84,47 +84,24 @@ describe("RewardsFacet", () => {
     it("should revert if no rewards to claim", async () => {
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
-        debug(`claiming gem type ${gemName(i)}`);
+        debug(`claiming gem type: ${gemName(i)}`);
         await contract.claimReward(i);
         await expect(contract.claimReward(i)).to.be.reverted;
       }
     });
 
-    const testClaim = async (tax: number) => {
-      for (const i of Object.values(GEMS)) {
-        debug(`claiming gem type ${gemName(i)}`);
-        debug(`testAmountToClaim(i) ${testAmountToClaim(i).toString()}`);
-        debug(`testAmountClaimed ${testAmountClaimed(i, tax).toString()}`);
-        //here times tax just to count the number of weeks passed to multiply rewards
-        await expect(contract.claimReward(i))
-          .to.emit(contract, "Claimed")
-          .withArgs(user, testAmountToClaim(i).mul(tax), testAmountClaimed(i, tax).mul(tax));
-      }
-    };
-
-    it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 1", async () => {
-      await hardhat.run("jump-in-time");
-      debug(`tax tier 1`);
-      await testClaim(1);
-    });
-
-    it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 2", async () => {
-      await hardhat.run("jump-in-time", { time: "2weeks" });
-      debug(`tax tier 2`);
-      await testClaim(2);
-    });
-
-    it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 3", async () => {
-      await hardhat.run("jump-in-time", { time: "3weeks" });
-      debug(`tax tier 3`);
-      await testClaim(3);
-    });
-
-    it("should claim reward for every configured gem type and event emitted with the correct amounts tax tier 4 (no tax)", async () => {
-      await hardhat.run("jump-in-time", { time: "4weeks" });
-      debug(`tax tier 4`);
-      await testClaim(4);
-    });
+    [1, 2, 3, 4].forEach(tax =>
+      it(`should claim reward for every configured gem type and event emitted with the correct amounts tax tier ${tax}`, async () => {
+        await hardhat.run("jump-in-time", { time: `${tax}weeks` });
+        for (const i of Object.values(GEMS)) {
+          debug(`claiming gem type: ${gemName(i)}`);
+          //here times tax just to count the number of weeks passed to multiply rewards
+          await expect(contract.claimReward(i))
+            .to.emit(contract, "Claimed")
+            .withArgs(user, testAmountToClaim(i).mul(tax), testAmountClaimed(i, tax).mul(tax));
+        }
+      }),
+    );
   });
 
   describe("stakeReward(uint256 _tokenId, uint256 _amount)", () => {
@@ -134,6 +111,21 @@ describe("RewardsFacet", () => {
         debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
         expect(await contract.stakeReward(i, testAmountToStake(i)));
         expect(await contract.getRewardAmount(i)).to.be.equal(ethers.constants.Zero);
+      }
+    });
+
+    it("should stake a given amount and emit event", async () => {
+      await hardhat.run("jump-in-time");
+      for (const i of Object.values(GEMS)) {
+        debug(`staking the reward to the vault ${gemName(i)}`);
+        const TEST_AMOUNT = testAmountToStake(i).div(2);
+        await expect(contract.stakeReward(i, TEST_AMOUNT))
+          .to.emit(contract, "Staked")
+          .withArgs(
+            user,
+            TEST_AMOUNT,
+            TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT)),
+          );
       }
     });
 
@@ -151,6 +143,25 @@ describe("RewardsFacet", () => {
         await contract.stakeReward(i, testAmountToStake(i));
         await expect(contract.stakeReward(i, testAmountToStake(i))).to.be.reverted;
       }
+    });
+  });
+
+  describe("stakeAndClaim(uint256 _tokenId, uint256 _percent)", () => {
+    [20, 40, 60, 80].forEach(strategy => {
+      it(`should claim and stake reward for every configured gem type for vault strategy ${strategy}`, async () => {
+        await hardhat.run("jump-in-time");
+        for (const i of Object.values(GEMS)) {
+          debug(`gem ${gemName(i)}`);
+          const TEST_AMOUNT = testAmountToStake(i).mul(strategy).div(100);
+          await expect(contract.stakeAndClaim(i, percent(strategy)))
+            .to.emit(contract, "Staked")
+            .withArgs(
+              user,
+              TEST_AMOUNT,
+              TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT)),
+            );
+        }
+      });
     });
   });
 

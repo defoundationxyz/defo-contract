@@ -8,7 +8,6 @@ import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
 import "../libraries/PercentHelper.sol";
-import "hardhat/console.sol";
 
 /** @title  YieldGemFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
@@ -33,13 +32,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /// @dev takes payment for mint and passes to the internal _mint function
     function mint(uint8 _gemTypeId) external onlyMintAvailable(_gemTypeId) {
         address minter = _msgSender();
-        console.log("=== mint");
-        console.log("minter %s");
         // check if there's enough DAI and DEFO
         for (uint i = 0; i < PAYMENT_TOKENS; i++) {
-            IERC20 paymentToken = s.config.paymentTokens[i];
-            uint256 userBalance = s.config.paymentTokens[i].balanceOf(minter);
-            console.log("token %s, balance %s", address(paymentToken), userBalance);
             require(
                 s.config.paymentTokens[i].balanceOf(minter) > s.gemTypes[_gemTypeId].price[i],
                 "Insufficient balance"
@@ -48,8 +42,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         // distribute payment according to the distribution setup
         for (uint receiver = 0; receiver < PAYMENT_RECEIVERS; receiver++) {
             for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
-                console.log("receiver %s: %s", receiver, s.config.wallets[receiver]);
-                console.log("paymentToken %s: %s", paymentToken, address(s.config.paymentTokens[paymentToken]));
                 uint256 amountToTransfer = PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[paymentToken][receiver]);
                 if (amountToTransfer != 0) {
                     require(s.config.wallets[receiver] != address(0), "YieldGem: configuration error, zero address");

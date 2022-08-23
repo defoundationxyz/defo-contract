@@ -3,22 +3,18 @@ pragma solidity 0.8.15;
 
 import "./PercentHelper.sol";
 import "./LibAppStorage.sol";
-import "hardhat/console.sol";
 
 /// @notice Library for withdrawal tax operations
 library TaxHelper {
     /// @dev gets an index to the taxTable
     /// @param _timeFromLastRewardWithdrawal time in seconds passed from the last claim or stake
     /// @return taxTier_ tax tier, can be a configurable mapping, now it's 0- 100% (rewards have not accrued yet), 1- 30%, 2-30%, 3- 15%, 4-0%.
-    function getTaxTier(uint256 _timeFromLastRewardWithdrawal) internal view returns (TaxTiers taxTier_) {
+    function getTaxTier(uint256 _timeFromLastRewardWithdrawal) internal pure returns (TaxTiers taxTier_) {
         taxTier_ = TaxTiers.Tier4NoTax;
         if (_timeFromLastRewardWithdrawal < 4 weeks) taxTier_ = TaxTiers.Tier3SmallTax;
         if (_timeFromLastRewardWithdrawal < 3 weeks) taxTier_ = TaxTiers.Tier2MediumTax;
         if (_timeFromLastRewardWithdrawal < 2 weeks) taxTier_ = TaxTiers.Tier1HugeTax;
         if (_timeFromLastRewardWithdrawal < 1 weeks) taxTier_ = TaxTiers.Tier0NoPayment;
-        console.log("-- TaxHelper");
-        console.log("_timeFromLastRewardWithdrawal", _timeFromLastRewardWithdrawal);
-        console.log("taxTier_", uint256(taxTier_));
     }
 
     /// @dev gets an index to taxRates from config

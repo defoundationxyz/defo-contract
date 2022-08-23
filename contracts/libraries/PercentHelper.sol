@@ -2,7 +2,6 @@
 pragma solidity 0.8.15;
 
 import "./LibAppStorage.sol";
-import "hardhat/console.sol";
 
 
 /**
@@ -21,10 +20,7 @@ library PercentHelper {
      * @param tax Percent to apply
      */
     ///todo make pure once got rid of the console.log
-    function rate(uint256 value, uint256 tax) internal view returns (uint256) {
-        console.log("--rate helper");
-        console.log("rate, got value %s, rate %s", value, tax);
-        console.log("return ", tax > 0 ? (value * tax) / HUNDRED_PERCENT : 0);
+    function rate(uint256 value, uint256 tax) internal pure returns (uint256) {
         return tax > 0 ? (value * tax) / HUNDRED_PERCENT : 0;
     }
 
@@ -39,10 +35,7 @@ library PercentHelper {
 
 
     /// @dev received inverted percent for taper calc, if ratio is 20%, then 1/(1-20%) = 25%
-    function invertedRate(uint256 value, uint256 ratio) internal view returns (uint256) {
-        console.log("--invertedPercent");
-        console.log("value %s,ratio %s", value, ratio);
-        console.log("result", value * HUNDRED_PERCENT / (HUNDRED_PERCENT - ratio));
+    function invertedRate(uint256 value, uint256 ratio) internal pure returns (uint256) {
         return value * HUNDRED_PERCENT / (HUNDRED_PERCENT - ratio);
     }
 
@@ -65,15 +58,11 @@ library PercentHelper {
 
 
     /// @dev simply value less given percentage, e.g. if tax is 30% the functio gives 70 for 100
-    function lessRate(uint256 value, uint256 tax) internal view returns (uint256) {
-        console.log("--lessRate helper");
-        console.log("got value %s, tax %s", value, tax);
-        console.log("return", value - rate(value, tax));
+    function lessRate(uint256 value, uint256 tax) internal pure returns (uint256) {
         return value - rate(value, tax);
     }
 
-    function plusRate(uint256 value, uint256 tax) internal view returns (uint256) {
-        console.log("plusRate, got value %s, tax %s", value, tax);
+    function plusRate(uint256 value, uint256 tax) internal pure returns (uint256) {
         return value + rate(value, tax);
     }
 }

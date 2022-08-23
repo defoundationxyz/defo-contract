@@ -4,7 +4,6 @@ pragma solidity 0.8.15;
 
 import "../interfaces/IDonations.sol";
 import "../base-facet/BaseFacet.sol";
-import "hardhat/console.sol";
 
 /** @title  DonationsFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
