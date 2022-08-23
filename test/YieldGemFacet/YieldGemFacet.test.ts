@@ -40,13 +40,15 @@ describe("YieldGemFacet", () => {
   });
 
   describe("mint()", () => {
-    it("should mint a gem of every configured type", async () => {
+    it("should mint a gem of every configured type and emit Transfer event", async () => {
       await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
         debug(`minting ${gemName(i)}`);
-        expect(await contract.mint(i));
+        await expect(contract.mint(i))
+          .to.emit(contract, "Transfer")
+          .withArgs(ethers.constants.AddressZero, namedAccounts.deployer, BigNumber.from(i));
       }
     });
 
@@ -58,7 +60,7 @@ describe("YieldGemFacet", () => {
       }
     });
 
-    it("should charge the correct price in DAI and DEFO", async () => {
+    it("should charge the correct price in DAI and DEFO on mint", async () => {
       await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
@@ -76,6 +78,35 @@ describe("YieldGemFacet", () => {
           const priceCharged = balanceBefore[token].sub(balanceAfter);
           expect(priceCharged).to.be.equal(GEM_TYPES_CONFIG[i].price[token]);
         }
+      }
+    });
+
+    it("should revert on mint attempt more than allowed by a mint window", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+
+      for (const i of Object.values(GEMS)) {
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          debug(`minting ${gemName(i)}`);
+          await contract.mint(i);
+        }
+        await expect(contract.mint(i)).to.be.revertedWith("Gem mint restriction");
+      }
+    });
+
+    it("should mint during the next mint window when current window limit is reached", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+
+      for (const i of Object.values(GEMS)) {
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          debug(`minting ${gemName(i)}`);
+          await contract.mint(i);
+        }
+        await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow}seconds` });
+        expect(await contract.mint(i));
       }
     });
 
@@ -114,6 +145,42 @@ describe("YieldGemFacet", () => {
           }
         }
       });
+    });
+  });
+
+  describe("getMintWindow(uint8 _gemTypeId)", () => {
+    it("should return correct mint window initial details", async () => {
+      for (const gemId of Object.values(GEMS)) {
+        await contract.mint(gemId);
+        const mintWindow = await contract.getMintWindow(gemId);
+        expect(mintWindow.mintCount).to.be.equal(ethers.constants.Zero);
+        const variance = mintWindow.endOfMintLimitWindow - (await ethers.provider.getBlock("latest")).timestamp;
+        const error = variance - <number>PROTOCOL_CONFIG.mintLimitWindow;
+        //endOfMintLimitWindow should be equal to the block.timestamp + 12h, although some 10s difference is fine
+        expect(error).to.be.lessThan(10);
+      }
+    });
+
+    it("should return correct mintCount", async () => {
+      for (const i of Object.values(GEMS)) {
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          debug(`minting ${gemName(i)}`);
+          await contract.mint(i);
+          const mintWindow = await contract.getMintWindow(i);
+          expect(mintWindow.mintCount).to.be.equal(mintNum + 1);
+        }
+      }
+    });
+
+    it("should reset mintCount for the next mintWindow", async () => {
+      for (const i of Object.values(GEMS)) {
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          debug(`minting ${gemName(i)}`);
+          await contract.mint(i);
+        }
+        await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow}seconds` });
+        expect((await contract.getMintWindow(i)).mintCount).to.be.equal(ethers.constants.Zero);
+      }
     });
   });
 
