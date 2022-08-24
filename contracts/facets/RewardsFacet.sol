@@ -20,6 +20,7 @@ import "../libraries/FiHelper.sol";
 */
 contract RewardsFacet is BaseFacet, IRewards {
     using FiHelper for Fi;
+    using BoosterHelper for Booster;
 
     /* ====================== Modifiers ====================== */
     modifier onlyClaimable(uint256 _tokenId) {
@@ -38,7 +39,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
-    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) public {
+    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) exists(_tokenId) public {
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
@@ -88,7 +89,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
-    function getRewardAmount(uint256 _tokenId) public view returns (uint256) {
+    function getRewardAmount(uint256 _tokenId) public exists(_tokenId) view returns (uint256) {
         uint256 rewardToDate = _getCumulatedRewardAmountGross(_tokenId);
         rewardToDate += s.gems[_tokenId].fi.unStakedNet;
         rewardToDate -= s.gems[_tokenId].fi.claimedGross;
@@ -167,26 +168,13 @@ contract RewardsFacet is BaseFacet, IRewards {
     function _getCumulatedRewardAmountGross(uint256 _tokenId) internal view returns (uint256) {
         Gem memory gem = s.gems[_tokenId];
         GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
-        uint256 totalReward;
-        if (gem.boostTime == 0) {
-            (totalReward,) = PeriodicHelper.calculateTaperedRewardAndRate(
-                block.timestamp - gem.mintTime, //period to calculate
-                gemType.taperRewardsThresholdDefo,
-                s.config.taperRate,
-                gemType.rewardAmountDefo,
-                s.config.rewardPeriod);
-        }
-        else {
-            require(gem.mintTime < gem.boostTime, "DEFORewards:mint-later-than-boost");
-            totalReward = PeriodicHelper.calculateTaperedRewardWithIntermediateBoost(
-                gem.boostTime - gem.mintTime,
-                gemType.taperRewardsThresholdDefo,
-                s.config.taperRate,
-                gemType.rewardAmountDefo,
-                gem.booster,
-                gem.boostTime - gem.mintTime, //unboostedPeriod
-                s.config.rewardPeriod);
-        }
+        uint256 boostedRewardAmount = gem.booster.boostRewardsRate(gemType.rewardAmountDefo);
+        uint256 totalReward = PeriodicHelper.calculateTaperedReward(
+            block.timestamp - gem.mintTime, //period to calculate
+            gemType.taperRewardsThresholdDefo,
+            s.config.taperRate,
+            boostedRewardAmount,
+            s.config.rewardPeriod);
         return totalReward;
     }
 

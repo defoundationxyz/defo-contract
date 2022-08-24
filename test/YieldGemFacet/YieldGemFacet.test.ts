@@ -39,7 +39,7 @@ describe("YieldGemFacet", () => {
     otherUser = wallets[ANY_NUMBER_NOT_0].address;
   });
 
-  describe("mint()", () => {
+  describe("mint(uint8 _gemTypeId)", () => {
     it("should mint a gem of every configured type and emit Transfer event", async () => {
       await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
@@ -52,10 +52,10 @@ describe("YieldGemFacet", () => {
       }
     });
 
-    it("should not mint a gem if not enough balance", async () => {
+    it("should revert on mint if not enough balance", async () => {
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
-        debug(`minting ${gemName(i)}`);
+        debug(`attempting ${gemName(i)} with no balance`);
         await expect(contract.mint(i)).to.be.revertedWith("Insufficient balance");
       }
     });
@@ -73,7 +73,7 @@ describe("YieldGemFacet", () => {
         }
         await contract.mint(i);
         for (const token of [0, 1]) {
-          debug(`Gem ${gemName(i)}, checking price ${PaymentTokens[token]}`);
+          debug(`gem ${gemName(i)}, checking price ${PaymentTokens[token]}`);
           const balanceAfter = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
           const priceCharged = balanceBefore[token].sub(balanceAfter);
           expect(priceCharged).to.be.equal(GEM_TYPES_CONFIG[i].price[token]);
@@ -87,8 +87,8 @@ describe("YieldGemFacet", () => {
       await hardhat.run("permit");
 
       for (const i of Object.values(GEMS)) {
+        debug(`testing ${gemName(i)}`);
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
-          debug(`minting ${gemName(i)}`);
           await contract.mint(i);
         }
         await expect(contract.mint(i)).to.be.revertedWith("Gem mint restriction");
@@ -102,9 +102,11 @@ describe("YieldGemFacet", () => {
 
       for (const i of Object.values(GEMS)) {
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
-          debug(`minting ${gemName(i)}`);
           await contract.mint(i);
         }
+        debug(
+          `minted ${GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow} ${gemName(i)} gems, jumping to the next mint window`,
+        );
         await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow}seconds` });
         expect(await contract.mint(i));
       }
@@ -116,7 +118,7 @@ describe("YieldGemFacet", () => {
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         const receiversNumber = PROTOCOL_CONFIG.incomeDistributionOnMint.length;
-
+        ///todo check this test if it's running correctly
         for (const i of Object.values(GEMS)) {
           debug(`minting ${gemName(i)}`);
           const balanceBefore: Array<[BigNumber, BigNumber]> = new Array(receiversNumber).fill([
@@ -126,13 +128,13 @@ describe("YieldGemFacet", () => {
           for (const token of [0, 1]) {
             for (let wallet = 0; wallet < receiversNumber; wallet++) {
               balanceBefore[wallet][token] = await paymentTokenContracts[token].balanceOf(wallets[i].address);
-              debug(`Balance before wallet ${wallet} token ${token}: ${balanceBefore[wallet][token]}`);
+              debug(`balance before wallet ${wallet} token ${token}: ${balanceBefore[wallet][token]}`);
             }
           }
           await contract.mint(i);
           for (const token in Object.values(PaymentTokens) as number[]) {
             for (let wallet = 0; wallet < receiversNumber; wallet++) {
-              debug(`Gem ${gemName(i)}, checking price ${PaymentTokens[token]} for wallet ${wallets[i].address}`);
+              debug(`gem ${gemName(i)}, checking price ${PaymentTokens[token]} for wallet ${wallets[i].address}`);
               const balanceAfter = await paymentTokenContracts[token].balanceOf(wallets[i].address);
               const priceDistributedToReceiver = balanceBefore[wallet][token].sub(balanceAfter);
               debug(`priceDistributedToReceiver wallet ${wallet} token ${token}: ${priceDistributedToReceiver}`);
@@ -148,6 +150,27 @@ describe("YieldGemFacet", () => {
     });
   });
 
+  describe("mintTo(uint8 _gemType, address _to, Booster _booster)", () => {
+    [0, 1, 2].forEach(booster =>
+      it(`should mint a gem of every type with a booster ${
+        ["None", "Delta", "Omega"][booster]
+      } and emit Transfer event`, async () => {
+        for (const i of Object.values(GEMS)) {
+          debug(`minting ${gemName(i)}, ${["None", "Delta", "Omega"][booster]} booster`);
+          await expect(contract.mintTo(i, otherUser, booster))
+            .to.emit(contract, "Transfer")
+            .withArgs(ethers.constants.AddressZero, otherUser, BigNumber.from(i));
+        }
+      }),
+    );
+
+    it("should revert if unauthorized ", async () => {
+      const anyUser = "defoTokenOwner";
+      const unauthorizedUserContract = await getContractWithSigner<YieldGemFacet>(hardhat, "DEFODiamond", anyUser);
+      await expect(unauthorizedUserContract.mintTo(0, otherUser, 0)).to.be.revertedWith("Unauthorized");
+    });
+  });
+
   describe("getMintWindow(uint8 _gemTypeId)", () => {
     it("should return correct mint window initial details", async () => {
       await hardhat.run("dev:get-some-dai");
@@ -157,9 +180,10 @@ describe("YieldGemFacet", () => {
         const mintWindow = await contract.getMintWindow(gemId);
         expect(mintWindow.mintCount).to.be.equal(ethers.constants.Zero);
         const variance = mintWindow.endOfMintLimitWindow - (await ethers.provider.getBlock("latest")).timestamp;
-        const error = variance - <number>PROTOCOL_CONFIG.mintLimitWindow;
+        const error = <number>PROTOCOL_CONFIG.mintLimitWindow - variance;
         //endOfMintLimitWindow should be equal to the block.timestamp + 12h, although some 10s difference is fine
-        expect(error).to.be.lessThan(10);
+        debug(`delay in s: ${error.toString()}`);
+        expect(error).to.be.lessThan(30);
       }
     });
 
@@ -169,25 +193,58 @@ describe("YieldGemFacet", () => {
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
-          debug(`minting ${gemName(i)}`);
           await contract.mint(i);
           const mintWindow = await contract.getMintWindow(i);
           expect(mintWindow.mintCount).to.be.equal(mintNum + 1);
         }
+        debug(`minted ${GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow} ${gemName(i)} gems`);
       }
     });
 
-    it("should reset mintCount for the next mintWindow", async () => {
+    it("should return zero mintCount if minted past the mintWindow", async () => {
       await hardhat.run("dev:get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
+        debug(`testing gem ${gemName(i)}`);
         for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
-          debug(`minting ${gemName(i)}`);
           await contract.mint(i);
         }
         await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow}seconds` });
         expect((await contract.getMintWindow(i)).mintCount).to.be.equal(ethers.constants.Zero);
+      }
+    });
+
+    it("should return zero mintCount if minted second time much later than mintWindow length", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      for (const i of Object.values(GEMS)) {
+        debug(`testing gem ${gemName(i)}`);
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          await contract.mint(i);
+        }
+        await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow * 5 + 1000}seconds` });
+        expect((await contract.getMintWindow(i)).mintCount).to.be.equal(ethers.constants.Zero);
+      }
+    });
+
+    it("should start counting mints in the next mintWindow", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      for (const i of Object.values(GEMS)) {
+        debug(`testing gem ${gemName(i)}`);
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          await contract.mint(i);
+        }
+        await hardhat.run("jump-in-time", { time: `${<number>PROTOCOL_CONFIG.mintLimitWindow}seconds` });
+        for (let mintNum = 0; mintNum < GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow; mintNum++) {
+          await contract.mint(i);
+          const mintWindow = await contract.getMintWindow(i);
+          expect(mintWindow.mintCount).to.be.equal(mintNum + 1);
+        }
+        debug(`minted ${GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow} ${gemName(i)} gems`);
       }
     });
   });

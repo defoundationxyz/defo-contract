@@ -33,13 +33,13 @@ library PeriodicHelper {
 
     // @notice Calculated Tapered Reward starting from the mint time. To get the reward call this function and subtract already paid from it.
     // @return taperedReward, updatedRewardRate
-    function calculateTaperedRewardAndRate(
+    function calculateTaperedReward(
         uint timePeriod, //block.timestamp - mintTime
         uint256 taperThreshold, //120 for diamond
         uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
-        uint ratePerPeriod, //5 for diamond
+        uint ratePerPeriod, //5 for diamond, pass already boosted rate if boost is applicable
         uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal pure returns (uint taperedReward, uint updatedRewardRate) {
+    ) internal pure returns (uint256 taperedReward) {
         uint256 taperedPercent = taperPercent.oneHundredLessPercent();
         // Basically it's a geometric progression of the timestamps b_n = b_1*q_(n-1),
         // For simplicity startTime is zero, so timePeriod should be block.timestamp - startTime
@@ -91,26 +91,6 @@ library PeriodicHelper {
             finalRate = ratePerPeriod;
             finalAmount = timePeriod / payOrDeductPeriod * ratePerPeriod;
         }
-        return (finalAmount, finalRate);
-    }
-
-    // @notice Calculated Tapered Reward starting from the mint time. To get the reward call this function and subtract already paid from it.
-    // @return taperedReward, updatedRewardRate
-    function calculateTaperedRewardWithIntermediateBoost(
-        uint timePeriod, //block.timestamp - mintTime
-        uint256 taperThreshold, //120 for diamond
-        uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
-        uint ratePerPeriod, //5 for diamond
-        Booster booster, //booster to boost the tapered rate at the right moment
-        uint unboostedPeriod, // boost moment starting from zero, e.g. boost moment less mint date
-        uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal pure returns (uint) {
-        require(unboostedPeriod < timePeriod, "boost moment is earlier than mint time");
-        /// todo This is not very precise, some discrepancies may happen since the boosted taper is calculated fromt he boost moment not cosidered the part of the current taper timeframe when that boost happen, so the part of the curret taper period is lost in the moment of boost, in favor of the user
-        (uint unboostedAmount, uint unboostedRate) = calculateTaperedRewardAndRate(unboostedPeriod, taperThreshold, taperPercent, ratePerPeriod, payOrDeductPeriod);
-        uint boostedPeriod = timePeriod - unboostedPeriod;
-        uint boostedRate = BoosterHelper.boostRewardsRate(booster, unboostedRate);
-        (uint boostedAmount,) = calculateTaperedRewardAndRate(boostedPeriod, taperThreshold, taperPercent, boostedRate, payOrDeductPeriod);
-        return boostedAmount + unboostedAmount;
+        return finalAmount;
     }
 }

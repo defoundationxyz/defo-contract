@@ -149,7 +149,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     function linkDiamond(ITransferLimiter _transferLimiter) external auth {
         transferLimiter = _transferLimiter;
     }
-    
+
     function mint(address usr, uint256 wad) external auth {
         balanceOf[usr] = add(balanceOf[usr], wad);
         totalSupply = add(totalSupply, wad);
