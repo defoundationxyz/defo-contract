@@ -1,11 +1,12 @@
-import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
+import { GEMS, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
 import { RewardsFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
 import newDebug from "debug";
-import { BigNumber } from "ethers";
 import hardhat, { deployments, ethers } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
+
+import { BOOSTERS, testAmountClaimed, testAmountToClaim, testAmountToStake } from "../testHelpers";
 
 
 const debug = newDebug("defo:YieldGemFacet.test.ts");
@@ -13,36 +14,6 @@ const debug = newDebug("defo:YieldGemFacet.test.ts");
 describe("RewardsFacet", () => {
   let contract: RewardsFacet & YieldGemFacet;
   let user: Address;
-  const testAmountToClaim = (gemTypeId: number) => GEM_TYPES_CONFIG[gemTypeId].rewardAmountDefo as BigNumber;
-  const testAmountToStake = testAmountToClaim;
-  const testAmountTax = (gemTypeId: number, taxTier: number) =>
-    testAmountToClaim(gemTypeId)
-      .mul(<number>PROTOCOL_CONFIG.taxRates[taxTier])
-      .div(HUNDRED_PERCENT);
-  const testAmountCharity = (gemTypeId: number) =>
-    testAmountToClaim(gemTypeId)
-      .mul(<number>PROTOCOL_CONFIG.charityContributionRate)
-      .div(HUNDRED_PERCENT);
-
-  const testAmountClaimed = (gemTypeId: number, taxTier: number) =>
-    testAmountToClaim(gemTypeId).sub(testAmountCharity(gemTypeId)).sub(testAmountTax(gemTypeId, taxTier));
-
-  const BOOSTERS = [
-    {
-      name: "DELTA",
-      id: 1,
-      rewardsBoost: (reward: BigNumber) => reward.mul(125).div(100),
-      maintenanceFeeReduction: 0.75,
-      vaultFeeReduction: 0.5,
-    },
-    {
-      name: "OMEGA",
-      id: 2,
-      rewardsBoost: (reward: BigNumber) => reward.mul(150).div(100),
-      maintenanceFeeReduction: 0.5,
-      vaultFeeReduction: 0.9,
-    },
-  ];
 
   beforeEach(async () => {
     await deployments.fixture([
