@@ -212,7 +212,6 @@ uint256 constant TAX_TIERS = 5;
         uint8 gemTypeId;
         Booster booster;
         uint32 mintTime;
-        uint32 boostTime;
         uint32 lastRewardWithdrawalTime;
         uint32 lastMaintenanceTime;
         Fi fi;
@@ -242,4 +241,6 @@ uint256 constant TAX_TIERS = 5;
         Fi total;
         // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)
         mapping(address => Fi) usersFi;
+        mapping(address => uint8) usersNextGemTypeToBoost;
+        mapping(address => Booster) usersNextGemBooster;
     }

@@ -18,7 +18,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /* ====================== Modifiers ====================== */
 
     modifier onlyRedeemContract() {
-        require(s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Only from Redemption contract");
+        require(s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
         _;
     }
 
@@ -49,15 +49,22 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
                 }
             }
         }
-
+        //check if there's a booster left for the user and use it
+        Booster boost = _gemTypeId == s.usersNextGemTypeToBoost[minter] ? s.usersNextGemBooster[minter] : Booster.None;
         // finally mint a yield gem
-        _mint(_gemTypeId, minter);
+        _mint(_gemTypeId, minter, boost);
     }
 
-    function mintTo(uint8 _gemType, address _to) public onlyRedeemContract {
+    function mintTo(uint8 _gemType, address _to, Booster _booster) public onlyRedeemContract {
         //just mint with no payment, already paid on presale
-        _mint(_gemType, _to);
+        _mint(_gemType, _to, _booster);
     }
+
+    function createBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
+        s.usersNextGemTypeToBoost[_to] = _gemType;
+        s.usersNextGemBooster[_to] = _booster;
+    }
+
 
     function getGemInfo(uint256 _tokenId) external view returns (Gem memory) {
         return s.gems[_tokenId];
@@ -88,7 +95,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /* ============ Internal Functions ============ */
 
     /// @dev mint only, no payment, covers yield gem related mint functions, minting itself and event firing is part of super contract from erc721-facet directory
-    function _mint(uint8 _gemType, address _to) private {
+    function _mint(uint8 _gemType, address _to, Booster _booster) private {
         // mint and update the counter
         uint256 tokenId = _safeMint(_to);
         LibMintLimiter.updateMintCount(_gemType);
@@ -98,6 +105,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         gem.lastMaintenanceTime = uint32(block.timestamp);
         gem.lastRewardWithdrawalTime = uint32(block.timestamp);
         gem.mintTime = uint32(block.timestamp);
+        gem.booster = _booster;
         s.gems[tokenId] = gem;
     }
 
@@ -110,8 +118,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         require(!s.config.transferLock, "Pausable: paused, transfer is locked");
         ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
-        if (from != address(0))
+        if (from != address(0)) {
             s.usersFi[to] = s.usersFi[from];
+            s.usersNextGemBooster[to] = s.usersNextGemBooster[from];
+        }
     }
 
     function _afterTokenTransfer(
@@ -120,7 +130,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         uint256 tokenId
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
-        if (from != address(0))
+        if (from != address(0)) {
             delete s.usersFi[from];
+            delete s.usersNextGemBooster[from];
+        }
     }
 }

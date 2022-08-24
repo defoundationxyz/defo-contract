@@ -1,5 +1,5 @@
 import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
-import { RewardsFacet } from "@contractTypes/contracts/facets";
+import { RewardsFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
 import newDebug from "debug";
@@ -11,21 +11,38 @@ import { Address } from "hardhat-deploy/dist/types";
 const debug = newDebug("defo:YieldGemFacet.test.ts");
 
 describe("RewardsFacet", () => {
-  let contract: RewardsFacet;
+  let contract: RewardsFacet & YieldGemFacet;
   let user: Address;
-  const testAmountToClaim = (id: number) => GEM_TYPES_CONFIG[id].rewardAmountDefo as BigNumber;
+  const testAmountToClaim = (gemTypeId: number) => GEM_TYPES_CONFIG[gemTypeId].rewardAmountDefo as BigNumber;
   const testAmountToStake = testAmountToClaim;
-  const testAmountTax = (id: number, taxTier: number) =>
-    testAmountToClaim(id)
+  const testAmountTax = (gemTypeId: number, taxTier: number) =>
+    testAmountToClaim(gemTypeId)
       .mul(<number>PROTOCOL_CONFIG.taxRates[taxTier])
       .div(HUNDRED_PERCENT);
-  const testAmountCharity = (id: number) =>
-    testAmountToClaim(id)
+  const testAmountCharity = (gemTypeId: number) =>
+    testAmountToClaim(gemTypeId)
       .mul(<number>PROTOCOL_CONFIG.charityContributionRate)
       .div(HUNDRED_PERCENT);
 
-  const testAmountClaimed = (id: number, taxTier: number) =>
-    testAmountToClaim(id).sub(testAmountCharity(id)).sub(testAmountTax(id, taxTier));
+  const testAmountClaimed = (gemTypeId: number, taxTier: number) =>
+    testAmountToClaim(gemTypeId).sub(testAmountCharity(gemTypeId)).sub(testAmountTax(gemTypeId, taxTier));
+
+  const BOOSTERS = [
+    {
+      name: "DELTA",
+      id: 1,
+      rewardsBoost: (reward: BigNumber) => reward.mul(125).div(100),
+      maintenanceFeeReduction: 0.75,
+      vaultFeeReduction: 0.5,
+    },
+    {
+      name: "OMEGA",
+      id: 2,
+      rewardsBoost: (reward: BigNumber) => reward.mul(150).div(100),
+      maintenanceFeeReduction: 0.5,
+      vaultFeeReduction: 0.9,
+    },
+  ];
 
   beforeEach(async () => {
     await deployments.fixture([
@@ -35,23 +52,38 @@ describe("RewardsFacet", () => {
       "DEFOTokenInit",
       "DiamondInitialized",
     ]);
-    contract = await getContractWithSigner<RewardsFacet>(hardhat, "DEFODiamond");
+    contract = await getContractWithSigner<RewardsFacet & YieldGemFacet>(hardhat, "DEFODiamond");
     user = (await hardhat.getNamedAccounts()).deployer;
     await hardhat.run("dev:get-some-dai");
     await hardhat.run("get-some-defo");
     await hardhat.run("permit");
-    await hardhat.run("get-some-gems");
   });
 
   describe("getRewardAmount(uint256 _tokenId)", () => {
     it("should earn reward with a given amount after one week", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`testing reward amount of gem type: ${gemName(i)}`);
         expect(await contract.getRewardAmount(i)).to.be.equal(testAmountToStake(i));
       }
     });
+
+    BOOSTERS.forEach(booster =>
+      it(`should earn correct reward for ${booster.name} boosted gem`, async () => {
+        for (const i of Object.values(GEMS)) {
+          await contract.mintTo(i, user, booster.id);
+        }
+        await hardhat.run("jump-in-time");
+        for (const i of Object.values(GEMS)) {
+          debug(`testing reward amount of  ${booster.name} boosted gem type: ${gemName(i)}`);
+          expect(await contract.getRewardAmount(i)).to.be.equal(booster.rewardsBoost(testAmountToStake(i)));
+        }
+      }),
+    );
+
     it("should show zero amount for the gems once staked", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const id of Object.values(GEMS)) {
         debug(`testing staking for gem type: ${gemName(id)}`);
@@ -67,6 +99,7 @@ describe("RewardsFacet", () => {
 
   describe("claimReward(uint256 _tokenId)", () => {
     it("should claim reward for every configured gem type", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`claiming gem type: ${gemName(i)}`);
@@ -75,6 +108,7 @@ describe("RewardsFacet", () => {
     });
 
     it("should revert if a week has not passed after mint", async () => {
+      await hardhat.run("get-some-gems");
       for (const i of Object.values(GEMS)) {
         debug(`claiming gem type: ${gemName(i)}`);
         await expect(contract.claimReward(i)).to.be.revertedWith("Not claimable");
@@ -82,6 +116,7 @@ describe("RewardsFacet", () => {
     });
 
     it("should revert if no rewards to claim", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`claiming gem type: ${gemName(i)}`);
@@ -90,15 +125,17 @@ describe("RewardsFacet", () => {
       }
     });
 
-    [1, 2, 3, 4].forEach(tax =>
-      it(`should claim reward for every configured gem type and event emitted with the correct amounts tax tier ${tax}`, async () => {
-        await hardhat.run("jump-in-time", { time: `${tax}weeks` });
+    [1, 2, 3, 4].forEach(taxTier =>
+      it(`should claim reward for every configured gem type and event emitted with the correct amounts tax tier ${taxTier}`, async () => {
+        debug(`Tax tier ${taxTier} is ${<number>PROTOCOL_CONFIG.taxRates[taxTier] / 100}%`);
+        await hardhat.run("get-some-gems");
+        await hardhat.run("jump-in-time", { time: `${taxTier}weeks` });
         for (const i of Object.values(GEMS)) {
           debug(`claiming gem type: ${gemName(i)}`);
           //here times tax just to count the number of weeks passed to multiply rewards
           await expect(contract.claimReward(i))
             .to.emit(contract, "Claimed")
-            .withArgs(user, testAmountToClaim(i).mul(tax), testAmountClaimed(i, tax).mul(tax));
+            .withArgs(user, testAmountToClaim(i).mul(taxTier), testAmountClaimed(i, taxTier).mul(taxTier));
         }
       }),
     );
@@ -106,6 +143,7 @@ describe("RewardsFacet", () => {
 
   describe("stakeReward(uint256 _tokenId, uint256 _amount)", () => {
     it("should stake all earned reward to the vault", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
@@ -115,6 +153,7 @@ describe("RewardsFacet", () => {
     });
 
     it("should stake a given amount and emit event", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`staking the reward to the vault ${gemName(i)}`);
@@ -130,6 +169,7 @@ describe("RewardsFacet", () => {
     });
 
     it("should revert on staking if a week has not passed after mint", async () => {
+      await hardhat.run("get-some-gems");
       for (const i of Object.values(GEMS)) {
         debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
         await expect(contract.stakeReward(i, testAmountToStake(i))).to.be.reverted;
@@ -137,6 +177,7 @@ describe("RewardsFacet", () => {
     });
 
     it("should revert on staking if no claimable rewards", async () => {
+      await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time");
       for (const i of Object.values(GEMS)) {
         debug(`staking the reward to the vault, complete amount ${gemName(i)}`);
@@ -149,6 +190,7 @@ describe("RewardsFacet", () => {
   describe("stakeAndClaim(uint256 _tokenId, uint256 _percent)", () => {
     [20, 40, 60, 80].forEach(strategy => {
       it(`should claim and stake reward for every configured gem type for vault strategy ${strategy}`, async () => {
+        await hardhat.run("get-some-gems");
         await hardhat.run("jump-in-time");
         for (const i of Object.values(GEMS)) {
           debug(`gem ${gemName(i)}`);

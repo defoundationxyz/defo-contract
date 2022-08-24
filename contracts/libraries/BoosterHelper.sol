@@ -12,11 +12,11 @@ library BoosterHelper {
     /// @notice boosting rewards rate (which is an amount per second), 50% for omega, 25% for delta
     function boostRewardsRate(Booster booster, uint256 rate) internal pure returns (uint256) {
         if (booster == Booster.Omega) {
-            return rate * 15000 / 10000;
             //50% more
+            return rate * 15000 / 10000;
         } else if (booster == Booster.Delta) {
-            return rate * 12500 / 10000;
             //25% more
+            return rate * 12500 / 10000;
         } else return rate;
     }
 
@@ -25,15 +25,15 @@ library BoosterHelper {
         if (booster == Booster.Omega) {
             return fee / 2;
         } else if (booster == Booster.Delta) {
-            return fee * 100 / 75;
+            return fee * 7500 / 10000;
         } else return fee;
     }
 
     function reduceVaultWithdrawalFee(Booster booster, uint256 fee) internal pure returns (uint256) {
         if (booster == Booster.Omega) {
-            return fee * 100 / 90;
+            return fee * 1000 / 10000;
         } else if (booster == Booster.Delta) {
-            return fee /2;
+            return fee / 2;
         } else return fee;
     }
 }
