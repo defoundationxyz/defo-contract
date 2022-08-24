@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
-
-import "hardhat/console.sol";
 import "./LibAppStorage.sol";
 
 /**
@@ -13,19 +11,6 @@ library FiHelper {
     function updateStorage(Fi memory _add, uint256 _tokenId, address _user) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         Gem storage gem = s.gems[_tokenId];
-
-        console.log("=== updateStorage");
-        console.log("_add.claimedGross: ", _add.claimedGross);
-        console.log("_add.claimTaxPaid: ", _add.claimTaxPaid);
-        console.log("_add.donated: ", _add.donated);
-        console.log("_add.claimedNet: ", _add.claimedNet);
-        console.log("_add.unStakedGross: ", _add.unStakedGross);
-        console.log("_add.vaultTaxPaid: ", _add.vaultTaxPaid);
-        console.log("_add.donated: ", _add.donated);
-        console.log("_add.unStakedNet: ", _add.unStakedNet);
-        console.log("_add.stakedGross: ", _add.stakedGross);
-        console.log("_add.donated: ", _add.donated);
-        console.log("_add.stakedNet: ", _add.stakedNet);
 
 
         ///todo refactor financial consisitency checks into a separate function

@@ -17,7 +17,7 @@ export const gemName = (gemNumber: number) =>
   (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
 
 export const PERCENTAGE_PRECISION_MULTIPLIER = 100;
-const percent = (value: number) => value * PERCENTAGE_PRECISION_MULTIPLIER;
+export const percent = (value: number) => value * PERCENTAGE_PRECISION_MULTIPLIER;
 export const HUNDRED_PERCENT = percent(100);
 
 export const SECONDS_IN_AN_HOUR = 3600;

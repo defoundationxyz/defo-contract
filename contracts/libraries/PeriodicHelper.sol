@@ -3,7 +3,6 @@ pragma solidity 0.8.15;
 
 import "./PercentHelper.sol";
 import "./BoosterHelper.sol";
-import "hardhat/console.sol";
 
 /// @notice Library for reward calculations
 /// @author Decentralized Foundation
@@ -26,9 +25,6 @@ library PeriodicHelper {
         uint32 lastEventTime,
         uint32 payOrDeductPeriod
     ) internal view returns (uint) {
-        console.log("=== calculatePeriodic");
-        console.log("ratePerPeriod %s, lastEventTime %s, payOrDeductPeriod %s ", ratePerPeriod, lastEventTime, payOrDeductPeriod);
-        console.log("result: ", calculatePeriodicToDate(ratePerPeriod, lastEventTime, uint32(block.timestamp), payOrDeductPeriod));
 
         return calculatePeriodicToDate(ratePerPeriod, lastEventTime, uint32(block.timestamp), payOrDeductPeriod);
     }
@@ -43,13 +39,7 @@ library PeriodicHelper {
         uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
         uint ratePerPeriod, //5 for diamond
         uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal view returns (uint taperedReward, uint updatedRewardRate) {
-        console.log("-- calcTaperedReward");
-        console.log("timePeriod ", timePeriod);
-        console.log("taperThreshold ", taperThreshold);
-        console.log("taperPercent ", taperPercent);
-        console.log("ratePerPeriod ", ratePerPeriod);
-        console.log("payOrDeductPeriod ", payOrDeductPeriod);
+    ) internal pure returns (uint taperedReward, uint updatedRewardRate) {
         uint256 taperedPercent = taperPercent.oneHundredLessPercent();
         // Basically it's a geometric progression of the timestamps b_n = b_1*q_(n-1),
         // For simplicity startTime is zero, so timePeriod should be block.timestamp - startTime
@@ -85,21 +75,15 @@ library PeriodicHelper {
             (PercentHelper.PERCENTAGE_PRECISION_MULTIPLIER * PercentHelper.HUNDRED_PERCENT ** n / taperedPercent ** n - PercentHelper.PERCENTAGE_PRECISION_MULTIPLIER) /
             (PercentHelper.PERCENTAGE_PRECISION_MULTIPLIER * PercentHelper.HUNDRED_PERCENT / taperedPercent - PercentHelper.PERCENTAGE_PRECISION_MULTIPLIER);
             n++;
-            //            console.log("loop, n=%s, sN=%s, sNp1=%s", n, sN, sNp1);
         }
         while (payOrDeductPeriod * sNp1 <= timePeriod);
         n = n - 2;
         //convert sN to Seconds, that's just for the logs to show in weeks
         sN *= payOrDeductPeriod;
-        //        console.log("n= %s, sN = %s", n, sN);
         //        uint bN = payOrDeductPeriod * taperThreshold / (ratePerPeriod * taperedPercent ** n);
-        //        console.log("bN= ", bN);
         // The whole process makes sense if the current time is later than the 1st taper event
         uint finalRate;
         if (sN != 0 && timePeriod > sN) {
-            //            console.log("(timePeriod - sN)", (timePeriod - sN));
-            //            console.log("(timePeriod - sN) / payOrDeductPeriod", (timePeriod - sN) / payOrDeductPeriod);
-            //            console.log("taperThreshold * n", taperThreshold * n);
             finalRate = ratePerPeriod * taperedPercent ** (n + 1) / PercentHelper.HUNDRED_PERCENT ** (n + 1);
             finalAmount = taperThreshold * n + ((timePeriod - sN) / payOrDeductPeriod) * finalRate;
         }
@@ -107,7 +91,6 @@ library PeriodicHelper {
             finalRate = ratePerPeriod;
             finalAmount = timePeriod / payOrDeductPeriod * ratePerPeriod;
         }
-        console.log("---- result finalAmount %s", finalAmount);
         return (finalAmount, finalRate);
     }
 
@@ -121,7 +104,7 @@ library PeriodicHelper {
         Booster booster, //booster to boost the tapered rate at the right moment
         uint unboostedPeriod, // boost moment starting from zero, e.g. boost moment less mint date
         uint payOrDeductPeriod //in seconds, initially it's 1 week
-    ) internal view returns (uint) {
+    ) internal pure returns (uint) {
         require(unboostedPeriod < timePeriod, "boost moment is earlier than mint time");
         /// todo This is not very precise, some discrepancies may happen since the boosted taper is calculated fromt he boost moment not cosidered the part of the current taper timeframe when that boost happen, so the part of the curret taper period is lost in the moment of boost, in favor of the user
         (uint unboostedAmount, uint unboostedRate) = calculateTaperedRewardAndRate(unboostedPeriod, taperThreshold, taperPercent, ratePerPeriod, payOrDeductPeriod);
