@@ -60,6 +60,13 @@ The contract is built as an EIP-2535 Diamond, implementing ERC-1155 functionalit
 NFTs.
 In order to interact with the deployed contracts, see `contracts/interfaces`.
 
+### Avalanche FUJI Addresses
+
+| Contract                                       | Address                                        |
+|------------------------------------------------|------------------------------------------------|
+| DEFO Token ERC-20                              | **0xA9D3adb2B5c7d89c56d74584E98ABcea1E4e6a4D** |
+| DEFO Protocol Main Contract ERC-721 compatible | **0xf0d26dD82f6beE798cB677ee17E5466d009193Eb** |
+
 ## Cash flow
 
 ```mermaid
