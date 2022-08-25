@@ -35,6 +35,52 @@ contract ConfigFacet is BaseFacet, IConfig {
         }
     }
 
+    function setConfigWallets(address[WALLETS] memory _wallets) external onlyOwner {
+        s.config.wallets = _wallets;
+    }
+
+    function setConfigIncomeDistributionOnMint(uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] memory _incomeDistributionOnMint) external onlyOwner {
+        s.config.incomeDistributionOnMint = _incomeDistributionOnMint;
+    }
+
+    function setConfigMaintenancePeriod(uint32 _maintenancePeriod) external onlyOwner {
+        s.config.maintenancePeriod = _maintenancePeriod;
+    }
+
+    function setConfigRewardPeriod(uint32 _rewardPeriod) external onlyOwner {
+        s.config.rewardPeriod = _rewardPeriod;
+    }
+
+    function setConfigTaxScaleSinceLastClaimPeriod(uint32 _taxScaleSinceLastClaimPeriod) external onlyOwner {
+        s.config.taxScaleSinceLastClaimPeriod = _taxScaleSinceLastClaimPeriod;
+    }
+
+    function setConfigTaxRates(uint256[TAX_TIERS] memory _taxRates) external onlyOwner {
+        s.config.taxRates = _taxRates;
+    }
+
+    function setConfigTaxScaleSinceLastClaimPeriod(uint256 _charityContributionRate) external onlyOwner {
+        s.config.charityContributionRate = _charityContributionRate;
+    }
+
+    function setConfigVaultWithdrawalTaxRate(uint256 _vaultWithdrawalTaxRate) external onlyOwner {
+        s.config.vaultWithdrawalTaxRate = _vaultWithdrawalTaxRate;
+    }
+
+    function setConfigTaperRate(uint256 _taperRate) external onlyOwner {
+        s.config.taperRate = _taperRate;
+    }
+
+    function setConfigMintLimitWindow(uint32 _mintLimitWindow) external onlyOwner {
+        s.config.mintLimitWindow = _mintLimitWindow;
+    }
+
+    function setConfigMintLimitWindow(DefoTokenLimitConfig calldata _defoTokenLimitConfig) external onlyOwner {
+        DefoTokenLimitConfig memory temp = _defoTokenLimitConfig;
+        s.config.defoTokenLimitConfig = temp;
+    }
+
+
     function getConfig() external view returns (ProtocolConfig memory) {
         return s.config;
     }
