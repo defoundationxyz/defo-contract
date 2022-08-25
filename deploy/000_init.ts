@@ -37,7 +37,15 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     ),
   );
 
-  const accountsThatShouldBeFunded = ["deployer", "treasury", "rewardPool", "vault", "team"];
+  const accountsThatShouldBeFunded = [
+    "deployer",
+    "treasury",
+    "donations",
+    "defoTokenOwner",
+    "rewardPool",
+    "vault",
+    "team",
+  ];
 
   const namesAccountsWithBalance = await Promise.all(
     Object.entries(namedAccounts).map(async ([name, address]) => {
