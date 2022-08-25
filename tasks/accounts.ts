@@ -30,8 +30,8 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
       : null;
   assert(defoContract, "defoContract is null");
   announce(
-    `DEFO token was ${chalk.yellow(
-      forkedDefoToken ? "forked" : defoTokenDeployment ? "deployed locally" : chalk.red("not deployed!"),
+    `DEFO token is ${chalk.yellow(
+      forkedDefoToken ? "on live network" : defoTokenDeployment ? "deployed locally" : chalk.red("not deployed!"),
     )}. Address: ${defoContract.address}`,
   );
 
