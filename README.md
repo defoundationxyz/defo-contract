@@ -1,12 +1,16 @@
+[![Compile & Test Pass](https://github.com/defoundationxyz/defo-contract/actions/workflows/test.yml/badge.svg)](https://github.com/defoundationxyz/defo-contract/actions/workflows/test.yml)
+
 # DEFO smart contracts
 
-DEFO is a DeFi protocol on AVAX. If you buy a Yield Gem NFT with our DEFO token, you get DEFO rewards every week.
+[DEFO](https://docs.defo.app/) is a DeFi protocol on AVAX.
+If you buy a Yield Gem NFT with our DEFO token, you get DEFO
+rewards every week.
 
 ## Preparation
 
 Copy `.env.example` to `.env`.
 
-```sh
+```shell
 $ yarn install
 ```
 
@@ -14,13 +18,13 @@ $ yarn install
 
 To run unit & integration tests:
 
-```sh
+```shell
 $ yarn test
 ```
 
 To run coverage:
 
-```sh
+```shell
 $ yarn coverage
 ```
 
@@ -62,10 +66,10 @@ In order to interact with the deployed contracts, see `contracts/interfaces`.
 
 ### Avalanche FUJI Addresses
 
-| Contract                                       | Address                                        |
-|------------------------------------------------|------------------------------------------------|
-| DEFO Token ERC-20                              | **0xA9D3adb2B5c7d89c56d74584E98ABcea1E4e6a4D** |
-| DEFO Protocol Main Contract ERC-721 compatible | **0xf0d26dD82f6beE798cB677ee17E5466d009193Eb** |
+| Contract                                       | Address                                      |
+|------------------------------------------------|----------------------------------------------|
+| DEFO Token ERC-20                              | [0xA9D3adb2B5c7d89c56d74584E98ABcea1E4e6a4D](https://testnet.snowtrace.io/address/0xA9D3adb2B5c7d89c56d74584E98ABcea1E4e6a4D) |
+| DEFO Protocol Main Contract ERC-721 compatible | [0xf0d26dD82f6beE798cB677ee17E5466d009193Eb](https://testnet.snowtrace.io/address/0xf0d26dD82f6beE798cB677ee17E5466d009193Eb) |
 
 ## Cash flow
 
