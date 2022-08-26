@@ -9,7 +9,7 @@ import { Address } from "hardhat-deploy/dist/types";
 import { BOOSTERS, testAmountClaimed, testAmountToClaim, testAmountToStake } from "../testHelpers";
 
 
-const debug = newDebug("defo:YieldGemFacet.test.ts");
+const debug = newDebug("defo:RewardsFacet.test.ts");
 
 describe("RewardsFacet", () => {
   let contract: RewardsFacet & YieldGemFacet;

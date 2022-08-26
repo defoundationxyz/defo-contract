@@ -30,5 +30,7 @@ jobs:
         run: cp .env.example .env
       - name: Install dependencies
         run: yarn install
+      - name: Build contracts and types
+        run: yarn typechain
       - name: Coverage
-        run: yarn coverage
+        run: yarn test

@@ -66,8 +66,8 @@ describe("YieldGemFacet", () => {
         await contract.mint(i);
         for (const token of [0, 1]) {
           debug(`gem ${gemName(i)}, checking price ${PaymentTokens[token]}`);
-          const balanceAfter = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
-          const priceCharged = balanceBefore[token].sub(balanceAfter);
+          const balanceAfter: BigNumber = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
+          const priceCharged: BigNumber = balanceBefore[token].sub(balanceAfter);
           expect(priceCharged).to.be.equal(GEM_TYPES_CONFIG[i].price[token]);
         }
       }
@@ -131,9 +131,13 @@ describe("YieldGemFacet", () => {
         await contract.mint(gemTypeId);
         for (const token of [0, 1]) {
           for (let wallet = 0; wallet < receiversNumber; wallet++) {
-            const balanceAfter = await paymentTokenContracts[token].balanceOf(wallets[wallet]);
-            debug(`balance after wallet ${wallet}, ${wallets[wallet]}, token ${token}: ${fromWei(balanceAfter)}`);
-            const priceDistributedToReceiver = balanceAfter.sub(balanceBefore[wallet][token]);
+            const balanceAfter: BigNumber = await paymentTokenContracts[token].balanceOf(wallets[wallet]);
+            debug(
+              `balance after  wallet ${wallet}, ${wallets[wallet]}, token ${["DAI", "DEFO"][token]}: ${fromWei(
+                balanceAfter,
+              )}`,
+            );
+            const priceDistributedToReceiver: BigNumber = balanceAfter.sub(balanceBefore[wallet][token]);
             debug(
               `wallet ${wallet} ${wallets[wallet]} change is ${fromWei(priceDistributedToReceiver)} ${
                 ["DAI", "DEFO"][token]
