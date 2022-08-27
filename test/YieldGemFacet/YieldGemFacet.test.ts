@@ -110,21 +110,20 @@ describe("YieldGemFacet", () => {
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         const receiversNumber = PROTOCOL_CONFIG.incomeDistributionOnMint[0].length;
-        const wallets = (await contract.getConfig()).wallets;
-        ///todo check this test if it's running correctly
-
-        debug(`minting ${gemName(gemTypeId)}`);
-        const balanceBefore = new Array(receiversNumber).fill([ethers.constants.Zero, ethers.constants.Zero]);
-        for (const token of [0, 1]) {
-          for (let wallet = 0; wallet < receiversNumber; wallet++) {
-            balanceBefore[wallet][token] = await paymentTokenContracts[token].balanceOf(wallets[wallet]);
-            debug(
-              `balance before wallet ${wallet}, ${wallets[wallet]}, token ${["DAI", "DEFO"][token]}: ${fromWei(
-                balanceBefore[wallet][token],
-              )}`,
-            );
-          }
-        }
+        const wallets = (await contract.getConfig()).wallets.slice(0, receiversNumber);
+        debug(`testing  ${gemName(gemTypeId)}`);
+        const balanceBefore: Array<[BigNumber, BigNumber]> = await Promise.all(
+          wallets.map(
+            async wallet =>
+              await Promise.all(
+                [0, 1].map(async token => {
+                  const element: BigNumber = await paymentTokenContracts[token].balanceOf(wallet);
+                  debug(`balance before wallet ${wallet}, token ${["DAI", "DEFO"][token]}: ${fromWei(element)}`);
+                  return element;
+                }) as [Promise<BigNumber>, Promise<BigNumber>],
+              ),
+          ),
+        );
         debug(`balanceBefore ${balanceBefore.toString()}`);
         await contract.mint(gemTypeId);
         debug(`${gemName(gemTypeId)} minted`);
