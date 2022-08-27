@@ -114,10 +114,7 @@ describe("YieldGemFacet", () => {
         ///todo check this test if it's running correctly
 
         debug(`minting ${gemName(gemTypeId)}`);
-        const balanceBefore: Array<[BigNumber, BigNumber]> = new Array(receiversNumber).fill([
-          ethers.constants.Zero,
-          ethers.constants.Zero,
-        ]);
+        const balanceBefore = new Array(receiversNumber).fill([ethers.constants.Zero, ethers.constants.Zero]);
         for (const token of [0, 1]) {
           for (let wallet = 0; wallet < receiversNumber; wallet++) {
             balanceBefore[wallet][token] = await paymentTokenContracts[token].balanceOf(wallets[wallet]);
@@ -128,7 +125,9 @@ describe("YieldGemFacet", () => {
             );
           }
         }
+        debug(`balanceBefore ${balanceBefore.toString()}`);
         await contract.mint(gemTypeId);
+        debug(`${gemName(gemTypeId)} minted`);
         for (const token of [0, 1]) {
           for (let wallet = 0; wallet < receiversNumber; wallet++) {
             const balanceAfter: BigNumber = await paymentTokenContracts[token].balanceOf(wallets[wallet]);

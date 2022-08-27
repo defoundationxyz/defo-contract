@@ -33,4 +33,4 @@ jobs:
       - name: Build contracts and types
         run: yarn typechain
       - name: Coverage
-        run: yarn test
+        run: yarn coverage

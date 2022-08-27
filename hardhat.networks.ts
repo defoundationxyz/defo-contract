@@ -22,12 +22,6 @@ const networks: NetworksUserConfig = {
   localhost: {
     url: "http://127.0.0.1:8545",
   },
-  coverage: {
-    chainId: 13370,
-    url: "http://127.0.0.1:8555",
-    blockGasLimit: 200000000,
-    allowUnlimitedContractSize: true,
-  },
   fuji: {
     chainId: 43113,
     url: avalancheFujiJsonRPCUrl,
