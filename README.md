@@ -22,13 +22,15 @@ To run unit & integration tests:
 $ yarn test
 ```
 
-To run coverage:
+To run the coverage:
 
 ```shell
 $ yarn coverage
 ```
 
-(compile the contracts and build the types with `yarn typechain` if you're running coverage as the first command.)
+Not to compile the contracts and build the smart contract types with `yarn typechain` prior to that if you're running
+coverage as the
+first command after installation.
 
 ## Deployment
 

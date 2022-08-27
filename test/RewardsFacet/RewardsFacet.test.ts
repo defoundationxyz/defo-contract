@@ -3,6 +3,7 @@ import { RewardsFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
 import newDebug from "debug";
+import { BigNumber } from "ethers";
 import hardhat, { deployments, ethers } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
 
@@ -13,7 +14,9 @@ const debug = newDebug("defo:RewardsFacet.test.ts");
 
 describe("RewardsFacet", () => {
   let contract: RewardsFacet & YieldGemFacet;
+  let otherUserContract: RewardsFacet & YieldGemFacet;
   let user: Address;
+  let otherUser: Address;
 
   beforeEach(async () => {
     await deployments.fixture([
@@ -25,6 +28,13 @@ describe("RewardsFacet", () => {
     ]);
     contract = await getContractWithSigner<RewardsFacet & YieldGemFacet>(hardhat, "DEFODiamond");
     user = (await hardhat.getNamedAccounts()).deployer;
+    const ANY_USER = { id: 3, name: "team" };
+    otherUser = (await hardhat.ethers.getSigners())[ANY_USER.id].address;
+    otherUserContract = await getContractWithSigner<RewardsFacet & YieldGemFacet>(
+      hardhat,
+      "DEFODiamond",
+      ANY_USER.name,
+    );
     await hardhat.run("dev:get-some-dai");
     await hardhat.run("get-some-defo");
     await hardhat.run("permit");
@@ -65,6 +75,61 @@ describe("RewardsFacet", () => {
         });
         expect(await contract.getRewardAmount(id)).to.be.equal(ethers.constants.Zero);
       }
+    });
+
+    BOOSTERS.forEach(booster =>
+      it(`should earn correct reward for ${booster.name} boosted gem`, async () => {
+        for (const i of Object.values(GEMS)) {
+          await contract.mintTo(i, user, booster.id);
+        }
+        await hardhat.run("jump-in-time");
+        for (const i of Object.values(GEMS)) {
+          debug(`testing reward amount of  ${booster.name} boosted gem type: ${gemName(i)}`);
+          expect(await contract.getRewardAmount(i)).to.be.equal(booster.rewardsBoost(testAmountToStake(i)));
+        }
+      }),
+    );
+
+    it("should show zero amount for the gems once staked", async () => {
+      await hardhat.run("get-some-gems");
+      await hardhat.run("jump-in-time");
+      for (const id of Object.values(GEMS)) {
+        debug(`testing staking for gem type: ${gemName(id)}`);
+        await hardhat.run("vault", {
+          op: "stake",
+          id,
+          amount: Number(fromWei(testAmountToStake(id))),
+        });
+        expect(await contract.getRewardAmount(id)).to.be.equal(ethers.constants.Zero);
+      }
+    });
+  });
+
+  describe("getCumulatedReward()", () => {
+    it("should return correct reward after one week for all gems", async () => {
+      await hardhat.run("get-some-gems");
+      await hardhat.run("jump-in-time");
+      expect(await contract.getCumulatedReward()).to.be.equal(
+        Object.values(GEMS).reduce<BigNumber>(
+          (totalReward, i) => totalReward.add(testAmountToStake(i)),
+          ethers.constants.Zero,
+        ),
+      );
+    });
+
+    it("should transfer total reward if a gem had been transferred", async () => {
+      await hardhat.run("get-some-gems");
+      await hardhat.run("jump-in-time");
+      await Promise.all(
+        Object.values(GEMS).map(i => contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i)),
+      );
+      expect(await contract.getCumulatedReward()).to.be.equal(ethers.constants.Zero);
+      expect(await otherUserContract.getCumulatedReward()).to.be.equal(
+        Object.values(GEMS).reduce<BigNumber>(
+          (totalReward, i) => totalReward.add(testAmountToStake(i)),
+          ethers.constants.Zero,
+        ),
+      );
     });
   });
 
