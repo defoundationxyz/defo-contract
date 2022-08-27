@@ -14,10 +14,12 @@ import { BOOSTERS } from "../testHelpers";
 
 
 const debug = newDebug("defo:YieldGemFacet.test.ts");
+
 describe("YieldGemFacet", () => {
   let contract: YieldGemFacet & ConfigFacet;
   let paymentTokenContracts: [Contract, Contract];
   let namedAccounts: { [name: string]: Address };
+  let user: Address;
   let otherUser: Address;
 
   beforeEach(async () => {
@@ -27,9 +29,87 @@ describe("YieldGemFacet", () => {
     const daiContract = await ethers.getContractAt(ERC20ABI, MAINNET_DAI_ADDRESS);
     paymentTokenContracts = [daiContract, defoContract];
     namedAccounts = await hardhat.getNamedAccounts();
+    user = namedAccounts.deployer;
     const ANY_NUMBER_NOT_0 = 3;
     otherUser = (await hardhat.ethers.getSigners())[ANY_NUMBER_NOT_0].address;
   });
+
+  // ERC721 Compatibility Tests
+  describe("balanceOf(address _owner)", () => {
+    it("should transfer a gem to any other user and emit event", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      expect(await contract.balanceOf(user)).to.be.equal(Object.values(GEMS).length);
+    });
+  });
+
+  describe("name()", () => {
+    it("should return correct name: DEFO Node", async () => {
+      expect(await contract.name()).to.be.equal("DEFO Node");
+    });
+  });
+  describe("symbol()", () => {
+    it("should return correct DEFO Node symbol: DFN", async () => {
+      expect(await contract.symbol()).to.be.equal("DFN");
+    });
+  });
+
+  describe("ownerOf(uint256 _tokenId)", () => {
+    it("should return correct owner", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      for (const i of Object.values(GEMS)) {
+        debug(`checking ${gemName(i)}`);
+        expect(await contract.ownerOf(i)).to.be.equal(user);
+      }
+    });
+
+    it("should return correct owner after transfer", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      for (const i of Object.values(GEMS)) {
+        debug(`checking ${gemName(i)}`);
+        await contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i);
+        expect(await contract.ownerOf(i)).to.be.equal(otherUser);
+      }
+    });
+  });
+
+  describe("safeTransferFrom(address _from, address _to, uint256 _tokenId)", () => {
+    it("should transfer a gem to another user and emit event", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      for (const i of Object.values(GEMS)) {
+        debug(`transferring ${gemName(i)}`);
+        await expect(contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i))
+          .to.emit(contract, "Transfer")
+          .withArgs(user, otherUser, i);
+      }
+    });
+
+    it("should update user balance on transfer both for the sender and receiver ", async () => {
+      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      await hardhat.run("get-some-gems");
+      for (const i of Object.values(GEMS)) {
+        debug(`transferring ${gemName(i)}`);
+        await contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i);
+      }
+      expect(await contract.balanceOf(user)).to.be.equal(ethers.constants.Zero);
+      expect(await contract.balanceOf(otherUser)).to.be.equal(Object.values(GEMS).length);
+    });
+  });
+
+  // DEFO Specificity
 
   describe("mint(uint8 _gemTypeId)", () => {
     it("should mint a gem of every configured type and emit Transfer event", async () => {
@@ -40,7 +120,7 @@ describe("YieldGemFacet", () => {
         debug(`minting ${gemName(i)}`);
         await expect(contract.mint(i))
           .to.emit(contract, "Transfer")
-          .withArgs(ethers.constants.AddressZero, namedAccounts.deployer, BigNumber.from(i));
+          .withArgs(ethers.constants.AddressZero, user, BigNumber.from(i));
       }
     });
 
@@ -61,12 +141,12 @@ describe("YieldGemFacet", () => {
         debug(`minting ${gemName(i)}`);
         const balanceBefore: [BigNumber, BigNumber] = [ethers.constants.Zero, ethers.constants.Zero];
         for (const token of [0, 1]) {
-          balanceBefore[token] = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
+          balanceBefore[token] = await paymentTokenContracts[token].balanceOf(user);
         }
         await contract.mint(i);
         for (const token of [0, 1]) {
           debug(`gem ${gemName(i)}, checking price ${PaymentTokens[token]}`);
-          const balanceAfter: BigNumber = await paymentTokenContracts[token].balanceOf(namedAccounts.deployer);
+          const balanceAfter: BigNumber = await paymentTokenContracts[token].balanceOf(user);
           const priceCharged: BigNumber = balanceBefore[token].sub(balanceAfter);
           expect(priceCharged).to.be.equal(GEM_TYPES_CONFIG[i].price[token]);
         }
@@ -158,7 +238,7 @@ describe("YieldGemFacet", () => {
         await hardhat.run("permit");
         for (const i of Object.values(GEMS)) {
           debug(`testing gem ${gemName(i)}`);
-          await contract.createBooster(namedAccounts.deployer, i, booster.id);
+          await contract.createBooster(user, i, booster.id);
           await contract.mint(i);
           expect((await contract.getGemInfo(i)).booster).to.be.equal(booster.id);
         }
@@ -170,7 +250,7 @@ describe("YieldGemFacet", () => {
         await hardhat.run("permit");
         for (const i of Object.values(GEMS)) {
           debug(`testing gem ${gemName(i)}`);
-          await contract.createBooster(namedAccounts.deployer, i, booster.id);
+          await contract.createBooster(user, i, booster.id);
           await contract.mint((i + 1) % Object.values(GEMS).length);
           expect((await contract.getGemInfo(i)).booster).to.be.equal(0);
         }
@@ -201,7 +281,7 @@ describe("YieldGemFacet", () => {
   describe("createBooster(address _to, uint8 _gemType, Booster _booster)", () => {
     BOOSTERS.forEach(booster =>
       it(`should create a booster for a gem type, booster ${booster.name}`, async () =>
-        expect(await contract.createBooster(namedAccounts.deployer, 0, booster.id))),
+        expect(await contract.createBooster(user, 0, booster.id))),
     );
   });
 
@@ -279,21 +359,6 @@ describe("YieldGemFacet", () => {
           expect(mintWindow.mintCount).to.be.equal(mintNum + 1);
         }
         debug(`minted ${GEM_TYPES_CONFIG[i].maxMintsPerLimitWindow} ${gemName(i)} gems`);
-      }
-    });
-  });
-
-  describe("safeTransferFrom(address _from, address _to, uint256 _tokenId)", () => {
-    it("should transfer a gem to any other user", async () => {
-      await hardhat.run("dev:get-some-dai");
-      await hardhat.run("get-some-defo");
-      await hardhat.run("permit");
-      await hardhat.run("get-some-gems");
-      for (const i of Object.values(GEMS)) {
-        debug(`transferring ${gemName(i)}`);
-        await expect(contract["safeTransferFrom(address,address,uint256)"](namedAccounts.deployer, otherUser, i))
-          .to.emit(contract, "Transfer")
-          .withArgs(namedAccounts.deployer, otherUser, i);
       }
     });
   });
