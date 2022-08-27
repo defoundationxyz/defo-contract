@@ -50,32 +50,25 @@ describe("RewardsFacet", () => {
       }
     });
 
-    BOOSTERS.forEach(booster =>
-      it(`should earn correct reward for ${booster.name} boosted gem`, async () => {
-        for (const i of Object.values(GEMS)) {
-          await contract.mintTo(i, user, booster.id);
-        }
-        await hardhat.run("jump-in-time");
-        for (const i of Object.values(GEMS)) {
-          debug(`testing reward amount of  ${booster.name} boosted gem type: ${gemName(i)}`);
-          expect(await contract.getRewardAmount(i)).to.be.equal(booster.rewardsBoost(testAmountToStake(i)));
-        }
-      }),
-    );
-
-    it("should show zero amount for the gems once staked", async () => {
-      await hardhat.run("get-some-gems");
-      await hardhat.run("jump-in-time");
-      for (const id of Object.values(GEMS)) {
-        debug(`testing staking for gem type: ${gemName(id)}`);
-        await hardhat.run("vault", {
-          op: "stake",
-          id,
-          amount: Number(fromWei(testAmountToStake(id))),
-        });
-        expect(await contract.getRewardAmount(id)).to.be.equal(ethers.constants.Zero);
-      }
-    });
+    //todo tapering test
+    // Object.values(GEMS).forEach(i =>
+    //   it(`should taper reward for gem ${gemName(i)}`, async () => {
+    //     let reward = ethers.constants.Zero;
+    //     await hardhat.run("get-some-gems", { type: i });
+    //     while (reward.lt(<BigNumber>GEM_TYPES_CONFIG[i].taperRewardsThresholdDefo)) {
+    //       await hardhat.run("jump-in-time");
+    //       reward = await contract.getRewardAmount(0);
+    //     }
+    //     await hardhat.run("jump-in-time");
+    //     const expectedTaperedReward = await contract.getRewardAmount(0);
+    //     const taperedForAWeek = expectedTaperedReward.sub(reward);
+    //     expect(taperedForAWeek).to.be.equal(
+    //       testAmountToStake(0)
+    //         .mul(HUNDRED_PERCENT - <number>PROTOCOL_CONFIG.taperRate)
+    //         .div(HUNDRED_PERCENT),
+    //     );
+    //   }),
+    // );
 
     BOOSTERS.forEach(booster =>
       it(`should earn correct reward for ${booster.name} boosted gem`, async () => {
