@@ -100,7 +100,7 @@
     "docs": "hardhat docgen",
     "commit": "git-cz",
     "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
-    "coverage": "cross-env HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true hardhat coverage",
+    "coverage": "cross-env HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true hardhat coverage --network hardhat",
     "coverage:file": "cross-env HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true hardhat coverage --testfiles",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
