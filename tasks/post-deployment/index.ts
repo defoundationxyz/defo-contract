@@ -1,1 +1,1 @@
-export * as reconfigure from "./reconfigure";
+export * as config from "./config";

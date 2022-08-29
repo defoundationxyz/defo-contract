@@ -1,3 +1,4 @@
+import { Wallets } from "@config";
 import { ConfigFacet, ProtocolConfigStructOutput } from "@contractTypes/contracts/facets/ConfigFacet";
 import { announce, outputFormatKeyValue, outputFormatter } from "@utils/output.helper";
 import { parseTimeInput } from "@utils/taskParamsInput.helper";
@@ -61,7 +62,7 @@ export default task("config", "Reconfigure the contract, display configuration i
           configOutput.maintenancePeriod,
         )}, setting  ${seconds} seconds (${human})`,
       );
-      await contract.setConfigMaintenancePeriod(seconds);
+      await (await contract.setConfigMaintenancePeriod(seconds)).wait();
     }
     if (taskArgs.taxScalePeriod) {
       const { seconds, human } = parseTimeInput(taskArgs.taxScalePeriod);
@@ -91,7 +92,9 @@ export default task("config", "Reconfigure the contract, display configuration i
       const walletsArray = String(taskArgs.wallets).split(",");
       if (walletsArray.length < 7)
         throw new Error(
-          "There should be all 7 wallets provided in the following string order: Treasury, RewardPool, LiquidityPair, Team, Charity, Vault, RedeemContract",
+          `There should be all 7 wallets provided in the following string order: ${Object.values(Wallets)
+            .filter(i => isNaN(Number(i)))
+            .toString()}`,
         );
       await contract.setConfigWallets(walletsArray);
     }

@@ -111,6 +111,10 @@ contract ERC721Facet is BaseFacet {
         emit ApprovalForAll(owner, operator, _approved);
     }
 
+    function initialized() external view returns (bool) {
+        return s.nft.init;
+    }
+
     function balanceOf(address _owner) external view nonZeroAddress(_owner) returns (uint256 balance) {
         return s.nft.balances[_owner];
     }
