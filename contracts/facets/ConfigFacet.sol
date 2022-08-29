@@ -59,7 +59,7 @@ contract ConfigFacet is BaseFacet, IConfig {
         s.config.taxRates = _taxRates;
     }
 
-    function setConfigTaxScaleSinceLastClaimPeriod(uint256 _charityContributionRate) external onlyOwner {
+    function setCharityContributionRate(uint256 _charityContributionRate) external onlyOwner {
         s.config.charityContributionRate = _charityContributionRate;
     }
 
