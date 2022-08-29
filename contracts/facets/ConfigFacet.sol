@@ -59,7 +59,7 @@ contract ConfigFacet is BaseFacet, IConfig {
         s.config.taxRates = _taxRates;
     }
 
-    function setConfigTaxScaleSinceLastClaimPeriod(uint256 _charityContributionRate) external onlyOwner {
+    function setCharityContributionRate(uint256 _charityContributionRate) external onlyOwner {
         s.config.charityContributionRate = _charityContributionRate;
     }
 
@@ -75,7 +75,7 @@ contract ConfigFacet is BaseFacet, IConfig {
         s.config.mintLimitWindow = _mintLimitWindow;
     }
 
-    function setConfigMintLimitWindow(DefoTokenLimitConfig calldata _defoTokenLimitConfig) external onlyOwner {
+    function setConfigDefoTokenLimitConfig(DefoTokenLimitConfig calldata _defoTokenLimitConfig) external onlyOwner {
         DefoTokenLimitConfig memory temp = _defoTokenLimitConfig;
         s.config.defoTokenLimitConfig = temp;
     }
