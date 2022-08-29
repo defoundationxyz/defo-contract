@@ -75,7 +75,7 @@ contract ConfigFacet is BaseFacet, IConfig {
         s.config.mintLimitWindow = _mintLimitWindow;
     }
 
-    function setConfigMintLimitWindow(DefoTokenLimitConfig calldata _defoTokenLimitConfig) external onlyOwner {
+    function setConfigDefoTokenLimitConfig(DefoTokenLimitConfig calldata _defoTokenLimitConfig) external onlyOwner {
         DefoTokenLimitConfig memory temp = _defoTokenLimitConfig;
         s.config.defoTokenLimitConfig = temp;
     }

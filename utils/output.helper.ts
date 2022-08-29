@@ -38,12 +38,14 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 
 export const outputFormatKeyValue = (
   key: string,
-  value: string | boolean | BigNumberish | Promise<BigNumberish> | FiStruct | undefined,
+  value: boolean | BigNumberish | Promise<BigNumberish> | FiStruct | undefined,
 ): string | number | bigint | boolean =>
   key.match(/Period|duration|mintLimitWindow/i)
     ? moment.duration(Number(value), "s").humanize()
     : key.match(/Last|Next|Time/i)
     ? moment.unix(Number(value)).format("DD.MM.YYYY")
+    : key.match(/Rate/i) && BigNumber.isBigNumber(value)
+    ? value.toNumber()
     : BigNumber.isBigNumber(value)
     ? Number(Number(ethers.utils.formatEther(value)).toFixed(7))
     : value instanceof Promise
@@ -63,9 +65,10 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
       // acc[key] = outputFormatKeyValue(key, cur[1]);
       if (Array.isArray(cur[1]))
         cur[1].forEach(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          (element, index) => (acc[`${key} (${String(index).padStart(2, "0")})`] = outputFormatKeyValue(key, element)),
+          (element: any, index: number) =>
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            (acc[`${key} (${String(index).padStart(2, "0")})`] = outputFormatKeyValue(key, element)),
         );
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
