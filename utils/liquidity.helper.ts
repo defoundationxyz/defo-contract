@@ -8,12 +8,12 @@ import JOE_ROUTER_ABI from "../abi/joe-router.json";
 
 
 export const getLiquidityPairInfo = async (hre: HardhatRuntimeEnvironment) => {
-  const { joeRouter, dai: daiAddress } = await hre.getNamedAccounts();
+  const { dexRouter, dai: daiAddress } = await hre.getNamedAccounts();
   const defoContract = await hre.ethers.getContract<DEFOToken>("DEFOToken");
   const daiContract = await hre.ethers.getContractAt(DAI_ABI, daiAddress);
 
-  const joeRouterContact = await hre.ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
-  const factoryAddress = await joeRouterContact.factory();
+  const dexRouterContact = await hre.ethers.getContractAt(JOE_ROUTER_ABI, dexRouter);
+  const factoryAddress = await dexRouterContact.factory();
   const factoryContract = await hre.ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
 
   const pairAddress = await factoryContract.getPair(daiContract.address, defoContract.address);

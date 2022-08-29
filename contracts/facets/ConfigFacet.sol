@@ -80,15 +80,6 @@ contract ConfigFacet is BaseFacet, IConfig {
         s.config.defoTokenLimitConfig = temp;
     }
 
-
-    function getConfig() external view returns (ProtocolConfig memory) {
-        return s.config;
-    }
-
-    function getGemTypesConfig() external view returns (GemTypeConfig[] memory) {
-        return s.gemTypes;
-    }
-
     function lockMint() public onlyOwner {
         LibMintLimiter.lockMint();
     }
@@ -103,6 +94,15 @@ contract ConfigFacet is BaseFacet, IConfig {
 
     function unpause() external onlyOwner {
         LibPauser._unpause();
+    }
+
+
+    function getConfig() external view returns (ProtocolConfig memory) {
+        return s.config;
+    }
+
+    function getGemTypesConfig() external view returns (GemTypeConfig[] memory) {
+        return s.gemTypes;
     }
 
 }
