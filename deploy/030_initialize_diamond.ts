@@ -25,7 +25,7 @@ const func: DeployFunction = async hre => {
     deployer,
     dai: daiAddress,
     treasury,
-    joeRouter,
+    dexRouter,
     vault,
     rewardPool,
     donations,
@@ -37,8 +37,8 @@ const func: DeployFunction = async hre => {
   const defoTokenDeployment = await deployments.get("DEFOToken");
 
   const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
-  const joeRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
-  const factoryAddress = await joeRouterContact.factory();
+  const dexRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, dexRouter);
+  const factoryAddress = await dexRouterContact.factory();
   const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
   let pairAddress = await factoryContract.getPair(daiContract.address, defoTokenDeployment.address);
   if (pairAddress === ethers.constants.AddressZero) {

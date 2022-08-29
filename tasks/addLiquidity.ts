@@ -12,16 +12,16 @@ export default task("add-liquidity", "adds DAI and DEFO liquidity to the pair us
   .addOptionalParam("defo", "DEFO to add to the pool", 10000, types.int)
   .setAction(async ({ dai, defo }, hre) => {
     const { getNamedAccounts, ethers } = hre;
-    const { deployer, joeRouter, dai: daiAddress } = await getNamedAccounts();
+    const { deployer, dexRouter, dai: daiAddress } = await getNamedAccounts();
     const { Zero, MaxUint256 } = ethers.constants;
 
     const defoContract = await ethers.getContract<DEFOToken>("DEFOToken");
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
     announce(`Adding liquidity to the DAI/DEFO pair and creating it if not exists: ${dai} DAI and ${defo} DEFO`);
-    const joeRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
-    await daiContract.approve(joeRouterContact.address, MaxUint256);
-    await defoContract.approve(joeRouterContact.address, MaxUint256);
-    await joeRouterContact.addLiquidity(
+    const dexRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, dexRouter);
+    await daiContract.approve(dexRouterContact.address, MaxUint256);
+    await defoContract.approve(dexRouterContact.address, MaxUint256);
+    await dexRouterContact.addLiquidity(
       daiContract.address,
       defoContract.address,
       toWei(dai),

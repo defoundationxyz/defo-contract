@@ -11,7 +11,7 @@ import JOE_ROUTER_ABI from "../abi/joe-router.json";
 
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, ethers } = hre;
-  const { deployer, joeRouter, dai: daiAddress } = await getNamedAccounts();
+  const { deployer, dexRouter, dai: daiAddress } = await getNamedAccounts();
   const { Zero, MaxUint256 } = ethers.constants;
 
   if (!hre.network.live) {
@@ -24,10 +24,10 @@ const func: DeployFunction = async hre => {
 
     const defoContract = await ethers.getContract<DEFOToken>("DEFOToken");
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
-    const joeRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, joeRouter);
-    await daiContract.approve(joeRouterContact.address, MaxUint256);
-    await defoContract.approve(joeRouterContact.address, MaxUint256);
-    await joeRouterContact.addLiquidity(
+    const dexRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, dexRouter);
+    await daiContract.approve(dexRouterContact.address, MaxUint256);
+    await defoContract.approve(dexRouterContact.address, MaxUint256);
+    await dexRouterContact.addLiquidity(
       daiContract.address,
       defoContract.address,
       toWei(dai),
@@ -38,7 +38,7 @@ const func: DeployFunction = async hre => {
       MaxUint256,
     );
 
-    const factoryAddress = await joeRouterContact.factory();
+    const factoryAddress = await dexRouterContact.factory();
     const factoryContract = await ethers.getContractAt(JOE_FACTORY_ABI, factoryAddress);
 
     const pairAddress = await factoryContract.getPair(daiContract.address, defoContract.address);

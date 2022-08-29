@@ -16,7 +16,7 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
     },
   } = hre;
   const namedAccounts = await getNamedAccounts();
-  const { dai, forkedDefoToken, joeRouter } = namedAccounts;
+  const { dai, forkedDefoToken } = namedAccounts;
   info("\n 📡 Querying balances...");
   const daiContract = await ethers.getContractAt(DAI_ABI, dai);
   const defoTokenDeployment = (await deployments.getOrNull("DEFOToken"))?.address || "";
