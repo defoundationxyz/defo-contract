@@ -28,7 +28,7 @@ To run the coverage:
 $ yarn coverage
 ```
 
-Not to compile the contracts and build the smart contract types with `yarn typechain` prior to that if you're running
+Note to compile the contracts and build the types with `yarn typechain` prior to that if you're running
 coverage as the
 first command after installation.
 
