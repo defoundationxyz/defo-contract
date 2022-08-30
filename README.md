@@ -80,11 +80,13 @@ add it to the injected wallet along with the DEFO Token to test with the DApp.
 ## Handy Hardhat Tasks
 
 To play around with the smart contracts, there is a bunch of handy scripts.
-For local network get a local mainnet fork running with the contracts deployed with `yarn start-fork` in a separate
-terminal.
-*These tasks reply on `hardhat deploy` and use deployments, so the deployment to initial deployment to the desired
-network is necessary to interact with those
-Scripts with the contracts from the command line.
+They cover complete protocol functionality from the command line.
+To use them on the local network run `yarn start-fork` in a separate terminal at first.
+
+These tasks reply on `hardhat deploy`, so the deployment to the desired network is necessary to interact with the
+contracts from the command line. Technically, the scripts can be redesigned to work with the contract addresses vs
+deployments, although the main focus here is the development aid and testing the deployments, but not the user-facing
+command line substitution of the Dapp UI.
 
 Most of the scripts require network name. If `NETWORK` is specified, it's mandatory and should be substitued
 by `localhost`, `fuji` or `mainnet`.
@@ -98,9 +100,7 @@ Parameters (including `--help`) should be specified after the network, e.g. `yar
 
 ### Deployments
 
-View deployments which is the prerequisite to use all the below tasks.
-Technically, the scripts can be redesigned to work with the contract addresses, although the main focus here is to test
-the deployments, but not to substitute the UI of the DApp.
+Deployments which are the prerequisite to use all the below tasks.
 
 ```shell
 yarn deployments NETWORK  #display deployments with addresses
