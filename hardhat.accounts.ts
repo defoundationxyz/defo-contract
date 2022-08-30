@@ -8,7 +8,7 @@ import {
   FUJI_JOE_ROUTER_ADDRESS,
   MAINNET_DAI_ADDRESS,
   MAINNET_DEFO_ADDRESS,
-  MAINNET_JOE_ROUTER_ADDRESS,
+  MAINNET_SWAPSICLE_ROUTER_ADDRESS,
 } from "./constants/addresses";
 
 dotenvConfig({ path: resolve(__dirname, "./.env") });
@@ -71,11 +71,12 @@ const namedAccountsIndex: NamedAccounts = {
     43113: FUJI_DEFO_ADDRESS,
     1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? null,
   },
-  joeRouter: {
-    43114: MAINNET_JOE_ROUTER_ADDRESS,
+  dexRouter: {
+    43114: MAINNET_SWAPSICLE_ROUTER_ADDRESS,
     43113: FUJI_JOE_ROUTER_ADDRESS,
     1337:
-      (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_JOE_ROUTER_ADDRESS : MAINNET_JOE_ROUTER_ADDRESS)) ??
+      (process.env.FORK_ENABLED &&
+        (process.env.FORK_TESTNET ? FUJI_JOE_ROUTER_ADDRESS : MAINNET_SWAPSICLE_ROUTER_ADDRESS)) ??
       null,
   },
 };
