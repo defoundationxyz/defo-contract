@@ -1,5 +1,5 @@
 import { TypedEvent } from "@contractTypes/common";
-import { announce, info, success } from "@utils/output.helper";
+import { announce, info, networkInfo, success } from "@utils/output.helper";
 import { parseTimeInput } from "@utils/taskParamsInput.helper";
 import { BigNumber } from "ethers";
 import { task, types } from "hardhat/config";
@@ -20,6 +20,7 @@ export default task("history", "get events for the past days")
     } = hre;
     const { deployer } = await getNamedAccounts();
     const { seconds, human } = parseTimeInput(time);
+    await networkInfo(hre, info);
     announce(`Getting events history for ${time} (${human}) ago.`);
 
     const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
@@ -38,6 +39,7 @@ export default task("history", "get events for the past days")
     const startTime = latestBlock.timestamp - seconds < 0 ? 0 : latestBlock.timestamp - seconds;
 
     let pointerTimestamp = (await ethers.provider.getBlock(fromBlockNumber)).timestamp;
+    ///todo this is a perfect option for the binary sort algorithm
     // there are roughly about 300K blocks for 7 days, let's find the earliest with large steps
     //going with large steps to
     const STEP = 3000;

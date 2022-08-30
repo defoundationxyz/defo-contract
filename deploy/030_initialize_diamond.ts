@@ -1,4 +1,4 @@
-import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG, Wallets } from "@config";
+import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG, walletNames } from "@config";
 import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, isFuji, namedSigner } from "@utils/chain.helper";
@@ -62,9 +62,6 @@ const func: DeployFunction = async hre => {
   ];
 
   deployInfo("Configuration wallets:");
-  const walletNames = Object.values(Wallets)
-    .filter(i => isNaN(Number(i)))
-    .map(i => i.toString().padEnd(15));
   wallets.forEach((wallet, index) => {
     if (wallet === ethers.constants.AddressZero) {
       deployError(wallet);

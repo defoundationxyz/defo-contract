@@ -1,4 +1,4 @@
-import { announce, info, sayMaximumForMaxUint, success } from "@utils/output.helper";
+import { announce, info, networkInfo, sayMaximumForMaxUint, success } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import { signDaiPermit } from "eth-permit";
 import { task } from "hardhat/config";
@@ -7,18 +7,11 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export default task(
   "permit",
-  "sign 712 permit allowing all facets of DEFO Diamond to spend DAI and DEFO on behalf of the deployer",
+  "sign 712 permit allowing all facets of DEFO Diamond to spend DAI and DEFO on behalf of the ",
 ).setAction(async (_, hre: HardhatRuntimeEnvironment) => {
-  const {
-    getNamedAccounts,
-    deployments,
-    ethers,
-    ethers: {
-      utils: { formatEther: fromWei },
-    },
-  } = hre;
+  const { getNamedAccounts, deployments, ethers } = hre;
   const { deployer, dai } = await getNamedAccounts();
-
+  await networkInfo(hre, info);
   const { address: spenderAddress } = await deployments.get("DEFODiamond");
 
   const defoContract = await ethers.getContract("DEFOToken");
@@ -27,20 +20,27 @@ export default task(
   for (const token of [defoContract, daiContract]) {
     const name = await token.name();
     announce(`Approving spending of ${name}`);
-    info(`Current allowance is ${fromWei(await token.allowance(deployer, spenderAddress))}`);
-    if (token == defoContract) {
-      info(`Signing for ${await token.name()}`);
-      const result = await signDaiPermit(ethers.provider, token.address, deployer, spenderAddress);
-      await token.permit(deployer, spenderAddress, result.nonce, result.expiry, true, result.v, result.r, result.s);
-    } else {
-      info(`Calling approve for ${await token.name()}, max amount`);
-      await token.approve(spenderAddress, ethers.constants.MaxUint256);
-    }
-    const allowance = await token.allowance(deployer, spenderAddress);
-    success(
-      `Permission to spend granted to DEFO Diamond Contract deployed to ${spenderAddress}. Now allowance is ${sayMaximumForMaxUint(
-        allowance,
-      )}`,
+    let allowance = await token.allowance(deployer, spenderAddress);
+    info(
+      `Current allowance is ${sayMaximumForMaxUint(allowance)} ${
+        allowance.eq(ethers.constants.MaxUint256) && "already"
+      }`,
     );
+    if (!allowance.eq(ethers.constants.MaxUint256)) {
+      if (token == defoContract) {
+        info(`Signing for ${await token.name()}`);
+        const result = await signDaiPermit(ethers.provider, token.address, deployer, spenderAddress);
+        await token.permit(deployer, spenderAddress, result.nonce, result.expiry, true, result.v, result.r, result.s);
+      } else {
+        info(`Calling approve for ${await token.name()}, max amount`);
+        await token.approve(spenderAddress, ethers.constants.MaxUint256);
+      }
+      allowance = await token.allowance(deployer, spenderAddress);
+      success(
+        `Permission to spend granted to DEFO Diamond Contract deployed to ${spenderAddress}. Now allowance is ${sayMaximumForMaxUint(
+          allowance,
+        )}`,
+      );
+    }
   }
 });

@@ -1,7 +1,7 @@
 import { GEMS, gemName } from "@config";
 import { IDEFODiamond } from "@contractTypes/index";
 import { CompleteGemData, gemsGroupedByType } from "@utils/gems.helper";
-import { announce, info, outputFormatKeyValue } from "@utils/output.helper";
+import { announce, info, networkInfo, outputFormatKeyValue } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
@@ -34,6 +34,7 @@ export default task("claim", "claim rewards for gem(s)")
           : Object.values(GEMS)
         : [gemTypeParam];
 
+    await networkInfo(hre, info);
     announce(`Deployer ${deployer} has ${await gemContract.balanceOf(deployer)} gem(s)`);
     for (const type of types) {
       const balance = gemsOfDeployerGroupedByType[type]?.length || 0;

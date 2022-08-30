@@ -1,6 +1,7 @@
 import { fundDefo } from "@utils/actions.helper";
-import { announce, error, success } from "@utils/output.helper";
+import { announce, error, info, networkInfo, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
+
 
 export default task("get-some-defo", "get funded with DEFO Token")
   .addOptionalParam(
@@ -9,14 +10,21 @@ export default task("get-some-defo", "get funded with DEFO Token")
     "deployer",
     types.string,
   )
-  .addOptionalParam("amount", "How much", 100_000, types.int)
+  .addParam("amount", "How much", 100_000, types.int)
   .setAction(async ({ account, amount }, hre) => {
     const { getNamedAccounts } = hre;
+    if ((await hre.getChainId()) === "43114") {
+      error("Not applicable to mainnet!");
+      return;
+    }
+
     const namedAccounts = await getNamedAccounts();
+    await networkInfo(hre, info);
     if (account !== "all" && !namedAccounts[account]) {
       error(`Named account ${account} not set`);
       return;
     }
+
     const accounts = account === "all" ? Object.values(namedAccounts) : [namedAccounts[account]];
     announce(`Funding ${accounts.toString()} with DEFO...`);
     for (const account of accounts) {

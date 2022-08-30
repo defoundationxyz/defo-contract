@@ -23,7 +23,7 @@ describe("VaultFacet", () => {
       "DiamondInitialized",
     ]);
     contract = await getContractWithSigner<VaultFacet & YieldGemFacet>(hardhat, "DEFODiamond");
-    await hardhat.run("dev:get-some-dai");
+    await hardhat.run("get-some-dai");
     await hardhat.run("get-some-defo");
     await hardhat.run("permit");
     await hardhat.run("get-some-gems");
