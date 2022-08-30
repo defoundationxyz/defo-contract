@@ -249,6 +249,6 @@ graph TD;
 
 ## Links
 
-Checkout DeFo website: [https://defo.app/](https://defo.app/)
-Pretty detailed whitepaper: [https://defo.app/whitepaper.pdf](https://defo.app/whitepaper.pdf)
-Feel free to join [Discord](discord.gg/defo).
+- Checkout DeFo website: [https://defo.app/](https://defo.app/)
+- Pretty detailed whitepaper: [https://defo.app/whitepaper.pdf](https://defo.app/whitepaper.pdf)
+- Feel free to join [Discord](discord.gg/defo).
