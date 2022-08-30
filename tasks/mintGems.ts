@@ -1,7 +1,7 @@
 import { GEMS, gemName } from "@config";
 import { IDEFODiamond } from "@contractTypes/index";
 import { gemsGroupedByType } from "@utils/gems.helper";
-import { announce, error, info, success } from "@utils/output.helper";
+import { announce, error, info, networkInfo, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
 
@@ -11,6 +11,7 @@ export default task("get-some-gems", "mint NFT gems")
   .setAction(async ({ type, amount }, hre) => {
     const { getNamedAccounts, ethers } = hre;
     const { deployer } = await getNamedAccounts();
+    await networkInfo(hre, info);
 
     const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];

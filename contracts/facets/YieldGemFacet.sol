@@ -3,6 +3,7 @@
 pragma solidity 0.8.15;
 
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeERC20.sol";
+import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoePair.sol";
 import "../interfaces/IYieldGem.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
@@ -49,6 +50,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
                 }
             }
         }
+        //mint to team to update pair reserves
+        uint TEAM_WALLET_INDEX = 3;
+        uint DEX_LP_WALLET_INDEX = 2;
+        uint256 liquidity = IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
         Booster boost = _gemTypeId == s.usersNextGemTypeToBoost[minter] ? s.usersNextGemBooster[minter] : Booster.None;
         // finally mint a yield gem

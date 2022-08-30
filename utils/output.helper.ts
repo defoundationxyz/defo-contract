@@ -1,9 +1,10 @@
-import { fromWei } from "@config";
+import { fromWei, walletNames } from "@config";
 import { FiStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
-import { getTime } from "@utils/chain.helper";
+import { chainName, getTime } from "@utils/chain.helper";
 import chalk from "chalk";
 import { BigNumber, BigNumberish, ethers } from "ethers";
 import { DeployResult } from "hardhat-deploy/dist/types";
+import { HardhatRuntimeEnvironment } from "hardhat/types";
 import _ from "lodash";
 import moment from "moment";
 
@@ -68,7 +69,8 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
           (element: any, index: number) =>
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            (acc[`${key} (${String(index).padStart(2, "0")})`] = outputFormatKeyValue(key, element)),
+            (acc[`${key} (${String(index).padStart(2, "0")}) ${key == "wallets" ? walletNames[index] : ""}`] =
+              outputFormatKeyValue(key, element)),
         );
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -81,3 +83,7 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
 export const isKey = <T>(x: T, k: PropertyKey): k is keyof T => k in x;
 
 export const getChainTime = getTime(timestamp => moment.unix(Number(timestamp)).format("DD.MM.YYYY HH:MM"));
+
+export const networkInfo = async (hre: HardhatRuntimeEnvironment, display: (message: string) => void) =>
+  !!process.env.HIDE_DEPLOY_LOG &&
+  display(`Network:  ${await chainName(hre)} (${hre.network.live ? chalk.red("live!") : chalk.yellow("local")})\n`);

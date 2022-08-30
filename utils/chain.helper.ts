@@ -3,6 +3,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { NamedAccounts, namedAccountsIndex } from "../hardhat.accounts";
 
+
 export const isFuji = async (hre: HardhatRuntimeEnvironment) => {
   const chainId = parseInt(await hre.getChainId(), 10);
   return chainId === 43113;
@@ -33,7 +34,7 @@ export const getContractWithSigner = async <T extends Contract>(
 
 export const getTime = (formatter: (timestamp: number) => string) => async (provider: providers.JsonRpcProvider) =>
   formatter((await provider.getBlock("latest")).timestamp);
-
+[];
 export const advanceBlock = async (provider: providers.JsonRpcProvider) => provider.send("evm_mine", []);
 
 export const increaseTime = async (provider: providers.JsonRpcProvider, time: number) => {

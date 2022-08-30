@@ -50,12 +50,12 @@ export default task("config", "Reconfigure the contract, display configuration i
           configOutput.rewardPeriod,
         )}, setting  ${seconds} seconds (${human})`,
       );
-      await contract.setConfigRewardPeriod(seconds);
+      await (await contract.setConfigRewardPeriod(seconds)).wait();
     }
 
     if (taskArgs.maintenancePeriod) {
       const { seconds, human } = parseTimeInput(taskArgs.maintenancePeriod);
-      announce("Updating reward period");
+      announce("Updating maintenance period");
       announce(
         `Was ${outputFormatKeyValue(
           "maintenancePeriod",
@@ -66,14 +66,14 @@ export default task("config", "Reconfigure the contract, display configuration i
     }
     if (taskArgs.taxScalePeriod) {
       const { seconds, human } = parseTimeInput(taskArgs.taxScalePeriod);
-      announce("Updating reward period");
+      announce("Updating tax scale period");
       announce(
         `Was ${outputFormatKeyValue(
           "taxScaleSinceLastClaimPeriod",
           configOutput.taxScaleSinceLastClaimPeriod,
         )}, setting  ${seconds} seconds (${human})`,
       );
-      await contract.setConfigTaxScaleSinceLastClaimPeriod(seconds);
+      await (await contract.setConfigTaxScaleSinceLastClaimPeriod(seconds)).wait();
     }
 
     if (taskArgs.vaultWithdrawalTax) {
@@ -83,7 +83,7 @@ export default task("config", "Reconfigure the contract, display configuration i
           taskArgs.vaultWithdrawalTax
         }`,
       );
-      await contract.setConfigVaultWithdrawalTaxRate(taskArgs.vaultWithdrawalTax);
+      await (await contract.setConfigVaultWithdrawalTaxRate(taskArgs.vaultWithdrawalTax)).wait();
     }
 
     if (taskArgs.wallets) {
@@ -96,7 +96,7 @@ export default task("config", "Reconfigure the contract, display configuration i
             .filter(i => isNaN(Number(i)))
             .toString()}`,
         );
-      await contract.setConfigWallets(walletsArray);
+      await (await contract.setConfigWallets(walletsArray)).wait();
     }
 
     configOutput = await contract.getConfig();

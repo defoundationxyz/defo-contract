@@ -63,6 +63,10 @@ export enum Wallets {
   RedeemContract,
 }
 
+export const walletNames = Object.values(Wallets)
+  .filter(i => isNaN(Number(i)))
+  .map(i => i.toString().padEnd(15));
+
 export enum TaxTiers {
   Tier0NoPayment,
   Tier1HugeTax,
