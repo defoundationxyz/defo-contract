@@ -10,9 +10,9 @@ import JOE_ROUTER_ABI from "../abi/joe-router.json";
 
 
 const func: DeployFunction = async hre => {
-  const {getNamedAccounts, ethers} = hre;
-  const {deployer, dexRouter, dai: daiAddress} = await getNamedAccounts();
-  const {Zero, MaxUint256} = ethers.constants;
+  const { getNamedAccounts, ethers } = hre;
+  const { team, dexRouter, dai: daiAddress } = await getNamedAccounts();
+  const { Zero, MaxUint256 } = ethers.constants;
 
   if (!hre.network.live) {
     const dai = 50000;
@@ -34,7 +34,7 @@ const func: DeployFunction = async hre => {
       toWei(defo),
       Zero,
       Zero,
-      deployer,
+      team,
       MaxUint256,
     );
 

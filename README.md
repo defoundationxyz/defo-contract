@@ -42,10 +42,10 @@ contracts to it:
 yarn start-fork
 ```
 
-Deployment to a live network is done with the
+Deployment (or upgrading) the contracts are done with
 
 ```shell
-yarn deploy #network, e.g. fuji or mainnet
+yarn deploy NETWORK   #NETWORK is localhost, fuji or mainnet
 ```
 
 Scripts in [/deploy](./deploy) as well as the handy scripts below work with any network managed by the hardhat and
@@ -77,11 +77,13 @@ the address
 is [0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a](https://testnet.snowtrace.io/address/0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a)
 add it to the injected wallet along with the DEFO Token to test with the DApp.
 
-## Handy scripts
+## Handy Hardhat Tasks
 
 To play around with the smart contracts, there is a bunch of handy scripts.
 For local network get a local mainnet fork running with the contracts deployed with `yarn start-fork` in a separate
 terminal.
+*These tasks reply on `hardhat deploy` and use deployments, so the deployment to initial deployment to the desired
+network is necessary to interact with those
 Scripts with the contracts from the command line.
 
 Most of the scripts require network name. If `NETWORK` is specified, it's mandatory and should be substitued
@@ -93,6 +95,16 @@ E.g. `yarn accounts fuji` displays contract wallets on fuji.
 `--help` shows parameters.
 
 Parameters (including `--help`) should be specified after the network, e.g. `yarn gems fuji --type 1`
+
+### Deployments
+
+View deployments which is the prerequisite to use all the below tasks.
+Technically, the scripts can be redesigned to work with the contract addresses, although the main focus here is to test
+the deployments, but not to substitute the UI of the DApp.
+
+```shell
+yarn deployments NETWORK  #display deployments with addresses
+```
 
 ### Accounts
 
