@@ -1,4 +1,4 @@
-import { fromWei } from "@config";
+import { fromWei, walletNames } from "@config";
 import { FiStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
 import { chainName, getTime } from "@utils/chain.helper";
 import chalk from "chalk";
@@ -69,10 +69,8 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
           (element: any, index: number) =>
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            (acc[`${key} (${String(index).padStart(2, "0")}) ${key == "wallets"}`] = outputFormatKeyValue(
-              key,
-              element,
-            )),
+            (acc[`${key} (${String(index).padStart(2, "0")}) ${key == "wallets" ? walletNames[index] : ""}`] =
+              outputFormatKeyValue(key, element)),
         );
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
