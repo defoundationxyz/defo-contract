@@ -1,14 +1,12 @@
 export * as accounts from "./accounts";
 export * as deployments from "./deployments";
-export * as jumpInTime from "./jumpInTime";
 export * as mintGems from "./mintGems";
 export * as gems from "./gems";
 export * as claim from "./claim";
-export * as getSomeDefo from "./getSomeDefo";
 export * as permit from "./permit";
 export * as vault from "./vault";
 export * as history from "./history";
-export * as addLiquidity from "./addLiquidity";
+export * as liquidity from "./liquidity";
 export * as abi from "./abi";
 export * from "./dev";
 export * from "./post-deployment";

@@ -37,7 +37,7 @@ describe("YieldGemFacet", () => {
   // ERC721 Compatibility Tests
   describe("balanceOf(address _owner)", () => {
     it("should transfer a gem to any other user and emit event", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -58,7 +58,7 @@ describe("YieldGemFacet", () => {
 
   describe("ownerOf(uint256 _tokenId)", () => {
     it("should return correct owner", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -69,7 +69,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should return correct owner after transfer", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -83,7 +83,7 @@ describe("YieldGemFacet", () => {
 
   describe("safeTransferFrom(address _from, address _to, uint256 _tokenId)", () => {
     it("should transfer a gem to another user and emit event", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -96,7 +96,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should update user balance on transfer both for the sender and receiver ", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       await hardhat.run("get-some-gems");
@@ -113,7 +113,7 @@ describe("YieldGemFacet", () => {
 
   describe("mint(uint8 _gemTypeId)", () => {
     it("should mint a gem of every configured type and emit Transfer event", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
@@ -133,7 +133,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should charge the correct price in DAI and DEFO on mint", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
 
@@ -154,7 +154,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should revert on mint attempt more than allowed by a mint window", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
 
@@ -168,7 +168,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should mint during the next mint window when current window limit is reached", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
 
@@ -186,7 +186,7 @@ describe("YieldGemFacet", () => {
 
     for (const gemTypeId of Object.values(GEMS)) {
       it(`should distribute DAI and DEFO amount correctly on mint for gem ${gemName(gemTypeId)}`, async () => {
-        await hardhat.run("dev:get-some-dai");
+        await hardhat.run("get-some-dai");
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         const receiversNumber = PROTOCOL_CONFIG.incomeDistributionOnMint[0].length;
@@ -233,7 +233,7 @@ describe("YieldGemFacet", () => {
 
     BOOSTERS.forEach(booster => {
       it(`should mint a boosted gem if there's a booster ${booster.name} created`, async () => {
-        await hardhat.run("dev:get-some-dai");
+        await hardhat.run("get-some-dai");
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         for (const i of Object.values(GEMS)) {
@@ -245,7 +245,7 @@ describe("YieldGemFacet", () => {
       });
 
       it("should not mint a boosted gem if there's a booster created for another gem type", async () => {
-        await hardhat.run("dev:get-some-dai");
+        await hardhat.run("get-some-dai");
         await hardhat.run("get-some-defo");
         await hardhat.run("permit");
         for (const i of Object.values(GEMS)) {
@@ -287,7 +287,7 @@ describe("YieldGemFacet", () => {
 
   describe("getMintWindow(uint8 _gemTypeId)", () => {
     it("should return correct mint window initial details", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const gemId of Object.values(GEMS)) {
@@ -302,7 +302,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should return correct mintCount", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
@@ -316,7 +316,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should return zero mintCount if minted past the mintWindow", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
@@ -330,7 +330,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should return zero mintCount if minted second time much later than mintWindow length", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {
@@ -344,7 +344,7 @@ describe("YieldGemFacet", () => {
     });
 
     it("should start counting mints in the next mintWindow", async () => {
-      await hardhat.run("dev:get-some-dai");
+      await hardhat.run("get-some-dai");
       await hardhat.run("get-some-defo");
       await hardhat.run("permit");
       for (const i of Object.values(GEMS)) {

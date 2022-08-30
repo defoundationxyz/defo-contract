@@ -35,7 +35,7 @@ describe("RewardsFacet", () => {
       "DEFODiamond",
       ANY_USER.name,
     );
-    await hardhat.run("dev:get-some-dai");
+    await hardhat.run("get-some-dai");
     await hardhat.run("get-some-defo");
     await hardhat.run("permit");
   });

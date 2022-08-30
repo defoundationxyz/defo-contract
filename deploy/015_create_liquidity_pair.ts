@@ -10,16 +10,16 @@ import JOE_ROUTER_ABI from "../abi/joe-router.json";
 
 
 const func: DeployFunction = async hre => {
-  const { getNamedAccounts, ethers } = hre;
-  const { deployer, dexRouter, dai: daiAddress } = await getNamedAccounts();
-  const { Zero, MaxUint256 } = ethers.constants;
+  const {getNamedAccounts, ethers} = hre;
+  const {deployer, dexRouter, dai: daiAddress} = await getNamedAccounts();
+  const {Zero, MaxUint256} = ethers.constants;
 
   if (!hre.network.live) {
     const dai = 50000;
     const defo = 10000;
     announce(`Adding liquidity to the DAI/DEFO pair and creating it if not exists: ${dai} DAI and ${defo} DEFO`);
 
-    await hre.run("dev:get-some-dai");
+    await hre.run("get-some-dai");
     await hre.run("get-some-defo");
 
     const defoContract = await ethers.getContract<DEFOToken>("DEFOToken");

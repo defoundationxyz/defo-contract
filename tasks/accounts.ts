@@ -1,5 +1,5 @@
 import { getLiquidityPairInfo } from "@utils/liquidity.helper";
-import { announce, info } from "@utils/output.helper";
+import { announce, info, networkInfo } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import assert from "assert";
 import chalk from "chalk";
@@ -28,6 +28,7 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
     forkedDefoToken || defoTokenDeployment
       ? await ethers.getContractAt("DEFOToken", forkedDefoToken || defoTokenDeployment)
       : null;
+  await networkInfo(hre, info);
   assert(defoContract, "defoContract is null");
   announce(
     `DEFO token is ${chalk.yellow(
@@ -48,5 +49,5 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
   );
   console.table(table);
   const { pairAddress, daiReserve, defoReserve } = await getLiquidityPairInfo(hre);
-  info(`Liquidity pair (${pairAddress})reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
+  info(`DEX Liquidity pair (${pairAddress})reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
 });

@@ -1,5 +1,5 @@
 import { fromWei, toWei } from "@config";
-import { announce, info, success } from "@utils/output.helper";
+import { announce, info, networkInfo, success } from "@utils/output.helper";
 import assert from "assert";
 import chalk from "chalk";
 import { task, types } from "hardhat/config";
@@ -18,6 +18,7 @@ task("vault", "Get the vault state")
   )
   .setAction(async ({ id, op, amount }, hre) => {
     const { ethers } = hre;
+    await networkInfo(hre, info);
     const vaultStakingFacet = await ethers.getContract<RewardsFacet & VaultFacet>("DEFODiamond_DiamondProxy");
 
     const vaultInfo = async () => {

@@ -1,5 +1,4 @@
-import { chainName } from "@utils/chain.helper";
-import { deployError, deployInfo } from "@utils/output.helper";
+import { deployError, deployInfo, networkInfo } from "@utils/output.helper";
 import assert from "assert";
 import chalk from "chalk";
 import { DeployFunction } from "hardhat-deploy/types";
@@ -23,9 +22,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   deployInfo("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   deployInfo("Decentralized Foundation Contracts - Deploy Script");
   deployInfo("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-  deployInfo(
-    `Network:  ${await chainName(hre)} (${hre.network.live ? chalk.red("remote") : chalk.yellow("local")})\n\n`,
-  );
+  await networkInfo(hre, deployInfo);
   assert(
     namedAccounts.treasury === signers[namedAccountsIndex.treasury as number].address &&
       namedAccounts.vault === signers[namedAccountsIndex.vault as number].address &&

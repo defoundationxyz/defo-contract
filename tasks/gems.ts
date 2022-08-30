@@ -7,6 +7,7 @@ import {
   getChainTime,
   info,
   isKey,
+  networkInfo,
   outputFormatKeyValue,
   outputFormatter,
   table,
@@ -27,7 +28,8 @@ export default task("gems", "get gems info and balance information for the deplo
       },
     } = hre;
     const { deployer } = await getNamedAccounts();
-    info("\n 📡 Querying gems...");
+    await networkInfo(hre, info);
+    info("📡 Querying gems...");
     info(`Current block time: ${chalk.green(await getChainTime(hre.ethers.provider))}`);
 
     const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
