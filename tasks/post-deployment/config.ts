@@ -1,6 +1,6 @@
 import { Wallets } from "@config";
 import { ConfigFacet, ProtocolConfigStructOutput } from "@contractTypes/contracts/facets/ConfigFacet";
-import { announce, outputFormatKeyValue, outputFormatter } from "@utils/output.helper";
+import { announce, info, networkInfo, outputFormatKeyValue, outputFormatter } from "@utils/output.helper";
 import { parseTimeInput } from "@utils/taskParamsInput.helper";
 import { task, types } from "hardhat/config";
 
@@ -40,6 +40,7 @@ export default task("config", "Reconfigure the contract, display configuration i
   .setAction(async (taskArgs, hre) => {
     const contract = await hre.ethers.getContract<ConfigFacet>("DEFODiamond_DiamondProxy");
     let configOutput: ProtocolConfigStructOutput = await contract.getConfig();
+    await networkInfo(hre, info);
 
     if (taskArgs.rewardPeriod) {
       const { seconds, human } = parseTimeInput(taskArgs.rewardPeriod);

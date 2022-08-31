@@ -85,5 +85,5 @@ export const isKey = <T>(x: T, k: PropertyKey): k is keyof T => k in x;
 export const getChainTime = getTime(timestamp => moment.unix(Number(timestamp)).format("DD.MM.YYYY HH:MM"));
 
 export const networkInfo = async (hre: HardhatRuntimeEnvironment, display: (message: string) => void) =>
-  !!process.env.HIDE_DEPLOY_LOG &&
+  !process.env.HIDE_SHOW_NETWORK &&
   display(`Network:  ${await chainName(hre)} (${hre.network.live ? chalk.red("live!") : chalk.yellow("local")})\n`);
