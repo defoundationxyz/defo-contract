@@ -7,6 +7,7 @@ export const avalancheMainnetJsonRPCUrl: string =
   process.env.MAINNET_RPC_URL || "https://api.avax.network/ext/bc/C/rpc";
 export const avalancheFujiJsonRPCUrl: string = process.env.FUJI_RPC_URL || "https://api.avax-test.network/ext/bc/C/rpc";
 /// TODO add accounts to fuji?
+
 const networks: NetworksUserConfig = {
   hardhat: {
     chainId: 1337,
