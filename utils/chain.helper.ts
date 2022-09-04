@@ -34,7 +34,7 @@ export const getContractWithSigner = async <T extends Contract>(
 
 export const getTime = (formatter: (timestamp: number) => string) => async (provider: providers.JsonRpcProvider) =>
   formatter((await provider.getBlock("latest")).timestamp);
-[];
+
 export const advanceBlock = async (provider: providers.JsonRpcProvider) => provider.send("evm_mine", []);
 
 export const increaseTime = async (provider: providers.JsonRpcProvider, time: number) => {

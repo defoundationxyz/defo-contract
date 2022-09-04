@@ -18,7 +18,7 @@ type NamedAccounts<AccountName extends string = string, NetworkName extends stri
   string | number | Record<NetworkName, null | number | string>
 >;
 
-const balance = "10000000000000000000000";
+const balance = "100000000000000000000000";
 
 const accounts: HardhatNetworkAccountsUserConfig = [
   {
