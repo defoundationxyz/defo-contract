@@ -9,13 +9,16 @@
 **/build
 **/cache
 **/coverage
-**/deployments
 **/.coverage_artifacts
 **/.coverage_cache
 **/.coverage_contracts
 **/dist
 **/node_modules
 /types
+
+#local deployments
+**/deployments/hardhat
+**/deployments/localhost
 
 # files
 *.env

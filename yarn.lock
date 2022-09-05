@@ -2011,7 +2011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@solidity-parser/parser@npm:^0.14.0, @solidity-parser/parser@npm:^0.14.3":
+"@solidity-parser/parser@npm:^0.14.0, @solidity-parser/parser@npm:^0.14.2, @solidity-parser/parser@npm:^0.14.3":
   version: 0.14.3
   resolution: "@solidity-parser/parser@npm:0.14.3"
   dependencies:
@@ -5772,18 +5772,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debug@npm:4.3.3":
-  version: 4.3.3
-  resolution: "debug@npm:4.3.3"
-  dependencies:
-    ms: 2.1.2
-  peerDependenciesMeta:
-    supports-color:
-      optional: true
-  checksum: 14472d56fe4a94dbcfaa6dbed2dd3849f1d72ba78104a1a328047bb564643ca49df0224c3a17fa63533fd11dd3d4c8636cd861191232a2c6735af00cc2d4de16
-  languageName: node
-  linkType: hard
-
 "debug@npm:^3.1.0":
   version: 3.2.7
   resolution: "debug@npm:3.2.7"
@@ -6009,7 +5997,7 @@ __metadata:
     ethereum-waffle: ^3.4.4
     ethereumjs-util: ^7.1.5
     ethers: ^5.6.9
-    hardhat: ^2.9.9
+    hardhat: 2.10.2
     hardhat-abi-exporter: ^2.10.0
     hardhat-contract-sizer: ^2.6.1
     hardhat-deploy: 0.11.11
@@ -7095,7 +7083,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereum-cryptography@npm:^0.1.2, ethereum-cryptography@npm:^0.1.3":
+"ethereum-cryptography@npm:^0.1.3":
   version: 0.1.3
   resolution: "ethereum-cryptography@npm:0.1.3"
   dependencies:
@@ -8953,9 +8941,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.9.9":
-  version: 2.9.9
-  resolution: "hardhat@npm:2.9.9"
+"hardhat@npm:2.10.2":
+  version: 2.10.2
+  resolution: "hardhat@npm:2.10.2"
   dependencies:
     "@ethereumjs/block": ^3.6.2
     "@ethereumjs/blockchain": ^5.5.2
@@ -8965,7 +8953,7 @@ __metadata:
     "@ethersproject/abi": ^5.1.2
     "@metamask/eth-sig-util": ^4.0.0
     "@sentry/node": ^5.18.1
-    "@solidity-parser/parser": ^0.14.1
+    "@solidity-parser/parser": ^0.14.2
     "@types/bn.js": ^5.1.0
     "@types/lru-cache": ^5.1.0
     abort-controller: ^3.0.0
@@ -8978,7 +8966,7 @@ __metadata:
     debug: ^4.1.1
     enquirer: ^2.3.0
     env-paths: ^2.2.0
-    ethereum-cryptography: ^0.1.2
+    ethereum-cryptography: ^1.0.3
     ethereumjs-abi: ^0.6.8
     ethereumjs-util: ^7.1.4
     find-up: ^2.1.0
@@ -8990,7 +8978,7 @@ __metadata:
     lodash: ^4.17.11
     merkle-patricia-tree: ^4.2.4
     mnemonist: ^0.38.0
-    mocha: ^9.2.0
+    mocha: ^10.0.0
     p-map: ^4.0.0
     qs: ^6.7.0
     raw-body: ^2.4.1
@@ -9015,7 +9003,7 @@ __metadata:
       optional: true
   bin:
     hardhat: internal/cli/cli.js
-  checksum: 1d30f4b5e56de82608e0fc8436b8338d5f6eb79125229236d65e32f4f0da39e9649c3a7138e743c62bb2fa1b00eac91e67cdb1775cd934fb8daedb1ede6eea01
+  checksum: 3034a213d25d2727fc80e4b45a6e82dc0ae01ec7b9fb669ee3650fa8a1ba8d38f29f689440826b8747fb2647882da15efb524d077e18c7e9eb55ebd574b9052a
   languageName: node
   linkType: hard
 
@@ -11561,15 +11549,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:4.2.1":
-  version: 4.2.1
-  resolution: "minimatch@npm:4.2.1"
-  dependencies:
-    brace-expansion: ^1.1.7
-  checksum: 2b1514e3d0f29a549912f0db7ae7b82c5cab4a8f2dd0369f1c6451a325b3f12b2cf473c95873b6157bb8df183d6cf6db82ff03614b6adaaf1d7e055beccdfd01
-  languageName: node
-  linkType: hard
-
 "minimatch@npm:5.0.1":
   version: 5.0.1
   resolution: "minimatch@npm:5.0.1"
@@ -11829,41 +11808,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mocha@npm:^9.2.0":
-  version: 9.2.2
-  resolution: "mocha@npm:9.2.2"
-  dependencies:
-    "@ungap/promise-all-settled": 1.1.2
-    ansi-colors: 4.1.1
-    browser-stdout: 1.3.1
-    chokidar: 3.5.3
-    debug: 4.3.3
-    diff: 5.0.0
-    escape-string-regexp: 4.0.0
-    find-up: 5.0.0
-    glob: 7.2.0
-    growl: 1.10.5
-    he: 1.2.0
-    js-yaml: 4.1.0
-    log-symbols: 4.1.0
-    minimatch: 4.2.1
-    ms: 2.1.3
-    nanoid: 3.3.1
-    serialize-javascript: 6.0.0
-    strip-json-comments: 3.1.1
-    supports-color: 8.1.1
-    which: 2.0.2
-    workerpool: 6.2.0
-    yargs: 16.2.0
-    yargs-parser: 20.2.4
-    yargs-unparser: 2.0.0
-  bin:
-    _mocha: bin/_mocha
-    mocha: bin/mocha
-  checksum: 4d5ca4ce33fc66627e63acdf09a634e2358c9a00f61de7788b1091b6aad430da04f97f9ecb82d56dc034b623cb833b65576136fd010d77679c03fcea5bc1e12d
-  languageName: node
-  linkType: hard
-
 "mock-fs@npm:^4.1.0":
   version: 4.14.0
   resolution: "mock-fs@npm:4.14.0"
@@ -11985,15 +11929,6 @@ __metadata:
   version: 0.1.2
   resolution: "nano-json-stream-parser@npm:0.1.2"
   checksum: 5bfe146358c659e0aa7d5e0003416be929c9bd02ba11b1e022b78dddf25be655e33d810249c1687d2c9abdcee5cd4d00856afd1b266a5a127236c0d16416d33a
-  languageName: node
-  linkType: hard
-
-"nanoid@npm:3.3.1":
-  version: 3.3.1
-  resolution: "nanoid@npm:3.3.1"
-  bin:
-    nanoid: bin/nanoid.cjs
-  checksum: 4ef0969e1bbe866fc223eb32276cbccb0961900bfe79104fa5abe34361979dead8d0e061410a5c03bc3d47455685adf32c09d6f27790f4a6898fb51f7df7ec86
   languageName: node
   linkType: hard
 
@@ -17362,7 +17297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"which@npm:2.0.2, which@npm:^2.0.1, which@npm:^2.0.2":
+"which@npm:^2.0.1, which@npm:^2.0.2":
   version: 2.0.2
   resolution: "which@npm:2.0.2"
   dependencies:
@@ -17421,13 +17356,6 @@ __metadata:
     reduce-flatten: ^2.0.0
     typical: ^5.2.0
   checksum: 3d927f3c95d0ad990968da54c0ad8cde2801d8e91006cd7474c26e6b742cc8557250ce495c9732b2f9db1f903601cb74ec282e0f122ee0d02d7abe81e150eea8
-  languageName: node
-  linkType: hard
-
-"workerpool@npm:6.2.0":
-  version: 6.2.0
-  resolution: "workerpool@npm:6.2.0"
-  checksum: 3493b4f0ef979a23d2c1583d7ef85f62fc9463cc02f82829d3e7e663b517f8ae9707da0249b382e46ac58986deb0ca2232ee1081713741211bda9254b429c9bb
   languageName: node
   linkType: hard
 
@@ -17533,8 +17461,8 @@ __metadata:
   linkType: hard
 
 "ws@npm:^7.4.6":
-  version: 7.5.8
-  resolution: "ws@npm:7.5.8"
+  version: 7.5.9
+  resolution: "ws@npm:7.5.9"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ^5.0.2
@@ -17543,7 +17471,7 @@ __metadata:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 49479ccf3ddab6500c5906fbcc316e9c8cd44b0ffb3903a6c1caf9b38cb9e06691685722a4c642cfa7d4c6eb390424fc3142cd4f8b940cfc7a9ce9761b1cd65b
+  checksum: c3c100a181b731f40b7f2fddf004aa023f79d64f489706a28bc23ff88e87f6a64b3c6651fbec3a84a53960b75159574d7a7385709847a62ddb7ad6af76f49138
   languageName: node
   linkType: hard
 
