@@ -106,10 +106,10 @@ const func: DeployFunction = async hre => {
           );
         } else {
           deployInfo(`Calling approve for ${await token.name()}, max amount`);
-          await token.approve(diamondDeployment.address, ethers.constants.MaxUint256);
+          await (await token.approve(diamondDeployment.address, ethers.constants.MaxUint256)).wait();
         }
         const allowance = await token.allowance(signer.address, diamondDeployment.address);
-        deploySuccess(`Permission to spend granted.Allowance is ${sayMaximumForMaxUint(allowance)}`);
+        deploySuccess(`Permission to spend granted.\nAllowance is ${sayMaximumForMaxUint(allowance)}`);
       }
     }
   }
