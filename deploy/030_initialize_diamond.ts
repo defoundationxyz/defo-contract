@@ -61,7 +61,7 @@ const func: DeployFunction = async hre => {
     deployer, //redeem contract goes here
   ];
 
-  deployInfo("Configuration wallets:");
+  deployInfo("Checking wallets before passing to the DEFODiamond:");
   wallets.forEach((wallet, index) => {
     if (wallet === ethers.constants.AddressZero) {
       deployError(wallet);

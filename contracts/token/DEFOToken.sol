@@ -28,6 +28,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     string public constant version = "1";
     uint8 public constant decimals = 18;
     uint256 public totalSupply;
+    bool public initialized;
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
@@ -60,6 +61,8 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     }
 
     function initialize(uint256 chainId_) external {
+        require(!initialized, "DEFOToken:already-initialized");
+        initialized = true;
         wards[_msgSender()] = 1;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
