@@ -25,13 +25,17 @@ export default task("swap", "swaps DAI to DEFO and vice versa, specify FROM toke
     const dexRouterContact = await ethers.getContractAt(JOE_ROUTER_ABI, dexRouter);
     await (await daiContract.approve(dexRouterContact.address, MaxUint256)).wait();
     await (await defoContract.approve(dexRouterContact.address, MaxUint256)).wait();
+
+    const { daiReserve: daiReserveBefore, defoReserve: defoReserveBefore } = await getLiquidityPairInfo(hre);
+    info(`Current reserves: DAI ${daiReserveBefore}, DEFO ${defoReserveBefore}`);
+
     let amount: BigNumber;
     let tokens: [string, string];
-    if (dai) {
-      amount = toWei(dai);
+    if (defo) {
+      amount = toWei(defo);
       tokens = [daiContract.address, defoContract.address];
     } else {
-      amount = toWei(defo);
+      amount = toWei(dai);
       tokens = [defoContract.address, daiContract.address];
     }
     await (
