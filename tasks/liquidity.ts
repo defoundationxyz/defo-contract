@@ -6,8 +6,7 @@ import DAI_ABI from "abi/dai-abi.json";
 import JOE_ROUTER_ABI from "abi/joe-router.json";
 import { task, types } from "hardhat/config";
 
-
-export default task("liquidity", "quries and adds DAI and DEFO liquidity to the pair")
+export default task("liquidity", "queries and adds DAI and DEFO liquidity to the pair")
   .addOptionalParam("dai", "DAI to add to the pool", undefined, types.int)
   .addOptionalParam("defo", "DEFO to add to the pool", undefined, types.int)
   .setAction(async ({ dai, defo }, hre) => {
