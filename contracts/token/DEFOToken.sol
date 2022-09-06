@@ -194,6 +194,10 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         _unpause();
     }
 
+    function getLinkedDiamond() external view returns (ITransferLimiter) {
+        return transferLimiter;
+    }
+
     /* ============ Internal Functions ============ */
 
     // --- Math ---
