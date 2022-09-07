@@ -98,8 +98,10 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     function isClaimable(uint256 _tokenId) public view returns (bool) {
-        return (TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-        LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0);
+        return (
+        TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
+        LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0 &&
+        getRewardAmount(_tokenId) != 0);
     }
 
     function getCumulatedReward() external view returns (uint256) {

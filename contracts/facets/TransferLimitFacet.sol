@@ -41,7 +41,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
                 uint256[] memory gemIds = _getGemIds(from);
                 require(gemIds.length > 0, "DEFOTransferLimit:no-gems");
                 uint256 allowedSellAmount = 0;
-
+                ///TODO - cound total weekly sale - should not be greater in total than rewards per week, not just a single sale !!
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;
                     allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;

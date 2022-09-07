@@ -8,5 +8,6 @@ export * as vault from "./vault";
 export * as history from "./history";
 export * as liquidity from "./liquidity";
 export * as abi from "./abi";
+export * as swap from "./swap";
 export * from "./dev";
 export * from "./post-deployment";
