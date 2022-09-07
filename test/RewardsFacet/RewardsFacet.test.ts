@@ -1,4 +1,4 @@
-import { GEMS, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
+import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, fromWei, gemName, percent } from "@config";
 import { MaintenanceFacet, RewardsFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
@@ -23,7 +23,7 @@ describe("RewardsFacet", () => {
       "LiquidityPairDAI-DEFO",
       "DEFODiamond",
       "DEFOTokenInit",
-      "DiamondInitialized",
+      "DiamondInitialized"
     ]);
     contract = await getContractWithSigner<RewardsFacet & YieldGemFacet & MaintenanceFacet>(hardhat, "DEFODiamond");
     user = (await hardhat.getNamedAccounts()).deployer;
@@ -32,7 +32,7 @@ describe("RewardsFacet", () => {
     otherUserContract = await getContractWithSigner<RewardsFacet & YieldGemFacet>(
       hardhat,
       "DEFODiamond",
-      ANY_USER.name,
+      ANY_USER.name
     );
     await hardhat.run("get-some-dai");
     await hardhat.run("get-some-defo");
@@ -49,25 +49,26 @@ describe("RewardsFacet", () => {
       }
     });
 
-    //todo tapering test
-    // Object.values(GEMS).forEach(i =>
-    //   it(`should taper reward for gem ${gemName(i)}`, async () => {
-    //     let reward = ethers.constants.Zero;
-    //     await hardhat.run("get-some-gems", { type: i });
-    //     while (reward.lt(<BigNumber>GEM_TYPES_CONFIG[i].taperRewardsThresholdDefo)) {
-    //       await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.rewardPeriod + 1).toString()}s` });
-    //       reward = await contract.getRewardAmount(0);
-    //     }
-    //     await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.rewardPeriod + 1).toString()}s` });
-    //     const expectedTaperedReward = await contract.getRewardAmount(0);
-    //     const taperedForAWeek = expectedTaperedReward.sub(reward);
-    //     expect(taperedForAWeek).to.be.equal(
-    //       testAmountToStake(0)
-    //         .mul(HUNDRED_PERCENT - <number>PROTOCOL_CONFIG.taperRate)
-    //         .div(HUNDRED_PERCENT),
-    //     );
-    //   }),
-    // );
+    Object.values(GEMS).forEach(i =>
+      it(`should taper reward for gem ${gemName(i)}`, async () => {
+        let reward = ethers.constants.Zero;
+        await hardhat.run("get-some-gems", { type: i });
+        const periodsToNextTaper = (GEM_TYPES_CONFIG[i].taperRewardsThresholdDefo as BigNumber).div(
+          GEM_TYPES_CONFIG[i].rewardAmountDefo as BigNumber
+        );
+        const timeToJump = <number>PROTOCOL_CONFIG.rewardPeriod * periodsToNextTaper.toNumber();
+        await hardhat.run("jump-in-time", { time: `${(timeToJump + 1).toString()}s` });
+        reward = await contract.getRewardAmount(0);
+        await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.rewardPeriod + 1).toString()}s` });
+        const expectedTaperedReward = await contract.getRewardAmount(0);
+        const taperedForAWeek = expectedTaperedReward.sub(reward);
+        expect(taperedForAWeek).to.be.equal(
+          testAmountToStake(i)
+            .mul(HUNDRED_PERCENT - <number>PROTOCOL_CONFIG.taperRate)
+            .div(HUNDRED_PERCENT)
+        );
+      })
+    );
 
     BOOSTERS.forEach(booster =>
       it(`should earn correct reward for ${booster.name} boosted gem`, async () => {
@@ -79,7 +80,7 @@ describe("RewardsFacet", () => {
           debug(`testing reward amount of  ${booster.name} boosted gem type: ${gemName(i)}`);
           expect(await contract.getRewardAmount(i)).to.be.equal(booster.rewardsBoost(testAmountToStake(i)));
         }
-      }),
+      })
     );
 
     it("should show zero amount for the gems once staked", async () => {
@@ -90,7 +91,7 @@ describe("RewardsFacet", () => {
         await hardhat.run("vault", {
           op: "stake",
           id,
-          amount: Number(fromWei(testAmountToStake(id))),
+          amount: Number(fromWei(testAmountToStake(id)))
         });
         expect(await contract.getRewardAmount(id)).to.be.equal(ethers.constants.Zero);
       }
@@ -136,7 +137,7 @@ describe("RewardsFacet", () => {
         await hardhat.run("vault", {
           op: "stake",
           id,
-          amount: Number(fromWei(testAmountToStake(id))),
+          amount: Number(fromWei(testAmountToStake(id)))
         });
         expect(await contract.isClaimable(id)).to.be.false;
       }
@@ -150,8 +151,8 @@ describe("RewardsFacet", () => {
       expect(await contract.getCumulatedReward()).to.be.equal(
         Object.values(GEMS).reduce<BigNumber>(
           (totalReward, i) => totalReward.add(testAmountToStake(i)),
-          ethers.constants.Zero,
-        ),
+          ethers.constants.Zero
+        )
       );
     });
 
@@ -159,14 +160,14 @@ describe("RewardsFacet", () => {
       await hardhat.run("get-some-gems");
       await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.rewardPeriod + 1).toString()}s` });
       await Promise.all(
-        Object.values(GEMS).map(i => contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i)),
+        Object.values(GEMS).map(i => contract["safeTransferFrom(address,address,uint256)"](user, otherUser, i))
       );
       expect(await contract.getCumulatedReward()).to.be.equal(ethers.constants.Zero);
       expect(await otherUserContract.getCumulatedReward()).to.be.equal(
         Object.values(GEMS).reduce<BigNumber>(
           (totalReward, i) => totalReward.add(testAmountToStake(i)),
-          ethers.constants.Zero,
-        ),
+          ethers.constants.Zero
+        )
       );
     });
   });
@@ -211,7 +212,7 @@ describe("RewardsFacet", () => {
             .to.emit(contract, "Claimed")
             .withArgs(user, testAmountToClaim(i).mul(taxTier), testAmountClaimed(i, taxTier).mul(taxTier));
         }
-      }),
+      })
     );
   });
 
@@ -237,7 +238,7 @@ describe("RewardsFacet", () => {
           .withArgs(
             user,
             TEST_AMOUNT,
-            TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT)),
+            TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT))
           );
       }
     });
@@ -274,7 +275,7 @@ describe("RewardsFacet", () => {
             .withArgs(
               user,
               TEST_AMOUNT,
-              TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT)),
+              TEST_AMOUNT.sub(TEST_AMOUNT.mul(<number>PROTOCOL_CONFIG.charityContributionRate).div(HUNDRED_PERCENT))
             );
         }
       });
