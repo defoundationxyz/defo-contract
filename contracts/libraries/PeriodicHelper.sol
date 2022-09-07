@@ -84,7 +84,7 @@ library PeriodicHelper {
         // The whole process makes sense if the current time is later than the 1st taper event
         uint finalRate;
         if (sN != 0 && timePeriod > sN) {
-            finalRate = ratePerPeriod * taperedPercent ** (n + 1) / PercentHelper.HUNDRED_PERCENT ** (n + 1);
+            finalRate = ratePerPeriod * taperedPercent ** (n) / PercentHelper.HUNDRED_PERCENT ** (n);
             finalAmount = taperThreshold * n + ((timePeriod - sN) / payOrDeductPeriod) * finalRate;
         }
         else {
