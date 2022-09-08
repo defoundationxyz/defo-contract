@@ -5,14 +5,27 @@ import { deployments } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 
 const func: DeployFunction = async hre => {
-  const { team, treasury, donations, vault, rewardPool } = await hre.getNamedAccounts();
+  const { deployer, team, treasury, donations, vault, rewardPool } = await hre.getNamedAccounts();
   const defoContract = await getContractWithSigner<DEFOToken>(hre, "DEFOToken", "defoTokenOwner");
   const diamondDeployment = await deployments.get("DEFODiamond");
   await (await defoContract.linkDiamond(diamondDeployment.address)).wait();
 
-  for (const privilegedAddress of [diamondDeployment.address, team, treasury, donations, team, vault, rewardPool]) {
-    deployInfo(`authorizing ${privilegedAddress}`);
-    await (await defoContract.rely(privilegedAddress)).wait();
+  for (const privilegedAddress of [
+    deployer,
+    diamondDeployment.address,
+    team,
+    treasury,
+    donations,
+    team,
+    vault,
+    rewardPool,
+  ]) {
+    if (await defoContract.authorized(privilegedAddress))
+      deployInfo(`${privilegedAddress}, already authorized, skipping`);
+    else {
+      deployInfo(`authorizing ${privilegedAddress}`);
+      await (await defoContract.rely(privilegedAddress)).wait();
+    }
   }
   deploySuccess("DEFO Token initialized");
 };
