@@ -21,8 +21,8 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
     }
 
     function DEFOTokenTransferLimit(
-        address to,
         address from,
+        address to,
         uint256 amount
     ) public {
         if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {
