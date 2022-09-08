@@ -1,16 +1,16 @@
 {
-  "address": "0x1f422c62Ee3876BA2074faA479C0050628F4eA2c",
+  "address": "0x25202dd3b7f331A9738485889eA3522fD465B891",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "to",
+          "name": "from",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "from",
+          "name": "to",
           "type": "address"
         },
         {
@@ -28,12 +28,12 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "to",
+          "name": "from",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "from",
+          "name": "to",
           "type": "address"
         },
         {
@@ -48,28 +48,28 @@
       "type": "function"
     }
   ],
-  "transactionHash": "0xbce7a3ee9bac687ff7ae7a2ed791f4be46ed56e78d9473af2d9e9ab8d6671885",
+  "transactionHash": "0x0f590125f06e927836ae2f5d4920506da9a7d87628314886dbf4d869117eb3b9",
   "receipt": {
     "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
     "from": "0x05309918A451156C2cE41f3C8dF89672ce83e944",
     "contractAddress": null,
     "transactionIndex": 1,
-    "gasUsed": "641512",
+    "gasUsed": "751744",
     "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0x41c15101f9361df07a972f8990e28d0ddc29492ae3faa832badbd500de0c53ee",
-    "transactionHash": "0xbce7a3ee9bac687ff7ae7a2ed791f4be46ed56e78d9473af2d9e9ab8d6671885",
+    "blockHash": "0x6bdd36a7280fc5abf0be0858e1cf2a4ce0d3bcef40f70b67a783ea7809774f9b",
+    "transactionHash": "0x0f590125f06e927836ae2f5d4920506da9a7d87628314886dbf4d869117eb3b9",
     "logs": [],
-    "blockNumber": 13267257,
-    "cumulativeGasUsed": "682682",
+    "blockNumber": 13304340,
+    "cumulativeGasUsed": "882993",
     "status": 1,
     "byzantium": true
   },
   "args": [],
-  "numDeployments": 2,
-  "solcInputHash": "22da63ea1f92c8c02aabaa5d71667029",
-  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"DEFOTokenTransferLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"yieldGemTransferLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Decentralized Foundation Team\",\"kind\":\"dev\",\"methods\":{},\"title\":\"ERC721Facet EIP-2535 Diamond Facet\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"yieldGemTransferLimit(address,address,uint256)\":{\"notice\":\"todo refactor transfer limiting operations to this facet\"}},\"notice\":\"The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/facets/TransferLimitFacet.sol\":\"TransferLimitFacet\"},\"evmVersion\":\"berlin\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":250},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `from` to `to` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) external returns (bool);\\n}\\n\",\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Counters.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Counters.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @title Counters\\n * @author Matt Condon (@shrugs)\\n * @dev Provides counters that can only be incremented, decremented or reset. This can be used e.g. to track the number\\n * of elements in a mapping, issuing ERC721 ids, or counting request ids.\\n *\\n * Include with `using Counters for Counters.Counter;`\\n */\\nlibrary Counters {\\n    struct Counter {\\n        // This variable should never be directly accessed by users of the library: interactions must be restricted to\\n        // the library's function. As of Solidity v0.5.2, this cannot be enforced, though there is a proposal to add\\n        // this feature: see https://github.com/ethereum/solidity/issues/4637\\n        uint256 _value; // default: 0\\n    }\\n\\n    function current(Counter storage counter) internal view returns (uint256) {\\n        return counter._value;\\n    }\\n\\n    function increment(Counter storage counter) internal {\\n        unchecked {\\n            counter._value += 1;\\n        }\\n    }\\n\\n    function decrement(Counter storage counter) internal {\\n        uint256 value = counter._value;\\n        require(value > 0, \\\"Counter: decrement overflow\\\");\\n        unchecked {\\n            counter._value = value - 1;\\n        }\\n    }\\n\\n    function reset(Counter storage counter) internal {\\n        counter._value = 0;\\n    }\\n}\\n\",\"keccak256\":\"0xf0018c2440fbe238dd3a8732fa8e17a0f9dce84d31451dc8a32f6d62b349c9f1\",\"license\":\"MIT\"},\"contracts/base-facet/BaseFacet.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\nimport {LibDiamond} from \\\"hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol\\\";\\nimport \\\"./Storage.sol\\\";\\n/**\\n * @title  BaseFacet\\n * @author Decentralized Foundation Team\\n * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils and  common reusable functions for DEFO Diamond\\n */\\ncontract BaseFacet is Storage {\\n\\n    /* ====================== Modifiers ====================== */\\n\\n    modifier exists(uint256 _tokenId) {\\n        _requireExists(_tokenId);\\n        _;\\n    }\\n\\n    modifier onlyGemHolder(uint256 _tokenId) {\\n        require(s.nft.owners[_tokenId] == _msgSender(), \\\"You don't own this gem\\\");\\n        _;\\n    }\\n\\n    modifier onlyOwner() {\\n        LibDiamond.enforceIsContractOwner();\\n        _;\\n    }\\n    modifier nonZeroAddress(address _owner) {\\n        require(_owner != address(0), \\\"ERC721: address zero is not a valid owner\\\");\\n        _;\\n    }\\n\\n    /* ============ Internal Functions ============ */\\n\\n    function _msgSender() internal override view returns (address sender_) {\\n        if (Context._msgSender() == address(this)) {\\n            bytes memory array = msg.data;\\n            uint256 index = msg.data.length;\\n            assembly {\\n            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.\\n                sender_ := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)\\n            }\\n        } else {\\n            sender_ = msg.sender;\\n        }\\n    }\\n\\n    function _getChainID() internal view returns (uint256 id) {\\n        assembly {\\n            id := chainid()\\n        }\\n    }\\n\\n    function _requireExists(uint256 _tokenId) internal view {\\n        require(_exists(_tokenId), \\\"ERC721: tokenId is not valid\\\");\\n    }\\n\\n    function _exists(uint256 _tokenId) internal view returns (bool) {\\n        return (s.nft.owners[_tokenId] != address(0));\\n    }\\n\\n    ///todo ensure passing memory array here to the public functions is pretty optimal\\n    function _getGemIds(address _user) internal view returns (uint256[] memory) {\\n        uint256 numberOfGems = s.nft.balances[_user];\\n        uint256[] memory gemIds = new uint256[](numberOfGems);\\n        for (uint256 i = 0; i < numberOfGems; i++) {\\n            uint256 gemId = s.nft.ownedTokens[_user][i];\\n            require(_exists(gemId), \\\"A gem doesn't exists\\\");\\n            gemIds[i] = gemId;\\n        }\\n        return gemIds;\\n    }\\n\\n    function _getAllUsers() internal view returns (address[] memory users_) {\\n        users_ = new address[](s.nft.allTokens.length);\\n        for (uint256 tokenId = 0; tokenId < s.nft.allTokens.length; tokenId++) {\\n            users_[tokenId] = s.nft.owners[tokenId];\\n        }\\n    }\\n\\n}\\n\",\"keccak256\":\"0x5ee18d83372dec082d66a9c61a88c6b5c034a741118da8be0524f9f1ed4f4b13\",\"license\":\"GPL-3.0\"},\"contracts/base-facet/Storage.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\nimport {AppStorage} from \\\"../libraries/LibAppStorage.sol\\\";\\n\\ncontract Storage is Context {\\n    AppStorage internal s;\\n}\\n\",\"keccak256\":\"0x66f07eea1ae3a0fbf40fbf070d67bed29b4a0a2dfbb689f58292d28b5065418a\",\"license\":\"GPL-3.0\"},\"contracts/data-types/IDataTypes.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/utils/Counters.sol\\\";\\n/**\\n*   @dev The only source for all the data structures used in the protocol storage\\n*   @dev This includes general config, gem type config, and mutable data\\n*/\\n\\n/// @dev number of payment tokens to enumerate the error, initially it's Defo and Dai,\\n/// @dev see PaymentTokens enum\\nuint256 constant PAYMENT_TOKENS = 2;\\n\\n/// @dev number of income recievers on yield gem mint\\nuint256 constant PAYMENT_RECEIVERS = 3;\\n\\n/// @dev total wallets on the protocol, see Wallets enum\\nuint256 constant WALLETS = 7;\\n\\n/// @dev total number of supported tax tiers\\nuint256 constant TAX_TIERS = 5;\\n\\n/**\\n*   @notice a struct for data compliance with erc721 standard\\n*   @param name Token name\\n*   @param symbol Token symbol\\n*   @param owners Mapping from token ID to owner address\\n*   @param balances Mapping owner address to token count\\n*   @param tokenApprovals Mapping from token ID to approved address\\n*   @param operatorApprovals Mapping from owner to operator approvals\\n*   @param ownedTokens Mapping from owner to list of owned token IDs\\n*   @param ownedTokensIndex Mapping from token ID to index of the owner tokens list\\n*   @param allTokens Array with all token ids, used for enumeration\\n*   @param allTokensIndex Mapping from token id to position in the allTokens array\\n*/\\n    struct ERC721Storage {\\n        string name;\\n        string symbol;\\n        Counters.Counter tokenIdTracker;\\n        mapping(uint256 => address) owners;\\n        mapping(address => uint256) balances;\\n        mapping(uint256 => address) tokenApprovals;\\n        mapping(address => mapping(address => bool)) operatorApprovals;\\n        string baseURI;\\n        mapping(address => mapping(uint256 => uint256)) ownedTokens;\\n        mapping(uint256 => uint256) ownedTokensIndex;\\n        uint256[] allTokens;\\n        mapping(uint256 => uint256) allTokensIndex;\\n        bool init;\\n    }\\n\\n\\n/// @notice token enum to index arrays of rates and addresses, the convention is that Dai is at place 0, Defo is at 1\\n/// @dev the order is extremely important once deployed\\n    enum PaymentTokens {\\n        Dai,\\n        Defo\\n    }\\n\\n/// @notice protocol wallets for easy enumeration,\\n/// @dev the order is extremely important once deployed, see configuration scripts\\n    enum Wallets {\\n        Treasury,\\n        RewardPool,\\n        LiquidityPair,\\n        Team,\\n        Charity,\\n        Vault,\\n        RedeemContract\\n    }\\n\\n\\n/// @notice these tiers correspond to the configurable percentage from the diamond storage\\n    enum TaxTiers {\\n        Tier0NoPayment,\\n        Tier1HugeTax,\\n        Tier2MediumTax,\\n        Tier3SmallTax,\\n        Tier4NoTax\\n    }\\n\\n/**\\n * @notice DefoTokenLimitConfig DEFO ERC20 Token transfer limiter, this is for the 1000 DEFO per 24h sale limitation, can be changes with setTransferLimit\\n * @param saleLimitPeriod initially 1 day\\n * @param saleLimitAmount initially 1000 tokens\\n*/\\n    struct DefoTokenLimitConfig {\\n        uint256 saleLimitPeriod;\\n        uint256 saleLimitAmount;\\n        bool limitByReward;\\n    }\\n\\n/**\\n * @notice Main Protocol Configuration structure\\n     * @param mintLock no mint for all gems, no minting if set\\n     * @param transferLock no transfer if set, including no minting\\n     * @param incomeDistributionOnMint distribution of the payment among tokens in percent rates, all values use percentage multiplier (see percent helper), here addresses are from the Addresses\\n     * @param maintenancePeriod a period in seconds for maintenance fee accrual, initially one month\\n     * @param rewardPeriod a period in seconds for generating yield gem rewards, initially one week\\n     * @param mintCountResetPeriod a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs.\\n     * @param taxScaleSinceLastClaimPeriod a period in seconds for a tax scale to work out, initially one week\\n     * @param taxRates tax rates in percent (with percent multiplier, see percent helper contract), initially 30%, 30%, 15%, 0\\n     * @param charityContributionRate charity rate (w multiplier as all percent values in the project), initially 5%\\n     * @param vaultWithdrawalRate fee paid to withdraw amount from the vault back to the earned rewards, initially 10%\\n     * @param taperRate taper rate, initially 20%\\n     * @param mintLock no mint for all gems, no minting if set\\n     * @param transferLock no transfer if set\\n     * @param mintLimitWindow a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs, see GemTypeConfig.maxMintsPerLimitWindow\\n     */\\n\\n    struct ProtocolConfig {\\n        IERC20[PAYMENT_TOKENS] paymentTokens;\\n        address[WALLETS] wallets;\\n        uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] incomeDistributionOnMint;\\n        // time periods\\n        uint32 maintenancePeriod;\\n        uint32 rewardPeriod;\\n        uint32 taxScaleSinceLastClaimPeriod;\\n        // taxes and contributions\\n        uint256[TAX_TIERS] taxRates;\\n        uint256 charityContributionRate;\\n        uint256 vaultWithdrawalTaxRate;\\n        uint256 taperRate;\\n        // locks\\n        bool mintLock;\\n        bool transferLock;\\n        // mint limit period for coutner reset\\n        uint32 mintLimitWindow;\\n        DefoTokenLimitConfig defoTokenLimitConfig;\\n    }\\n\\n/**\\n * @notice A struct containing configuration details for gemType\\n     * @param maintenanceFee Maintenance fee in Dai for the node type, amount in wei per month\\n     * @param rewardAmountDefo Reward in DEFO for the node type, amount in wei per week\\n     * @param price Price in DEFO and DAI (in wei), respectively, according to the PaymentTokens enum\\n     * @param taperRewardsThresholdDefo Taper threshold, in wei, decreasing rate every given amount of rewards in DEFO\\n     * @param maxMintsPerLimitWindow number of gems, mint limit for a node type, see ProtocolConfig.mintLimitWindow\\n     */\\n    struct GemTypeConfig {\\n        uint256 maintenanceFeeDai;\\n        uint256 rewardAmountDefo;\\n        uint256[PAYMENT_TOKENS] price;\\n        uint256 taperRewardsThresholdDefo;\\n        uint8 maxMintsPerLimitWindow;\\n    }\\n\\n/**\\n * @notice A struct containing current mutable status for gemType\\n     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0\\n     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over\\n     */\\n    struct GemTypeMintWindow {\\n        uint256 mintCount;\\n        uint32 endOfMintLimitWindow;\\n    }\\n\\n/**\\n * @notice A struct describing current DEFO Token limiter input\\n * @param tokensSold DEFO tokens sold per limit window, \\\"sold\\\" = \\\"transferred to liquidity pair except the mint\\\"\\n * @param timeOfLastSale time of last sale\\n     */\\n    struct DEFOTokenLimitWindow {\\n        mapping(address => uint256) tokensSold;\\n        mapping(address => uint256) timeOfLastSale;\\n    }\\n\\n    enum Booster {\\n        None,\\n        Delta,\\n        Omega\\n    }\\n\\n/**\\n * @notice A struct describing financial state, provides the complete state for user, gem, or protocol total.\\n * @notice It gives the current exact balance of the Vault, Rewards, and Charity.\\n * @param claimedGross rewards amount previously claimed for all time, gross amount - before tax and charity\\n * @param claimedNet rewards claimed and to user, net amount after tax and charity\\n * @param stakedGross amount removed from rewards to stake, charity not yet deducted\\n * @param stakedNet amount put to the vault - charity has been deducted\\n * @param unStakedGross  amount removed from the vault, pre withdraw tax and charity\\n * @param unStakedGrossUpped  amount removed from the vault gross-upped with charity to equal to the stakedGross amount\\n * @param unStakedNet  amount returned to the earned rewards, post withdraw tax and charity\\n * @param donated sent to charity\\n * @param claimTaxPaid claim tax deducted - 30%, 15%, 15%\\n * @param vaultTaxPaid vault withdrawal tax deducted\\n     */\\n    struct Fi {\\n        uint256 claimedGross;\\n        uint256 claimedNet;\\n        uint256 stakedGross;\\n        uint256 stakedNet;\\n        uint256 unStakedGross;\\n        uint256 unStakedGrossUp;\\n        uint256 unStakedNet;\\n        uint256 donated;\\n        uint256 claimTaxPaid;\\n        uint256 vaultTaxPaid;\\n    }\\n\\n/**\\n * @notice current state of a gem, a gem is an instance with consistent yield and fee rates specified by the pair (gemType, booster)\\n * @param gemType node type, initially it's  0 -> Ruby , 1 -> Sapphire, 2 -> Diamond, and boosters\\n * @param booster node Booster 0 -> None , 1 -> Delta , 2 -> Omega\\n * @param mintTime timestamp of the mint time\\n * @param lastRewardWithdrawalTime timestamp of last reward claim OR stake. Same as mintTime if not yet claimed.\\n * @param lastMaintenanceTime timestamp of the last maintenance (could be a date in the future in case of the upfront payment)\\n*/\\n    struct Gem {\\n        uint8 gemTypeId;\\n        Booster booster;\\n        uint32 mintTime;\\n        uint32 lastRewardWithdrawalTime;\\n        uint32 lastMaintenanceTime;\\n        Fi fi;\\n    }\\n\\n/**\\n*   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization\\n*   @param config main configuration, basically everything except gemType specific\\n*   @param gemTypes supported gem types with their details, gemTypeId is the index of the array\\n*   @param gems mapping indexed by tokenId, where tokenId is in the nft.allTokens\\n*   @param gemTypesMintWindows windows for limiting yield gem mints per gem type\\n*   @param defoTokenLimitWindow window for limiting DEFO Token sale\\n*   @param nft ERC721 standard related storage\\n*   @param total cumulated amounts for all operations\\n*   @param usersFi financial info per each user\\n*/\\n    struct AppStorage {\\n        // configuration\\n        ProtocolConfig config;\\n        GemTypeConfig[] gemTypes;\\n        // current state\\n        GemTypeMintWindow[] gemTypesMintWindows;\\n        DEFOTokenLimitWindow defoTokenLimitWindow;\\n        mapping(uint256 => Gem) gems;\\n        ERC721Storage nft;\\n        // Cumulations\\n        Fi total;\\n        // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)\\n        mapping(address => Fi) usersFi;\\n        mapping(address => uint8) usersNextGemTypeToBoost;\\n        mapping(address => Booster) usersNextGemBooster;\\n    }\\n\",\"keccak256\":\"0x5fe912796e18274a44ac1cb817e86bc4995bd4f76890bed36a90ac6e58519ec6\",\"license\":\"GPL-3.0\"},\"contracts/facets/TransferLimitFacet.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"../data-types/IDataTypes.sol\\\";\\nimport \\\"../interfaces/ITransferLimiter.sol\\\";\\nimport \\\"../base-facet/BaseFacet.sol\\\";\\n\\n/** @title  ERC721Facet EIP-2535 Diamond Facet\\n  * @author Decentralized Foundation Team\\n  * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable\\n*/\\ncontract TransferLimitFacet is BaseFacet, ITransferLimiter {\\n    /* ============ External and Public Functions ============ */\\n    ///todo refactor transfer limiting operations to this facet\\n    function yieldGemTransferLimit(\\n        address to,\\n        address from,\\n        uint256 tokenId\\n    ) public {\\n    }\\n\\n    function DEFOTokenTransferLimit(\\n        address to,\\n        address from,\\n        uint256 amount\\n    ) public {\\n        if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {\\n            uint256 endOfLimitWindow = s.defoTokenLimitWindow.timeOfLastSale[from] + s.config.defoTokenLimitConfig.saleLimitPeriod;\\n            require(\\n                (s.defoTokenLimitWindow.tokensSold[from] + amount <= s.config.defoTokenLimitConfig.saleLimitAmount) || (block.timestamp > endOfLimitWindow),\\n                \\\"DEFOToken:transfer-limit\\\"\\n            );\\n            if (block.timestamp > endOfLimitWindow)\\n                s.defoTokenLimitWindow.tokensSold[from] = amount;\\n            else\\n                s.defoTokenLimitWindow.tokensSold[from] += amount;\\n            s.defoTokenLimitWindow.timeOfLastSale[from] = block.timestamp;\\n\\n            if (s.config.defoTokenLimitConfig.limitByReward) {\\n                uint256[] memory gemIds = _getGemIds(from);\\n                require(gemIds.length > 0, \\\"DEFOTransferLimit:no-gems\\\");\\n                uint256 allowedSellAmount = 0;\\n                ///TODO - cound total weekly sale - should not be greater in total than rewards per week, not just a single sale !!\\n                for (uint256 i = 0; i < gemIds.length; i++) {\\n                    uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;\\n                    allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;\\n                }\\n\\n                require(amount <= allowedSellAmount, \\\"DEFOTransferLimit:greater-than-total-rewards-per-week\\\");\\n            }\\n\\n        }\\n    }\\n\\n}\\n\",\"keccak256\":\"0x6044e32325c8c69477aef48f6a88ab8ff46fe9850225d09bdd8608dbecd30b9f\",\"license\":\"GPL-3.0\"},\"contracts/interfaces/ITransferLimiter.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\n/** @title  ILimiter, limiter for DEFO token transfer\\n  * @author Decentralized Foundation Team\\n*/\\n\\ninterface ITransferLimiter {\\n    function yieldGemTransferLimit(\\n        address to,\\n        address from,\\n        uint256 tokenId\\n    ) external;\\n\\n    function DEFOTokenTransferLimit(\\n        address to,\\n        address from,\\n        uint256 amount\\n    ) external;\\n}\\n\",\"keccak256\":\"0xa7741cdf7be9bb3980ef635519bf7eca4b51c951116f52735621b75c9314d278\",\"license\":\"GPL-3.0\"},\"contracts/libraries/LibAppStorage.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"../data-types/IDataTypes.sol\\\";\\n\\n/** @title  LibAppStorage EIP-2535 Diamond Facet Storage\\n  * @author Decentralized Foundation Team\\n  * @notice This diamond storage library is inherited by all facets and imported in libraries\\n*/\\nlibrary LibAppStorage {\\n    function diamondStorage() internal pure returns (AppStorage storage ds) {\\n        assembly {\\n            ds.slot := 0\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xf2e84cec0bd10a28b47d23a086c1d77096efac4f3b3d6f1c132ebbe814c8b1d5\",\"license\":\"GPL-3.0\"},\"hardhat-deploy/solc_0.8/diamond/interfaces/IDiamondCut.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/******************************************************************************\\\\\\n* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)\\n* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535\\n/******************************************************************************/\\n\\ninterface IDiamondCut {\\n    enum FacetCutAction {Add, Replace, Remove}\\n    // Add=0, Replace=1, Remove=2\\n\\n    struct FacetCut {\\n        address facetAddress;\\n        FacetCutAction action;\\n        bytes4[] functionSelectors;\\n    }\\n\\n    /// @notice Add/replace/remove any number of functions and optionally execute\\n    ///         a function with delegatecall\\n    /// @param _diamondCut Contains the facet addresses and function selectors\\n    /// @param _init The address of the contract or facet to execute _calldata\\n    /// @param _calldata A function call, including function selector and arguments\\n    ///                  _calldata is executed with delegatecall on _init\\n    function diamondCut(\\n        FacetCut[] calldata _diamondCut,\\n        address _init,\\n        bytes calldata _calldata\\n    ) external;\\n\\n    event DiamondCut(FacetCut[] _diamondCut, address _init, bytes _calldata);\\n}\\n\",\"keccak256\":\"0xc00c16bfa30a3fa5f3dc684f7f8ba62c259962b25f647d9588739458989717fc\",\"license\":\"MIT\"},\"hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/******************************************************************************\\\\\\n* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)\\n* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535\\n/******************************************************************************/\\nimport { IDiamondCut } from \\\"../interfaces/IDiamondCut.sol\\\";\\n\\nlibrary LibDiamond {\\n    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256(\\\"diamond.standard.diamond.storage\\\");\\n\\n    struct FacetAddressAndPosition {\\n        address facetAddress;\\n        uint96 functionSelectorPosition; // position in facetFunctionSelectors.functionSelectors array\\n    }\\n\\n    struct FacetFunctionSelectors {\\n        bytes4[] functionSelectors;\\n        uint256 facetAddressPosition; // position of facetAddress in facetAddresses array\\n    }\\n\\n    struct DiamondStorage {\\n        // maps function selector to the facet address and\\n        // the position of the selector in the facetFunctionSelectors.selectors array\\n        mapping(bytes4 => FacetAddressAndPosition) selectorToFacetAndPosition;\\n        // maps facet addresses to function selectors\\n        mapping(address => FacetFunctionSelectors) facetFunctionSelectors;\\n        // facet addresses\\n        address[] facetAddresses;\\n        // Used to query if a contract implements an interface.\\n        // Used to implement ERC-165.\\n        mapping(bytes4 => bool) supportedInterfaces;\\n        // owner of the contract\\n        address contractOwner;\\n    }\\n\\n    function diamondStorage() internal pure returns (DiamondStorage storage ds) {\\n        bytes32 position = DIAMOND_STORAGE_POSITION;\\n        assembly {\\n            ds.slot := position\\n        }\\n    }\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    function setContractOwner(address _newOwner) internal {\\n        DiamondStorage storage ds = diamondStorage();\\n        address previousOwner = ds.contractOwner;\\n        ds.contractOwner = _newOwner;\\n        emit OwnershipTransferred(previousOwner, _newOwner);\\n    }\\n\\n    function contractOwner() internal view returns (address contractOwner_) {\\n        contractOwner_ = diamondStorage().contractOwner;\\n    }\\n\\n    function enforceIsContractOwner() internal view {\\n        require(msg.sender == diamondStorage().contractOwner, \\\"LibDiamond: Must be contract owner\\\");\\n    }\\n\\n    event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);\\n\\n    // Internal function version of diamondCut\\n    function diamondCut(\\n        IDiamondCut.FacetCut[] memory _diamondCut,\\n        address _init,\\n        bytes memory _calldata\\n    ) internal {\\n        for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {\\n            IDiamondCut.FacetCutAction action = _diamondCut[facetIndex].action;\\n            if (action == IDiamondCut.FacetCutAction.Add) {\\n                addFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else if (action == IDiamondCut.FacetCutAction.Replace) {\\n                replaceFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else if (action == IDiamondCut.FacetCutAction.Remove) {\\n                removeFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else {\\n                revert(\\\"LibDiamondCut: Incorrect FacetCutAction\\\");\\n            }\\n        }\\n        emit DiamondCut(_diamondCut, _init, _calldata);\\n        initializeDiamondCut(_init, _calldata);\\n    }\\n\\n    function addFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();        \\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Add facet can't be address(0)\\\");\\n        uint96 selectorPosition = uint96(ds.facetFunctionSelectors[_facetAddress].functionSelectors.length);\\n        // add new facet address if it does not exist\\n        if (selectorPosition == 0) {\\n            addFacet(ds, _facetAddress);            \\n        }\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            require(oldFacetAddress == address(0), \\\"LibDiamondCut: Can't add function that already exists\\\");\\n            addFunction(ds, selector, selectorPosition, _facetAddress);\\n            selectorPosition++;\\n        }\\n    }\\n\\n    function replaceFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();\\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Add facet can't be address(0)\\\");\\n        uint96 selectorPosition = uint96(ds.facetFunctionSelectors[_facetAddress].functionSelectors.length);\\n        // add new facet address if it does not exist\\n        if (selectorPosition == 0) {\\n            addFacet(ds, _facetAddress);\\n        }\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            require(oldFacetAddress != _facetAddress, \\\"LibDiamondCut: Can't replace function with same function\\\");\\n            removeFunction(ds, oldFacetAddress, selector);\\n            addFunction(ds, selector, selectorPosition, _facetAddress);\\n            selectorPosition++;\\n        }\\n    }\\n\\n    function removeFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();\\n        // if function does not exist then do nothing and return\\n        require(_facetAddress == address(0), \\\"LibDiamondCut: Remove facet address must be address(0)\\\");\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            removeFunction(ds, oldFacetAddress, selector);\\n        }\\n    }\\n\\n    function addFacet(DiamondStorage storage ds, address _facetAddress) internal {\\n        enforceHasContractCode(_facetAddress, \\\"LibDiamondCut: New facet has no code\\\");\\n        ds.facetFunctionSelectors[_facetAddress].facetAddressPosition = ds.facetAddresses.length;\\n        ds.facetAddresses.push(_facetAddress);\\n    }    \\n\\n\\n    function addFunction(DiamondStorage storage ds, bytes4 _selector, uint96 _selectorPosition, address _facetAddress) internal {\\n        ds.selectorToFacetAndPosition[_selector].functionSelectorPosition = _selectorPosition;\\n        ds.facetFunctionSelectors[_facetAddress].functionSelectors.push(_selector);\\n        ds.selectorToFacetAndPosition[_selector].facetAddress = _facetAddress;\\n    }\\n\\n    function removeFunction(DiamondStorage storage ds, address _facetAddress, bytes4 _selector) internal {        \\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Can't remove function that doesn't exist\\\");\\n        // an immutable function is a function defined directly in a diamond\\n        require(_facetAddress != address(this), \\\"LibDiamondCut: Can't remove immutable function\\\");\\n        // replace selector with last selector, then delete last selector\\n        uint256 selectorPosition = ds.selectorToFacetAndPosition[_selector].functionSelectorPosition;\\n        uint256 lastSelectorPosition = ds.facetFunctionSelectors[_facetAddress].functionSelectors.length - 1;\\n        // if not the same then replace _selector with lastSelector\\n        if (selectorPosition != lastSelectorPosition) {\\n            bytes4 lastSelector = ds.facetFunctionSelectors[_facetAddress].functionSelectors[lastSelectorPosition];\\n            ds.facetFunctionSelectors[_facetAddress].functionSelectors[selectorPosition] = lastSelector;\\n            ds.selectorToFacetAndPosition[lastSelector].functionSelectorPosition = uint96(selectorPosition);\\n        }\\n        // delete the last selector\\n        ds.facetFunctionSelectors[_facetAddress].functionSelectors.pop();\\n        delete ds.selectorToFacetAndPosition[_selector];\\n\\n        // if no more selectors for facet address then delete the facet address\\n        if (lastSelectorPosition == 0) {\\n            // replace facet address with last facet address and delete last facet address\\n            uint256 lastFacetAddressPosition = ds.facetAddresses.length - 1;\\n            uint256 facetAddressPosition = ds.facetFunctionSelectors[_facetAddress].facetAddressPosition;\\n            if (facetAddressPosition != lastFacetAddressPosition) {\\n                address lastFacetAddress = ds.facetAddresses[lastFacetAddressPosition];\\n                ds.facetAddresses[facetAddressPosition] = lastFacetAddress;\\n                ds.facetFunctionSelectors[lastFacetAddress].facetAddressPosition = facetAddressPosition;\\n            }\\n            ds.facetAddresses.pop();\\n            delete ds.facetFunctionSelectors[_facetAddress].facetAddressPosition;\\n        }\\n    }\\n\\n    function initializeDiamondCut(address _init, bytes memory _calldata) internal {\\n        if (_init == address(0)) {\\n            require(_calldata.length == 0, \\\"LibDiamondCut: _init is address(0) but_calldata is not empty\\\");\\n        } else {\\n            require(_calldata.length > 0, \\\"LibDiamondCut: _calldata is empty but _init is not address(0)\\\");\\n            if (_init != address(this)) {\\n                enforceHasContractCode(_init, \\\"LibDiamondCut: _init address has no code\\\");\\n            }\\n            (bool success, bytes memory error) = _init.delegatecall(_calldata);\\n            if (!success) {\\n                if (error.length > 0) {\\n                    // bubble up the error\\n                    revert(string(error));\\n                } else {\\n                    revert(\\\"LibDiamondCut: _init function reverted\\\");\\n                }\\n            }\\n        }\\n    }\\n\\n    function enforceHasContractCode(address _contract, string memory _errorMessage) internal view {\\n        uint256 contractSize;\\n        assembly {\\n            contractSize := extcodesize(_contract)\\n        }\\n        require(contractSize > 0, _errorMessage);\\n    }\\n}\\n\",\"keccak256\":\"0x2205345e83eb86f5281f159a9215a096cb6d404782619f9b8e9d7a4a46c32a37\",\"license\":\"MIT\"}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50610aaf806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80637e5c923d1461003b578063cfc0443814610057575b600080fd5b610055600480360381019061005091906106e5565b610073565b005b610071600480360381019061006c91906106e5565b610078565b005b505050565b600080016002016002600681111561009357610092610738565b5b600781106100a4576100a3610767565b5b0160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff160361045157600080600001601901600001546000601e0160010160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205461015591906107c5565b90506000800160190160010154826000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546101b391906107c5565b1115806101bf57508042115b6101fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101f590610878565b60405180910390fd5b8042111561025557816000601e0160000160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506102b2565b816000601e0160000160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546102aa91906107c5565b925050819055505b426000601e0160010160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506000800160190160020160009054906101000a900460ff161561044f57600061032484610456565b9050600081511161036a576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610361906108e4565b60405180910390fd5b6000805b825181101561040857600080602001600085848151811061039257610391610767565b5b6020026020010151815260200190815260200160002060000160009054906101000a900460ff1690506000601c018160ff16815481106103d5576103d4610767565b5b906000526020600020906006020160010154836103f291906107c5565b925050808061040090610904565b91505061036e565b508084111561044c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610443906109be565b60405180910390fd5b50505b505b505050565b606060008060210160040160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905060008167ffffffffffffffff8111156104bd576104bc6109de565b5b6040519080825280602002602001820160405280156104eb5781602001602082028036833780820191505090505b50905060005b828110156105cf5760008060210160080160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083815260200190815260200160002054905061055c816105da565b61059b576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161059290610a59565b60405180910390fd5b808383815181106105af576105ae610767565b5b6020026020010181815250505080806105c790610904565b9150506104f1565b508092505050919050565b60008073ffffffffffffffffffffffffffffffffffffffff166000602101600301600084815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614159050919050565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061067c82610651565b9050919050565b61068c81610671565b811461069757600080fd5b50565b6000813590506106a981610683565b92915050565b6000819050919050565b6106c2816106af565b81146106cd57600080fd5b50565b6000813590506106df816106b9565b92915050565b6000806000606084860312156106fe576106fd61064c565b5b600061070c8682870161069a565b935050602061071d8682870161069a565b925050604061072e868287016106d0565b9150509250925092565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60006107d0826106af565b91506107db836106af565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff038211156108105761080f610796565b5b828201905092915050565b600082825260208201905092915050565b7f4445464f546f6b656e3a7472616e736665722d6c696d69740000000000000000600082015250565b600061086260188361081b565b915061086d8261082c565b602082019050919050565b6000602082019050818103600083015261089181610855565b9050919050565b7f4445464f5472616e736665724c696d69743a6e6f2d67656d7300000000000000600082015250565b60006108ce60198361081b565b91506108d982610898565b602082019050919050565b600060208201905081810360008301526108fd816108c1565b9050919050565b600061090f826106af565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff820361094157610940610796565b5b600182019050919050565b7f4445464f5472616e736665724c696d69743a677265617465722d7468616e2d7460008201527f6f74616c2d726577617264732d7065722d7765656b0000000000000000000000602082015250565b60006109a860358361081b565b91506109b38261094c565b604082019050919050565b600060208201905081810360008301526109d78161099b565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b7f412067656d20646f65736e277420657869737473000000000000000000000000600082015250565b6000610a4360148361081b565b9150610a4e82610a0d565b602082019050919050565b60006020820190508181036000830152610a7281610a36565b905091905056fea26469706673582212208667436dc39bef0cb68069626bed3142aa55d305646f2660de7c5bb6408f24d164736f6c634300080f0033",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80637e5c923d1461003b578063cfc0443814610057575b600080fd5b610055600480360381019061005091906106e5565b610073565b005b610071600480360381019061006c91906106e5565b610078565b005b505050565b600080016002016002600681111561009357610092610738565b5b600781106100a4576100a3610767565b5b0160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff160361045157600080600001601901600001546000601e0160010160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205461015591906107c5565b90506000800160190160010154826000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546101b391906107c5565b1115806101bf57508042115b6101fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101f590610878565b60405180910390fd5b8042111561025557816000601e0160000160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506102b2565b816000601e0160000160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546102aa91906107c5565b925050819055505b426000601e0160010160008573ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506000800160190160020160009054906101000a900460ff161561044f57600061032484610456565b9050600081511161036a576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610361906108e4565b60405180910390fd5b6000805b825181101561040857600080602001600085848151811061039257610391610767565b5b6020026020010151815260200190815260200160002060000160009054906101000a900460ff1690506000601c018160ff16815481106103d5576103d4610767565b5b906000526020600020906006020160010154836103f291906107c5565b925050808061040090610904565b91505061036e565b508084111561044c576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610443906109be565b60405180910390fd5b50505b505b505050565b606060008060210160040160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905060008167ffffffffffffffff8111156104bd576104bc6109de565b5b6040519080825280602002602001820160405280156104eb5781602001602082028036833780820191505090505b50905060005b828110156105cf5760008060210160080160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083815260200190815260200160002054905061055c816105da565b61059b576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161059290610a59565b60405180910390fd5b808383815181106105af576105ae610767565b5b6020026020010181815250505080806105c790610904565b9150506104f1565b508092505050919050565b60008073ffffffffffffffffffffffffffffffffffffffff166000602101600301600084815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614159050919050565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061067c82610651565b9050919050565b61068c81610671565b811461069757600080fd5b50565b6000813590506106a981610683565b92915050565b6000819050919050565b6106c2816106af565b81146106cd57600080fd5b50565b6000813590506106df816106b9565b92915050565b6000806000606084860312156106fe576106fd61064c565b5b600061070c8682870161069a565b935050602061071d8682870161069a565b925050604061072e868287016106d0565b9150509250925092565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60006107d0826106af565b91506107db836106af565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff038211156108105761080f610796565b5b828201905092915050565b600082825260208201905092915050565b7f4445464f546f6b656e3a7472616e736665722d6c696d69740000000000000000600082015250565b600061086260188361081b565b915061086d8261082c565b602082019050919050565b6000602082019050818103600083015261089181610855565b9050919050565b7f4445464f5472616e736665724c696d69743a6e6f2d67656d7300000000000000600082015250565b60006108ce60198361081b565b91506108d982610898565b602082019050919050565b600060208201905081810360008301526108fd816108c1565b9050919050565b600061090f826106af565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff820361094157610940610796565b5b600182019050919050565b7f4445464f5472616e736665724c696d69743a677265617465722d7468616e2d7460008201527f6f74616c2d726577617264732d7065722d7765656b0000000000000000000000602082015250565b60006109a860358361081b565b91506109b38261094c565b604082019050919050565b600060208201905081810360008301526109d78161099b565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b7f412067656d20646f65736e277420657869737473000000000000000000000000600082015250565b6000610a4360148361081b565b9150610a4e82610a0d565b602082019050919050565b60006020820190508181036000830152610a7281610a36565b905091905056fea26469706673582212208667436dc39bef0cb68069626bed3142aa55d305646f2660de7c5bb6408f24d164736f6c634300080f0033",
+  "numDeployments": 4,
+  "solcInputHash": "825d23aeafc254050664db941ff63471",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.15+commit.e14f2714\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"DEFOTokenTransferLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"yieldGemTransferLimit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Decentralized Foundation Team\",\"kind\":\"dev\",\"methods\":{},\"title\":\"ERC721Facet EIP-2535 Diamond Facet\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"yieldGemTransferLimit(address,address,uint256)\":{\"notice\":\"todo refactor transfer limiting operations to this facet\"}},\"notice\":\"The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/facets/TransferLimitFacet.sol\":\"TransferLimitFacet\"},\"evmVersion\":\"berlin\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":250},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `from` to `to` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) external returns (bool);\\n}\\n\",\"keccak256\":\"0x9750c6b834f7b43000631af5cc30001c5f547b3ceb3635488f140f60e897ea6b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Counters.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Counters.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @title Counters\\n * @author Matt Condon (@shrugs)\\n * @dev Provides counters that can only be incremented, decremented or reset. This can be used e.g. to track the number\\n * of elements in a mapping, issuing ERC721 ids, or counting request ids.\\n *\\n * Include with `using Counters for Counters.Counter;`\\n */\\nlibrary Counters {\\n    struct Counter {\\n        // This variable should never be directly accessed by users of the library: interactions must be restricted to\\n        // the library's function. As of Solidity v0.5.2, this cannot be enforced, though there is a proposal to add\\n        // this feature: see https://github.com/ethereum/solidity/issues/4637\\n        uint256 _value; // default: 0\\n    }\\n\\n    function current(Counter storage counter) internal view returns (uint256) {\\n        return counter._value;\\n    }\\n\\n    function increment(Counter storage counter) internal {\\n        unchecked {\\n            counter._value += 1;\\n        }\\n    }\\n\\n    function decrement(Counter storage counter) internal {\\n        uint256 value = counter._value;\\n        require(value > 0, \\\"Counter: decrement overflow\\\");\\n        unchecked {\\n            counter._value = value - 1;\\n        }\\n    }\\n\\n    function reset(Counter storage counter) internal {\\n        counter._value = 0;\\n    }\\n}\\n\",\"keccak256\":\"0xf0018c2440fbe238dd3a8732fa8e17a0f9dce84d31451dc8a32f6d62b349c9f1\",\"license\":\"MIT\"},\"contracts/base-facet/BaseFacet.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\nimport {LibDiamond} from \\\"hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol\\\";\\nimport \\\"./Storage.sol\\\";\\n/**\\n * @title  BaseFacet\\n * @author Decentralized Foundation Team\\n * @notice BaseFacet is a base contract all facets to inherit, includes cross-facet utils and  common reusable functions for DEFO Diamond\\n */\\ncontract BaseFacet is Storage {\\n\\n    /* ====================== Modifiers ====================== */\\n\\n    modifier exists(uint256 _tokenId) {\\n        _requireExists(_tokenId);\\n        _;\\n    }\\n\\n    modifier onlyGemHolder(uint256 _tokenId) {\\n        require(s.nft.owners[_tokenId] == _msgSender(), \\\"You don't own this gem\\\");\\n        _;\\n    }\\n\\n    modifier onlyOwner() {\\n        LibDiamond.enforceIsContractOwner();\\n        _;\\n    }\\n    modifier nonZeroAddress(address _owner) {\\n        require(_owner != address(0), \\\"ERC721: address zero is not a valid owner\\\");\\n        _;\\n    }\\n\\n    /* ============ Internal Functions ============ */\\n\\n    function _msgSender() internal override view returns (address sender_) {\\n        if (Context._msgSender() == address(this)) {\\n            bytes memory array = msg.data;\\n            uint256 index = msg.data.length;\\n            assembly {\\n            // Load the 32 bytes word from memory with the address on the lower 20 bytes, and mask those.\\n                sender_ := and(mload(add(array, index)), 0xffffffffffffffffffffffffffffffffffffffff)\\n            }\\n        } else {\\n            sender_ = msg.sender;\\n        }\\n    }\\n\\n    function _getChainID() internal view returns (uint256 id) {\\n        assembly {\\n            id := chainid()\\n        }\\n    }\\n\\n    function _requireExists(uint256 _tokenId) internal view {\\n        require(_exists(_tokenId), \\\"ERC721: tokenId is not valid\\\");\\n    }\\n\\n    function _exists(uint256 _tokenId) internal view returns (bool) {\\n        return (s.nft.owners[_tokenId] != address(0));\\n    }\\n\\n    ///todo ensure passing memory array here to the public functions is pretty optimal\\n    function _getGemIds(address _user) internal view returns (uint256[] memory) {\\n        uint256 numberOfGems = s.nft.balances[_user];\\n        uint256[] memory gemIds = new uint256[](numberOfGems);\\n        for (uint256 i = 0; i < numberOfGems; i++) {\\n            uint256 gemId = s.nft.ownedTokens[_user][i];\\n            require(_exists(gemId), \\\"A gem doesn't exists\\\");\\n            gemIds[i] = gemId;\\n        }\\n        return gemIds;\\n    }\\n\\n    function _getAllUsers() internal view returns (address[] memory users_) {\\n        users_ = new address[](s.nft.allTokens.length);\\n        for (uint256 tokenId = 0; tokenId < s.nft.allTokens.length; tokenId++) {\\n            users_[tokenId] = s.nft.owners[tokenId];\\n        }\\n    }\\n\\n}\\n\",\"keccak256\":\"0x5ee18d83372dec082d66a9c61a88c6b5c034a741118da8be0524f9f1ed4f4b13\",\"license\":\"GPL-3.0\"},\"contracts/base-facet/Storage.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\nimport {AppStorage} from \\\"../libraries/LibAppStorage.sol\\\";\\n\\ncontract Storage is Context {\\n    AppStorage internal s;\\n}\\n\",\"keccak256\":\"0x66f07eea1ae3a0fbf40fbf070d67bed29b4a0a2dfbb689f58292d28b5065418a\",\"license\":\"GPL-3.0\"},\"contracts/data-types/IDataTypes.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/utils/Counters.sol\\\";\\n/**\\n*   @dev The only source for all the data structures used in the protocol storage\\n*   @dev This includes general config, gem type config, and mutable data\\n*/\\n\\n/// @dev number of payment tokens to enumerate the error, initially it's Defo and Dai,\\n/// @dev see PaymentTokens enum\\nuint256 constant PAYMENT_TOKENS = 2;\\n\\n/// @dev number of income recievers on yield gem mint\\nuint256 constant PAYMENT_RECEIVERS = 3;\\n\\n/// @dev total wallets on the protocol, see Wallets enum\\nuint256 constant WALLETS = 7;\\n\\n/// @dev total number of supported tax tiers\\nuint256 constant TAX_TIERS = 5;\\n\\n/**\\n*   @notice a struct for data compliance with erc721 standard\\n*   @param name Token name\\n*   @param symbol Token symbol\\n*   @param owners Mapping from token ID to owner address\\n*   @param balances Mapping owner address to token count\\n*   @param tokenApprovals Mapping from token ID to approved address\\n*   @param operatorApprovals Mapping from owner to operator approvals\\n*   @param ownedTokens Mapping from owner to list of owned token IDs\\n*   @param ownedTokensIndex Mapping from token ID to index of the owner tokens list\\n*   @param allTokens Array with all token ids, used for enumeration\\n*   @param allTokensIndex Mapping from token id to position in the allTokens array\\n*/\\n    struct ERC721Storage {\\n        string name;\\n        string symbol;\\n        Counters.Counter tokenIdTracker;\\n        mapping(uint256 => address) owners;\\n        mapping(address => uint256) balances;\\n        mapping(uint256 => address) tokenApprovals;\\n        mapping(address => mapping(address => bool)) operatorApprovals;\\n        string baseURI;\\n        mapping(address => mapping(uint256 => uint256)) ownedTokens;\\n        mapping(uint256 => uint256) ownedTokensIndex;\\n        uint256[] allTokens;\\n        mapping(uint256 => uint256) allTokensIndex;\\n        bool init;\\n    }\\n\\n\\n/// @notice token enum to index arrays of rates and addresses, the convention is that Dai is at place 0, Defo is at 1\\n/// @dev the order is extremely important once deployed\\n    enum PaymentTokens {\\n        Dai,\\n        Defo\\n    }\\n\\n/// @notice protocol wallets for easy enumeration,\\n/// @dev the order is extremely important once deployed, see configuration scripts\\n    enum Wallets {\\n        Treasury,\\n        RewardPool,\\n        LiquidityPair,\\n        Team,\\n        Charity,\\n        Vault,\\n        RedeemContract\\n    }\\n\\n\\n/// @notice these tiers correspond to the configurable percentage from the diamond storage\\n    enum TaxTiers {\\n        Tier0NoPayment,\\n        Tier1HugeTax,\\n        Tier2MediumTax,\\n        Tier3SmallTax,\\n        Tier4NoTax\\n    }\\n\\n/**\\n * @notice DefoTokenLimitConfig DEFO ERC20 Token transfer limiter, this is for the 1000 DEFO per 24h sale limitation, can be changes with setTransferLimit\\n * @param saleLimitPeriod initially 1 day\\n * @param saleLimitAmount initially 1000 tokens\\n*/\\n    struct DefoTokenLimitConfig {\\n        uint256 saleLimitPeriod;\\n        uint256 saleLimitAmount;\\n        bool limitByReward;\\n    }\\n\\n/**\\n * @notice Main Protocol Configuration structure\\n     * @param mintLock no mint for all gems, no minting if set\\n     * @param transferLock no transfer if set, including no minting\\n     * @param incomeDistributionOnMint distribution of the payment among tokens in percent rates, all values use percentage multiplier (see percent helper), here addresses are from the Addresses\\n     * @param maintenancePeriod a period in seconds for maintenance fee accrual, initially one month\\n     * @param rewardPeriod a period in seconds for generating yield gem rewards, initially one week\\n     * @param mintCountResetPeriod a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs.\\n     * @param taxScaleSinceLastClaimPeriod a period in seconds for a tax scale to work out, initially one week\\n     * @param taxRates tax rates in percent (with percent multiplier, see percent helper contract), initially 30%, 30%, 15%, 0\\n     * @param charityContributionRate charity rate (w multiplier as all percent values in the project), initially 5%\\n     * @param vaultWithdrawalRate fee paid to withdraw amount from the vault back to the earned rewards, initially 10%\\n     * @param taperRate taper rate, initially 20%\\n     * @param mintLock no mint for all gems, no minting if set\\n     * @param transferLock no transfer if set\\n     * @param mintLimitWindow a period in seconds to wait until last mint to reset mint count for a gem type, initially 12 hrs, see GemTypeConfig.maxMintsPerLimitWindow\\n     */\\n\\n    struct ProtocolConfig {\\n        IERC20[PAYMENT_TOKENS] paymentTokens;\\n        address[WALLETS] wallets;\\n        uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] incomeDistributionOnMint;\\n        // time periods\\n        uint32 maintenancePeriod;\\n        uint32 rewardPeriod;\\n        uint32 taxScaleSinceLastClaimPeriod;\\n        // taxes and contributions\\n        uint256[TAX_TIERS] taxRates;\\n        uint256 charityContributionRate;\\n        uint256 vaultWithdrawalTaxRate;\\n        uint256 taperRate;\\n        // locks\\n        bool mintLock;\\n        bool transferLock;\\n        // mint limit period for coutner reset\\n        uint32 mintLimitWindow;\\n        DefoTokenLimitConfig defoTokenLimitConfig;\\n    }\\n\\n/**\\n * @notice A struct containing configuration details for gemType\\n     * @param maintenanceFee Maintenance fee in Dai for the node type, amount in wei per month\\n     * @param rewardAmountDefo Reward in DEFO for the node type, amount in wei per week\\n     * @param price Price in DEFO and DAI (in wei), respectively, according to the PaymentTokens enum\\n     * @param taperRewardsThresholdDefo Taper threshold, in wei, decreasing rate every given amount of rewards in DEFO\\n     * @param maxMintsPerLimitWindow number of gems, mint limit for a node type, see ProtocolConfig.mintLimitWindow\\n     */\\n    struct GemTypeConfig {\\n        uint256 maintenanceFeeDai;\\n        uint256 rewardAmountDefo;\\n        uint256[PAYMENT_TOKENS] price;\\n        uint256 taperRewardsThresholdDefo;\\n        uint8 maxMintsPerLimitWindow;\\n    }\\n\\n/**\\n * @notice A struct containing current mutable status for gemType\\n     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0\\n     * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over\\n     */\\n    struct GemTypeMintWindow {\\n        uint256 mintCount;\\n        uint32 endOfMintLimitWindow;\\n    }\\n\\n/**\\n * @notice A struct describing current DEFO Token limiter input\\n * @param tokensSold DEFO tokens sold per limit window, \\\"sold\\\" = \\\"transferred to liquidity pair except the mint\\\"\\n * @param timeOfLastSale time of last sale\\n     */\\n    struct DEFOTokenLimitWindow {\\n        mapping(address => uint256) tokensSold;\\n        mapping(address => uint256) timeOfLastSale;\\n    }\\n\\n/**\\n * @notice A struct describing DEFO Token limit per weekly rewards\\n * @param tokensSold DEFO tokens sold per reward period window starting from the first sale \\\"sold\\\" = \\\"transferred to liquidity pair except the mint\\\"\\n * @param timeOfWindowStart time of first sale in the window\\n     */\\n    struct DEFOTokenLimitPerRewards {\\n        mapping(address => uint256) tokensSold;\\n        mapping(address => uint256) timeOfWindowStart;\\n    }\\n\\n    enum Booster {\\n        None,\\n        Delta,\\n        Omega\\n    }\\n\\n/**\\n * @notice A struct describing financial state, provides the complete state for user, gem, or protocol total.\\n * @notice It gives the current exact balance of the Vault, Rewards, and Charity.\\n * @param claimedGross rewards amount previously claimed for all time, gross amount - before tax and charity\\n * @param claimedNet rewards claimed and to user, net amount after tax and charity\\n * @param stakedGross amount removed from rewards to stake, charity not yet deducted\\n * @param stakedNet amount put to the vault - charity has been deducted\\n * @param unStakedGross  amount removed from the vault, pre withdraw tax and charity\\n * @param unStakedGrossUpped  amount removed from the vault gross-upped with charity to equal to the stakedGross amount\\n * @param unStakedNet  amount returned to the earned rewards, post withdraw tax and charity\\n * @param donated sent to charity\\n * @param claimTaxPaid claim tax deducted - 30%, 15%, 15%\\n * @param vaultTaxPaid vault withdrawal tax deducted\\n     */\\n    struct Fi {\\n        uint256 claimedGross;\\n        uint256 claimedNet;\\n        uint256 stakedGross;\\n        uint256 stakedNet;\\n        uint256 unStakedGross;\\n        uint256 unStakedGrossUp;\\n        uint256 unStakedNet;\\n        uint256 donated;\\n        uint256 claimTaxPaid;\\n        uint256 vaultTaxPaid;\\n    }\\n\\n/**\\n * @notice current state of a gem, a gem is an instance with consistent yield and fee rates specified by the pair (gemType, booster)\\n * @param gemType node type, initially it's  0 -> Ruby , 1 -> Sapphire, 2 -> Diamond, and boosters\\n * @param booster node Booster 0 -> None , 1 -> Delta , 2 -> Omega\\n * @param mintTime timestamp of the mint time\\n * @param lastRewardWithdrawalTime timestamp of last reward claim OR stake. Same as mintTime if not yet claimed.\\n * @param lastMaintenanceTime timestamp of the last maintenance (could be a date in the future in case of the upfront payment)\\n*/\\n    struct Gem {\\n        uint8 gemTypeId;\\n        Booster booster;\\n        uint32 mintTime;\\n        uint32 lastRewardWithdrawalTime;\\n        uint32 lastMaintenanceTime;\\n        Fi fi;\\n    }\\n\\n/**\\n*   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization\\n*   @param config main configuration, basically everything except gemType specific\\n*   @param gemTypes supported gem types with their details, gemTypeId is the index of the array\\n*   @param gems mapping indexed by tokenId, where tokenId is in the nft.allTokens\\n*   @param gemTypesMintWindows windows for limiting yield gem mints per gem type\\n*   @param defoTokenLimitWindow window for limiting DEFO Token sale\\n*   @param nft ERC721 standard related storage\\n*   @param total cumulated amounts for all operations\\n*   @param usersFi financial info per each user\\n*/\\n    struct AppStorage {\\n        // configuration\\n        ProtocolConfig config;\\n        GemTypeConfig[] gemTypes;\\n        // current state\\n        GemTypeMintWindow[] gemTypesMintWindows;\\n        DEFOTokenLimitWindow defoTokenLimitWindow;\\n        mapping(uint256 => Gem) gems;\\n        ERC721Storage nft;\\n        // Cumulations\\n        Fi total;\\n        // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)\\n        mapping(address => Fi) usersFi;\\n        mapping(address => uint8) usersNextGemTypeToBoost;\\n        mapping(address => Booster) usersNextGemBooster;\\n        // upgrading, that's why here in the bottom not to mess up current users' data\\n        DEFOTokenLimitPerRewards defoTokenLimitPerRewards;\\n    }\\n\",\"keccak256\":\"0x309b4fc4ab7219cebd7d7c38adbcf4bd41b87b94bdaa87733f3ee7e113841ba3\",\"license\":\"GPL-3.0\"},\"contracts/facets/TransferLimitFacet.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"../data-types/IDataTypes.sol\\\";\\nimport \\\"../interfaces/ITransferLimiter.sol\\\";\\nimport \\\"../base-facet/BaseFacet.sol\\\";\\n\\n/** @title  ERC721Facet EIP-2535 Diamond Facet\\n  * @author Decentralized Foundation Team\\n  * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable\\n*/\\ncontract TransferLimitFacet is BaseFacet, ITransferLimiter {\\n    /* ============ External and Public Functions ============ */\\n    ///todo refactor transfer limiting operations to this facet\\n    function yieldGemTransferLimit(\\n        address from,\\n        address to,\\n        uint256 tokenId\\n    ) public {\\n    }\\n\\n    function DEFOTokenTransferLimit(\\n        address from,\\n        address to,\\n        uint256 amount\\n    ) public {\\n        if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {\\n            uint256 endOfLimitWindow = s.defoTokenLimitWindow.timeOfLastSale[from] + s.config.defoTokenLimitConfig.saleLimitPeriod;\\n            require(\\n                (s.defoTokenLimitWindow.tokensSold[from] + amount <= s.config.defoTokenLimitConfig.saleLimitAmount) || (block.timestamp > endOfLimitWindow),\\n                \\\"DEFOToken:transfer-limit\\\"\\n            );\\n            if (block.timestamp > endOfLimitWindow)\\n                s.defoTokenLimitWindow.tokensSold[from] = amount;\\n            else\\n                s.defoTokenLimitWindow.tokensSold[from] += amount;\\n            s.defoTokenLimitWindow.timeOfLastSale[from] = block.timestamp;\\n\\n            if (s.config.defoTokenLimitConfig.limitByReward) {\\n                uint256[] memory gemIds = _getGemIds(from);\\n                require(gemIds.length > 0, \\\"DEFOTransferLimit:no-gems\\\");\\n                uint256 allowedSellAmount = 0;\\n                for (uint256 i = 0; i < gemIds.length; i++) {\\n                    uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;\\n                    allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;\\n                }\\n                if (s.defoTokenLimitPerRewards.timeOfWindowStart[from] == 0 || s.defoTokenLimitPerRewards.timeOfWindowStart[from] + s.config.rewardPeriod < block.timestamp) {\\n                    s.defoTokenLimitPerRewards.tokensSold[from] = amount;\\n                    s.defoTokenLimitPerRewards.timeOfWindowStart[from] = block.timestamp;\\n                }\\n                else {\\n                    s.defoTokenLimitPerRewards.tokensSold[from] += amount;\\n                }\\n                require(s.defoTokenLimitPerRewards.tokensSold[from] <= allowedSellAmount, \\\"DEFOTransferLimit:total-rewards-per-week\\\");\\n            }\\n\\n        }\\n    }\\n\\n}\\n\",\"keccak256\":\"0x85f040b9cb0f0509a8455f8de63daedc94df8d5eaa2eb5664ba126ff34577bfc\",\"license\":\"GPL-3.0\"},\"contracts/interfaces/ITransferLimiter.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\n/** @title  ILimiter, limiter for DEFO token transfer\\n  * @author Decentralized Foundation Team\\n*/\\n\\ninterface ITransferLimiter {\\n    function yieldGemTransferLimit(\\n        address to,\\n        address from,\\n        uint256 tokenId\\n    ) external;\\n\\n    function DEFOTokenTransferLimit(\\n        address to,\\n        address from,\\n        uint256 amount\\n    ) external;\\n}\\n\",\"keccak256\":\"0xa7741cdf7be9bb3980ef635519bf7eca4b51c951116f52735621b75c9314d278\",\"license\":\"GPL-3.0\"},\"contracts/libraries/LibAppStorage.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\n\\npragma solidity 0.8.15;\\n\\nimport \\\"../data-types/IDataTypes.sol\\\";\\n\\n/** @title  LibAppStorage EIP-2535 Diamond Facet Storage\\n  * @author Decentralized Foundation Team\\n  * @notice This diamond storage library is inherited by all facets and imported in libraries\\n*/\\nlibrary LibAppStorage {\\n    function diamondStorage() internal pure returns (AppStorage storage ds) {\\n        assembly {\\n            ds.slot := 0\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xf2e84cec0bd10a28b47d23a086c1d77096efac4f3b3d6f1c132ebbe814c8b1d5\",\"license\":\"GPL-3.0\"},\"hardhat-deploy/solc_0.8/diamond/interfaces/IDiamondCut.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/******************************************************************************\\\\\\n* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)\\n* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535\\n/******************************************************************************/\\n\\ninterface IDiamondCut {\\n    enum FacetCutAction {Add, Replace, Remove}\\n    // Add=0, Replace=1, Remove=2\\n\\n    struct FacetCut {\\n        address facetAddress;\\n        FacetCutAction action;\\n        bytes4[] functionSelectors;\\n    }\\n\\n    /// @notice Add/replace/remove any number of functions and optionally execute\\n    ///         a function with delegatecall\\n    /// @param _diamondCut Contains the facet addresses and function selectors\\n    /// @param _init The address of the contract or facet to execute _calldata\\n    /// @param _calldata A function call, including function selector and arguments\\n    ///                  _calldata is executed with delegatecall on _init\\n    function diamondCut(\\n        FacetCut[] calldata _diamondCut,\\n        address _init,\\n        bytes calldata _calldata\\n    ) external;\\n\\n    event DiamondCut(FacetCut[] _diamondCut, address _init, bytes _calldata);\\n}\\n\",\"keccak256\":\"0xc00c16bfa30a3fa5f3dc684f7f8ba62c259962b25f647d9588739458989717fc\",\"license\":\"MIT\"},\"hardhat-deploy/solc_0.8/diamond/libraries/LibDiamond.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\n/******************************************************************************\\\\\\n* Author: Nick Mudge <nick@perfectabstractions.com> (https://twitter.com/mudgen)\\n* EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535\\n/******************************************************************************/\\nimport { IDiamondCut } from \\\"../interfaces/IDiamondCut.sol\\\";\\n\\nlibrary LibDiamond {\\n    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256(\\\"diamond.standard.diamond.storage\\\");\\n\\n    struct FacetAddressAndPosition {\\n        address facetAddress;\\n        uint96 functionSelectorPosition; // position in facetFunctionSelectors.functionSelectors array\\n    }\\n\\n    struct FacetFunctionSelectors {\\n        bytes4[] functionSelectors;\\n        uint256 facetAddressPosition; // position of facetAddress in facetAddresses array\\n    }\\n\\n    struct DiamondStorage {\\n        // maps function selector to the facet address and\\n        // the position of the selector in the facetFunctionSelectors.selectors array\\n        mapping(bytes4 => FacetAddressAndPosition) selectorToFacetAndPosition;\\n        // maps facet addresses to function selectors\\n        mapping(address => FacetFunctionSelectors) facetFunctionSelectors;\\n        // facet addresses\\n        address[] facetAddresses;\\n        // Used to query if a contract implements an interface.\\n        // Used to implement ERC-165.\\n        mapping(bytes4 => bool) supportedInterfaces;\\n        // owner of the contract\\n        address contractOwner;\\n    }\\n\\n    function diamondStorage() internal pure returns (DiamondStorage storage ds) {\\n        bytes32 position = DIAMOND_STORAGE_POSITION;\\n        assembly {\\n            ds.slot := position\\n        }\\n    }\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    function setContractOwner(address _newOwner) internal {\\n        DiamondStorage storage ds = diamondStorage();\\n        address previousOwner = ds.contractOwner;\\n        ds.contractOwner = _newOwner;\\n        emit OwnershipTransferred(previousOwner, _newOwner);\\n    }\\n\\n    function contractOwner() internal view returns (address contractOwner_) {\\n        contractOwner_ = diamondStorage().contractOwner;\\n    }\\n\\n    function enforceIsContractOwner() internal view {\\n        require(msg.sender == diamondStorage().contractOwner, \\\"LibDiamond: Must be contract owner\\\");\\n    }\\n\\n    event DiamondCut(IDiamondCut.FacetCut[] _diamondCut, address _init, bytes _calldata);\\n\\n    // Internal function version of diamondCut\\n    function diamondCut(\\n        IDiamondCut.FacetCut[] memory _diamondCut,\\n        address _init,\\n        bytes memory _calldata\\n    ) internal {\\n        for (uint256 facetIndex; facetIndex < _diamondCut.length; facetIndex++) {\\n            IDiamondCut.FacetCutAction action = _diamondCut[facetIndex].action;\\n            if (action == IDiamondCut.FacetCutAction.Add) {\\n                addFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else if (action == IDiamondCut.FacetCutAction.Replace) {\\n                replaceFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else if (action == IDiamondCut.FacetCutAction.Remove) {\\n                removeFunctions(_diamondCut[facetIndex].facetAddress, _diamondCut[facetIndex].functionSelectors);\\n            } else {\\n                revert(\\\"LibDiamondCut: Incorrect FacetCutAction\\\");\\n            }\\n        }\\n        emit DiamondCut(_diamondCut, _init, _calldata);\\n        initializeDiamondCut(_init, _calldata);\\n    }\\n\\n    function addFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();        \\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Add facet can't be address(0)\\\");\\n        uint96 selectorPosition = uint96(ds.facetFunctionSelectors[_facetAddress].functionSelectors.length);\\n        // add new facet address if it does not exist\\n        if (selectorPosition == 0) {\\n            addFacet(ds, _facetAddress);            \\n        }\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            require(oldFacetAddress == address(0), \\\"LibDiamondCut: Can't add function that already exists\\\");\\n            addFunction(ds, selector, selectorPosition, _facetAddress);\\n            selectorPosition++;\\n        }\\n    }\\n\\n    function replaceFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();\\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Add facet can't be address(0)\\\");\\n        uint96 selectorPosition = uint96(ds.facetFunctionSelectors[_facetAddress].functionSelectors.length);\\n        // add new facet address if it does not exist\\n        if (selectorPosition == 0) {\\n            addFacet(ds, _facetAddress);\\n        }\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            require(oldFacetAddress != _facetAddress, \\\"LibDiamondCut: Can't replace function with same function\\\");\\n            removeFunction(ds, oldFacetAddress, selector);\\n            addFunction(ds, selector, selectorPosition, _facetAddress);\\n            selectorPosition++;\\n        }\\n    }\\n\\n    function removeFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {\\n        require(_functionSelectors.length > 0, \\\"LibDiamondCut: No selectors in facet to cut\\\");\\n        DiamondStorage storage ds = diamondStorage();\\n        // if function does not exist then do nothing and return\\n        require(_facetAddress == address(0), \\\"LibDiamondCut: Remove facet address must be address(0)\\\");\\n        for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {\\n            bytes4 selector = _functionSelectors[selectorIndex];\\n            address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;\\n            removeFunction(ds, oldFacetAddress, selector);\\n        }\\n    }\\n\\n    function addFacet(DiamondStorage storage ds, address _facetAddress) internal {\\n        enforceHasContractCode(_facetAddress, \\\"LibDiamondCut: New facet has no code\\\");\\n        ds.facetFunctionSelectors[_facetAddress].facetAddressPosition = ds.facetAddresses.length;\\n        ds.facetAddresses.push(_facetAddress);\\n    }    \\n\\n\\n    function addFunction(DiamondStorage storage ds, bytes4 _selector, uint96 _selectorPosition, address _facetAddress) internal {\\n        ds.selectorToFacetAndPosition[_selector].functionSelectorPosition = _selectorPosition;\\n        ds.facetFunctionSelectors[_facetAddress].functionSelectors.push(_selector);\\n        ds.selectorToFacetAndPosition[_selector].facetAddress = _facetAddress;\\n    }\\n\\n    function removeFunction(DiamondStorage storage ds, address _facetAddress, bytes4 _selector) internal {        \\n        require(_facetAddress != address(0), \\\"LibDiamondCut: Can't remove function that doesn't exist\\\");\\n        // an immutable function is a function defined directly in a diamond\\n        require(_facetAddress != address(this), \\\"LibDiamondCut: Can't remove immutable function\\\");\\n        // replace selector with last selector, then delete last selector\\n        uint256 selectorPosition = ds.selectorToFacetAndPosition[_selector].functionSelectorPosition;\\n        uint256 lastSelectorPosition = ds.facetFunctionSelectors[_facetAddress].functionSelectors.length - 1;\\n        // if not the same then replace _selector with lastSelector\\n        if (selectorPosition != lastSelectorPosition) {\\n            bytes4 lastSelector = ds.facetFunctionSelectors[_facetAddress].functionSelectors[lastSelectorPosition];\\n            ds.facetFunctionSelectors[_facetAddress].functionSelectors[selectorPosition] = lastSelector;\\n            ds.selectorToFacetAndPosition[lastSelector].functionSelectorPosition = uint96(selectorPosition);\\n        }\\n        // delete the last selector\\n        ds.facetFunctionSelectors[_facetAddress].functionSelectors.pop();\\n        delete ds.selectorToFacetAndPosition[_selector];\\n\\n        // if no more selectors for facet address then delete the facet address\\n        if (lastSelectorPosition == 0) {\\n            // replace facet address with last facet address and delete last facet address\\n            uint256 lastFacetAddressPosition = ds.facetAddresses.length - 1;\\n            uint256 facetAddressPosition = ds.facetFunctionSelectors[_facetAddress].facetAddressPosition;\\n            if (facetAddressPosition != lastFacetAddressPosition) {\\n                address lastFacetAddress = ds.facetAddresses[lastFacetAddressPosition];\\n                ds.facetAddresses[facetAddressPosition] = lastFacetAddress;\\n                ds.facetFunctionSelectors[lastFacetAddress].facetAddressPosition = facetAddressPosition;\\n            }\\n            ds.facetAddresses.pop();\\n            delete ds.facetFunctionSelectors[_facetAddress].facetAddressPosition;\\n        }\\n    }\\n\\n    function initializeDiamondCut(address _init, bytes memory _calldata) internal {\\n        if (_init == address(0)) {\\n            require(_calldata.length == 0, \\\"LibDiamondCut: _init is address(0) but_calldata is not empty\\\");\\n        } else {\\n            require(_calldata.length > 0, \\\"LibDiamondCut: _calldata is empty but _init is not address(0)\\\");\\n            if (_init != address(this)) {\\n                enforceHasContractCode(_init, \\\"LibDiamondCut: _init address has no code\\\");\\n            }\\n            (bool success, bytes memory error) = _init.delegatecall(_calldata);\\n            if (!success) {\\n                if (error.length > 0) {\\n                    // bubble up the error\\n                    revert(string(error));\\n                } else {\\n                    revert(\\\"LibDiamondCut: _init function reverted\\\");\\n                }\\n            }\\n        }\\n    }\\n\\n    function enforceHasContractCode(address _contract, string memory _errorMessage) internal view {\\n        uint256 contractSize;\\n        assembly {\\n            contractSize := extcodesize(_contract)\\n        }\\n        require(contractSize > 0, _errorMessage);\\n    }\\n}\\n\",\"keccak256\":\"0x2205345e83eb86f5281f159a9215a096cb6d404782619f9b8e9d7a4a46c32a37\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610cae806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c80637e5c923d1461003b578063cfc0443814610057575b600080fd5b610055600480360381019061005091906108e4565b610073565b005b610071600480360381019061006c91906108e4565b610078565b005b505050565b600080016002016002600681111561009357610092610937565b5b600781106100a4576100a3610966565b5b0160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff160361065057600080600001601901600001546000601e0160010160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205461015591906109c4565b90506000800160190160010154826000601e0160000160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546101b391906109c4565b1115806101bf57508042115b6101fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101f590610a77565b60405180910390fd5b8042111561025557816000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506102b2565b816000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546102aa91906109c4565b925050819055505b426000601e0160010160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506000800160190160020160009054906101000a900460ff161561064e57600061032485610655565b9050600081511161036a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161036190610ae3565b60405180910390fd5b6000805b825181101561040857600080602001600085848151811061039257610391610966565b5b6020026020010151815260200190815260200160002060000160009054906101000a900460ff1690506000601c018160ff16815481106103d5576103d4610966565b5b906000526020600020906006020160010154836103f291906109c4565b925050808061040090610b03565b91505061036e565b50600080603b0160010160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205414806104c857504260008001600f0160049054906101000a900463ffffffff1663ffffffff166000603b0160010160008973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546104c691906109c4565b105b1561056657836000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550426000603b0160010160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506105c3565b836000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546105bb91906109c4565b925050819055505b806000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054111561064b576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161064290610bbd565b60405180910390fd5b50505b505b505050565b606060008060210160040160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905060008167ffffffffffffffff8111156106bc576106bb610bdd565b5b6040519080825280602002602001820160405280156106ea5781602001602082028036833780820191505090505b50905060005b828110156107ce5760008060210160080160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083815260200190815260200160002054905061075b816107d9565b61079a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161079190610c58565b60405180910390fd5b808383815181106107ae576107ad610966565b5b6020026020010181815250505080806107c690610b03565b9150506106f0565b508092505050919050565b60008073ffffffffffffffffffffffffffffffffffffffff166000602101600301600084815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614159050919050565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061087b82610850565b9050919050565b61088b81610870565b811461089657600080fd5b50565b6000813590506108a881610882565b92915050565b6000819050919050565b6108c1816108ae565b81146108cc57600080fd5b50565b6000813590506108de816108b8565b92915050565b6000806000606084860312156108fd576108fc61084b565b5b600061090b86828701610899565b935050602061091c86828701610899565b925050604061092d868287016108cf565b9150509250925092565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60006109cf826108ae565b91506109da836108ae565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff03821115610a0f57610a0e610995565b5b828201905092915050565b600082825260208201905092915050565b7f4445464f546f6b656e3a7472616e736665722d6c696d69740000000000000000600082015250565b6000610a61601883610a1a565b9150610a6c82610a2b565b602082019050919050565b60006020820190508181036000830152610a9081610a54565b9050919050565b7f4445464f5472616e736665724c696d69743a6e6f2d67656d7300000000000000600082015250565b6000610acd601983610a1a565b9150610ad882610a97565b602082019050919050565b60006020820190508181036000830152610afc81610ac0565b9050919050565b6000610b0e826108ae565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8203610b4057610b3f610995565b5b600182019050919050565b7f4445464f5472616e736665724c696d69743a746f74616c2d726577617264732d60008201527f7065722d7765656b000000000000000000000000000000000000000000000000602082015250565b6000610ba7602883610a1a565b9150610bb282610b4b565b604082019050919050565b60006020820190508181036000830152610bd681610b9a565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b7f412067656d20646f65736e277420657869737473000000000000000000000000600082015250565b6000610c42601483610a1a565b9150610c4d82610c0c565b602082019050919050565b60006020820190508181036000830152610c7181610c35565b905091905056fea26469706673582212202fd692c01e756348f3c5afa80aea4b3147a3b96198e16c0c19882243db5fd54564736f6c634300080f0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100365760003560e01c80637e5c923d1461003b578063cfc0443814610057575b600080fd5b610055600480360381019061005091906108e4565b610073565b005b610071600480360381019061006c91906108e4565b610078565b005b505050565b600080016002016002600681111561009357610092610937565b5b600781106100a4576100a3610966565b5b0160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff160361065057600080600001601901600001546000601e0160010160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205461015591906109c4565b90506000800160190160010154826000601e0160000160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546101b391906109c4565b1115806101bf57508042115b6101fe576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101f590610a77565b60405180910390fd5b8042111561025557816000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506102b2565b816000601e0160000160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546102aa91906109c4565b925050819055505b426000601e0160010160008673ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506000800160190160020160009054906101000a900460ff161561064e57600061032485610655565b9050600081511161036a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161036190610ae3565b60405180910390fd5b6000805b825181101561040857600080602001600085848151811061039257610391610966565b5b6020026020010151815260200190815260200160002060000160009054906101000a900460ff1690506000601c018160ff16815481106103d5576103d4610966565b5b906000526020600020906006020160010154836103f291906109c4565b925050808061040090610b03565b91505061036e565b50600080603b0160010160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020019081526020016000205414806104c857504260008001600f0160049054906101000a900463ffffffff1663ffffffff166000603b0160010160008973ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020546104c691906109c4565b105b1561056657836000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002081905550426000603b0160010160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020819055506105c3565b836000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008282546105bb91906109c4565b925050819055505b806000603b0160000160008873ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054111561064b576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161064290610bbd565b60405180910390fd5b50505b505b505050565b606060008060210160040160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905060008167ffffffffffffffff8111156106bc576106bb610bdd565b5b6040519080825280602002602001820160405280156106ea5781602001602082028036833780820191505090505b50905060005b828110156107ce5760008060210160080160008773ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020600083815260200190815260200160002054905061075b816107d9565b61079a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161079190610c58565b60405180910390fd5b808383815181106107ae576107ad610966565b5b6020026020010181815250505080806107c690610b03565b9150506106f0565b508092505050919050565b60008073ffffffffffffffffffffffffffffffffffffffff166000602101600301600084815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614159050919050565b600080fd5b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600061087b82610850565b9050919050565b61088b81610870565b811461089657600080fd5b50565b6000813590506108a881610882565b92915050565b6000819050919050565b6108c1816108ae565b81146108cc57600080fd5b50565b6000813590506108de816108b8565b92915050565b6000806000606084860312156108fd576108fc61084b565b5b600061090b86828701610899565b935050602061091c86828701610899565b925050604061092d868287016108cf565b9150509250925092565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602160045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052603260045260246000fd5b7f4e487b7100000000000000000000000000000000000000000000000000000000600052601160045260246000fd5b60006109cf826108ae565b91506109da836108ae565b9250827fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff03821115610a0f57610a0e610995565b5b828201905092915050565b600082825260208201905092915050565b7f4445464f546f6b656e3a7472616e736665722d6c696d69740000000000000000600082015250565b6000610a61601883610a1a565b9150610a6c82610a2b565b602082019050919050565b60006020820190508181036000830152610a9081610a54565b9050919050565b7f4445464f5472616e736665724c696d69743a6e6f2d67656d7300000000000000600082015250565b6000610acd601983610a1a565b9150610ad882610a97565b602082019050919050565b60006020820190508181036000830152610afc81610ac0565b9050919050565b6000610b0e826108ae565b91507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8203610b4057610b3f610995565b5b600182019050919050565b7f4445464f5472616e736665724c696d69743a746f74616c2d726577617264732d60008201527f7065722d7765656b000000000000000000000000000000000000000000000000602082015250565b6000610ba7602883610a1a565b9150610bb282610b4b565b604082019050919050565b60006020820190508181036000830152610bd681610b9a565b9050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b7f412067656d20646f65736e277420657869737473000000000000000000000000600082015250565b6000610c42601483610a1a565b9150610c4d82610c0c565b602082019050919050565b60006020820190508181036000830152610c7181610c35565b905091905056fea26469706673582212202fd692c01e756348f3c5afa80aea4b3147a3b96198e16c0c19882243db5fd54564736f6c634300080f0033",
   "devdoc": {
     "author": "Decentralized Foundation Team",
     "kind": "dev",
@@ -90,12 +90,12 @@
   "storageLayout": {
     "storage": [
       {
-        "astId": 430,
+        "astId": 563,
         "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
         "label": "s",
         "offset": 0,
         "slot": "0",
-        "type": "t_struct(AppStorage)670_storage"
+        "type": "t_struct(AppStorage)815_storage"
       }
     ],
     "types": {
@@ -116,20 +116,20 @@
         "label": "uint256[3][2]",
         "numberOfBytes": "192"
       },
-      "t_array(t_contract(IERC20)77)2_storage": {
-        "base": "t_contract(IERC20)77",
+      "t_array(t_contract(IERC20)185)2_storage": {
+        "base": "t_contract(IERC20)185",
         "encoding": "inplace",
         "label": "contract IERC20[2]",
         "numberOfBytes": "64"
       },
-      "t_array(t_struct(GemTypeConfig)576_storage)dyn_storage": {
-        "base": "t_struct(GemTypeConfig)576_storage",
+      "t_array(t_struct(GemTypeConfig)709_storage)dyn_storage": {
+        "base": "t_struct(GemTypeConfig)709_storage",
         "encoding": "dynamic_array",
         "label": "struct GemTypeConfig[]",
         "numberOfBytes": "32"
       },
-      "t_array(t_struct(GemTypeMintWindow)581_storage)dyn_storage": {
-        "base": "t_struct(GemTypeMintWindow)581_storage",
+      "t_array(t_struct(GemTypeMintWindow)714_storage)dyn_storage": {
+        "base": "t_struct(GemTypeMintWindow)714_storage",
         "encoding": "dynamic_array",
         "label": "struct GemTypeMintWindow[]",
         "numberOfBytes": "32"
@@ -163,12 +163,12 @@
         "label": "bool",
         "numberOfBytes": "1"
       },
-      "t_contract(IERC20)77": {
+      "t_contract(IERC20)185": {
         "encoding": "inplace",
         "label": "contract IERC20",
         "numberOfBytes": "20"
       },
-      "t_enum(Booster)594": {
+      "t_enum(Booster)736": {
         "encoding": "inplace",
         "label": "enum Booster",
         "numberOfBytes": "1"
@@ -180,12 +180,12 @@
         "numberOfBytes": "32",
         "value": "t_bool"
       },
-      "t_mapping(t_address,t_enum(Booster)594)": {
+      "t_mapping(t_address,t_enum(Booster)736)": {
         "encoding": "mapping",
         "key": "t_address",
         "label": "mapping(address => enum Booster)",
         "numberOfBytes": "32",
-        "value": "t_enum(Booster)594"
+        "value": "t_enum(Booster)736"
       },
       "t_mapping(t_address,t_mapping(t_address,t_bool))": {
         "encoding": "mapping",
@@ -201,12 +201,12 @@
         "numberOfBytes": "32",
         "value": "t_mapping(t_uint256,t_uint256)"
       },
-      "t_mapping(t_address,t_struct(Fi)615_storage)": {
+      "t_mapping(t_address,t_struct(Fi)757_storage)": {
         "encoding": "mapping",
         "key": "t_address",
         "label": "mapping(address => struct Fi)",
         "numberOfBytes": "32",
-        "value": "t_struct(Fi)615_storage"
+        "value": "t_struct(Fi)757_storage"
       },
       "t_mapping(t_address,t_uint256)": {
         "encoding": "mapping",
@@ -229,12 +229,12 @@
         "numberOfBytes": "32",
         "value": "t_address"
       },
-      "t_mapping(t_uint256,t_struct(Gem)630_storage)": {
+      "t_mapping(t_uint256,t_struct(Gem)772_storage)": {
         "encoding": "mapping",
         "key": "t_uint256",
         "label": "mapping(uint256 => struct Gem)",
         "numberOfBytes": "32",
-        "value": "t_struct(Gem)630_storage"
+        "value": "t_struct(Gem)772_storage"
       },
       "t_mapping(t_uint256,t_uint256)": {
         "encoding": "mapping",
@@ -248,76 +248,76 @@
         "label": "string",
         "numberOfBytes": "32"
       },
-      "t_struct(AppStorage)670_storage": {
+      "t_struct(AppStorage)815_storage": {
         "encoding": "inplace",
         "label": "struct AppStorage",
         "members": [
           {
-            "astId": 633,
+            "astId": 775,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "config",
             "offset": 0,
             "slot": "0",
-            "type": "t_struct(ProtocolConfig)563_storage"
+            "type": "t_struct(ProtocolConfig)696_storage"
           },
           {
-            "astId": 637,
+            "astId": 779,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "gemTypes",
             "offset": 0,
             "slot": "28",
-            "type": "t_array(t_struct(GemTypeConfig)576_storage)dyn_storage"
+            "type": "t_array(t_struct(GemTypeConfig)709_storage)dyn_storage"
           },
           {
-            "astId": 641,
+            "astId": 783,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "gemTypesMintWindows",
             "offset": 0,
             "slot": "29",
-            "type": "t_array(t_struct(GemTypeMintWindow)581_storage)dyn_storage"
+            "type": "t_array(t_struct(GemTypeMintWindow)714_storage)dyn_storage"
           },
           {
-            "astId": 644,
+            "astId": 786,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "defoTokenLimitWindow",
             "offset": 0,
             "slot": "30",
-            "type": "t_struct(DEFOTokenLimitWindow)590_storage"
+            "type": "t_struct(DEFOTokenLimitWindow)723_storage"
           },
           {
-            "astId": 649,
+            "astId": 791,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "gems",
             "offset": 0,
             "slot": "32",
-            "type": "t_mapping(t_uint256,t_struct(Gem)630_storage)"
+            "type": "t_mapping(t_uint256,t_struct(Gem)772_storage)"
           },
           {
-            "astId": 652,
+            "astId": 794,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "nft",
             "offset": 0,
             "slot": "33",
-            "type": "t_struct(ERC721Storage)498_storage"
+            "type": "t_struct(ERC721Storage)631_storage"
           },
           {
-            "astId": 655,
+            "astId": 797,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "total",
             "offset": 0,
             "slot": "46",
-            "type": "t_struct(Fi)615_storage"
+            "type": "t_struct(Fi)757_storage"
           },
           {
-            "astId": 660,
+            "astId": 802,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "usersFi",
             "offset": 0,
             "slot": "56",
-            "type": "t_mapping(t_address,t_struct(Fi)615_storage)"
+            "type": "t_mapping(t_address,t_struct(Fi)757_storage)"
           },
           {
-            "astId": 664,
+            "astId": 806,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "usersNextGemTypeToBoost",
             "offset": 0,
@@ -325,22 +325,30 @@
             "type": "t_mapping(t_address,t_uint8)"
           },
           {
-            "astId": 669,
+            "astId": 811,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "usersNextGemBooster",
             "offset": 0,
             "slot": "58",
-            "type": "t_mapping(t_address,t_enum(Booster)594)"
+            "type": "t_mapping(t_address,t_enum(Booster)736)"
+          },
+          {
+            "astId": 814,
+            "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
+            "label": "defoTokenLimitPerRewards",
+            "offset": 0,
+            "slot": "59",
+            "type": "t_struct(DEFOTokenLimitPerRewards)732_storage"
           }
         ],
-        "numberOfBytes": "1888"
+        "numberOfBytes": "1952"
       },
-      "t_struct(Counter)105_storage": {
+      "t_struct(Counter)238_storage": {
         "encoding": "inplace",
         "label": "struct Counters.Counter",
         "members": [
           {
-            "astId": 104,
+            "astId": 237,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "_value",
             "offset": 0,
@@ -350,12 +358,12 @@
         ],
         "numberOfBytes": "32"
       },
-      "t_struct(DEFOTokenLimitWindow)590_storage": {
+      "t_struct(DEFOTokenLimitPerRewards)732_storage": {
         "encoding": "inplace",
-        "label": "struct DEFOTokenLimitWindow",
+        "label": "struct DEFOTokenLimitPerRewards",
         "members": [
           {
-            "astId": 585,
+            "astId": 727,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "tokensSold",
             "offset": 0,
@@ -363,7 +371,30 @@
             "type": "t_mapping(t_address,t_uint256)"
           },
           {
-            "astId": 589,
+            "astId": 731,
+            "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
+            "label": "timeOfWindowStart",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_address,t_uint256)"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(DEFOTokenLimitWindow)723_storage": {
+        "encoding": "inplace",
+        "label": "struct DEFOTokenLimitWindow",
+        "members": [
+          {
+            "astId": 718,
+            "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
+            "label": "tokensSold",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_uint256)"
+          },
+          {
+            "astId": 722,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "timeOfLastSale",
             "offset": 0,
@@ -373,12 +404,12 @@
         ],
         "numberOfBytes": "64"
       },
-      "t_struct(DefoTokenLimitConfig)522_storage": {
+      "t_struct(DefoTokenLimitConfig)655_storage": {
         "encoding": "inplace",
         "label": "struct DefoTokenLimitConfig",
         "members": [
           {
-            "astId": 517,
+            "astId": 650,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "saleLimitPeriod",
             "offset": 0,
@@ -386,7 +417,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 519,
+            "astId": 652,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "saleLimitAmount",
             "offset": 0,
@@ -394,7 +425,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 521,
+            "astId": 654,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "limitByReward",
             "offset": 0,
@@ -404,12 +435,12 @@
         ],
         "numberOfBytes": "96"
       },
-      "t_struct(ERC721Storage)498_storage": {
+      "t_struct(ERC721Storage)631_storage": {
         "encoding": "inplace",
         "label": "struct ERC721Storage",
         "members": [
           {
-            "astId": 453,
+            "astId": 586,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "name",
             "offset": 0,
@@ -417,7 +448,7 @@
             "type": "t_string_storage"
           },
           {
-            "astId": 455,
+            "astId": 588,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "symbol",
             "offset": 0,
@@ -425,15 +456,15 @@
             "type": "t_string_storage"
           },
           {
-            "astId": 458,
+            "astId": 591,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "tokenIdTracker",
             "offset": 0,
             "slot": "2",
-            "type": "t_struct(Counter)105_storage"
+            "type": "t_struct(Counter)238_storage"
           },
           {
-            "astId": 462,
+            "astId": 595,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "owners",
             "offset": 0,
@@ -441,7 +472,7 @@
             "type": "t_mapping(t_uint256,t_address)"
           },
           {
-            "astId": 466,
+            "astId": 599,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "balances",
             "offset": 0,
@@ -449,7 +480,7 @@
             "type": "t_mapping(t_address,t_uint256)"
           },
           {
-            "astId": 470,
+            "astId": 603,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "tokenApprovals",
             "offset": 0,
@@ -457,7 +488,7 @@
             "type": "t_mapping(t_uint256,t_address)"
           },
           {
-            "astId": 476,
+            "astId": 609,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "operatorApprovals",
             "offset": 0,
@@ -465,7 +496,7 @@
             "type": "t_mapping(t_address,t_mapping(t_address,t_bool))"
           },
           {
-            "astId": 478,
+            "astId": 611,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "baseURI",
             "offset": 0,
@@ -473,7 +504,7 @@
             "type": "t_string_storage"
           },
           {
-            "astId": 484,
+            "astId": 617,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "ownedTokens",
             "offset": 0,
@@ -481,7 +512,7 @@
             "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))"
           },
           {
-            "astId": 488,
+            "astId": 621,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "ownedTokensIndex",
             "offset": 0,
@@ -489,7 +520,7 @@
             "type": "t_mapping(t_uint256,t_uint256)"
           },
           {
-            "astId": 491,
+            "astId": 624,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "allTokens",
             "offset": 0,
@@ -497,7 +528,7 @@
             "type": "t_array(t_uint256)dyn_storage"
           },
           {
-            "astId": 495,
+            "astId": 628,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "allTokensIndex",
             "offset": 0,
@@ -505,7 +536,7 @@
             "type": "t_mapping(t_uint256,t_uint256)"
           },
           {
-            "astId": 497,
+            "astId": 630,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "init",
             "offset": 0,
@@ -515,12 +546,12 @@
         ],
         "numberOfBytes": "416"
       },
-      "t_struct(Fi)615_storage": {
+      "t_struct(Fi)757_storage": {
         "encoding": "inplace",
         "label": "struct Fi",
         "members": [
           {
-            "astId": 596,
+            "astId": 738,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "claimedGross",
             "offset": 0,
@@ -528,7 +559,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 598,
+            "astId": 740,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "claimedNet",
             "offset": 0,
@@ -536,7 +567,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 600,
+            "astId": 742,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "stakedGross",
             "offset": 0,
@@ -544,7 +575,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 602,
+            "astId": 744,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "stakedNet",
             "offset": 0,
@@ -552,7 +583,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 604,
+            "astId": 746,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "unStakedGross",
             "offset": 0,
@@ -560,7 +591,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 606,
+            "astId": 748,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "unStakedGrossUp",
             "offset": 0,
@@ -568,7 +599,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 608,
+            "astId": 750,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "unStakedNet",
             "offset": 0,
@@ -576,7 +607,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 610,
+            "astId": 752,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "donated",
             "offset": 0,
@@ -584,7 +615,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 612,
+            "astId": 754,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "claimTaxPaid",
             "offset": 0,
@@ -592,7 +623,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 614,
+            "astId": 756,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "vaultTaxPaid",
             "offset": 0,
@@ -602,12 +633,12 @@
         ],
         "numberOfBytes": "320"
       },
-      "t_struct(Gem)630_storage": {
+      "t_struct(Gem)772_storage": {
         "encoding": "inplace",
         "label": "struct Gem",
         "members": [
           {
-            "astId": 617,
+            "astId": 759,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "gemTypeId",
             "offset": 0,
@@ -615,15 +646,15 @@
             "type": "t_uint8"
           },
           {
-            "astId": 620,
+            "astId": 762,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "booster",
             "offset": 1,
             "slot": "0",
-            "type": "t_enum(Booster)594"
+            "type": "t_enum(Booster)736"
           },
           {
-            "astId": 622,
+            "astId": 764,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "mintTime",
             "offset": 2,
@@ -631,7 +662,7 @@
             "type": "t_uint32"
           },
           {
-            "astId": 624,
+            "astId": 766,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "lastRewardWithdrawalTime",
             "offset": 6,
@@ -639,7 +670,7 @@
             "type": "t_uint32"
           },
           {
-            "astId": 626,
+            "astId": 768,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "lastMaintenanceTime",
             "offset": 10,
@@ -647,22 +678,22 @@
             "type": "t_uint32"
           },
           {
-            "astId": 629,
+            "astId": 771,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "fi",
             "offset": 0,
             "slot": "1",
-            "type": "t_struct(Fi)615_storage"
+            "type": "t_struct(Fi)757_storage"
           }
         ],
         "numberOfBytes": "352"
       },
-      "t_struct(GemTypeConfig)576_storage": {
+      "t_struct(GemTypeConfig)709_storage": {
         "encoding": "inplace",
         "label": "struct GemTypeConfig",
         "members": [
           {
-            "astId": 565,
+            "astId": 698,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "maintenanceFeeDai",
             "offset": 0,
@@ -670,7 +701,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 567,
+            "astId": 700,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "rewardAmountDefo",
             "offset": 0,
@@ -678,7 +709,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 571,
+            "astId": 704,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "price",
             "offset": 0,
@@ -686,7 +717,7 @@
             "type": "t_array(t_uint256)2_storage"
           },
           {
-            "astId": 573,
+            "astId": 706,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "taperRewardsThresholdDefo",
             "offset": 0,
@@ -694,7 +725,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 575,
+            "astId": 708,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "maxMintsPerLimitWindow",
             "offset": 0,
@@ -704,12 +735,12 @@
         ],
         "numberOfBytes": "192"
       },
-      "t_struct(GemTypeMintWindow)581_storage": {
+      "t_struct(GemTypeMintWindow)714_storage": {
         "encoding": "inplace",
         "label": "struct GemTypeMintWindow",
         "members": [
           {
-            "astId": 578,
+            "astId": 711,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "mintCount",
             "offset": 0,
@@ -717,7 +748,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 580,
+            "astId": 713,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "endOfMintLimitWindow",
             "offset": 0,
@@ -727,20 +758,20 @@
         ],
         "numberOfBytes": "64"
       },
-      "t_struct(ProtocolConfig)563_storage": {
+      "t_struct(ProtocolConfig)696_storage": {
         "encoding": "inplace",
         "label": "struct ProtocolConfig",
         "members": [
           {
-            "astId": 527,
+            "astId": 660,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "paymentTokens",
             "offset": 0,
             "slot": "0",
-            "type": "t_array(t_contract(IERC20)77)2_storage"
+            "type": "t_array(t_contract(IERC20)185)2_storage"
           },
           {
-            "astId": 531,
+            "astId": 664,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "wallets",
             "offset": 0,
@@ -748,7 +779,7 @@
             "type": "t_array(t_address)7_storage"
           },
           {
-            "astId": 537,
+            "astId": 670,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "incomeDistributionOnMint",
             "offset": 0,
@@ -756,7 +787,7 @@
             "type": "t_array(t_array(t_uint256)3_storage)2_storage"
           },
           {
-            "astId": 539,
+            "astId": 672,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "maintenancePeriod",
             "offset": 0,
@@ -764,7 +795,7 @@
             "type": "t_uint32"
           },
           {
-            "astId": 541,
+            "astId": 674,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "rewardPeriod",
             "offset": 4,
@@ -772,7 +803,7 @@
             "type": "t_uint32"
           },
           {
-            "astId": 543,
+            "astId": 676,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "taxScaleSinceLastClaimPeriod",
             "offset": 8,
@@ -780,7 +811,7 @@
             "type": "t_uint32"
           },
           {
-            "astId": 547,
+            "astId": 680,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "taxRates",
             "offset": 0,
@@ -788,7 +819,7 @@
             "type": "t_array(t_uint256)5_storage"
           },
           {
-            "astId": 549,
+            "astId": 682,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "charityContributionRate",
             "offset": 0,
@@ -796,7 +827,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 551,
+            "astId": 684,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "vaultWithdrawalTaxRate",
             "offset": 0,
@@ -804,7 +835,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 553,
+            "astId": 686,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "taperRate",
             "offset": 0,
@@ -812,7 +843,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 555,
+            "astId": 688,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "mintLock",
             "offset": 0,
@@ -820,7 +851,7 @@
             "type": "t_bool"
           },
           {
-            "astId": 557,
+            "astId": 690,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "transferLock",
             "offset": 1,
@@ -828,7 +859,7 @@
             "type": "t_bool"
           },
           {
-            "astId": 559,
+            "astId": 692,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "mintLimitWindow",
             "offset": 2,
@@ -836,12 +867,12 @@
             "type": "t_uint32"
           },
           {
-            "astId": 562,
+            "astId": 695,
             "contract": "contracts/facets/TransferLimitFacet.sol:TransferLimitFacet",
             "label": "defoTokenLimitConfig",
             "offset": 0,
             "slot": "25",
-            "type": "t_struct(DefoTokenLimitConfig)522_storage"
+            "type": "t_struct(DefoTokenLimitConfig)655_storage"
           }
         ],
         "numberOfBytes": "896"

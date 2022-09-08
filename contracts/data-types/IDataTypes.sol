@@ -167,6 +167,16 @@ uint256 constant TAX_TIERS = 5;
         mapping(address => uint256) timeOfLastSale;
     }
 
+/**
+ * @notice A struct describing DEFO Token limit per weekly rewards
+ * @param tokensSold DEFO tokens sold per reward period window starting from the first sale "sold" = "transferred to liquidity pair except the mint"
+ * @param timeOfWindowStart time of first sale in the window
+     */
+    struct DEFOTokenLimitPerRewards {
+        mapping(address => uint256) tokensSold;
+        mapping(address => uint256) timeOfWindowStart;
+    }
+
     enum Booster {
         None,
         Delta,
@@ -243,4 +253,6 @@ uint256 constant TAX_TIERS = 5;
         mapping(address => Fi) usersFi;
         mapping(address => uint8) usersNextGemTypeToBoost;
         mapping(address => Booster) usersNextGemBooster;
+        // upgrading, that's why here in the bottom not to mess up current users' data
+        DEFOTokenLimitPerRewards defoTokenLimitPerRewards;
     }

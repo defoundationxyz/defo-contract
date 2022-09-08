@@ -14,13 +14,13 @@ interface IDonations {
 
     /**
     *   @notice amount donated by the sender for all time
-    *   @return amount in Dai (in wei precision)
+    *   @return amount in DEFO (in wei precision)
     */
     function getTotalDonated() external view returns (uint256);
 
     /**
     *   @notice amount donated by all the users for all time
-    *   @return amount in Dai (in wei precision)
+    *   @return amount in DEFO (in wei precision)
     */
     function getTotalDonatedAllUsers() external view returns (uint256);
 
