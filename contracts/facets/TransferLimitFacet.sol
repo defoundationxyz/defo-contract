@@ -14,8 +14,8 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
     /* ============ External and Public Functions ============ */
     ///todo refactor transfer limiting operations to this facet
     function yieldGemTransferLimit(
-        address to,
         address from,
+        address to,
         uint256 tokenId
     ) public {
     }
