@@ -155,7 +155,10 @@ assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration
 
 //configurations per each network
 export const CONFIG_PER_NETWORK = {
-  1337: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
+  1337: {
+    protocol: PROTOCOL_CONFIG,
+    gems: GEM_TYPES_CONFIG,
+  },
   31337: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
   43113: {
     protocol: {

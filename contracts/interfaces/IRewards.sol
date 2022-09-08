@@ -46,26 +46,26 @@ interface IRewards {
 
     /**
     *   @notice amount of pre-taxed total reward earned by the sender for all time
-    *   @return amount in Dai (in wei precision)
+    *   @return amount in DEFO (in wei precision)
     */
     function getCumulatedReward() external view returns (uint256);
 
     /**
     *   @notice amount of pre-taxed total reward earned by all the users for all time
-    *   @return amount in Dai (in wei precision)
+    *   @return amount in DEFO (in wei precision)
     */
     function getCumulatedRewardAllUsers() external view returns (uint256);
 
 
     /**
     *   @notice amount of pre-taxed reward that are currently in the vault for the sender, so if put and then taken from the vault, it's not the return of the function
-    *   @return total amount in Dai (in wei precision)
+    *   @return total amount in DEFO (in wei precision)
     */
     function getStakedGross() external view returns (uint256);
 
     /**
     *   @notice amount of pre-taxed reward that are currently in the vault for all users, it's not equal to the after-tax amount in the vault
-    *   @return total amount in Dai (in wei precision)
+    *   @return total amount in DEFO (in wei precision)
     */
     function getStakedGrossAllUsers() external view returns (uint256);
 

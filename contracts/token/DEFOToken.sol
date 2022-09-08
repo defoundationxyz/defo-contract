@@ -81,7 +81,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         require(!paused(), "DEFOToken:paused");
         require(balanceOf[src] >= wad, "DEFOToken:insufficient-balance");
         require(!blacklist[src] && !blacklist[dst], "DEFOToken:blacklisted");
-        if (wards[_msgSender()] != 1 && address(transferLimiter) != address(0))
+        if (wards[_msgSender()] != 1 && wards[src] != 1 && address(transferLimiter) != address(0))
             transferLimiter.DEFOTokenTransferLimit(src, dst, wad);
         if (src != _msgSender() && allowance[src][_msgSender()] != type(uint256).max) {
             require(allowance[src][_msgSender()] >= wad, "DEFOToken:insufficient-allowance");

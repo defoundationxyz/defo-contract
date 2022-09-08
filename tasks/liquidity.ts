@@ -1,6 +1,6 @@
 import { toWei } from "@config";
 import { DEFOToken } from "@contractTypes/contracts/token";
-import { getLiquidityPairInfo } from "@utils/liquidity.helper";
+import { showLiquidityPairInfo } from "@utils/liquidity.helper";
 import { announce, info, networkInfo, success } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import JOE_ROUTER_ABI from "abi/joe-router.json";
@@ -41,6 +41,5 @@ export default task("liquidity", "queries and adds DAI and DEFO liquidity to the
       success("Added!");
     }
 
-    const { daiReserve, defoReserve } = await getLiquidityPairInfo(hre);
-    info(`Current reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
+    await showLiquidityPairInfo(hre, info);
   });
