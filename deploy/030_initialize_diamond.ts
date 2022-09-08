@@ -1,4 +1,4 @@
-import { GEM_TYPES_CONFIG, PROTOCOL_CONFIG, walletNames } from "@config";
+import { CONFIG_PER_NETWORK, walletNames } from "@config";
 import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, isFuji, namedSigner } from "@utils/chain.helper";
@@ -69,12 +69,16 @@ const func: DeployFunction = async hre => {
     } else deployInfo(`${index.toString().padStart(2, "0")}: ${walletNames[index]} : ${chalk.green(wallet)}`);
   });
 
+  const chainId = Number(await hre.getChainId()) as keyof typeof CONFIG_PER_NETWORK;
+  const protocolConfig = CONFIG_PER_NETWORK[chainId].protocol;
+  const gemConfig = CONFIG_PER_NETWORK[chainId].gems;
+
   const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
-  await (await configFacetInstance.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG })).wait();
+  await (await configFacetInstance.setConfig({ paymentTokens, wallets, ...protocolConfig })).wait();
   deployInfo("DEFODiamond configured.");
 
   deployAnnounce("\n\nConfiguring gem types...");
-  await (await configFacetInstance.setGemTypesConfig(GEM_TYPES_CONFIG)).wait();
+  await (await configFacetInstance.setGemTypesConfig(gemConfig)).wait();
   deployInfo("Gem types configured.");
 
   for (const tokensOwner of ["treasury", "vault", "rewardPool", "donations"]) {

@@ -1,3 +1,6 @@
+/**
+ * This is the core configuration file for the protocol. Mainnet goes first, other networks is at the bottom.
+ */
 import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
 import assert, { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
@@ -149,3 +152,20 @@ export const DIAMOND_GEM: GemTypeConfigStruct = {
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
 
 assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration error");
+
+//configurations per each network
+export const CONFIG_PER_NETWORK = {
+  1337: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
+  31337: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
+  43113: {
+    protocol: {
+      ...PROTOCOL_CONFIG,
+      maintenancePeriod: SECONDS_IN_A_DAY * 2,
+      rewardPeriod: SECONDS_IN_AN_HOUR,
+      taxScaleSinceLastClaimPeriod: SECONDS_IN_A_DAY * 2,
+      mintLimitWindow: 60 * 10,
+    },
+    gems: GEM_TYPES_CONFIG,
+  },
+  43114: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
+};
