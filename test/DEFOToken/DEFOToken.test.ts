@@ -5,7 +5,6 @@ import { expect } from "chai";
 import hardhat, { deployments } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
 
-
 describe("DEFOToken", () => {
   const TEST_AMOUNT = toWei(1000);
   let contract: DEFOToken;
@@ -30,7 +29,7 @@ describe("DEFOToken", () => {
       expect(await contract.balanceOf(otherUser)).to.be.equal(TEST_AMOUNT);
     });
     it("should not mint DEFO tokens to unauthorized party", async () => {
-      const contractFromOtherUser = await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken", "deployer");
+      const contractFromOtherUser = await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken", "donations");
       await expect(contractFromOtherUser.mint(otherUser, TEST_AMOUNT)).to.be.revertedWith("DEFOToken:not-authorized");
     });
   });
