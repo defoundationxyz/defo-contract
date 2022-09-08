@@ -48,32 +48,24 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
     }
 
     constructor(uint256 chainId_) {
-        wards[_msgSender()] = 1;
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name)),
-                keccak256(bytes(version)),
-                chainId_,
-                address(this)
-            )
-        );
     }
 
     function initialize(uint256 chainId_) external {
-        require(!initialized, "DEFOToken:already-initialized");
-        initialized = true;
-        wards[_msgSender()] = 1;
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name)),
-                keccak256(bytes(version)),
-                chainId_,
-                address(this)
-            )
-        );
+        if (!initialized) {
+            initialized = true;
+            wards[_msgSender()] = 1;
+            DOMAIN_SEPARATOR = keccak256(
+                abi.encode(
+                    keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                    keccak256(bytes(name)),
+                    keccak256(bytes(version)),
+                    chainId_,
+                    address(this)
+                )
+            );
+        }
     }
+
 
     // --- Token ---
 
@@ -201,6 +193,9 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         return transferLimiter;
     }
 
+    function authorized(address guy) external view returns (bool) {
+        return wards[guy] == 1;
+    }
     /* ============ Internal Functions ============ */
 
     // --- Math ---

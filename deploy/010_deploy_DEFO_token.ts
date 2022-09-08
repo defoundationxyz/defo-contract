@@ -4,7 +4,6 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { namedAccountsIndex } from "../hardhat.accounts";
 
-
 const func: DeployFunction = async hre => {
   const {
     getNamedAccounts,
