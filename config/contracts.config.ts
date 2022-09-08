@@ -2,7 +2,6 @@ import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contra
 import assert, { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
 
-
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
 export const toWei = (value: number | string | BigNumber) => ethers.utils.parseEther(value.toString());
@@ -112,7 +111,7 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
   mintLimitWindow: 12 * SECONDS_IN_AN_HOUR,
   defoTokenLimitConfig: {
     saleLimitPeriod: SECONDS_IN_A_DAY,
-    saleLimitAmount: 1_000,
+    saleLimitAmount: ethers.constants.MaxUint256,
     limitByReward: true,
   },
 };
@@ -126,7 +125,7 @@ export const SAPHIRE_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(25), toWei(5)],
   taperRewardsThresholdDefo: toWei(7.5),
-  maxMintsPerLimitWindow: 32,
+  maxMintsPerLimitWindow: 16,
 };
 
 export const RUBY_GEM: GemTypeConfigStruct = {
@@ -135,7 +134,7 @@ export const RUBY_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(100), toWei(20)],
   taperRewardsThresholdDefo: toWei(30),
-  maxMintsPerLimitWindow: 8,
+  maxMintsPerLimitWindow: 4,
 };
 
 export const DIAMOND_GEM: GemTypeConfigStruct = {
@@ -144,7 +143,7 @@ export const DIAMOND_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(400), toWei(80)],
   taperRewardsThresholdDefo: toWei(120),
-  maxMintsPerLimitWindow: 2,
+  maxMintsPerLimitWindow: 1,
 };
 
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
