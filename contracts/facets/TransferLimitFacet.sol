@@ -39,7 +39,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
 
             if (s.config.defoTokenLimitConfig.limitByReward) {
                 uint256[] memory gemIds = _getGemIds(from);
-                require(gemIds.length > 0, "DEFOTransferLimit:no-gems");
+                require(gemIds.length > 0, "DEFOTransferLimit:no-gems-owned");
                 uint256 allowedSellAmount = 0;
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;
