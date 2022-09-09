@@ -1,4 +1,4 @@
-import { GEMS, fromWei, gemName } from "@config";
+import { GEMS, PROTOCOL_CONFIG, fromWei, gemName } from "@config";
 import { VaultFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { getContractWithSigner } from "@utils/chain.helper";
 import { expect } from "chai";
@@ -7,7 +7,6 @@ import { BigNumber } from "ethers";
 import hardhat, { deployments, ethers } from "hardhat";
 
 import { BOOSTERS, testAmountStaked, testAmountToStake, testAmountUnStaked } from "../testHelpers";
-
 
 const debug = newDebug("defo:VaultFacet.test.ts");
 
@@ -32,7 +31,7 @@ describe("VaultFacet", () => {
         await contract.mintTo(i, contract.signer.getAddress(), booster.id);
       }
     }
-    await hardhat.run("jump-in-time");
+    await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.rewardPeriod + 1).toString()}s` });
     for (const id of Object.values(GEMS)) {
       debug(`staking gem ${gemName(id)}`);
       await hardhat.run("vault", {

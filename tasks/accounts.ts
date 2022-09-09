@@ -1,5 +1,5 @@
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
-import { getLiquidityPairInfo } from "@utils/liquidity.helper";
+import { showLiquidityPairInfo } from "@utils/liquidity.helper";
 import { announce, info, networkInfo } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import assert from "assert";
@@ -57,6 +57,6 @@ task("accounts", "Get the address and balance information (AVAX, DEFO, DAI) for 
       }),
     );
     console.table(table);
-    const { pairAddress, daiReserve, defoReserve } = await getLiquidityPairInfo(hre);
-    info(`DEX Liquidity pair (${pairAddress})reserves: DAI ${daiReserve}, DEFO ${defoReserve}`);
+
+    await showLiquidityPairInfo(hre, info);
   });

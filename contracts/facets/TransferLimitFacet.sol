@@ -14,15 +14,15 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
     /* ============ External and Public Functions ============ */
     ///todo refactor transfer limiting operations to this facet
     function yieldGemTransferLimit(
-        address to,
         address from,
+        address to,
         uint256 tokenId
     ) public {
     }
 
     function DEFOTokenTransferLimit(
-        address to,
         address from,
+        address to,
         uint256 amount
     ) public {
         if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {
@@ -41,13 +41,18 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
                 uint256[] memory gemIds = _getGemIds(from);
                 require(gemIds.length > 0, "DEFOTransferLimit:no-gems");
                 uint256 allowedSellAmount = 0;
-                ///TODO - cound total weekly sale - should not be greater in total than rewards per week, not just a single sale !!
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;
                     allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;
                 }
-
-                require(amount <= allowedSellAmount, "DEFOTransferLimit:greater-than-total-rewards-per-week");
+                if (s.defoTokenLimitPerRewards.timeOfWindowStart[from] == 0 || s.defoTokenLimitPerRewards.timeOfWindowStart[from] + s.config.rewardPeriod < block.timestamp) {
+                    s.defoTokenLimitPerRewards.tokensSold[from] = amount;
+                    s.defoTokenLimitPerRewards.timeOfWindowStart[from] = block.timestamp;
+                }
+                else {
+                    s.defoTokenLimitPerRewards.tokensSold[from] += amount;
+                }
+                require(s.defoTokenLimitPerRewards.tokensSold[from] <= allowedSellAmount, "DEFOTransferLimit:total-rewards-per-week");
             }
 
         }

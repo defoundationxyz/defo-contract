@@ -3,7 +3,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { NamedAccounts, namedAccountsIndex } from "../hardhat.accounts";
 
-
 export const isFuji = async (hre: HardhatRuntimeEnvironment) => {
   const chainId = parseInt(await hre.getChainId(), 10);
   return chainId === 43113;

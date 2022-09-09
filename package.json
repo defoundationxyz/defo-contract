@@ -124,6 +124,7 @@
     "permit": "hardhat permit --network",
     "vault": "hardhat vault --network",
     "liquidity": "hardhat liquidity --network",
+    "swap": "hardhat swap --network",
     "jump-in-time": "hardhat --network localhost jump-in-time",
     "history": "hardhat history --time 7days --network",
     "dev": "cross-env HIDE_SHOW_NETWORK=true yarn get-some-dai localhost && yarn get-some-defo localhost && yarn permit localhost && yarn get-some-gems localhost && yarn jump-in-time --time 8d && yarn claim localhost --id 0 && yarn vault localhost --op stake --id 1 --amount 1 && yarn vault localhost --op stake --id 2 --amount 5 && yarn vault localhost --op unstake --id 2 --amount 4.75 && yarn gems localhost && yarn accounts localhost ",

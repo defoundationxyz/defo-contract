@@ -1,11 +1,16 @@
-import { Wallets } from "@config";
+import { CONFIG_PER_NETWORK, Wallets } from "@config";
 import { ConfigFacet, ProtocolConfigStructOutput } from "@contractTypes/contracts/facets/ConfigFacet";
 import { announce, info, networkInfo, outputFormatKeyValue, outputFormatter } from "@utils/output.helper";
 import { parseTimeInput } from "@utils/taskParamsInput.helper";
 import { task, types } from "hardhat/config";
 
-
 export default task("config", "Reconfigure the contract, display configuration if no params provided")
+  .addOptionalParam(
+    "update",
+    "update the configuration except payment tokens and wallets from the config/contracts.config.ts",
+    undefined,
+    types.boolean,
+  )
   .addOptionalParam(
     "rewardPeriod",
     "reward period in a human-readable format without spaces: '1w', '1day', '20h', etc.",
@@ -42,9 +47,28 @@ export default task("config", "Reconfigure the contract, display configuration i
     let configOutput: ProtocolConfigStructOutput = await contract.getConfig();
     await networkInfo(hre, info);
 
+    if (taskArgs.update) {
+      const chainId = Number(await hre.getChainId()) as keyof typeof CONFIG_PER_NETWORK;
+      const protocolConfig = CONFIG_PER_NETWORK[chainId].protocol;
+      const gemConfig = CONFIG_PER_NETWORK[chainId].gems;
+      const currentConfig = await contract.getConfig();
+      announce("Updating configuration...");
+      await (
+        await contract.setConfig({
+          ...protocolConfig,
+          paymentTokens: currentConfig.paymentTokens,
+          wallets: currentConfig.wallets,
+        })
+      ).wait();
+
+      announce("Configuring gem types...");
+      await (await contract.setGemTypesConfig(gemConfig)).wait();
+      info("Configured.");
+    }
+
     if (taskArgs.rewardPeriod) {
       const { seconds, human } = parseTimeInput(taskArgs.rewardPeriod);
-      announce("Updating reward period");
+      announce("Updating reward period...");
       announce(
         `Was ${outputFormatKeyValue(
           "rewardPeriod",
