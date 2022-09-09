@@ -154,7 +154,9 @@ export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
 assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration error");
 
 //configurations per each network
-export const CONFIG_PER_NETWORK = {
+export const CONFIG_PER_NETWORK: {
+  [chainId: number]: { protocol: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets">; gems: GemTypeConfigStruct[] };
+} = {
   1337: {
     protocol: PROTOCOL_CONFIG,
     gems: GEM_TYPES_CONFIG,
@@ -163,6 +165,7 @@ export const CONFIG_PER_NETWORK = {
   43113: {
     protocol: {
       ...PROTOCOL_CONFIG,
+      taxRates: [percent(30), percent(20), percent(15), percent(10), 0],
       maintenancePeriod: SECONDS_IN_A_DAY * 2,
       rewardPeriod: SECONDS_IN_AN_HOUR,
       taxScaleSinceLastClaimPeriod: SECONDS_IN_A_DAY * 2,
