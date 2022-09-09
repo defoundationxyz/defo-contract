@@ -24,7 +24,7 @@ contract VaultFacet is BaseFacet, IVault {
         address user = _msgSender();
         Gem storage gem = s.gems[_tokenId];
         uint256 vaultAmount = gem.fi.stakedNet - gem.fi.unStakedGross;
-        require(vaultAmount >= _amount, "Vault: not enough amount in the vault for the gem");
+        require(vaultAmount >= _amount, "Not enough amount in the vault for the gem");
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         Fi memory op;

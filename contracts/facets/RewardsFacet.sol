@@ -45,6 +45,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         address user = _msgSender();
         Fi memory op;
 
+        require(_amount > 0, "Zero rewards for a gem");
         uint256 rewardGross = getRewardAmount(_tokenId);
         require(_amount <= rewardGross, "Not enough rewards");
 
