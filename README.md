@@ -65,7 +65,9 @@ yarn dev
 The contract is built as an EIP-2535 Diamond, implementing ERC-721 functionality covering Yield Gem
 NFTs. DEFO Token is a separate ERC-20 token.
 
-### Avalanche FUJI Addresses
+### Testing on Avalanche FUJI
+
+#### Addresses
 
 | Contract                                       | Address                                      |
 |------------------------------------------------|----------------------------------------------|
@@ -74,8 +76,26 @@ NFTs. DEFO Token is a separate ERC-20 token.
 
 DAI for fuji is a customly deployed contract from the real Dai code but mintable by anyone for test purposes.
 the address
-is [0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a](https://testnet.snowtrace.io/address/0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a)
+is [0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a](https://testnet.snowtrace.io/address/0x3362FE2f7E17A5a9F90DaBE12E4A6E16E146F19a#writeContract)
 add it to the injected wallet along with the DEFO Token to test with the DApp.
+To get some DAI just select *Write Contract* tab, connect your wallet to the snowtrace, and fill in section *4.mint*
+with your address and amount (remember to add 18 zeroes), then press Write, voilà!
+
+DEX router address
+is [0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901](https://testnet.snowtrace.io/address/0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901#writeContract)
+.<br>
+DAI-DEFO liquidity pair is created
+at [0x27aa1a537313396ACc8b3c594a8441ae073d8750](https://testnet.snowtrace.io/address/0x27aa1a537313396ACc8b3c594a8441ae073d8750)
+
+#### Configuration
+
+The configuration on Fuji is different from those on mainnet. Here are the main differences:
+
+- Reward period is one hour (vs one week).
+- Maintenance period is two days (vs one month).
+- Mint limit window is 10 minutes (vs 12 hours).
+- Tax scale change speed is 2 days (vs one week).
+- Tax rates table is 30% (for the first 2 days), then 20%, 15%, 10%, 0%.
 
 ## Handy Hardhat Tasks
 
@@ -143,6 +163,21 @@ OPTIONS:
   --dai 	DAI to add to the pool
   --defo	DEFO to add to the pool
 
+```
+
+### Swap
+
+Swaps DAI - DEFO with the DEX liquidity pair.
+
+```shell
+yarn swap NETWORK OPTIONS
+
+OPTIONS:
+
+  --dai 	DAI amount to swap to DEFO
+  --defo	DEFO amount to swap to DAI
+
+swap: swaps DAI to DEFO and vice versa, specify FROM token only
 ```
 
 ### Gems
