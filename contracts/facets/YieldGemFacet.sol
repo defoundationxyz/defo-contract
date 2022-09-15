@@ -55,21 +55,37 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         uint DEX_LP_WALLET_INDEX = 2;
         uint256 liquidity = IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
-        Booster boost = _gemTypeId == s.usersNextGemTypeToBoost[minter] ? s.usersNextGemBooster[minter] : Booster.None;
+        Booster boost = Booster.None;
+        for (uint256 booster = 1; booster <= 2; booster++) {
+            if (s.usersNextGemBooster[minter][_gemTypeId][Booster(booster)] > 0) {
+                boost = Booster(booster);
+                s.usersNextGemBooster[minter][_gemTypeId][Booster(booster)]--;
+                break;
+            }
+        }
         // finally mint a yield gem
         _mint(_gemTypeId, minter, boost);
     }
 
     function mintTo(uint8 _gemType, address _to, Booster _booster) public onlyRedeemContract {
         //just mint with no payment, already paid on presale
-        _mint(_gemType, _to, _booster);
+        uint256 tokenId = _mint(_gemType, _to, _booster);
+        s.gems[tokenId].presold = true;
+        if (uint(_booster) > 0)
+            createBooster(_to, _gemType, _booster);
     }
 
     function createBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
-        s.usersNextGemTypeToBoost[_to] = _gemType;
-        s.usersNextGemBooster[_to] = _booster;
+        s.usersNextGemBooster[_to][_gemType][_booster]++;
     }
 
+    function removeBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
+        s.usersNextGemBooster[_to][_gemType][_booster]--;
+    }
+
+    function getBooster(address _to, uint8 _gemType, Booster _booster) public view onlyRedeemContract returns (uint256) {
+        return s.usersNextGemBooster[_to][_gemType][_booster];
+    }
 
     function getGemInfo(uint256 _tokenId) external view returns (Gem memory) {
         return s.gems[_tokenId];
@@ -104,7 +120,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /* ============ Internal Functions ============ */
 
     /// @dev mint only, no payment, covers yield gem related mint functions, minting itself and event firing is part of super contract from erc721-facet directory
-    function _mint(uint8 _gemType, address _to, Booster _booster) private {
+    function _mint(uint8 _gemType, address _to, Booster _booster) private returns (uint256) {
         // mint and update the counter
         uint256 tokenId = _safeMint(_to);
         LibMintLimiter.updateMintCount(_gemType);
@@ -116,9 +132,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         gem.mintTime = uint32(block.timestamp);
         gem.booster = _booster;
         s.gems[tokenId] = gem;
+        return tokenId;
     }
 
-    ///todo test transfer
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -127,9 +143,12 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         require(!s.config.transferLock, "Pausable: paused, transfer is locked");
         ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
-        if (from != address(0)) {
+        if (from != address(0) && to != address(0)) {
             s.usersFi[to] = s.usersFi[from];
-            s.usersNextGemBooster[to] = s.usersNextGemBooster[from];
+            for (uint8 i = 0; i < s.gemTypes.length; i++) {
+                s.usersNextGemBooster[to][i][Booster.Omega] = s.usersNextGemBooster[from][i][Booster.Omega];
+                s.usersNextGemBooster[to][i][Booster.Delta] = s.usersNextGemBooster[to][i][Booster.Delta];
+            }
         }
     }
 
@@ -141,7 +160,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         super._afterTokenTransfer(from, to, tokenId);
         if (from != address(0)) {
             delete s.usersFi[from];
-            delete s.usersNextGemBooster[from];
+            for (uint8 i = 0; i < s.gemTypes.length; i++) {
+                delete s.usersNextGemBooster[from][i][Booster.Omega];
+                delete s.usersNextGemBooster[from][i][Booster.Delta];
+            }
         }
     }
 }

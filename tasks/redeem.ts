@@ -41,7 +41,11 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
           const balance = (await contract.balanceOf(nodeHolder)).toNumber();
           const element = { address: nodeHolder, balance };
           if (!nodeBalances.find(el => el.address === nodeHolder)) {
-            info(`${nodeHolder} has ${balance} ${nodeContractName}s`);
+            info(
+              `${nodeIndex.toString().padStart(3)} of ${totalSupply.toString().padStart(3)}: ${nodeHolder} has ${balance
+                .toString()
+                .padStart(2)} ${nodeContractName}s`,
+            );
             nodeBalances.push(element);
           }
         } catch (e) {
@@ -57,6 +61,7 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
         for (const gemId of gemIds) {
           const gem = await defoDiamond.getGemInfo(gemId);
           if (
+            gem.presold &&
             gem.gemTypeId === PRESALE_NODES[nodeContractName].type &&
             gem.booster === PRESALE_NODES[nodeContractName].boost
           ) {
@@ -64,12 +69,12 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
           }
         }
         info(
-          `${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} same DEFO yield gem(s).`,
+          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s).`,
         );
         const toMint = nodeBalance.balance - alreadyMintedBalance;
-        if (toMint > 0) info(`Minting ${toMint}`);
+        if (toMint > 0) info(`Minting ${toMint}...`);
         else info(`Nothing to mint, skipping.`);
-        for (let i = 0; i < toMint; i++) {
+        for (let i = 1; i <= toMint; i++) {
           await (
             await defoDiamond.mintTo(
               PRESALE_NODES[nodeContractName].type,

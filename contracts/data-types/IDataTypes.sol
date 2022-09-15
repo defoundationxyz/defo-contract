@@ -217,6 +217,7 @@ uint256 constant TAX_TIERS = 5;
  * @param mintTime timestamp of the mint time
  * @param lastRewardWithdrawalTime timestamp of last reward claim OR stake. Same as mintTime if not yet claimed.
  * @param lastMaintenanceTime timestamp of the last maintenance (could be a date in the future in case of the upfront payment)
+ * @param presold flag that this gem was bought on presale, used to avoid double minting
 */
     struct Gem {
         uint8 gemTypeId;
@@ -225,6 +226,7 @@ uint256 constant TAX_TIERS = 5;
         uint32 lastRewardWithdrawalTime;
         uint32 lastMaintenanceTime;
         Fi fi;
+        bool presold;
     }
 
 /**
@@ -237,6 +239,7 @@ uint256 constant TAX_TIERS = 5;
 *   @param nft ERC721 standard related storage
 *   @param total cumulated amounts for all operations
 *   @param usersFi financial info per each user
+*   @param usersNextGemBooster used for presale, number (uint256) of boosters (Booster) with a type (uint8) left for a user (address)
 */
     struct AppStorage {
         // configuration
@@ -251,8 +254,6 @@ uint256 constant TAX_TIERS = 5;
         Fi total;
         // User data, users list is s.nft.owners, size s.nft.allTokens.length (managed by ERC721Enumerable)
         mapping(address => Fi) usersFi;
-        mapping(address => uint8) usersNextGemTypeToBoost;
-        mapping(address => Booster) usersNextGemBooster;
-        // upgrading, that's why here in the bottom not to mess up current users' data
+        mapping(address => mapping(uint8 => mapping(Booster => uint256))) usersNextGemBooster;
         DEFOTokenLimitPerRewards defoTokenLimitPerRewards;
     }

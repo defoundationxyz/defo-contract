@@ -2,7 +2,6 @@ import { NetworksUserConfig } from "hardhat/src/types/config";
 
 import { accounts } from "./hardhat.accounts";
 
-
 export const avalancheMainnetJsonRPCUrl: string =
   process.env.MAINNET_RPC_URL || "https://api.avax.network/ext/bc/C/rpc";
 export const avalancheFujiJsonRPCUrl: string = process.env.FUJI_RPC_URL || "https://api.avax-test.network/ext/bc/C/rpc";
@@ -32,6 +31,8 @@ const networks: NetworksUserConfig = {
       initialIndex: 0,
       count: 7,
     },
+    gas: 2100000,
+    gasPrice: 8000000000,
   },
 };
 
