@@ -8,6 +8,11 @@ export const isFuji = async (hre: HardhatRuntimeEnvironment) => {
   return chainId === 43113;
 };
 
+export const isMainnet = async (hre: HardhatRuntimeEnvironment) => {
+  const chainId = parseInt(await hre.getChainId(), 10);
+  return chainId === 43114;
+};
+
 export const chainName = async (hre: HardhatRuntimeEnvironment) => {
   switch (parseInt(await hre.getChainId(), 10)) {
     case 1337:

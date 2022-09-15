@@ -1,7 +1,7 @@
 import { fundDefo } from "@utils/actions.helper";
+import { isMainnet } from "@utils/chain.helper";
 import { announce, error, info, networkInfo, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
-
 
 export default task("get-some-defo", "get funded with DEFO Token")
   .addOptionalParam(
@@ -13,7 +13,7 @@ export default task("get-some-defo", "get funded with DEFO Token")
   .addParam("amount", "How much", 100_000, types.int)
   .setAction(async ({ account, amount }, hre) => {
     const { getNamedAccounts } = hre;
-    if ((await hre.getChainId()) === "43114") {
+    if (await isMainnet(hre)) {
       error("Not applicable to mainnet!");
       return;
     }

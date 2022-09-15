@@ -1,8 +1,8 @@
+import { isMainnet } from "@utils/chain.helper";
 import { announce, error, info, networkInfo, success } from "@utils/output.helper";
 import { task, types } from "hardhat/config";
 
 import { beTheWhale } from "./beTheWhale";
-
 
 export default task("get-some-dai", "Distribute DAI from AAVE")
   .addOptionalParam(
@@ -14,7 +14,7 @@ export default task("get-some-dai", "Distribute DAI from AAVE")
   .addOptionalParam("amount", "The amount to transfer to the deployer", 100_000, types.int)
   .setAction(async ({ account, amount }, hre) => {
     const { getNamedAccounts } = hre;
-    if ((await hre.getChainId()) === "43114") {
+    if (await isMainnet(hre)) {
       error("Not applicable to mainnet!");
       return;
     }
