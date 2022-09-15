@@ -1,5 +1,5 @@
-import { FiStruct, GemStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
-import { IMaintenance, IRewards, IYieldGem } from "@contractTypes/index";
+import { FiStruct, GemStruct } from "@contractTypes/contracts/interfaces/IGetter";
+import { IDEFODiamond } from "@contractTypes/index";
 import { BigNumber } from "ethers";
 
 export type CompleteGemData = GemStruct &
@@ -11,7 +11,7 @@ export type CompleteGemData = GemStruct &
   };
 
 export const gemsIdsWithData =
-  (gemContract: IRewards & IMaintenance & IYieldGem, user?: string) => async (): Promise<Array<CompleteGemData>> =>
+  (gemContract: IDEFODiamond, user?: string) => async (): Promise<Array<CompleteGemData>> =>
     Promise.all(
       (user ? await gemContract.getGemIdsOf(user) : await gemContract.getGemIds()).map(async gemId => {
         const gem = await gemContract.getGemInfo(gemId);
@@ -27,7 +27,7 @@ export const gemsIdsWithData =
       }),
     );
 
-export const gemsGroupedByType = async (gemContract: IRewards & IMaintenance & IYieldGem, user?: string) =>
+export const gemsGroupedByType = async (gemContract: IDEFODiamond, user?: string) =>
   (await gemsIdsWithData(gemContract, user)()).reduce(
     (r, v, i, a, k = v.gemTypeId) => ((r[k as number] || (r[k as number] = [])).push(v), r),
     {} as Array<Array<CompleteGemData>>,

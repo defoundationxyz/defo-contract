@@ -4,7 +4,7 @@
 // 2. mint in the loop, checking if the address is a presale gem holder, once minted - deactivate gems
 // Add separate task to deploy a test contract and a test node to check
 import { PRESALE_NODES, presaleNodes } from "@constants/addresses";
-import { YieldGemFacet } from "@contractTypes/contracts/facets";
+import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
 import { isFuji } from "@utils/chain.helper";
 import { announce, info, networkInfo, success } from "@utils/output.helper";
@@ -17,7 +17,7 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
   async (_, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
-    const defoDiamond = await ethers.getContract<YieldGemFacet>("DEFODiamond");
+    const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
 
     for (const nodeContractName of presaleNodes) {
       const nodeAddress = (await isFuji(hre))

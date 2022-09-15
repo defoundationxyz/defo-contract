@@ -31,8 +31,6 @@ const networks: NetworksUserConfig = {
       initialIndex: 0,
       count: 7,
     },
-    gas: 2100000,
-    gasPrice: 8000000000,
   },
 };
 
