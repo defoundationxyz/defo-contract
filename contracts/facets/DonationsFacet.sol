@@ -17,6 +17,10 @@ contract DonationsFacet is BaseFacet, IDonations {
         return s.usersFi[_msgSender()].donated;
     }
 
+    function getTotalDonatedOf(address _user) external view returns (uint256) {
+        return s.usersFi[_user].donated;
+    }
+
     function getTotalDonatedAllUsers() external view returns (uint256) {
         return s.total.donated;
     }

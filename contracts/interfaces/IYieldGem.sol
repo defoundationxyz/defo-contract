@@ -31,6 +31,14 @@ interface IYieldGem {
     function getGemIds() external view returns (uint256[] memory);
 
     /**
+    * @notice Lists gem IDs of a user
+    * @param _user gemHolder to get gemsOf
+    * @return array with token Ids
+    */
+    function getGemIdsOf(address _user) external view returns (uint256[] memory);
+
+
+    /**
     * @notice Get detailed status of all the yield gems the requester holds
     * @return array of the Ids and array of the Gem structurs
     */

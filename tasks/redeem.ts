@@ -6,7 +6,7 @@
 import { PRESALE_NODES, presaleNodes } from "@constants/addresses";
 import { YieldGemFacet } from "@contractTypes/contracts/facets";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
-import { isMainnet } from "@utils/chain.helper";
+import { isFuji } from "@utils/chain.helper";
 import { announce, info, networkInfo, success } from "@utils/output.helper";
 import { Address } from "hardhat-deploy/dist/types";
 import { task } from "hardhat/config";
@@ -20,9 +20,9 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
     const defoDiamond = await ethers.getContract<YieldGemFacet>("DEFODiamond");
 
     for (const nodeContractName of presaleNodes) {
-      const nodeAddress = (await isMainnet(hre))
-        ? PRESALE_NODES[nodeContractName].address
-        : (await deployments.get(nodeContractName)).address;
+      const nodeAddress = (await isFuji(hre))
+        ? (await deployments.get(nodeContractName)).address
+        : PRESALE_NODES[nodeContractName].address;
       const contract = await ethers.getContractAt<DiamondNode>("DiamondNode", nodeAddress);
       const totalSupply = (await contract.totalSupply()).toNumber();
       const activeSale = await contract.activeSale();

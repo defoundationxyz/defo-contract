@@ -80,8 +80,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         return _getGemIds(user);
     }
 
-    function getGemIdsOf(address user) public view returns (uint256[] memory) {
-        return _getGemIds(user);
+    function getGemIdsOf(address _user) public view returns (uint256[] memory) {
+        return _getGemIds(_user);
     }
 
     function getGemsInfo() external view returns (uint256[] memory, Gem[] memory) {
