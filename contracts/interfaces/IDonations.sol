@@ -17,6 +17,12 @@ interface IDonations {
     *   @return amount in DEFO (in wei precision)
     */
     function getTotalDonated() external view returns (uint256);
+    /**
+    *   @notice amount donated by a user for all time
+    *   @param _user user to query info for
+    *   @return amount in DEFO (in wei precision)
+    */
+    function getTotalDonatedOf(address _user) external view returns (uint256);
 
     /**
     *   @notice amount donated by all the users for all time

@@ -19,7 +19,8 @@ import _ from "lodash";
 
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
-  .setAction(async ({ type }, hre) => {
+  .addOptionalParam("user", "specify address to check", undefined, types.string)
+  .setAction(async ({ type, user }, hre) => {
     const {
       getNamedAccounts,
       ethers,
@@ -32,13 +33,15 @@ export default task("gems", "get gems info and balance information for the deplo
     info("📡 Querying gems...");
     info(`Current block time: ${chalk.green(await getChainTime(hre.ethers.provider))}`);
 
+    const participant = user ?? deployer;
+
     const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
-    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract);
+    const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, participant);
 
     // headliner, deployer data
-    announce(`Deployer ${deployer} has ${await gemContract.balanceOf(deployer)} gem(s)`);
-    info(`Total Charity: ${fromWei(await gemContract.getTotalDonated())}`);
+    announce(`${participant} has ${await gemContract.balanceOf(participant)} gem(s)`);
+    info(`Total Charity: ${fromWei(await gemContract.getTotalDonatedOf(participant))}`);
 
     // gemtype config output
     const gemTypesConfig: GemTypeConfigStructOutput[] = await gemContract.getGemTypesConfig();
