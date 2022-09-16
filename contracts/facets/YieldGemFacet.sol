@@ -84,7 +84,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         s.usersNextGemBooster[_to][_gemType][_booster]--;
     }
 
-    function getBooster(address _to, uint8 _gemType, Booster _booster) public view onlyRedeemContract returns (uint256) {
+    function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];
     }
 

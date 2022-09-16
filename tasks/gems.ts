@@ -17,6 +17,8 @@ import chalk from "chalk";
 import { task, types } from "hardhat/config";
 import _ from "lodash";
 
+import { BOOSTERS } from "../test/testHelpers";
+
 export default task("gems", "get gems info and balance information for the deployer")
   .addOptionalParam("type", "0 - sapphire, 1 - ruby, 2 - diamond, empty (-1) - get info for all three", -1, types.int)
   .addOptionalParam("user", "specify address to check", undefined, types.string)
@@ -42,6 +44,14 @@ export default task("gems", "get gems info and balance information for the deplo
     // headliner, deployer data
     announce(`${participant} has ${await gemContract.balanceOf(participant)} gem(s)`);
     info(`Total Charity: ${fromWei(await gemContract.getTotalDonatedOf(participant))}`);
+
+    // available boosts
+    for (const gemType of types) {
+      for (const boosterType of BOOSTERS) {
+        const booster = (await gemContract.getBooster(participant, gemType, boosterType.id)).toNumber();
+        if (booster > 0) info(`${boosterType.name} booster(s) for gem type ${gemName(gemType)}: ${booster}`);
+      }
+    }
 
     // gemtype config output
     const gemTypesConfig: GemTypeConfigStructOutput[] = await gemContract.getGemTypesConfig();
