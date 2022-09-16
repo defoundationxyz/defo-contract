@@ -9,17 +9,21 @@ import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol
 import { isFuji } from "@utils/chain.helper";
 import { announce, info, networkInfo, success } from "@utils/output.helper";
 import { Address } from "hardhat-deploy/dist/types";
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 
-export default task("redeem", "mints gems for the pre-sold nodes").setAction(
-  async (_, hre: HardhatRuntimeEnvironment) => {
+export default task("redeem", "mints gems for the pre-sold nodes")
+  .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
+  .addOptionalParam("node", "node name to redeem", undefined, types.string)
+  .setAction(async ({ test, node }, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
     const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
 
-    for (const nodeContractName of presaleNodes) {
+    const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
+
+    for (const nodeContractName of nodes) {
       const nodeAddress = (await isFuji(hre))
         ? (await deployments.get(nodeContractName)).address
         : PRESALE_NODES[nodeContractName].address;
@@ -74,17 +78,20 @@ export default task("redeem", "mints gems for the pre-sold nodes").setAction(
         const toMint = nodeBalance.balance - alreadyMintedBalance;
         if (toMint > 0) info(`Minting ${toMint}...`);
         else info(`Nothing to mint, skipping.`);
-        for (let i = 1; i <= toMint; i++) {
-          await (
-            await defoDiamond.mintTo(
-              PRESALE_NODES[nodeContractName].type,
-              nodeHolder,
-              PRESALE_NODES[nodeContractName].boost,
-            )
-          ).wait();
-          success(`Minted gem ${i}`);
+        if (test) {
+          info("Skipping mint due to test flag");
+        } else {
+          for (let i = 1; i <= toMint; i++) {
+            await (
+              await defoDiamond.mintTo(
+                PRESALE_NODES[nodeContractName].type,
+                nodeHolder,
+                PRESALE_NODES[nodeContractName].boost,
+              )
+            ).wait();
+            success(`Minted gem ${i}`);
+          }
         }
       }
     }
-  },
-);
+  });
