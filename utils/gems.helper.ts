@@ -1,4 +1,4 @@
-import { FiStruct, GemStruct } from "@contractTypes/contracts/interfaces/IGetter";
+import { FiStruct, GemStruct } from "@contractTypes/contracts/interfaces/IYieldGem";
 import { IDEFODiamond } from "@contractTypes/index";
 import { BigNumber } from "ethers";
 

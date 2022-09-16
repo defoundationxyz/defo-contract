@@ -1,6 +1,6 @@
 import { GEMS, GEM_TYPES_CONFIG, HUNDRED_PERCENT, PROTOCOL_CONFIG, PaymentTokens, fromWei, gemName } from "@config";
 import { MAINNET_DAI_ADDRESS } from "@constants/addresses";
-import { ConfigFacet, GetterFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
+import { ConfigFacet, YieldGemFacet } from "@contractTypes/contracts/facets";
 import { DEFOToken } from "@contractTypes/contracts/token";
 import { getContractWithSigner } from "@utils/chain.helper";
 import ERC20ABI from "abi/erc20-abi.json";
@@ -15,7 +15,7 @@ import { BOOSTERS } from "../testHelpers";
 const debug = newDebug("defo:YieldGemFacet.test.ts");
 
 describe("YieldGemFacet", () => {
-  let contract: YieldGemFacet & ConfigFacet & GetterFacet;
+  let contract: YieldGemFacet & ConfigFacet;
   let paymentTokenContracts: [Contract, Contract];
   let namedAccounts: { [name: string]: Address };
   let user: Address;
@@ -23,7 +23,7 @@ describe("YieldGemFacet", () => {
 
   beforeEach(async () => {
     await deployments.fixture(["DEFOToken", "DEFODiamond", "DEFOTokenInit", "DiamondInitialized"]);
-    contract = await getContractWithSigner<YieldGemFacet & ConfigFacet & GetterFacet>(hardhat, "DEFODiamond");
+    contract = await getContractWithSigner<YieldGemFacet & ConfigFacet>(hardhat, "DEFODiamond");
     const defoContract = await getContractWithSigner<DEFOToken>(hardhat, "DEFOToken");
     const daiContract = await ethers.getContractAt(ERC20ABI, MAINNET_DAI_ADDRESS);
     paymentTokenContracts = [daiContract, defoContract];
@@ -316,7 +316,7 @@ describe("YieldGemFacet", () => {
         expect(mintWindow.mintCount).to.be.equal(ethers.constants.Zero);
         const variance = mintWindow.endOfMintLimitWindow - (await ethers.provider.getBlock("latest")).timestamp;
         const error = <number>PROTOCOL_CONFIG.mintLimitWindow - variance;
-        //endOfMintLimitWindow should be equal to the block.timestamp + 12h, although some 10s difference is fine
+        //endOfMintLimitWindow should be equa l to the block.timestamp + 12h, although some 10s difference is fine
         debug(`delay in s: ${error.toString()}`);
         expect(error).to.be.lessThan(100);
       }

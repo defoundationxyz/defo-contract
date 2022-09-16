@@ -8,7 +8,6 @@ const func: DeployFunction = async hre => {
 
   const facetNames = [
     "YieldGemFacet",
-    "GetterFacet",
     "ConfigFacet",
     "RewardsFacet",
     "VaultFacet",

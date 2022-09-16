@@ -5,7 +5,6 @@ pragma solidity 0.8.15;
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeERC20.sol";
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoePair.sol";
 import "../interfaces/IYieldGem.sol";
-import "../interfaces/IGetter.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
@@ -54,7 +53,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         //mint to team to update pair reserves
         uint TEAM_WALLET_INDEX = 3;
         uint DEX_LP_WALLET_INDEX = 2;
-        uint256 liquidity = IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
+        IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
         Booster boost = Booster.None;
         for (uint256 booster = 1; booster <= 2; booster++) {
@@ -75,6 +74,51 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         if (uint(_booster) > 0)
             s.usersNextGemBooster[_to][_gemType][_booster]++;
     }
+
+
+    function createBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
+        s.usersNextGemBooster[_to][_gemType][_booster]++;
+    }
+
+    function removeBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
+        s.usersNextGemBooster[_to][_gemType][_booster]--;
+    }
+
+    function getBooster(address _to, uint8 _gemType, Booster _booster) public view onlyRedeemContract returns (uint256) {
+        return s.usersNextGemBooster[_to][_gemType][_booster];
+    }
+
+
+    function getGemInfo(uint256 _tokenId) external view returns (Gem memory) {
+        return s.gems[_tokenId];
+    }
+
+    function getGemIds() public view returns (uint256[] memory) {
+        address user = _msgSender();
+        return _getGemIds(user);
+    }
+
+    function getGemIdsOf(address _user) public view returns (uint256[] memory) {
+        return _getGemIds(_user);
+    }
+
+    function getGemsInfo() external view returns (uint256[] memory, Gem[] memory) {
+        uint256[] memory gemIds = getGemIds();
+        Gem[] memory gems = new Gem[](gemIds.length);
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gems[i] = s.gems[gemIds[i]];
+        }
+        return (gemIds, gems);
+    }
+
+    function isMintAvailable(uint8 _gemType) external view returns (bool) {
+        return LibMintLimiter.isMintAvailableForGem(_gemType);
+    }
+
+    function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory){
+        return LibMintLimiter.getCurrentMintWindow(_gemTypeId);
+    }
+
 
     /* ============ Internal Functions ============ */
 

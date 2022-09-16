@@ -1,5 +1,5 @@
 import { fromWei, walletNames } from "@config";
-import { FiStruct } from "@contractTypes/contracts/interfaces/IGetter";
+import { FiStruct } from "@contractTypes/contracts/interfaces/IYieldGem";
 import { chainName, getTime } from "@utils/chain.helper";
 import chalk from "chalk";
 import { BigNumber, BigNumberish, ethers } from "ethers";
