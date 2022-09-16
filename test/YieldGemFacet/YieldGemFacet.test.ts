@@ -318,7 +318,7 @@ describe("YieldGemFacet", () => {
         const error = <number>PROTOCOL_CONFIG.mintLimitWindow - variance;
         //endOfMintLimitWindow should be equal to the block.timestamp + 12h, although some 10s difference is fine
         debug(`delay in s: ${error.toString()}`);
-        expect(error).to.be.lessThan(30);
+        expect(error).to.be.lessThan(100);
       }
     });
 
