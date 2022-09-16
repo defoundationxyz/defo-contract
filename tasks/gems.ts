@@ -35,7 +35,7 @@ export default task("gems", "get gems info and balance information for the deplo
 
     const participant = user ?? deployer;
 
-    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond_DiamondProxy");
+    const gemContract = await ethers.getContract<IDEFODiamond>("DEFODiamond");
     const types: number[] = type === -1 ? Object.values(GEMS) : [type];
     const gemsOfDeployerGroupedByType = await gemsGroupedByType(gemContract, participant);
 
