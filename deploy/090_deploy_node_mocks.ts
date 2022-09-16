@@ -20,6 +20,7 @@ const func: DeployFunction = async hre => {
         from: deployer,
         owner: deployer,
         args: [dai],
+        gasLimit: 4000000,
       });
       const contract = await ethers.getContract<DiamondNode>(nodeContractName);
       if (!(await contract.activeSale())) {

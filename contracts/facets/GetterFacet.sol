@@ -7,11 +7,11 @@ import "../interfaces/IGetter.sol";
 import "../interfaces/IYieldGem.sol";
 import "../libraries/LibMintLimiter.sol";
 
-/** @title  BoosterFacet EIP-2535 Diamond Facet
+/** @title  GetterFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice Minting functionality including redeeming pre-sold nodes
 */
-contract BoosterFacet is BaseFacet, IGetter {
+contract GetterFacet is BaseFacet, IGetter {
 
     /* ====================== Modifiers ====================== */
 

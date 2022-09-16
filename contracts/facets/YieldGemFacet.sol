@@ -73,7 +73,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         uint256 tokenId = _mint(_gemType, _to, _booster);
         s.gems[tokenId].presold = true;
         if (uint(_booster) > 0)
-            IGetter(address(this)).createBooster(_to, _gemType, _booster);
+            s.usersNextGemBooster[_to][_gemType][_booster]++;
     }
 
     /* ============ Internal Functions ============ */
