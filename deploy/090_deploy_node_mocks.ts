@@ -20,12 +20,12 @@ const func: DeployFunction = async hre => {
         from: deployer,
         owner: deployer,
         args: [dai],
-        gasLimit: 4000000,
+        gasLimit: 8_000_000,
       });
       const contract = await ethers.getContract<DiamondNode>(nodeContractName);
       if (!(await contract.activeSale())) {
         await (await contract.setSaleState()).wait();
-        await contract.giveAwayMint();
+        await (await contract.giveAwayMint()).wait();
       }
     }
   } else deployInfo("Skipping nodes deployment on mainnet and localhost (forking from mainnet)");
