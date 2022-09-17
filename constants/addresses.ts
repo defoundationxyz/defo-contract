@@ -29,3 +29,27 @@ export const MAINNET_DEFO_SAPPHIRE_OMEGA_NODE = "0x52bd885E4F7059634f3dbcf226F89
 export const MAINNET_DEFO_SAPPHIRE_DELTA_NODE = "0x5DeF78995748e2cfF42F36DA0CC7625e4B19cDB2";
 export const MAINNET_DEFO_DIAMOND_OMEGA_NODE = "0x947c90eCC60C2ae9a61dE29fB799e7B9c58b52Ea";
 export const MAINNET_DEFO_DIAMOND_DELTA_NODE = "0x1fF38cA054215aE6AF4D7cCadc44d871fDA5A82b";
+
+export const presaleNodes = [
+  "SapphireNode",
+  "SapphireNodeOmega",
+  "SapphireNodeDelta",
+  "RubyNode",
+  "RubyNodeOmega",
+  "RubyNodeDelta",
+  "DiamondNode",
+  "DiamondNodeOmega",
+  "DiamondNodeDelta",
+] as const;
+
+export const PRESALE_NODES: Record<typeof presaleNodes[number], { address: string; type: number; boost: number }> = {
+  SapphireNode: { address: "0xA7Fa128FA70AB30f8314DB59D7677434B838f116", type: 0, boost: 0 },
+  RubyNode: { address: "0xDf8F0ABb914068A50c610083D0706D4D7F5f3508", type: 1, boost: 0 },
+  DiamondNode: { address: "0x31D7739F96C566eDdd55fFD318ea22082E80D2f5", type: 2, boost: 0 },
+  SapphireNodeOmega: { address: "0x52bd885E4F7059634f3dbcf226F8903c0ee886B1", type: 0, boost: 2 },
+  RubyNodeOmega: { address: "0x99B29003a73575571AF3921bcc0FaF7Dbfd0A123", type: 1, boost: 2 },
+  DiamondNodeOmega: { address: "0x947c90eCC60C2ae9a61dE29fB799e7B9c58b52Ea", type: 2, boost: 2 },
+  SapphireNodeDelta: { address: "0x5DeF78995748e2cfF42F36DA0CC7625e4B19cDB2", type: 0, boost: 1 },
+  RubyNodeDelta: { address: "0x22CcbC7D801d680ECf47D0650dE9b05DE7F609Ac", type: 1, boost: 1 },
+  DiamondNodeDelta: { address: "0x1fF38cA054215aE6AF4D7cCadc44d871fDA5A82b", type: 2, boost: 1 },
+};

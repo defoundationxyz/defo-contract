@@ -1,7 +1,6 @@
 import { deployAndTell } from "@utils/deployFunc";
 import { DeployFunction } from "hardhat-deploy/types";
 
-
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, deployments } = hre;
   const { diamond } = deployments;

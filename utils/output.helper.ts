@@ -1,5 +1,5 @@
 import { fromWei, walletNames } from "@config";
-import { FiStruct } from "@contractTypes/contracts/facets/YieldGemFacet";
+import { FiStruct } from "@contractTypes/contracts/interfaces/IYieldGem";
 import { chainName, getTime } from "@utils/chain.helper";
 import chalk from "chalk";
 import { BigNumber, BigNumberish, ethers } from "ethers";
@@ -7,7 +7,6 @@ import { DeployResult } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import _ from "lodash";
 import moment from "moment";
-
 
 type MutableObject<T> = { -readonly [P in keyof T]: T[P] };
 
@@ -39,7 +38,7 @@ export const displayDeployResult = (name: string, result: DeployResult) =>
 
 export const outputFormatKeyValue = (
   key: string,
-  value: boolean | BigNumberish | Promise<BigNumberish> | FiStruct | undefined,
+  value: boolean | BigNumberish | Promise<BigNumberish> | Promise<boolean> | FiStruct | undefined,
 ): string | number | bigint | boolean =>
   key.match(/Period|duration|mintLimitWindow/i)
     ? moment.duration(Number(value), "s").humanize()
@@ -49,9 +48,10 @@ export const outputFormatKeyValue = (
     ? value.toNumber()
     : BigNumber.isBigNumber(value)
     ? Number(Number(ethers.utils.formatEther(value)).toFixed(7))
-    : value instanceof Promise
-    ? outputFormatKeyValue(key, Promise.resolve(value))
-    : typeof value === "number" || typeof value === "boolean"
+    : ///todo add autoresolving promise support for flxibility
+    // : value instanceof Promise
+    // ? outputFormatKeyValue(key, Promise.resolve(value))
+    typeof value === "number" || typeof value === "boolean"
     ? value
     : typeof value === "undefined"
     ? "-"

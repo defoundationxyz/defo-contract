@@ -12,7 +12,6 @@ import { Address } from "hardhat-deploy/dist/types";
 
 import { BOOSTERS } from "../testHelpers";
 
-
 const debug = newDebug("defo:YieldGemFacet.test.ts");
 
 describe("YieldGemFacet", () => {
@@ -244,19 +243,41 @@ describe("YieldGemFacet", () => {
         }
       });
 
-      it("should not mint a boosted gem if there's a booster created for another gem type", async () => {
-        await hardhat.run("get-some-dai");
-        await hardhat.run("get-some-defo");
-        await hardhat.run("permit");
-        for (const i of Object.values(GEMS)) {
-          debug(`testing gem ${gemName(i)}`);
+      for (const i of Object.values(GEMS)) {
+        const anotherType = (i + 1) % Object.values(GEMS).length;
+        it(`should not mint a boosted gem for ${gemName(
+          anotherType,
+        )} if there's a booster created for gem type  ${gemName(i)}`, async () => {
+          await hardhat.run("get-some-dai");
+          await hardhat.run("get-some-defo");
+          await hardhat.run("permit");
           await contract.createBooster(user, i, booster.id);
-          await contract.mint((i + 1) % Object.values(GEMS).length);
-          expect((await contract.getGemInfo(i)).booster).to.be.equal(0);
-        }
-      });
+          await contract.mint(anotherType);
+          const boosterOfMintedGem = (await contract.getGemInfo(i)).booster;
+          expect(boosterOfMintedGem).to.be.equal(0);
+        });
+      }
     });
   });
+
+  for (const gemType of Object.values(GEMS)) {
+    it(`should mint several different boosted gems for the same gem types if different boosters created`, async () => {
+      await hardhat.run("get-some-dai");
+      await hardhat.run("get-some-defo");
+      await hardhat.run("permit");
+      debug(`testing gem ${gemName(gemType)}`);
+      await contract.createBooster(user, gemType, 1);
+      await contract.createBooster(user, gemType, 2);
+      await contract.mint(gemType);
+      expect((await contract.getGemInfo(0)).booster).to.be.equal(1);
+      await hardhat.run("jump-in-time");
+      await contract.mint(gemType);
+      expect((await contract.getGemInfo(1)).booster).to.be.equal(2);
+      await hardhat.run("jump-in-time");
+      await contract.mint(gemType);
+      expect((await contract.getGemInfo(2)).booster).to.be.equal(0);
+    });
+  }
 
   describe("mintTo(uint8 _gemType, address _to, Booster _booster)", () => {
     [0, 1, 2].forEach(boosterId =>
@@ -295,9 +316,9 @@ describe("YieldGemFacet", () => {
         expect(mintWindow.mintCount).to.be.equal(ethers.constants.Zero);
         const variance = mintWindow.endOfMintLimitWindow - (await ethers.provider.getBlock("latest")).timestamp;
         const error = <number>PROTOCOL_CONFIG.mintLimitWindow - variance;
-        //endOfMintLimitWindow should be equal to the block.timestamp + 12h, although some 10s difference is fine
+        //endOfMintLimitWindow should be equa l to the block.timestamp + 12h, although some 10s difference is fine
         debug(`delay in s: ${error.toString()}`);
-        expect(error).to.be.lessThan(30);
+        expect(error).to.be.lessThan(100);
       }
     });
 

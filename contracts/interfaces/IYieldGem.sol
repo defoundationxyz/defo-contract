@@ -18,7 +18,19 @@ interface IYieldGem {
     function mint(uint8 _gemTypeId) external;
 
     /**
-    * @notice Get detailed status of the Gem, including financial details
+    * @notice For redeem usage
+    */
+
+    function mintTo(uint8 _gemType, address _to, Booster _booster) external;
+
+    function createBooster(address _to, uint8 _gemType, Booster _booster) external;
+
+    function removeBooster(address _to, uint8 _gemType, Booster _booster) external;
+
+    function getBooster(address _to, uint8 _gemType, Booster _booster) external view returns (uint256);
+
+    /**
+ * @notice Get detailed status of the Gem, including financial details
     * @param _tokenId gem Id
     * @return Gem structure with all the details, excluding the gem type and protocol configuration, which is returned by IConfig facet
     */
@@ -29,6 +41,14 @@ interface IYieldGem {
     * @return array with token Ids
     */
     function getGemIds() external view returns (uint256[] memory);
+
+    /**
+    * @notice Lists gem IDs of a user
+    * @param _user gemHolder to get gemsOf
+    * @return array with token Ids
+    */
+    function getGemIdsOf(address _user) external view returns (uint256[] memory);
+
 
     /**
     * @notice Get detailed status of all the yield gems the requester holds
@@ -47,4 +67,6 @@ interface IYieldGem {
     * @return GemTypeMintWindow mint window structure
     */
     function getMintWindow(uint8 _gemTypeId) external view returns (GemTypeMintWindow memory);
+
+
 }

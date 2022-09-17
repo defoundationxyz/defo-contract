@@ -25,8 +25,6 @@ dotenvConfig({ path: resolve(__dirname, "./.env") });
 //   console.log("SNOWTRACE_API_KEY not set in an .env file, won't be available");
 // }
 
-const optimizerEnabled = !process.env.OPTIMIZER_DISABLED;
-
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   abiExporter: {
@@ -55,7 +53,7 @@ const config: HardhatUserConfig = {
         version: "0.8.15",
         settings: {
           optimizer: {
-            enabled: optimizerEnabled,
+            enabled: !process.env.OPTIMIZER_DISABLED,
             runs: 250,
           },
           outputSelection: {
