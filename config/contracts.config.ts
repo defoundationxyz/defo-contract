@@ -105,8 +105,8 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
   maintenancePeriod: SECONDS_IN_A_MONTH,
   rewardPeriod: SECONDS_IN_A_WEEK,
   taxScaleSinceLastClaimPeriod: SECONDS_IN_A_WEEK,
-  taxRates: [percent(100), percent(30), percent(30), percent(15), 0],
-  charityContributionRate: percent(5),
+  taxRates: [percent(100), percent(35), percent(35), percent(20), 0],
+  charityContributionRate: percent(2),
   vaultWithdrawalTaxRate: percent(10),
   taperRate: percent(20),
   mintLock: false,
@@ -124,7 +124,7 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
 //note in price DAI goes first, DEFO goes second
 export const SAPHIRE_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(1.5),
-  rewardAmountDefo: toWei(0.29),
+  rewardAmountDefo: toWei(0.21),
   //dai goes first, defo second
   price: [toWei(25), toWei(5)],
   taperRewardsThresholdDefo: toWei(7.5),
@@ -133,7 +133,7 @@ export const SAPHIRE_GEM: GemTypeConfigStruct = {
 
 export const RUBY_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(6),
-  rewardAmountDefo: toWei(1.2),
+  rewardAmountDefo: toWei(0.86),
   //dai goes first, defo second
   price: [toWei(100), toWei(20)],
   taperRewardsThresholdDefo: toWei(30),
@@ -142,7 +142,7 @@ export const RUBY_GEM: GemTypeConfigStruct = {
 
 export const DIAMOND_GEM: GemTypeConfigStruct = {
   maintenanceFeeDai: toWei(24),
-  rewardAmountDefo: toWei(5),
+  rewardAmountDefo: toWei(3.5),
   //dai goes first, defo second
   price: [toWei(400), toWei(80)],
   taperRewardsThresholdDefo: toWei(120),
@@ -173,5 +173,12 @@ export const CONFIG_PER_NETWORK: {
     },
     gems: GEM_TYPES_CONFIG,
   },
-  43114: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
+  43114: {
+    protocol: {
+      ...PROTOCOL_CONFIG,
+      mintLock: true,
+      transferLock: true,
+    },
+    gems: GEM_TYPES_CONFIG,
+  },
 };
