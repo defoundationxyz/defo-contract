@@ -32,6 +32,18 @@ const networks: NetworksUserConfig = {
       count: 7,
     },
   },
+  mainnet: {
+    chainId: 43114,
+    url: avalancheMainnetJsonRPCUrl,
+    accounts: [
+      process.env.MAINNET_DEPLOYER_PRIVATE_KEY ?? "",
+      process.env.MAINNET_TREASURY_WALLET_PRIVATE_KEY ?? "",
+      process.env.MAINNET_DONATIONS_WALLET_PRIVATE_KEY ?? "",
+      process.env.MAINNET_TEAM_WALLET_PRIVATE_KEY ?? "",
+      process.env.MAINNET_VAULT_PRIVATE_KEY ?? "",
+      process.env.MAINNET_REWARD_POOL_PRIVATE_KEY ?? "",
+    ],
+  },
 };
 
 export default networks;
