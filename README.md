@@ -65,9 +65,16 @@ yarn dev
 The contract is built as an EIP-2535 Diamond, implementing ERC-721 functionality covering Yield Gem
 NFTs. DEFO Token is a separate ERC-20 token.
 
-### Testing on Avalanche FUJI
+### Addresses
 
-#### Addresses
+#### Avalanche Mainnet
+
+| Contract                                       | Address                                      |
+|------------------------------------------------|----------------------------------------------|
+| DEFO Token ERC-20                              | [0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693](https://testnet.snowtrace.io/address/0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693) |
+| DEFO Protocol Main Contract ERC-721 compatible | [0xa47f856CD11513DB4E723c03990292f6c2FAC6b7](https://testnet.snowtrace.io/address/0xa47f856CD11513DB4E723c03990292f6c2FAC6b7) |
+
+#### Avalanche Fuji Testnet
 
 | Contract                                       | Address                                      |
 |------------------------------------------------|----------------------------------------------|
@@ -86,6 +93,8 @@ is [0xd7f655E3376cE2D7A2b08fF01Eb3B1023191A901](https://testnet.snowtrace.io/add
 .<br>
 DAI-DEFO liquidity pair is created
 at [0x27aa1a537313396ACc8b3c594a8441ae073d8750](https://testnet.snowtrace.io/address/0x27aa1a537313396ACc8b3c594a8441ae073d8750)
+
+### Testing on Avalanche FUJI
 
 #### Configuration
 

@@ -1,7 +1,7 @@
 import { CONFIG_PER_NETWORK, walletNames } from "@config";
-import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS } from "@constants/addresses";
+import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS, MAINNET_DEFO_GNOSIS_MULTISIG } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
-import { getContractWithSigner, isFuji, namedSigner } from "@utils/chain.helper";
+import { getContractWithSigner, isFuji, isMainnet, namedSigner } from "@utils/chain.helper";
 import {
   deployAnnounce,
   deployError,
@@ -52,7 +52,7 @@ const func: DeployFunction = async hre => {
     defoTokenDeployment.address!,
   ];
   const wallets = [
-    treasury,
+    (await isMainnet(hre)) ? MAINNET_DEFO_GNOSIS_MULTISIG : treasury,
     rewardPool,
     pairAddress,
     team,

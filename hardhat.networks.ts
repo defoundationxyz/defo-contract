@@ -1,6 +1,6 @@
 import { NetworksUserConfig } from "hardhat/src/types/config";
 
-import { accounts } from "./hardhat.accounts";
+import { accounts, mainnetAccounts } from "./hardhat.accounts";
 
 export const avalancheMainnetJsonRPCUrl: string =
   process.env.MAINNET_RPC_URL || "https://api.avax.network/ext/bc/C/rpc";
@@ -31,6 +31,11 @@ const networks: NetworksUserConfig = {
       initialIndex: 0,
       count: 7,
     },
+  },
+  mainnet: {
+    chainId: 43114,
+    url: avalancheMainnetJsonRPCUrl,
+    accounts: mainnetAccounts,
   },
 };
 
