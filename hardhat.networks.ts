@@ -1,6 +1,6 @@
 import { NetworksUserConfig } from "hardhat/src/types/config";
 
-import { accounts } from "./hardhat.accounts";
+import { accounts, mainnetAccounts } from "./hardhat.accounts";
 
 export const avalancheMainnetJsonRPCUrl: string =
   process.env.MAINNET_RPC_URL || "https://api.avax.network/ext/bc/C/rpc";
@@ -35,14 +35,7 @@ const networks: NetworksUserConfig = {
   mainnet: {
     chainId: 43114,
     url: avalancheMainnetJsonRPCUrl,
-    accounts: [
-      process.env.MAINNET_DEPLOYER_PRIVATE_KEY ?? "",
-      process.env.MAINNET_TREASURY_WALLET_PRIVATE_KEY ?? "",
-      process.env.MAINNET_DONATIONS_WALLET_PRIVATE_KEY ?? "",
-      process.env.MAINNET_TEAM_WALLET_PRIVATE_KEY ?? "",
-      process.env.MAINNET_VAULT_PRIVATE_KEY ?? "",
-      process.env.MAINNET_REWARD_POOL_PRIVATE_KEY ?? "",
-    ],
+    accounts: mainnetAccounts,
   },
 };
 

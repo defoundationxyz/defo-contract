@@ -20,6 +20,16 @@ type NamedAccounts<AccountName extends string = string, NetworkName extends stri
 
 const balance = "100000000000000000000000";
 
+const mainnetAccounts = [
+  process.env.MAINNET_DEPLOYER_PRIVATE_KEY ?? "",
+  process.env.MAINNET_TREASURY_PRIVATE_KEY ?? "",
+  process.env.MAINNET_DONATIONS_WALLET_PRIVATE_KEY ?? "",
+  process.env.MAINNET_TEAM_WALLET_PRIVATE_KEY ?? "",
+  process.env.MAINNET_VAULT_PRIVATE_KEY ?? "",
+  process.env.MAINNET_REWARD_POOL_PRIVATE_KEY ?? "",
+  process.env.MAINNET_DEFO_TOKEN_PRIVATE_KEY ?? "",
+];
+
 const accounts: HardhatNetworkAccountsUserConfig = [
   {
     privateKey: process.env.DEPLOYER_PRIVATE_KEY || "",
@@ -85,4 +95,4 @@ if (Object.values(accounts).length < 7) {
   throw new Error("Please check you've set all six different private keys in the .env file");
 }
 
-export { NamedAccounts, accounts, namedAccountsIndex };
+export { NamedAccounts, accounts, mainnetAccounts, namedAccountsIndex };
