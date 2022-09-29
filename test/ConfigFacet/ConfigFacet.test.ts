@@ -55,6 +55,8 @@ describe("ConfigFacet", () => {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             expect(etalon[etalonKey].toString().toUpperCase()).to.be.equal(
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               toCompare[etalonKey].toString().toUpperCase(),
             ),
           );
