@@ -1,4 +1,4 @@
-import { NetworksUserConfig } from "hardhat/src/types/config";
+import { NetworksUserConfig } from "hardhat/types/config";
 
 import { accounts, mainnetAccounts } from "./hardhat.accounts";
 
@@ -21,6 +21,14 @@ const networks: NetworksUserConfig = {
   },
   localhost: {
     url: "http://127.0.0.1:8545",
+  },
+  staging: {
+    url: "http://127.0.0.1:8545",
+    saveDeployments: false,
+    companionNetworks: {
+      m: "mainnet",
+    },
+    accounts: mainnetAccounts,
   },
   fuji: {
     chainId: 43113,
