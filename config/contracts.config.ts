@@ -13,7 +13,7 @@ export const fromWei = ethers.utils.formatEther;
 export const GEMS: Record<GemNames, number> = {
   sapphire: 0,
   ruby: 1,
-  diamond: 2,
+  diamond: 2
 };
 export const gemName = (gemNumber: number) =>
   (Object.keys(GEMS) as Array<GemNames>).find(key => GEMS[key] === gemNumber);
@@ -59,7 +59,7 @@ export enum Wallets {
   Treasury,
   RewardPool,
   LiquidityPair,
-  Team,
+  Stabilizer,
   Charity,
   Vault,
   RedeemContract,
@@ -90,7 +90,7 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
       //   RewardPool,
       REWARD_DAI_RATE,
       //   LiquidityPair,
-      LIQUIDITY_DAI_RATE,
+      LIQUIDITY_DAI_RATE
     ],
     //DEFO distribution
     [
@@ -99,8 +99,8 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
       //   RewardPool,
       REWARD_DEFO_RATE,
       //   LiquidityPair,
-      LIQUIDITY_DEFO_RATE,
-    ],
+      LIQUIDITY_DEFO_RATE
+    ]
   ],
   maintenancePeriod: SECONDS_IN_A_MONTH,
   rewardPeriod: SECONDS_IN_A_WEEK,
@@ -115,8 +115,8 @@ export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wall
   defoTokenLimitConfig: {
     saleLimitPeriod: SECONDS_IN_A_DAY,
     saleLimitAmount: ethers.constants.MaxUint256,
-    limitByReward: true,
-  },
+    limitByReward: true
+  }
 };
 
 //====== Gem Types Config ========
@@ -128,7 +128,7 @@ export const SAPHIRE_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(25), toWei(5)],
   taperRewardsThresholdDefo: toWei(7.5),
-  maxMintsPerLimitWindow: 16,
+  maxMintsPerLimitWindow: 16
 };
 
 export const RUBY_GEM: GemTypeConfigStruct = {
@@ -137,7 +137,7 @@ export const RUBY_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(100), toWei(20)],
   taperRewardsThresholdDefo: toWei(30),
-  maxMintsPerLimitWindow: 4,
+  maxMintsPerLimitWindow: 4
 };
 
 export const DIAMOND_GEM: GemTypeConfigStruct = {
@@ -146,7 +146,7 @@ export const DIAMOND_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(400), toWei(80)],
   taperRewardsThresholdDefo: toWei(120),
-  maxMintsPerLimitWindow: 1,
+  maxMintsPerLimitWindow: 1
 };
 
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
@@ -159,7 +159,7 @@ export const CONFIG_PER_NETWORK: {
 } = {
   1337: {
     protocol: PROTOCOL_CONFIG,
-    gems: GEM_TYPES_CONFIG,
+    gems: GEM_TYPES_CONFIG
   },
   31337: { protocol: PROTOCOL_CONFIG, gems: GEM_TYPES_CONFIG },
   43113: {
@@ -169,16 +169,16 @@ export const CONFIG_PER_NETWORK: {
       maintenancePeriod: SECONDS_IN_A_DAY * 2,
       rewardPeriod: SECONDS_IN_AN_HOUR,
       taxScaleSinceLastClaimPeriod: SECONDS_IN_A_DAY * 2,
-      mintLimitWindow: 60 * 10,
+      mintLimitWindow: 60 * 10
     },
-    gems: GEM_TYPES_CONFIG,
+    gems: GEM_TYPES_CONFIG
   },
   43114: {
     protocol: {
       ...PROTOCOL_CONFIG,
       mintLock: true,
-      transferLock: true,
+      transferLock: true
     },
-    gems: GEM_TYPES_CONFIG,
-  },
+    gems: GEM_TYPES_CONFIG
+  }
 };

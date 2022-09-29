@@ -29,7 +29,7 @@ const func: DeployFunction = async hre => {
     vault,
     rewardPool,
     donations,
-    team,
+    stabilizer,
   } = await getNamedAccounts();
   deployAnnounce("\n\nConfiguring the protocol...");
 
@@ -55,7 +55,7 @@ const func: DeployFunction = async hre => {
     (await isMainnet(hre)) ? MAINNET_DEFO_GNOSIS_MULTISIG : treasury,
     rewardPool,
     pairAddress,
-    team,
+    stabilizer,
     donations,
     vault,
     deployer, //redeem contract goes here

@@ -6,7 +6,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import { namedAccountsIndex } from "../hardhat.accounts";
 
-
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const {
     getNamedAccounts,
@@ -28,7 +27,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       namedAccounts.vault === signers[namedAccountsIndex.vault as number].address &&
       namedAccounts.rewardPool === signers[namedAccountsIndex.rewardPool as number].address &&
       namedAccounts.donations === signers[namedAccountsIndex.donations as number].address &&
-      namedAccounts.team === signers[namedAccountsIndex.team as number].address,
+      namedAccounts.stabilizer === signers[namedAccountsIndex.stabilizer as number].address,
     chalk.red(
       "Configuration error, named accounts do not correspond to signers: check the order of the Hardhat accounts.",
     ),
@@ -41,7 +40,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     "defoTokenOwner",
     "rewardPool",
     "vault",
-    "team",
+    "stabilizer",
   ];
 
   const namesAccountsWithBalance = await Promise.all(

@@ -11,7 +11,7 @@ export default task("liquidity", "queries and adds DAI and DEFO liquidity to the
   .addOptionalParam("defo", "DEFO to add to the pool", undefined, types.int)
   .setAction(async ({ dai, defo }, hre) => {
     const { getNamedAccounts, ethers } = hre;
-    const { team, dexRouter, dai: daiAddress } = await getNamedAccounts();
+    const { stabilizer, dexRouter, dai: daiAddress } = await getNamedAccounts();
     const { Zero, MaxUint256 } = ethers.constants;
 
     await networkInfo(hre, info);
@@ -34,7 +34,7 @@ export default task("liquidity", "queries and adds DAI and DEFO liquidity to the
           toWei(defo),
           Zero,
           Zero,
-          team,
+          stabilizer,
           MaxUint256,
         )
       ).wait();

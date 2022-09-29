@@ -50,10 +50,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
                 }
             }
         }
-        //mint to team to update pair reserves
-        uint TEAM_WALLET_INDEX = 3;
+        //mint to stabilizer to update pair reserves
+        uint STABILIZER_WALLET_INDEX = 3;
         uint DEX_LP_WALLET_INDEX = 2;
-        IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
+        IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[STABILIZER_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
         Booster boost = Booster.None;
         for (uint256 booster = 1; booster <= 2; booster++) {
