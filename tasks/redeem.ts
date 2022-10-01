@@ -81,9 +81,8 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s).`,
         );
         const toMint = nodeBalance.balance - alreadyMintedBalance;
-        if (toMint === 0) info(`Nothing to mint, skipping.`);
-        if (test) {
-          info("Skipping mint due to test flag");
+        if (toMint === 0 || test) {
+          info(`Nothing to mint or test mode, skipping`);
         } else {
           await (
             await defoDiamond.mintToFew(
