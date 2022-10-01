@@ -39,7 +39,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         // check if there's enough DAI and DEFO
         for (uint i = 0; i < PAYMENT_TOKENS; i++) {
             require(
-                s.config.paymentTokens[i].balanceOf(minter) > s.gemTypes[_gemTypeId].price[i],
+                s.config.paymentTokens[i].balanceOf(minter) >= s.gemTypes[_gemTypeId].price[i],
                 "Insufficient balance"
             );
         }

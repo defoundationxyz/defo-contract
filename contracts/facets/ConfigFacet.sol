@@ -105,4 +105,10 @@ contract ConfigFacet is BaseFacet, IConfig {
         return s.gemTypes;
     }
 
+    function zeroMintCount(uint8 _gemTypeId) external onlyOwner {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        GemTypeMintWindow storage windowStorage = s.gemTypesMintWindows[_gemTypeId];
+        windowStorage.mintCount = 0;
+    }
+
 }

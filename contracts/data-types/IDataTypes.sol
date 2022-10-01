@@ -144,7 +144,7 @@ uint256 constant TAX_TIERS = 5;
         uint256 rewardAmountDefo;
         uint256[PAYMENT_TOKENS] price;
         uint256 taperRewardsThresholdDefo;
-        uint8 maxMintsPerLimitWindow;
+        uint256 maxMintsPerLimitWindow;
     }
 
 /**
