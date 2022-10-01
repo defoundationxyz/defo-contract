@@ -20,6 +20,11 @@ export default task("redeem", "mints gems for the pre-sold nodes")
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
     const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
+    const { deployer } = await hre.getNamedAccounts();
+
+    const baseNonce = ethers.provider.getTransactionCount(deployer);
+    let nonceOffset = 0;
+    const getNonce = () => baseNonce.then(nonce => nonce + nonceOffset++);
 
     const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
 
@@ -86,6 +91,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
               nodeHolder,
               PRESALE_NODES[nodeContractName].boost,
               toMint,
+              { nonce: getNonce() },
             )
           ).wait();
           success(`Minted ${toMint} gems`);
