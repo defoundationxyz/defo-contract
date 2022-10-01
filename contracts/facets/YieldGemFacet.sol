@@ -81,13 +81,21 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function mintToFew(uint8 _gemType, address _to, Booster _booster, uint8 _number) public onlyRedeemContract {
         //just mint with no payment, already paid on presale
         for (uint8 i = 0; i < _number; i++) {
-            mintTo(_gemType, _to, _booster);
+            uint256 tokenId = _mint(_gemType, _to, _booster);
+            s.gems[tokenId].presold = true;
+            if (uint(_booster) > 0)
+                s.usersNextGemBooster[_to][_gemType][_booster]++;
         }
     }
 
     function mintToBulk(uint8[] calldata _gemType, address[] calldata _to, Booster[] calldata _booster, uint8[] calldata _number) public onlyRedeemContract {
         for (uint j = 0; j < _to.length; j++) {
-            mintToFew(_gemType[j], _to[j], _booster[j], _number[j]);
+            for (uint8 i = 0; i < _number[j]; i++) {
+                uint256 tokenId = _mint(_gemType[j], _to[j], _booster[j]);
+                s.gems[tokenId].presold = true;
+                if (uint(_booster[j]) > 0)
+                    s.usersNextGemBooster[_to[j]][_gemType[j]][_booster[j]]++;
+            }
         }
     }
 
