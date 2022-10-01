@@ -65,7 +65,7 @@ uint256 constant TAX_TIERS = 5;
         Treasury,
         RewardPool,
         LiquidityPair,
-        Team,
+        Stabilizer,
         Charity,
         Vault,
         RedeemContract

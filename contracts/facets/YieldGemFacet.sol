@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeERC20.sol";
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoePair.sol";
 import "../interfaces/IYieldGem.sol";
+import "../interfaces/IPresaleNode.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
@@ -19,7 +20,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /* ====================== Modifiers ====================== */
 
     modifier onlyRedeemContract() {
-        require(s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
+        require(
+            s.config.wallets[uint(Wallets.Stabilizer)] == _msgSender() ||
+            s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
         _;
     }
 
@@ -75,6 +78,18 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
             s.usersNextGemBooster[_to][_gemType][_booster]++;
     }
 
+    function mintToFew(uint8 _gemType, address _to, Booster _booster, uint8 _number) public onlyRedeemContract {
+        //just mint with no payment, already paid on presale
+        for (uint8 i = 0; i < _number; i++) {
+            mintTo(_gemType, _to, _booster);
+        }
+    }
+
+    function mintToBulk(uint8[] calldata _gemType, address[] calldata _to, Booster[] calldata _booster, uint8[] calldata _number) public onlyRedeemContract {
+        for (uint j = 0; j < _to.length; j++) {
+            mintToFew(_gemType[j], _to[j], _booster[j], _number[j]);
+        }
+    }
 
     function createBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
         s.usersNextGemBooster[_to][_gemType][_booster]++;

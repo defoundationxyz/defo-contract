@@ -10,11 +10,12 @@ export default task("permit", "sign 712 permit allowing all facets of DEFO Diamo
     undefined,
     types.string,
   )
-  .setAction(async ({ user }, hre: HardhatRuntimeEnvironment) => {
+  .addOptionalParam("spender", "spender contract to grant approval to", undefined, types.string)
+  .setAction(async ({ user, spender }, hre: HardhatRuntimeEnvironment) => {
     const { getNamedAccounts, deployments, ethers } = hre;
     const { deployer, dai } = await getNamedAccounts();
     await networkInfo(hre, info);
-    const { address: spenderAddress } = await deployments.get("DEFODiamond");
+    const { address: spenderAddress } = spender ?? (await deployments.get("DEFODiamond"));
 
     const signer = user ?? deployer;
     info(`Signer ${signer}`);
