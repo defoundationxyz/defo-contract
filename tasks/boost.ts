@@ -92,7 +92,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
                   })
                 ).wait();
                 success(
-                  `Presold boosted ${gemId} with booster ${booster} (available boosters was ${availableBoosters})`,
+                  `Presold  ${gemId} (presold: ${gem.presold}) with booster ${booster} (available boosters was ${availableBoosters})`,
                 );
               }
             }
