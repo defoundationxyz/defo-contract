@@ -75,13 +75,15 @@ export default task("boost", "mints gems for the pre-sold nodes")
             );
             const gem = await defoDiamond.getGemInfo(gemId);
             if (
-              availableBoosters &&
+              availableBoosters.toNumber() > 0 &&
               // gem.presold &&
               gem.booster === 0 &&
               gem.gemTypeId === PRESALE_NODES[nodeContractName].type
             ) {
               if (test) {
-                info(`Test mode, skipping boost ${gemId} with booster ${booster}`);
+                info(
+                  `Test mode, skipping boost ${gemId} with booster ${booster} (available boosters ${availableBoosters}`,
+                );
               } else {
                 await (await defoDiamond.setBooster(gemId, booster, { nonce: getNonce() })).wait();
                 await (
