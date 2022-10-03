@@ -103,6 +103,10 @@ export default task("redeem", "mints gems for the pre-sold nodes")
             )
           ).wait();
           success(`Minted ${toMint} gems`);
+        }
+        if (toBoost > 0 || test) {
+          info(`Nothing to boost or test mode, skipping`);
+        } else {
           while (toBoost > 0) {
             await (
               await defoDiamond.createBooster(
@@ -114,7 +118,10 @@ export default task("redeem", "mints gems for the pre-sold nodes")
             ).wait();
             toBoost--;
           }
-
+        }
+        if (toBoost < 0 || test) {
+          info(`No boosters to erase or test mode, skipping`);
+        } else {
           while (toBoost < 0) {
             await (
               await defoDiamond.removeBooster(
