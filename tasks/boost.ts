@@ -91,7 +91,9 @@ export default task("boost", "mints gems for the pre-sold nodes")
                     nonce: getNonce(),
                   })
                 ).wait();
-                success(`Presold boosted ${gemId} with booster ${booster}`);
+                success(
+                  `Presold boosted ${gemId} with booster ${booster} (available boosters was ${availableBoosters})`,
+                );
               }
             }
           }
