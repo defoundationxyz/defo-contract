@@ -13,7 +13,7 @@ import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 
-export default task("redeem", "mints gems for the pre-sold nodes")
+export default task("boost", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
   .addOptionalParam("node", "node name to redeem", undefined, types.string)
   .setAction(async ({ test, node }, hre: HardhatRuntimeEnvironment) => {
@@ -104,7 +104,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           ).wait();
           success(`Minted ${toMint} gems`);
         }
-        if (toBoost > 0 || test) {
+        if (toBoost <= 0 || test) {
           info(`Nothing to boost or test mode, skipping`);
         } else {
           while (toBoost > 0) {
@@ -119,7 +119,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
             toBoost--;
           }
         }
-        if (toBoost < 0 || test) {
+        if (toBoost <= 0 || test) {
           info(`No boosters to erase or test mode, skipping`);
         } else {
           while (toBoost < 0) {
