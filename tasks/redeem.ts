@@ -13,7 +13,7 @@ import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 
-export default task("boost", "mints gems for the pre-sold nodes")
+export default task("redeem", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
   .addOptionalParam("node", "node name to redeem", undefined, types.string)
   .setAction(async ({ test, node }, hre: HardhatRuntimeEnvironment) => {
