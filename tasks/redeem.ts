@@ -134,6 +134,17 @@ export default task("redeem", "mints gems for the pre-sold nodes")
             toBoost++;
           }
         }
+
+        if (test) {
+          info(`test mode, skipping`);
+        } else {
+          for (const gemId of gemIds) {
+            const gem = await defoDiamond.getGemInfo(gemId);
+            if (gem.presold) {
+              await (await defoDiamond.setLaunchTime(gemId, 1664643600)).wait();
+            }
+          }
+        }
       }
     }
   });

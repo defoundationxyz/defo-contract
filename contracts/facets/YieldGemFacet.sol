@@ -107,6 +107,19 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         s.usersNextGemBooster[_to][_gemType][_booster]--;
     }
 
+    function setLaunchTime(uint256 _tokenId, uint32 time) public onlyRedeemContract {
+        if (s.gems[_tokenId].presold) {
+            s.gems[_tokenId].lastMaintenanceTime = time;
+            s.gems[_tokenId].lastRewardWithdrawalTime = time;
+            s.gems[_tokenId].mintTime = time;
+        }
+    }
+
+    function setBooster(uint256 _tokenId, Booster _booster) public onlyRedeemContract {
+        s.gems[_tokenId].booster = _booster;
+    }
+
+
     function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];
     }

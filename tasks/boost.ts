@@ -3,7 +3,7 @@
 // 1. sort these receivers, there would be 9 types: 3 gems, and 3 x 2 boosted ones
 // 2. mint in the loop, checking if the address is a presale gem holder, once minted - deactivate gems
 // Add separate task to deploy a test contract and a test node to check
-import { PRESALE_NODES, presaleNodes } from "@constants/addresses";
+import { PRESALE_NODES } from "@constants/addresses";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
 import { isFuji } from "@utils/chain.helper";
@@ -15,7 +15,7 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export default task("boost", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
-  .setAction(async ({ test, node }, hre: HardhatRuntimeEnvironment) => {
+  .setAction(async ({ test }, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
     const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
@@ -25,8 +25,9 @@ export default task("boost", "mints gems for the pre-sold nodes")
     let nonceOffset = 0;
     const getNonce = () => baseNonce.then(nonce => nonce + nonceOffset++);
 
-    const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
+    const nodes = ["SapphireNode", "RubyNode", "DiamondNode"] as const;
 
+    info("Collecting non-boosters from 1st presale...");
     for (const nodeContractName of nodes) {
       const nodeAddress = (await isFuji(hre))
         ? (await deployments.get(nodeContractName)).address
@@ -35,7 +36,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
       const totalSupply = (await contract.totalSupply()).toNumber();
       const activeSale = await contract.activeSale();
       announce(
-        `\n\nRedeeming ${nodeContractName}, ${nodeAddress}, supply: ${totalSupply} node(s), active sale: ${activeSale}`,
+        `\n\nBoosting ${nodeContractName}, ${nodeAddress}, supply: ${totalSupply} node(s), active sale: ${activeSale}`,
       );
 
       //collecting presold node balances
@@ -60,40 +61,33 @@ export default task("boost", "mints gems for the pre-sold nodes")
           info(`node index ${nodeIndex} doesn't exist`);
         }
       }
-      info("Pre-sold collected. Now minting yield gems...");
+      info("Pre-sold collected. Now boosting if there are boosters...");
       //checking how many exist already to avoid double minting and minting the rest
       for (const nodeBalance of nodeBalances) {
         const nodeHolder = nodeBalance.address;
         const gemIds = await defoDiamond.getGemIdsOf(nodeHolder);
-        let alreadyMintedBalance: number = 0;
         for (const gemId of gemIds) {
-          const gem = await defoDiamond.getGemInfo(gemId);
-          if (
-            gem.presold &&
-            gem.gemTypeId === PRESALE_NODES[nodeContractName].type &&
-            gem.booster === PRESALE_NODES[nodeContractName].boost
-          ) {
-            alreadyMintedBalance++;
+          for (const booster of [1, 2]) {
+            const availableBoosters = await defoDiamond.getBooster(
+              nodeHolder,
+              PRESALE_NODES[nodeContractName].type,
+              booster,
+            );
+            const gem = await defoDiamond.getGemInfo(gemId);
+            if (
+              availableBoosters &&
+              // gem.presold &&
+              gem.booster === 0 &&
+              gem.gemTypeId === PRESALE_NODES[nodeContractName].type
+            ) {
+              if (test) {
+                info(`Test mode, skipping boost ${gemId} with booster ${booster}`);
+              } else {
+                await (await defoDiamond.setBooster(gemId, booster, { nonce: getNonce() })).wait();
+                success(`Presold boosted ${gemId} with booster ${booster}`);
+              }
+            }
           }
-        }
-        info(
-          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s).`,
-        );
-        const toMint = nodeBalance.balance - alreadyMintedBalance;
-        if (toMint === 0 || test) {
-          info(`Nothing to mint or test mode, skipping`);
-        } else {
-          if (PRESALE_NODES[nodeContractName].boost === 2)
-            for (let i = 0; i < toMint; i++)
-              await (
-                await defoDiamond.createBooster(
-                  nodeHolder,
-                  PRESALE_NODES[nodeContractName].type,
-                  PRESALE_NODES[nodeContractName].boost,
-                  { nonce: getNonce() },
-                )
-              ).wait();
-          success(`Minted ${toMint} gems`);
         }
       }
     }
