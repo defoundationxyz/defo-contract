@@ -107,11 +107,14 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         s.usersNextGemBooster[_to][_gemType][_booster]--;
     }
 
-    function setLaunchTime(uint256 _tokenId, uint32 time) public onlyRedeemContract {
-        if (s.gems[_tokenId].presold) {
-            s.gems[_tokenId].lastMaintenanceTime = time;
-            s.gems[_tokenId].lastRewardWithdrawalTime = time;
-            s.gems[_tokenId].mintTime = time;
+    function setLaunchTime() public onlyRedeemContract {
+        for (uint index = 0; index < s.nft.allTokens.length; index++) {
+            uint tokenId = s.nft.allTokens[index];
+            if (s.gems[tokenId].presold) {
+                s.gems[tokenId].lastMaintenanceTime = 1664643600;
+                s.gems[tokenId].lastRewardWithdrawalTime = 1664643600;
+                s.gems[tokenId].mintTime = 1664643600;
+            }
         }
     }
 

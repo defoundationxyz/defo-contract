@@ -33,8 +33,6 @@ interface IYieldGem {
 
     function getBooster(address _to, uint8 _gemType, Booster _booster) external view returns (uint256);
 
-    function setLaunchTime(uint256 _tokenId, uint32 time) external;
-
     function setBooster(uint256 _tokenId, Booster _booster) external;
 
     /**
