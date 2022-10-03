@@ -84,10 +84,10 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           PRESALE_NODES[nodeContractName].boost,
         );
         const toMint = nodeBalance.balance - alreadyMintedBalance;
-        let toBoost = PRESALE_NODES[nodeContractName].boost - boosters.toNumber();
+        let toBoost = PRESALE_NODES[nodeContractName].boost * toMint - boosters.toNumber();
 
         info(
-          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, to boos ${toBoost}`,
+          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, to boost ${toBoost}`,
         );
 
         if (toMint === 0 || test) {
