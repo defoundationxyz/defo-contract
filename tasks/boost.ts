@@ -15,7 +15,6 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export default task("addbooster", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
-  .addOptionalParam("node", "node name to redeem", undefined, types.string)
   .setAction(async ({ test, node }, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
