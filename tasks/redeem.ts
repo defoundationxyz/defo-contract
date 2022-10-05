@@ -7,7 +7,7 @@ import { PRESALE_NODES, presaleNodes } from "@constants/addresses";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
 import { isFuji } from "@utils/chain.helper";
-import { announce, info, networkInfo, success } from "@utils/output.helper";
+import { announce, info, networkInfo } from "@utils/output.helper";
 import { Address } from "hardhat-deploy/dist/types";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -86,7 +86,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           PRESALE_NODES[nodeContractName].type,
           PRESALE_NODES[nodeContractName].boost,
         );
-        const toMint = nodeBalance.balance - alreadyMintedBalance;
+        // const toMint = nodeBalance.balance - alreadyMintedBalance;
 
         let releasedBoosters = 0;
         for (const gemId of gemIds) {
@@ -103,23 +103,24 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           (PRESALE_NODES[nodeContractName].boost + 1) * nodeBalance.balance - boosters.toNumber() - releasedBoosters;
 
         info(
-          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, to boost ${toBoost})`,
+          // `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, create boosters ${toBoost})`,
+          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). Create boosters ${toBoost})`,
         );
 
-        if (toMint <= 0 || test) {
-          info(`Nothing to mint or test mode, skipping`);
-        } else {
-          await (
-            await defoDiamond.mintToFew(
-              PRESALE_NODES[nodeContractName].type,
-              nodeHolder,
-              PRESALE_NODES[nodeContractName].boost,
-              toMint,
-              { nonce: getNonce() },
-            )
-          ).wait();
-          success(`Minted ${toMint} gems`);
-        }
+        // if (toMint <= 0 || test) {
+        //   info(`Nothing to mint or test mode, skipping`);
+        // } else {
+        //   await (
+        //     await defoDiamond.mintToFew(
+        //       PRESALE_NODES[nodeContractName].type,
+        //       nodeHolder,
+        //       PRESALE_NODES[nodeContractName].boost,
+        //       toMint,
+        //       { nonce: getNonce() },
+        //     )
+        //   ).wait();
+        //   success(`Minted ${toMint} gems`);
+        // }
         if (toBoost <= 0 || test) {
           info(`Nothing to boost or test mode, skipping`);
         } else {
