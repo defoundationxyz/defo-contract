@@ -7,7 +7,7 @@ import { PRESALE_NODES } from "@constants/addresses";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
 import { isFuji } from "@utils/chain.helper";
-import { announce, info, networkInfo } from "@utils/output.helper";
+import { announce, info, networkInfo, success } from "@utils/output.helper";
 import { Address } from "hardhat-deploy/dist/types";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -17,7 +17,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
   .addOptionalParam("node", "node name to redeem", undefined, types.string)
   .addOptionalParam("user", "user", undefined, types.string)
-  .setAction(async ({ test, node, user }, hre: HardhatRuntimeEnvironment) => {
+  .setAction(async ({ test, _, user }, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
     const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
@@ -129,33 +129,67 @@ export default task("redeem", "mints gems for the pre-sold nodes")
         //   ).wait();
         //   success(`Minted ${toMint} gems`);
         // }
-        if (toBoost <= 0 || test) {
-          info(`Nothing to boost or test mode, skipping`);
+        if (toBoost <= 0) {
+          info(`Nothing to boost, skipping`);
         } else {
           while (toBoost > 0) {
-            await (
-              await defoDiamond.createBooster(
-                nodeHolder,
-                PRESALE_NODES[nodeContractName].type,
-                PRESALE_NODES[nodeContractName].boost,
-                { nonce: getNonce() },
-              )
-            ).wait();
+            if (!test)
+              await (
+                await defoDiamond.createBooster(
+                  nodeHolder,
+                  PRESALE_NODES[nodeContractName].type,
+                  PRESALE_NODES[nodeContractName].boost,
+                  { nonce: getNonce() },
+                )
+              ).wait();
+            else `mock for create booster`;
             toBoost--;
           }
         }
-        if (toBoost > 0 || test) {
+        if (toBoost > 0) {
           info(`No boosters to erase or test mode, skipping`);
         } else {
           while (toBoost < 0) {
-            await (
-              await defoDiamond.removeBooster(
-                nodeHolder,
-                PRESALE_NODES[nodeContractName].type,
-                PRESALE_NODES[nodeContractName].boost,
-                { nonce: getNonce() },
-              )
-            ).wait();
+            if (
+              (
+                await defoDiamond.getBooster(
+                  nodeHolder,
+                  PRESALE_NODES[nodeContractName].type,
+                  PRESALE_NODES[nodeContractName].boost,
+                )
+              ).toNumber() > 0
+            ) {
+              if (!test)
+                await (
+                  await defoDiamond.removeBooster(
+                    nodeHolder,
+                    PRESALE_NODES[nodeContractName].type,
+                    PRESALE_NODES[nodeContractName].boost,
+                    { nonce: getNonce() },
+                  )
+                ).wait();
+              else `mock for deletefree booster`;
+              success(`Deleted free booster ${PRESALE_NODES[nodeContractName].boost}`);
+            } else {
+              for (const gemId of gemIds) {
+                const gem = await defoDiamond.getGemInfo(gemId);
+                if (
+                  !gem.presold &&
+                  gem.gemTypeId === PRESALE_NODES[nodeContractName].type &&
+                  gem.booster === PRESALE_NODES[nodeContractName].boost
+                ) {
+                  if (!test)
+                    await (
+                      await defoDiamond.setBooster(gemId, 0, {
+                        nonce: getNonce(),
+                      })
+                    ).wait();
+                  else `mock for remove booster from gem ${gemId}`;
+                  success(`Removed booster from ${gemId}, booster was ${gem.booster}`);
+                  break;
+                }
+              }
+            }
             toBoost++;
           }
         }
