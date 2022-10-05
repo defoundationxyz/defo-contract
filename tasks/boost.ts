@@ -15,7 +15,8 @@ import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 export default task("boost", "mints gems for the pre-sold nodes")
   .addOptionalParam("test", "set true for testing balances, no minting, no state change", undefined, types.boolean)
-  .setAction(async ({ test }, hre: HardhatRuntimeEnvironment) => {
+  .addOptionalParam("user", "user", undefined, types.string)
+  .setAction(async ({ test, user }, hre: HardhatRuntimeEnvironment) => {
     const { deployments, ethers } = hre;
     await networkInfo(hre, info);
     const defoDiamond = await ethers.getContract<IDEFODiamond>("DEFODiamond");
@@ -47,6 +48,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
         try {
           const nodeId = await contract.tokenByIndex(nodeIndex);
           nodeHolder = await contract.ownerOf(nodeId);
+          if (user && user != nodeHolder) continue;
           const balance = (await contract.balanceOf(nodeHolder)).toNumber();
           const element = { address: nodeHolder, balance };
           if (!nodeBalances.find(el => el.address === nodeHolder)) {
@@ -65,6 +67,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
       //checking how many exist already to avoid double minting and minting the rest
       for (const nodeBalance of nodeBalances) {
         const nodeHolder = nodeBalance.address;
+        if (user && user != nodeHolder) continue;
         const gemIds = await defoDiamond.getGemIdsOf(nodeHolder);
         for (const gemId of gemIds) {
           for (const booster of [1, 2]) {

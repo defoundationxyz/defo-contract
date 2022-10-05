@@ -44,7 +44,6 @@ export default task("gems", "get gems info and balance information for the deplo
     // headliner, deployer data
     announce(`${participant} has ${await gemContract.balanceOf(participant)} gem(s)`);
     info(`Total Charity: ${fromWei(await gemContract.getTotalDonatedOf(participant))}`);
-
     // available boosts
     for (const gemType of types) {
       for (const boosterType of BOOSTERS) {
