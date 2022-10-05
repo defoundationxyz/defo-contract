@@ -87,13 +87,26 @@ export default task("redeem", "mints gems for the pre-sold nodes")
           PRESALE_NODES[nodeContractName].boost,
         );
         const toMint = nodeBalance.balance - alreadyMintedBalance;
-        let toBoost = PRESALE_NODES[nodeContractName].boost * nodeBalance.balance - boosters.toNumber();
+
+        let releasedBoosters = 0;
+        for (const gemId of gemIds) {
+          const gem = await defoDiamond.getGemInfo(gemId);
+          if (
+            gem.gemTypeId === PRESALE_NODES[nodeContractName].type &&
+            gem.booster === PRESALE_NODES[nodeContractName].boost
+          ) {
+            releasedBoosters++;
+          }
+        }
+
+        let toBoost =
+          (PRESALE_NODES[nodeContractName].boost + 1) * nodeBalance.balance - boosters.toNumber() - releasedBoosters;
 
         info(
-          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, to boost ${toBoost}`,
+          `\n${nodeHolder} with ${nodeBalance.balance} ${nodeContractName} pre-sold node(s) already has ${alreadyMintedBalance} presold DEFO yield gem(s) and ${boosters} booster(s). To mint ${toMint}, to boost ${toBoost})`,
         );
 
-        if (toMint === 0 || test) {
+        if (toMint <= 0 || test) {
           info(`Nothing to mint or test mode, skipping`);
         } else {
           await (
@@ -122,7 +135,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
             toBoost--;
           }
         }
-        if (toBoost <= 0 || test) {
+        if (toBoost > 0 || test) {
           info(`No boosters to erase or test mode, skipping`);
         } else {
           while (toBoost < 0) {
