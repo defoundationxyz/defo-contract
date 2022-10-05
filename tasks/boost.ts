@@ -26,9 +26,16 @@ export default task("boost", "mints gems for the pre-sold nodes")
     let nonceOffset = 0;
     const getNonce = () => baseNonce.then(nonce => nonce + nonceOffset++);
 
-    const nodes = ["SapphireNode", "RubyNode", "DiamondNode"] as const;
+    const nodes = [
+      "SapphireNodeOmega",
+      "RubyNodeOmega",
+      "DiamondNodeOmega",
+      "SapphireNodeDelta",
+      "RubyNodeDelta",
+      "DiamondNodeDelta",
+    ] as const;
 
-    info("Collecting non-boosters from 1st presale...");
+    info("Collecting all 2nd presale boosters...");
     for (const nodeContractName of nodes) {
       const nodeAddress = (await isFuji(hre))
         ? (await deployments.get(nodeContractName)).address
@@ -37,7 +44,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
       const totalSupply = (await contract.totalSupply()).toNumber();
       const activeSale = await contract.activeSale();
       announce(
-        `\n\nBoosting ${nodeContractName}, ${nodeAddress}, supply: ${totalSupply} node(s), active sale: ${activeSale}`,
+        `\n\nGetting owners of ${nodeContractName}, ${nodeAddress}, supply: ${totalSupply} node(s), active sale: ${activeSale}`,
       );
 
       //collecting presold node balances
@@ -63,7 +70,7 @@ export default task("boost", "mints gems for the pre-sold nodes")
           info(`node index ${nodeIndex} doesn't exist`);
         }
       }
-      info("Pre-sold collected. Now boosting if there are boosters...");
+      info("Pre-sold collected. Now boosting all 1st presold and bought if there are boosters...");
       //checking how many exist already to avoid double minting and minting the rest
       for (const nodeBalance of nodeBalances) {
         const nodeHolder = nodeBalance.address;
