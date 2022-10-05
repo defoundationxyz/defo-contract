@@ -30,6 +30,7 @@ export default task("redeem", "mints gems for the pre-sold nodes")
     const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
 
     for (const nodeContractName of nodes) {
+      if (!node.contains("Omega") && !node.contains("Delta")) continue;
       const nodeAddress = (await isFuji(hre))
         ? (await deployments.get(nodeContractName)).address
         : PRESALE_NODES[nodeContractName].address;
