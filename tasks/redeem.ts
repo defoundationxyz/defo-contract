@@ -3,7 +3,7 @@
 // 1. sort these receivers, there would be 9 types: 3 gems, and 3 x 2 boosted ones
 // 2. mint in the loop, checking if the address is a presale gem holder, once minted - deactivate gems
 // Add separate task to deploy a test contract and a test node to check
-import { PRESALE_NODES, presaleNodes } from "@constants/addresses";
+import { PRESALE_NODES } from "@constants/addresses";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { DiamondNode } from "@contractTypes/contracts/presale/presaleDiamond.sol";
 import { isFuji } from "@utils/chain.helper";
@@ -27,10 +27,17 @@ export default task("redeem", "mints gems for the pre-sold nodes")
     let nonceOffset = 0;
     const getNonce = () => baseNonce.then(nonce => nonce + nonceOffset++);
 
-    const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
+    // const nodes = node && presaleNodes.includes(node) ? [node as keyof typeof PRESALE_NODES] : presaleNodes;
+    const nodes = [
+      "SapphireNodeOmega",
+      "RubyNodeOmega",
+      "DiamondNodeOmega",
+      "SapphireNodeDelta",
+      "RubyNodeDelta",
+      "DiamondNodeDelta",
+    ] as const;
 
     for (const nodeContractName of nodes) {
-      if (!node.contains("Omega") && !node.contains("Delta")) continue;
       const nodeAddress = (await isFuji(hre))
         ? (await deployments.get(nodeContractName)).address
         : PRESALE_NODES[nodeContractName].address;
