@@ -1,4 +1,4 @@
-import { isMainnet } from "@utils/chain.helper";
+import { isFuji, isMainnet } from "@utils/chain.helper";
 import DAI_ABI from "abi/erc20-abi.json";
 import { Address } from "hardhat-deploy/dist/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
@@ -7,7 +7,7 @@ import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS, MAINNET_DAI_WHALE_ADDRESS } from
 
 export const beTheWhale = async (hre: HardhatRuntimeEnvironment, accountToFund: Address, amountToTransfer?: number) => {
   if (await isMainnet(hre)) throw new Error("Not available on mainnet");
-  if (hre.network.live) {
+  if (await isFuji(hre)) {
     for (const token of [FUJI_DAI_ADDRESS]) {
       const contract = await hre.ethers.getContractAt(DAI_ABI, token);
       const toTransfer = hre.ethers.utils.parseEther(

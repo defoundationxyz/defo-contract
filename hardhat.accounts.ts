@@ -79,7 +79,8 @@ const namedAccountsIndex: NamedAccounts = {
   forkedDefoToken: {
     43114: MAINNET_DEFO_ADDRESS,
     43113: FUJI_DEFO_ADDRESS,
-    1337: (process.env.FORK_ENABLED && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? null,
+    1337:
+      (process.env.FORK_DEFO_TOKEN && (process.env.FORK_TESTNET ? FUJI_DEFO_ADDRESS : MAINNET_DEFO_ADDRESS)) ?? null,
   },
   dexRouter: {
     43114: MAINNET_SWAPSICLE_ROUTER_ADDRESS,
