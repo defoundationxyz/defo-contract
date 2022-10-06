@@ -14,8 +14,8 @@ const func: DeployFunction = async hre => {
   const { Zero, MaxUint256 } = ethers.constants;
 
   if (!hre.network.live) {
-    const dai = 50000;
-    const defo = 10000;
+    const dai = 10000;
+    const defo = 2000;
     announce(`Adding liquidity to the DAI/DEFO pair and creating it if not exists: ${dai} DAI and ${defo} DEFO`);
 
     await hre.run("get-some-dai");
