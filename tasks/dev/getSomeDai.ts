@@ -12,7 +12,7 @@ export default task("get-some-dai", "Distribute DAI from AAVE")
     types.string,
   )
   .addOptionalParam("user", "user address to get", undefined, types.string)
-  .addOptionalParam("amount", "The amount to transfer to the deployer", 100_000, types.int)
+  .addOptionalParam("amount", "The amount to transfer to the deployer", 5_000, types.int)
   .setAction(async ({ account, user, amount }, hre) => {
     const { getNamedAccounts } = hre;
     if (await isMainnet(hre)) {
