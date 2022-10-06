@@ -25,6 +25,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
         address to,
         uint256 amount
     ) public {
+        require(to != s.config.wallets[uint(Wallets.Vault)], "DEFO Token: not possible to send directly to vault");
         if (to == s.config.wallets[uint(Wallets.LiquidityPair)]) {
             uint256 endOfLimitWindow = s.defoTokenLimitWindow.timeOfLastSale[from] + s.config.defoTokenLimitConfig.saleLimitPeriod;
             require(
