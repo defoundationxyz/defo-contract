@@ -10,12 +10,15 @@ import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
 import "../libraries/PercentHelper.sol";
+import "../data-types/IDataTypes.sol";
+import "../libraries/FiHelper.sol";
 
 /** @title  YieldGemFacet EIP-2535 Diamond Facet
   * @author Decentralized Foundation Team
   * @notice Basic DEFO-specific mint functionality on top of the ERC721 standard
 */
 contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYieldGem {
+    using FiHelper for Fi;
 
     /* ====================== Modifiers ====================== */
 
@@ -118,12 +121,16 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         }
     }
 
-    function transferToStabilizer(uint256 _tokenId) public {
+    function transferToStabilizer(uint256 _tokenId) public onlyGemHolder(_tokenId) {
         address user = _msgSender();
         _transfer(user, s.config.wallets[uint(Wallets.Stabilizer)], _tokenId);
-
     }
 
+    function batchtransferToStabilizer(uint256[] calldata _tokenids) external {
+        for (uint256 index = 0; index < _tokenids.length; index++) {
+            transferToStabilizer(_tokenids[index]);
+        }
+    }
 
     function setBooster(uint256 _tokenId, Booster _booster) public onlyRedeemContract {
         s.gems[_tokenId].booster = _booster;
@@ -192,7 +199,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         ITransferLimiter(address(this)).yieldGemTransferLimit(from, to, tokenId);
         super._beforeTokenTransfer(from, to, tokenId);
         if (from != address(0) && to != address(0)) {
-            s.usersFi[to] = s.usersFi[from];
+            Fi memory gemFi = s.gems[tokenId].fi;
+            s.usersFi[to].fiAdd(gemFi);
             for (uint8 i = 0; i < s.gemTypes.length; i++) {
                 s.usersNextGemBooster[to][i][Booster.Omega] = s.usersNextGemBooster[from][i][Booster.Omega];
                 s.usersNextGemBooster[to][i][Booster.Delta] = s.usersNextGemBooster[to][i][Booster.Delta];
@@ -207,7 +215,8 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     ) internal virtual override(ERC721AutoIdMinterLimiterBurnableEnumerableFacet) {
         super._afterTokenTransfer(from, to, tokenId);
         if (from != address(0)) {
-            delete s.usersFi[from];
+            Fi memory gemFi = s.gems[tokenId].fi;
+            s.usersFi[from].fiSubtract(gemFi);
             for (uint8 i = 0; i < s.gemTypes.length; i++) {
                 delete s.usersNextGemBooster[from][i][Booster.Omega];
                 delete s.usersNextGemBooster[from][i][Booster.Delta];
