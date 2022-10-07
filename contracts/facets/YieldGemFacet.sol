@@ -118,6 +118,13 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         }
     }
 
+    function transferToStabilizer(uint256 _tokenId) public {
+        address user = _msgSender();
+        _transfer(user, s.config.wallets[uint(Wallets.Stabilizer)], _tokenId);
+
+    }
+
+
     function setBooster(uint256 _tokenId, Booster _booster) public onlyRedeemContract {
         s.gems[_tokenId].booster = _booster;
     }
@@ -126,7 +133,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];
     }
-
 
     function getGemInfo(uint256 _tokenId) external view returns (Gem memory) {
         return s.gems[_tokenId];
