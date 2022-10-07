@@ -19,7 +19,9 @@ export const getLiquidityPairInfo = async (hre: HardhatRuntimeEnvironment) => {
   const pairAddress = await factoryContract.getPair(daiContract.address, defoContract.address);
   const pairContract = await hre.ethers.getContractAt(JOE_PAIR_ABI, pairAddress);
 
-  const [reservesDai, reservesDefo] = await pairContract.getReserves();
+  const [reserves0, reserves1] = await pairContract.getReserves();
+  const [reservesDai, reservesDefo] =
+    (await pairContract.token0()) == daiContract ? [reserves0, reserves1] : [reserves1, reserves0];
 
   return {
     daiReserve: reservesDai,

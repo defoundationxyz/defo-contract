@@ -71,8 +71,8 @@ NFTs. DEFO Token is a separate ERC-20 token.
 
 | Contract                                       | Address                                      |
 |------------------------------------------------|----------------------------------------------|
-| DEFO Token ERC-20                              | [0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693](https://testnet.snowtrace.io/address/0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693) |
-| DEFO Protocol Main Contract ERC-721 compatible | [0xa47f856CD11513DB4E723c03990292f6c2FAC6b7](https://testnet.snowtrace.io/address/0xa47f856CD11513DB4E723c03990292f6c2FAC6b7) |
+| DEFO Token ERC-20                              | [0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693](https://snowtrace.io/address/0xbb6ffeCE837a525A2eAE033ff0161a7CDC60B693) |
+| DEFO Protocol Main Contract ERC-721 compatible | [0xa47f856CD11513DB4E723c03990292f6c2FAC6b7](https://snowtrace.io/address/0xa47f856CD11513DB4E723c03990292f6c2FAC6b7) |
 
 #### Avalanche Fuji Testnet
 

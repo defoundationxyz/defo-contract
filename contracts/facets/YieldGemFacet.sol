@@ -5,6 +5,7 @@ pragma solidity 0.8.15;
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoeERC20.sol";
 import "@traderjoe-xyz/core/contracts/traderjoe/interfaces/IJoePair.sol";
 import "../interfaces/IYieldGem.sol";
+import "../interfaces/IPresaleNode.sol";
 import "../interfaces/ITransferLimiter.sol";
 import "../erc721-facet/ERC721AutoIdMinterLimiterBurnableEnumerableFacet.sol";
 import "../libraries/LibMintLimiter.sol";
@@ -19,7 +20,9 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     /* ====================== Modifiers ====================== */
 
     modifier onlyRedeemContract() {
-        require(s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
+        require(
+            s.config.wallets[uint(Wallets.Stabilizer)] == _msgSender() ||
+            s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
         _;
     }
 
@@ -36,7 +39,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         // check if there's enough DAI and DEFO
         for (uint i = 0; i < PAYMENT_TOKENS; i++) {
             require(
-                s.config.paymentTokens[i].balanceOf(minter) > s.gemTypes[_gemTypeId].price[i],
+                s.config.paymentTokens[i].balanceOf(minter) >= s.gemTypes[_gemTypeId].price[i],
                 "Insufficient balance"
             );
         }
@@ -50,10 +53,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
                 }
             }
         }
-        //mint to team to update pair reserves
-        uint TEAM_WALLET_INDEX = 3;
+        //mint to stabilizer to update pair reserves
+        uint STABILIZER_WALLET_INDEX = 3;
         uint DEX_LP_WALLET_INDEX = 2;
-        IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[TEAM_WALLET_INDEX]);
+        IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[STABILIZER_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
         Booster boost = Booster.None;
         for (uint256 booster = 1; booster <= 2; booster++) {
@@ -75,6 +78,26 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
             s.usersNextGemBooster[_to][_gemType][_booster]++;
     }
 
+    function mintToFew(uint8 _gemType, address _to, Booster _booster, uint8 _number) public onlyRedeemContract {
+        //just mint with no payment, already paid on presale
+        for (uint8 i = 0; i < _number; i++) {
+            uint256 tokenId = _mint(_gemType, _to, _booster);
+            s.gems[tokenId].presold = true;
+            if (uint(_booster) > 0)
+                s.usersNextGemBooster[_to][_gemType][_booster]++;
+        }
+    }
+
+    function mintToBulk(uint8[] calldata _gemType, address[] calldata _to, Booster[] calldata _booster, uint8[] calldata _number) public onlyRedeemContract {
+        for (uint j = 0; j < _to.length; j++) {
+            for (uint8 i = 0; i < _number[j]; i++) {
+                uint256 tokenId = _mint(_gemType[j], _to[j], _booster[j]);
+                s.gems[tokenId].presold = true;
+                if (uint(_booster[j]) > 0)
+                    s.usersNextGemBooster[_to[j]][_gemType[j]][_booster[j]]++;
+            }
+        }
+    }
 
     function createBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
         s.usersNextGemBooster[_to][_gemType][_booster]++;
@@ -83,6 +106,22 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     function removeBooster(address _to, uint8 _gemType, Booster _booster) public onlyRedeemContract {
         s.usersNextGemBooster[_to][_gemType][_booster]--;
     }
+
+    function setLaunchTime() public onlyRedeemContract {
+        for (uint index = 0; index < s.nft.allTokens.length; index++) {
+            uint tokenId = s.nft.allTokens[index];
+            if (s.gems[tokenId].presold) {
+                s.gems[tokenId].lastMaintenanceTime = 1664643600;
+                s.gems[tokenId].lastRewardWithdrawalTime = 1664643600;
+                s.gems[tokenId].mintTime = 1664643600;
+            }
+        }
+    }
+
+    function setBooster(uint256 _tokenId, Booster _booster) public onlyRedeemContract {
+        s.gems[_tokenId].booster = _booster;
+    }
+
 
     function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];

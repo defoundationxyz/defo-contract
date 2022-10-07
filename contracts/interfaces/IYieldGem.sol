@@ -23,11 +23,17 @@ interface IYieldGem {
 
     function mintTo(uint8 _gemType, address _to, Booster _booster) external;
 
+    function mintToFew(uint8 _gemType, address _to, Booster _booster, uint8 _number) external;
+
+    function mintToBulk(uint8[] calldata _gemType, address[] calldata _to, Booster[] calldata _booster, uint8[] calldata _number) external;
+
     function createBooster(address _to, uint8 _gemType, Booster _booster) external;
 
     function removeBooster(address _to, uint8 _gemType, Booster _booster) external;
 
     function getBooster(address _to, uint8 _gemType, Booster _booster) external view returns (uint256);
+
+    function setBooster(uint256 _tokenId, Booster _booster) external;
 
     /**
  * @notice Get detailed status of the Gem, including financial details

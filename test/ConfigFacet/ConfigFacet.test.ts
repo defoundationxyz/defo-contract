@@ -9,7 +9,6 @@ import newDebug from "debug";
 import hardhat, { deployments } from "hardhat";
 import { Address } from "hardhat-deploy/dist/types";
 
-
 const debug = newDebug("defo:Config.test.ts");
 
 describe("ConfigFacet", () => {
@@ -28,7 +27,7 @@ describe("ConfigFacet", () => {
       namedAccounts.treasury,
       namedAccounts.rewardPool,
       namedAccounts.deployer, //liquidity pair goes here
-      namedAccounts.team,
+      namedAccounts.stabilizer,
       namedAccounts.donations,
       namedAccounts.vault,
       namedAccounts.deployer, //redeem contract goes here
@@ -37,13 +36,13 @@ describe("ConfigFacet", () => {
 
   describe("setConfig()", () => {
     it("should set configuration of the protocol", async () => {
-      expect(await contract.setConfig({paymentTokens, wallets, ...PROTOCOL_CONFIG}));
+      expect(await contract.setConfig({ paymentTokens, wallets, ...PROTOCOL_CONFIG }));
     });
   });
 
   describe("getConfig()", () => {
     it("should get the configuration from the contract, should equal to the one set", async () => {
-      const etalonConfig = {paymentTokens, wallets, ...PROTOCOL_CONFIG};
+      const etalonConfig = { paymentTokens, wallets, ...PROTOCOL_CONFIG };
       await contract.setConfig(etalonConfig);
       const config = await contract.getConfig();
       Object.keys(etalonConfig).forEach(key => {
@@ -51,11 +50,15 @@ describe("ConfigFacet", () => {
         const etalon = etalonConfig[index];
         const toCompare = config[index];
         debug(`comparing ${key}`);
-        if (typeof (etalon) === "object") {
+        if (typeof etalon === "object") {
           Object.keys(etalon).forEach(etalonKey =>
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            expect(etalon[etalonKey].toString().toUpperCase()).to.be.equal(toCompare[etalonKey].toString().toUpperCase())
+            expect(etalon[etalonKey].toString().toUpperCase()).to.be.equal(
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              toCompare[etalonKey].toString().toUpperCase(),
+            ),
           );
         } else {
           expect(etalon.toString().toUpperCase()).to.be.equal(toCompare.toString().toUpperCase());

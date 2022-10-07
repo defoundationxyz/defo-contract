@@ -8,15 +8,14 @@ import JOE_FACTORY_ABI from "../abi/joe-factory.json";
 import JOE_PAIR_ABI from "../abi/joe-pair.json";
 import JOE_ROUTER_ABI from "../abi/joe-router.json";
 
-
 const func: DeployFunction = async hre => {
   const { getNamedAccounts, ethers } = hre;
-  const { team, dexRouter, dai: daiAddress } = await getNamedAccounts();
+  const { stabilizer, dexRouter, dai: daiAddress } = await getNamedAccounts();
   const { Zero, MaxUint256 } = ethers.constants;
 
   if (!hre.network.live) {
-    const dai = 50000;
-    const defo = 10000;
+    const dai = 10000;
+    const defo = 2000;
     announce(`Adding liquidity to the DAI/DEFO pair and creating it if not exists: ${dai} DAI and ${defo} DEFO`);
 
     await hre.run("get-some-dai");
@@ -34,7 +33,7 @@ const func: DeployFunction = async hre => {
       toWei(defo),
       Zero,
       Zero,
-      team,
+      stabilizer,
       MaxUint256,
     );
 

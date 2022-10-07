@@ -37,7 +37,7 @@ export default task("config", "Reconfigure the contract, display configuration i
   )
   .addOptionalParam(
     "wallets",
-    "set all protocol wallets, note, all 6 should be provided comma separated with no spaces, e.g. 0x001,0x002,0x003,0x004,0x005,0x006",
+    "set all protocol wallets, note, all 7 should be provided comma separated with no spaces, e.g. 0x001,0x002,0x003,0x004,0x005,0x006,0x007",
     undefined,
     types.string,
   )

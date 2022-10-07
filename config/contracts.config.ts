@@ -59,7 +59,7 @@ export enum Wallets {
   Treasury,
   RewardPool,
   LiquidityPair,
-  Team,
+  Stabilizer,
   Charity,
   Vault,
   RedeemContract,
@@ -128,7 +128,7 @@ export const SAPHIRE_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(25), toWei(5)],
   taperRewardsThresholdDefo: toWei(7.5),
-  maxMintsPerLimitWindow: 16,
+  maxMintsPerLimitWindow: 100,
 };
 
 export const RUBY_GEM: GemTypeConfigStruct = {
@@ -137,7 +137,7 @@ export const RUBY_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(100), toWei(20)],
   taperRewardsThresholdDefo: toWei(30),
-  maxMintsPerLimitWindow: 4,
+  maxMintsPerLimitWindow: 50,
 };
 
 export const DIAMOND_GEM: GemTypeConfigStruct = {
@@ -146,7 +146,7 @@ export const DIAMOND_GEM: GemTypeConfigStruct = {
   //dai goes first, defo second
   price: [toWei(400), toWei(80)],
   taperRewardsThresholdDefo: toWei(120),
-  maxMintsPerLimitWindow: 1,
+  maxMintsPerLimitWindow: 10,
 };
 
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
@@ -176,8 +176,8 @@ export const CONFIG_PER_NETWORK: {
   43114: {
     protocol: {
       ...PROTOCOL_CONFIG,
-      mintLock: true,
-      transferLock: true,
+      // mintLock: true,
+      // transferLock: true,
     },
     gems: GEM_TYPES_CONFIG,
   },

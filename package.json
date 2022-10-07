@@ -4,6 +4,7 @@
   "verion": "0.1.0",
   "main": "index.js",
   "devDependencies": {
+    "@alch/alchemy-web3": "^1.4.2",
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
     "@ethersproject/abi": "^5.6.4",
@@ -34,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "add": "^2.0.6",
+    "bignumber.js": "^9.0.2",
     "chai": "^4.3.6",
     "chalk": "4.1.2",
     "cli-table3": "^0.6.1",
@@ -41,6 +43,7 @@
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "3.3.0",
     "debug": "^4.3.4",
+    "dotenv": "^16.0.1",
     "eslint": "^8.19.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-unused-imports": "^2.0.0",
@@ -63,6 +66,7 @@
     "lodash.isequal": "^4.5.0",
     "mocha": "^10.0.0",
     "moment": "^2.29.4",
+    "node-cron": "^3.0.0",
     "prettier": "^2.7.1",
     "prettier-plugin-solidity": "^1.0.0-dev.23",
     "shelljs": "^0.8.5",
@@ -77,12 +81,6 @@
     "typechain": "^8.1.0",
     "typescript": "^4.7.4",
     "yarn": "^1.22.19"
-  },
-  "dependencies": {
-    "@alch/alchemy-web3": "^1.4.2",
-    "bignumber.js": "^9.0.2",
-    "dotenv": "^16.0.1",
-    "node-cron": "^3.0.0"
   },
   "files": [
     "LICENSE",

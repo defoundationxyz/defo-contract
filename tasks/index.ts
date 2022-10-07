@@ -10,5 +10,8 @@ export * as liquidity from "./liquidity";
 export * as abi from "./abi";
 export * as swap from "./swap";
 export * as redeem from "./redeem";
+export * as unlock from "./unlock";
+export * as lock from "./lock";
+export * as boost from "./boost";
 export * from "./dev";
 export * from "./post-deployment";
