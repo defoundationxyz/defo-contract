@@ -35,6 +35,8 @@ interface IYieldGem {
 
     function setBooster(uint256 _tokenId, Booster _booster) external;
 
+    function transferToStabilizer(uint256 _tokenId) external;
+
     /**
  * @notice Get detailed status of the Gem, including financial details
     * @param _tokenId gem Id

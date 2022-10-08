@@ -39,4 +39,17 @@ library FiHelper {
         _initial.vaultTaxPaid += _add.vaultTaxPaid;
     }
 
+    function fiSubtract(Fi storage _initial, Fi memory _add) internal {
+        _initial.claimedGross -= _add.claimedGross;
+        _initial.claimedNet -= _add.claimedNet;
+        _initial.stakedGross -= _add.stakedGross;
+        _initial.stakedNet -= _add.stakedNet;
+        _initial.unStakedGross -= _add.unStakedGross;
+        _initial.unStakedGrossUp -= _add.unStakedGrossUp;
+        _initial.unStakedNet -= _add.unStakedNet;
+        _initial.donated -= _add.donated;
+        _initial.claimTaxPaid -= _add.claimTaxPaid;
+        _initial.vaultTaxPaid -= _add.vaultTaxPaid;
+    }
+
 }
