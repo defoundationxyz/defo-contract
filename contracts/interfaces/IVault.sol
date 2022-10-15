@@ -28,6 +28,12 @@ interface IVault {
     function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external;
 
     /**
+    * @notice put defo to the vault from the user's wallet
+    * @param _defoAmount amount of DeFo to put to vault
+    */
+    function giveaway(uint256 _defoAmount) external;
+
+    /**
     * @notice get DEFO amount currently in the vault for a specific yield gem
     * @param _tokenId yield gem id
     * @return amount in DEFO (wei precision)
