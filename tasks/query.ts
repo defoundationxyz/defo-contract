@@ -76,7 +76,7 @@ task("query", "Get all the users with their balance, gems, and vault information
         dai: Number(Number(fromWei(await daiContract.balanceOf(accountAddress))).toFixed(3)),
         defo: defoContract && Number(Number(fromWei(await defoContract.balanceOf(accountAddress))).toFixed(3)),
         gems: Number(await diamondContract.balanceOf(accountAddress)),
-        vault: vault.toNumber(),
+        vault: fromWei(vault),
       };
       worksheet.addRow(data);
       return data;
