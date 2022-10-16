@@ -270,6 +270,14 @@ check reward generation, maintenance fee accrual, and other time-dependand funct
 yarn jump-in-time   # optional with human-readable time without spaces, e.g. --time 7d
 ```
 
+### Query
+
+This is used to get the list of the protocol users with vault contents
+
+```shell
+yarn query NETWORK
+```
+
 Check out [package.json](./package.json) and [./tasks](./tasks) for more.
 
 ## Cash flow
