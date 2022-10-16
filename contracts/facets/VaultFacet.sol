@@ -50,6 +50,24 @@ contract VaultFacet is BaseFacet, IVault {
         op.updateStorage(_tokenId, user);
     }
 
+    function giveaway(uint256 _defoAmount) external {
+        address minter = _msgSender();
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        address[WALLETS] storage wallets = s.config.wallets;
+        require(_defoAmount > 0, "Zero rewards for a gem");
+
+        Fi memory op;
+        op.stakedGross = _defoAmount;
+        op.stakedNet = _defoAmount;
+
+        defo.transferFrom(
+            minter,
+            wallets[uint(Wallets.Vault)],
+            _defoAmount);
+        op.updateStorage(minter);
+        emit GiveAway(minter, _defoAmount);
+    }
+
     function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external {
 
     }

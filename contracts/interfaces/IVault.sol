@@ -9,6 +9,7 @@ pragma solidity 0.8.15;
 interface IVault {
     // @dev here if we unStake, say, 100 DEFO from the vault, the  amountGross is unStaked, amountNet comes back to earned rewards
     event UnStaked(address indexed user, uint256 amountGross, uint256 amountNet);
+    event GiveAway(address indexed minter, uint256 amountDefo);
     event LotteryConfigured(uint256 numberOfWinners, uint32 lotteryStart, uint32 periodicity);
     event LotteryWinnersDetermined(uint256[] winners);
 
@@ -26,6 +27,12 @@ interface IVault {
     * @param _periodicity periodicity in seconds, initially weekly
     */
     function configureLottery(uint256 _numberOfWinners, uint32 _lotteryStart, uint32 _periodicity) external;
+
+    /**
+    * @notice put defo to the vault from the user's wallet
+    * @param _defoAmount amount of DeFo to put to vault
+    */
+    function giveaway(uint256 _defoAmount) external;
 
     /**
     * @notice get DEFO amount currently in the vault for a specific yield gem
