@@ -9,6 +9,7 @@ pragma solidity 0.8.15;
 interface IVault {
     // @dev here if we unStake, say, 100 DEFO from the vault, the  amountGross is unStaked, amountNet comes back to earned rewards
     event UnStaked(address indexed user, uint256 amountGross, uint256 amountNet);
+    event GiveAway(address indexed minter, uint256 amountDefo);
     event LotteryConfigured(uint256 numberOfWinners, uint32 lotteryStart, uint32 periodicity);
     event LotteryWinnersDetermined(uint256[] winners);
 

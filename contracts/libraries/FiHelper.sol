@@ -9,6 +9,7 @@ import "./LibAppStorage.sol";
  */
 
 library FiHelper {
+
     function updateStorage(Fi memory _add, uint256 _tokenId, address _user) internal {
         AppStorage storage s = LibAppStorage.diamondStorage();
         Gem storage gem = s.gems[_tokenId];
@@ -23,6 +24,12 @@ library FiHelper {
 
         fiAdd(s.total, _add);
         fiAdd(gem.fi, _add);
+        fiAdd(s.usersFi[_user], _add);
+    }
+
+    function updateStorage(Fi memory _add, address _user) internal {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        fiAdd(s.total, _add);
         fiAdd(s.usersFi[_user], _add);
     }
 
