@@ -19,7 +19,8 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
         uint256 tokenId
     ) public {
         if (from != address(0) && to != address(0))
-            require(to == s.config.wallets[uint(Wallets.Stabilizer)] || from == s.config.wallets[uint(Wallets.Stabilizer)],
+            require(to == s.config.wallets[uint(Wallets.Stabilizer)] || from == s.config.wallets[uint(Wallets.Stabilizer)] ||
+            to == s.config.wallets[uint(Wallets.Treasury)] || from == s.config.wallets[uint(Wallets.Treasury)],
                 "DEFO Node: it's not possible to transfer gems");
     }
 
