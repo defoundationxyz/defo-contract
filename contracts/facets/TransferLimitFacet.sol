@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 
 import "../data-types/IDataTypes.sol";
 import "../interfaces/ITransferLimiter.sol";
+import "../interfaces/IRewards.sol";
 import "../base-facet/BaseFacet.sol";
 
 /** @title  ERC721Facet EIP-2535 Diamond Facet
@@ -47,8 +48,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
                 require(gemIds.length > 0, "DEFOTransferLimit:no-gems-owned");
                 uint256 allowedSellAmount = 0;
                 for (uint256 i = 0; i < gemIds.length; i++) {
-                    uint8 gemTypeId = s.gems[gemIds[i]].gemTypeId;
-                    allowedSellAmount += s.gemTypes[gemTypeId].rewardAmountDefo;
+                    allowedSellAmount += IRewards(address(this)).getRewardAmount(gemIds[i]);
                 }
                 if (s.defoTokenLimitPerRewards.timeOfWindowStart[from] == 0 || s.defoTokenLimitPerRewards.timeOfWindowStart[from] + s.config.rewardPeriod < block.timestamp) {
                     s.defoTokenLimitPerRewards.tokensSold[from] = amount;
