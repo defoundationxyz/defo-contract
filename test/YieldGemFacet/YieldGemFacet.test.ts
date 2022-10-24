@@ -269,10 +269,10 @@ describe("YieldGemFacet", () => {
       await contract.createBooster(user, gemType, 1);
       await contract.createBooster(user, gemType, 2);
       await contract.mint(gemType);
-      expect((await contract.getGemInfo(0)).booster).to.be.equal(1);
+      expect((await contract.getGemInfo(0)).booster).to.be.equal(2);
       await hardhat.run("jump-in-time");
       await contract.mint(gemType);
-      expect((await contract.getGemInfo(1)).booster).to.be.equal(2);
+      expect((await contract.getGemInfo(1)).booster).to.be.equal(1);
       await hardhat.run("jump-in-time");
       await contract.mint(gemType);
       expect((await contract.getGemInfo(2)).booster).to.be.equal(0);
