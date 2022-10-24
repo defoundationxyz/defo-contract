@@ -50,8 +50,9 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     allowedSellAmount += IRewards(address(this)).getRewardAmount(gemIds[i]);
                 }
+                allowedSellAmount -= s.defoTokenLimitPerRewards.tokensSold[from];
                 s.defoTokenLimitPerRewards.tokensSold[from] += amount;
-                require(s.defoTokenLimitPerRewards.tokensSold[from] <= allowedSellAmount, "DEFOTransferLimit:total-rewards-per-week");
+                require(amount <= allowedSellAmount, "DEFOTransferLimit: only total rewards earned are allowed for sale");
             }
 
         }
