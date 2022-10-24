@@ -62,7 +62,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         IJoePair(s.config.wallets[DEX_LP_WALLET_INDEX]).mint(s.config.wallets[STABILIZER_WALLET_INDEX]);
         //check if there's a booster left for the user and use it
         Booster boost = Booster.None;
-        for (uint256 booster = 1; booster <= 2; booster++) {
+        for (uint256 booster = 2; booster >= 1; booster--) {
             if (s.usersNextGemBooster[minter][_gemTypeId][Booster(booster)] > 0) {
                 boost = Booster(booster);
                 s.usersNextGemBooster[minter][_gemTypeId][Booster(booster)]--;
