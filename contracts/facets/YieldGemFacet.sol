@@ -110,6 +110,15 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         s.usersNextGemBooster[_to][_gemType][_booster]--;
     }
 
+    function moveBooster(address _from, address _to) public onlyRedeemContract {
+        for (uint8 gemType = 0; gemType < s.gemTypes.length; gemType++) {
+            for (uint256 booster = 2; booster >= 1; booster--) {
+                s.usersNextGemBooster[_to][gemType][Booster(booster)] = s.usersNextGemBooster[_from][gemType][Booster(booster)];
+                s.usersNextGemBooster[_from][gemType][Booster(booster)] = 0;
+            }
+        }
+    }
+
     function setLaunchTime() public onlyRedeemContract {
         for (uint index = 0; index < s.nft.allTokens.length; index++) {
             uint tokenId = s.nft.allTokens[index];
