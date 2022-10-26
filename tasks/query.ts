@@ -49,8 +49,12 @@ task("query", "Get all the users with their balance, gems, and vault information
 
     const users = new Set<string>();
     for (const id of gemIds) {
+      if (!silent) process.stdout.write(`Querying owner of token ${id}\r`);
       users.add(await diamondContract.ownerOf(id));
     }
+    const usersArray = Array.from(users);
+
+    if (!silent) info(`Total ${usersArray.length} users.`);
 
     const defoContract =
       forkedDefoToken || defoTokenDeployment
@@ -66,7 +70,7 @@ task("query", "Get all the users with their balance, gems, and vault information
       );
 
     const table = await Promise.all(
-      Array.from(users).map(async accountAddress => {
+      usersArray.map(async accountAddress => {
         const userGems = (await diamondContract.getGemIdsOf(accountAddress)).map(gemId => gemId.toNumber());
         const stakedForGems = await Promise.all(userGems.map(gemId => diamondContract.getStaked(gemId)));
         const vault = stakedForGems.reduce<BigNumber>(
@@ -82,6 +86,7 @@ task("query", "Get all the users with their balance, gems, and vault information
           vault: Number(fromWei(vault)),
         };
         worksheet.addRow(data);
+        if (!silent) process.stdout.write(`processed ${accountAddress}\r`);
         return data;
       }),
     );
