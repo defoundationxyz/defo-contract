@@ -49,9 +49,7 @@ contract TransferLimitFacet is BaseFacet, ITransferLimiter {
                 uint256 allowedSellAmount = 0;
                 for (uint256 i = 0; i < gemIds.length; i++) {
                     allowedSellAmount += IRewards(address(this)).getRewardAmount(gemIds[i]);
-                    allowedSellAmount -= s.gems[gemIds[i]].fi.unStakedNet;
                     allowedSellAmount += s.gems[gemIds[i]].fi.claimedGross;
-                    allowedSellAmount += s.gems[gemIds[i]].fi.stakedGross;
                 }
                 allowedSellAmount -= s.defoTokenLimitPerRewards.tokensSold[from];
                 s.defoTokenLimitPerRewards.tokensSold[from] += amount;
