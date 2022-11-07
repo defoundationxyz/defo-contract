@@ -48,7 +48,7 @@ contract MaintenanceFacet is BaseFacet, IMaintenance {
     function fixMaintenance(uint256[] calldata _tokenIds) external onlyRedeemContract {
         for (uint256 index = 0; index < _tokenIds.length; index++) {
             AppStorage storage s = LibAppStorage.diamondStorage();
-            Gem storage gem = s.gems[_tokenId];
+            Gem storage gem = s.gems[index];
             if (gem.lastMaintenanceTime > gem.mintTime) {
                 uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
                 gem.maintenanceFeePaid = discountedFeeDai;

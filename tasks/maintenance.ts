@@ -45,6 +45,7 @@ task("maintenance", "Get all the gems with maintenance details.")
     if (totalSupply.isZero()) throw new Error("No gems minted");
 
     const gemIds = await Promise.all(
+      // [...Array(10).keys()].map(async i => await diamondContract.tokenByIndex(i)),
       [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
     );
 
@@ -56,7 +57,7 @@ task("maintenance", "Get all the gems with maintenance details.")
           minted: moment.unix(Number(gemInfo.mintTime)).format("DD.MM.YYYY"),
           maintained: moment.unix(Number(gemInfo.lastMaintenanceTime)).format("DD.MM.YYYY"),
           maintenanceFeePending: Number(fromWei(await diamondContract.getPendingMaintenanceFee(gemId))),
-          maintenanceFeePaid: 0, //Number(fromWei(gemInfo.maintenanceFeePaid)),
+          maintenanceFeePaid: Number(fromWei(gemInfo.maintenanceFeePaid)),
           owner: await diamondContract.ownerOf(gemId),
           feeAmount: Number(fromWei(GEM_TYPES_CONFIG[gemInfo.gemTypeId].maintenanceFeeDai as BigNumber)),
         };
