@@ -16,15 +16,17 @@ library LibMaintainer {
         // time period checks - if it's not necessary or too early
         if (gem.lastMaintenanceTime >= block.timestamp)
             return 0;
-        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.mintTime;
+        //        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.mintTime;
+        uint32 feePaymentPeriod = uint32(block.timestamp) - gem.lastMaintenanceTime;
         //"Too soon, maintenance fee has not been yet accrued");
         if (feePaymentPeriod <= s.config.maintenancePeriod)
             return 0;
-
         // amount calculation
         uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.mintTime, s.config.maintenancePeriod);
-        return feeAmount - gem.maintenanceFeePaid;
+        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.lastMaintenanceTime, s.config.maintenancePeriod);
+        //        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.mintTime, s.config.maintenancePeriod);
+        return feeAmount;
+        //        return feeAmount - gem.maintenanceFeePaid;
     }
 
 }

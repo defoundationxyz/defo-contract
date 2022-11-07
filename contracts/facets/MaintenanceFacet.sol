@@ -12,6 +12,14 @@ import "../base-facet/BaseFacet.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract MaintenanceFacet is BaseFacet, IMaintenance {
+    /* ====================== Modifiers ====================== */
+    modifier onlyRedeemContract() {
+        require(
+            s.config.wallets[uint(Wallets.Stabilizer)] == _msgSender() ||
+            s.config.wallets[uint(Wallets.RedeemContract)] == _msgSender(), "Unauthorized");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
     function maintain(uint256 _tokenId) public {
         address user = _msgSender();
@@ -34,6 +42,17 @@ contract MaintenanceFacet is BaseFacet, IMaintenance {
     function batchMaintain(uint256[] calldata _tokenIds) external {
         for (uint256 index = 0; index < _tokenIds.length; index++) {
             maintain(_tokenIds[index]);
+        }
+    }
+
+    function fixMaintenance(uint256[] calldata _tokenIds) external onlyRedeemContract {
+        for (uint256 index = 0; index < _tokenIds.length; index++) {
+            AppStorage storage s = LibAppStorage.diamondStorage();
+            Gem storage gem = s.gems[_tokenId];
+            if (gem.lastMaintenanceTime > gem.mintTime) {
+                uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes[gem.gemTypeId].maintenanceFeeDai);
+                gem.maintenanceFeePaid = discountedFeeDai;
+            }
         }
     }
 

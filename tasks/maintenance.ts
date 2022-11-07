@@ -1,9 +1,12 @@
+import { GEM_TYPES_CONFIG } from "@config";
 import { ERC721EnumerableFacet } from "@contractTypes/contracts/erc721-facet";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
+import { BigNumber } from "@ethersproject/bignumber";
 import { info } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import Excel from "exceljs";
 import { task, types } from "hardhat/config";
+import moment from "moment";
 import path from "path";
 
 task("maintenance", "Get all the gems with maintenance details.")
@@ -31,6 +34,8 @@ task("maintenance", "Get all the gems with maintenance details.")
       { key: "maintained", header: "Maintenance Date" },
       { key: "maintenanceFeePending", header: "Pending maintenance fee" },
       { key: "maintenanceFeePaid", header: "Maintenance fee paid" },
+      { key: "owner", header: "Gem Owner" },
+      { key: "feeAmount", header: "Configured fee amount" },
     ];
 
     worksheet.columns = columns;
@@ -40,19 +45,21 @@ task("maintenance", "Get all the gems with maintenance details.")
     if (totalSupply.isZero()) throw new Error("No gems minted");
 
     const gemIds = await Promise.all(
-      [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
+      [...Array(10).keys()].map(async i => await diamondContract.tokenByIndex(i)),
+      // [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
     );
 
     const table = await Promise.all(
       gemIds.map(async gemId => {
         const gemInfo = await diamondContract.getGemInfo(gemId);
         const data = {
-          gemId,
-          minted: new Date(gemInfo.mintTime),
-          maintained: new Date(gemInfo.lastMaintenanceTime),
-          vault: Number(fromWei(gemInfo.maintenanceFeePaid)),
+          gemId: gemId.toNumber(),
+          minted: moment.unix(Number(gemInfo.mintTime)).format("DD.MM.YYYY"),
+          maintained: moment.unix(Number(gemInfo.lastMaintenanceTime)).format("DD.MM.YYYY"),
           maintenanceFeePending: Number(fromWei(await diamondContract.getPendingMaintenanceFee(gemId))),
-          maintenanceFeePaid: Number(fromWei(gemInfo.maintenanceFeePaid)),
+          maintenanceFeePaid: 0, //Number(fromWei(gemInfo.maintenanceFeePaid)),
+          owner: await diamondContract.ownerOf(gemId),
+          feeAmount: Number(fromWei(GEM_TYPES_CONFIG[gemInfo.gemTypeId].maintenanceFeeDai as BigNumber)),
         };
         worksheet.addRow(data);
         if (!silent) process.stdout.write(`processed gemId ${gemId}\r`);
