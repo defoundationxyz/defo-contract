@@ -45,8 +45,7 @@ task("maintenance", "Get all the gems with maintenance details.")
     if (totalSupply.isZero()) throw new Error("No gems minted");
 
     const gemIds = await Promise.all(
-      [...Array(10).keys()].map(async i => await diamondContract.tokenByIndex(i)),
-      // [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
+      [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
     );
 
     const table = await Promise.all(
