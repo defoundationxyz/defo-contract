@@ -80,7 +80,13 @@ task("maintenance", "Get all the gems with maintenance details.")
         )
         .map(i => i.gemId);
       info(`gemIds to maintain length: ${gemIdsToMaintain.length}`);
-      await (await diamondContract.fixMaintenance(gemIdsToMaintain)).wait();
+      const chunkSize = 50;
+      const gemIdsToMaintainChunks = [...Array(Math.ceil(gemIdsToMaintain.length / chunkSize))].map((value, index) => {
+        return gemIdsToMaintain.slice(index * chunkSize, (index + 1) * chunkSize);
+      });
+      for (const chunk of gemIdsToMaintainChunks) {
+        await (await diamondContract.fixMaintenance(chunk)).wait();
+      }
     }
 
     if (!silent) console.table(table);
