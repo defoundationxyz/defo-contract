@@ -1,5 +1,6 @@
 import { GEM_TYPES_CONFIG } from "@config";
 import { ERC721EnumerableFacet } from "@contractTypes/contracts/erc721-facet";
+import { MaintenanceFacet } from "@contractTypes/contracts/facets";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { BigNumber } from "@ethersproject/bignumber";
 import { info } from "@utils/output.helper";
@@ -11,7 +12,8 @@ import path from "path";
 
 task("maintenance", "Get all the gems with maintenance details.")
   .addOptionalParam("silent", "true for silent output", false, types.boolean)
-  .setAction(async ({ silent }, hre) => {
+  .addOptionalParam("test", "default is true to avoid db update", true, types.boolean)
+  .setAction(async ({ silent, test }, hre) => {
     const {
       getNamedAccounts,
       deployments,
@@ -24,7 +26,9 @@ task("maintenance", "Get all the gems with maintenance details.")
     const { dai, forkedDefoToken } = namedAccounts;
     const daiContract = await ethers.getContractAt(DAI_ABI, dai);
     const defoTokenDeployment = (await deployments.getOrNull("DEFOToken"))?.address || "";
-    const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet>("DEFODiamond");
+    const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet & MaintenanceFacet>(
+      "DEFODiamond",
+    );
 
     const workbook = new Excel.Workbook();
     const worksheet = workbook.addWorksheet("gems");
@@ -66,6 +70,19 @@ task("maintenance", "Get all the gems with maintenance details.")
         return data;
       }),
     );
+
+    if (!test) {
+      const gemIdsToMaintain = table
+        .filter(
+          gemData =>
+            gemData.maintenanceFeePending === 0 &&
+            moment(gemData.maintained, "DD.MM.YYYY").unix() > moment(gemData.minted, "DD.MM.YYYY").unix(),
+        )
+        .map(i => i.gemId);
+      info(`gemIds to maintain length: ${gemIdsToMaintain.length}`);
+      await (await diamondContract.fixMaintenance(gemIdsToMaintain)).wait();
+    }
+
     if (!silent) console.table(table);
     const exportPath = path.resolve(__dirname, "maintenance.xlsx");
 
