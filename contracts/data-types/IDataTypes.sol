@@ -227,6 +227,7 @@ uint256 constant TAX_TIERS = 5;
         uint32 lastMaintenanceTime;
         Fi fi;
         bool presold;
+        uint256 maintenanceFeePaid;
     }
 
 /**

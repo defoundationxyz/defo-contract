@@ -12,6 +12,7 @@ import "../base-facet/BaseFacet.sol";
   * @notice The Contract uses diamond storage providing functionality of ERC721, ERC721Enumerable, ERC721Burnable, ERC721Pausable
 */
 contract MaintenanceFacet is BaseFacet, IMaintenance {
+
     /* ============ External and Public Functions ============ */
     function maintain(uint256 _tokenId) public {
         address user = _msgSender();
@@ -26,6 +27,7 @@ contract MaintenanceFacet is BaseFacet, IMaintenance {
 
         // data update
         s.gems[_tokenId].lastMaintenanceTime = uint32(block.timestamp);
+        s.gems[_tokenId].maintenanceFeePaid = feeAmount;
         emit MaintenancePaid(user, _tokenId, feeAmount);
 
     }
