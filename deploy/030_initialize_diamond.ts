@@ -59,6 +59,7 @@ const func: DeployFunction = async hre => {
     donations,
     vault,
     deployer, //redeem contract goes here
+    dexRouter
   ];
 
   deployInfo("Checking wallets before passing to the DEFODiamond:");
