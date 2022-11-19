@@ -80,6 +80,8 @@ export const outputFormatter = <T extends Record<string, any>>(object: T, keys?:
     {} as T,
   );
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 export const isKey = <T>(x: T, k: PropertyKey): k is keyof T => k in x;
 
 export const getChainTime = getTime(timestamp => moment.unix(Number(timestamp)).format("DD.MM.YYYY HH:MM"));

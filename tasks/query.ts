@@ -1,4 +1,5 @@
 import { ERC721EnumerableFacet } from "@contractTypes/contracts/erc721-facet";
+import { ConfigFacet } from "@contractTypes/contracts/facets";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
 import { announce, info, networkInfo } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
@@ -24,7 +25,7 @@ task("query", "Get all the users with their balance, gems, and vault information
     const { dai, forkedDefoToken } = namedAccounts;
     const daiContract = await ethers.getContractAt(DAI_ABI, dai);
     const defoTokenDeployment = (await deployments.getOrNull("DEFOToken"))?.address || "";
-    const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet>("DEFODiamond");
+    const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet & ConfigFacet>("DEFODiamond");
 
     const workbook = new Excel.Workbook();
     const worksheet = workbook.addWorksheet("DeFo Users");
@@ -35,6 +36,16 @@ task("query", "Get all the users with their balance, gems, and vault information
       { key: "defo", header: "DEFO" },
       { key: "gems", header: "Gems" },
       { key: "vault", header: "DEFO in Vault" },
+      { key: "claimedGross", header: "claimedGross" },
+      { key: "claimedNet", header: "claimedNet" },
+      { key: "stakedGross", header: "stakedGross" },
+      { key: "stakedNet", header: "stakedGross" },
+      { key: "unStakedGross", header: "unStakedGross" },
+      { key: "unStakedGrossUp", header: "unStakedGrossUp" },
+      { key: "unStakedNet", header: "unStakedNet" },
+      { key: "donated", header: "donated" },
+      { key: "claimTaxPaid", header: "claimTaxPaid" },
+      { key: "vaultTaxPaid", header: "vaultTaxPaid" },
     ];
 
     worksheet.columns = columns;
@@ -77,6 +88,7 @@ task("query", "Get all the users with their balance, gems, and vault information
           (totalStaked, stakedForGem) => totalStaked.add(stakedForGem),
           ethers.constants.Zero,
         );
+        const userData = await diamondContract.getTotal(accountAddress);
         const data = {
           address: accountAddress,
           avax: Number(Number(fromWei(await ethers.provider.getBalance(accountAddress))).toFixed(3)),
@@ -84,6 +96,16 @@ task("query", "Get all the users with their balance, gems, and vault information
           defo: defoContract && Number(Number(fromWei(await defoContract.balanceOf(accountAddress))).toFixed(3)),
           gems: Number(await diamondContract.balanceOf(accountAddress)),
           vault: Number(fromWei(vault)),
+          claimedGross: Number(Number(fromWei(userData.claimedGross)).toFixed(3)),
+          claimedNet: Number(Number(fromWei(userData.claimedNet)).toFixed(3)),
+          stakedGross: Number(Number(fromWei(userData.stakedGross)).toFixed(3)),
+          stakedNet: Number(Number(fromWei(userData.stakedNet)).toFixed(3)),
+          unStakedGross: Number(Number(fromWei(userData.unStakedGross)).toFixed(3)),
+          unStakedGrossUp: Number(Number(fromWei(userData.unStakedGrossUp)).toFixed(3)),
+          unStakedNet: Number(Number(fromWei(userData.unStakedNet)).toFixed(3)),
+          donated: Number(Number(fromWei(userData.donated)).toFixed(3)),
+          claimTaxPaid: Number(Number(fromWei(userData.claimTaxPaid)).toFixed(3)),
+          vaultTaxPaid: Number(Number(fromWei(userData.vaultTaxPaid)).toFixed(3)),
         };
         worksheet.addRow(data);
         if (!silent) process.stdout.write(`processed ${accountAddress}\r`);
