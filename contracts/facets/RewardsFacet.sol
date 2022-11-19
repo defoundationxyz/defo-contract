@@ -4,6 +4,7 @@ pragma solidity 0.8.15;
 
 import "../data-types/IDataTypes.sol";
 import "../interfaces/IRewards.sol";
+import "../interfaces/IDEXRouter02.sol";
 import "../base-facet/BaseFacet.sol";
 import "../libraries/LibDonations.sol";
 import "../libraries/LibMaintainer.sol";
@@ -53,10 +54,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         op.stakedGross = _amount;
         op.stakedNet = _amount - op.donated;
 
-        defo.transferFrom(
-            wallets[uint(Wallets.RewardPool)],
-            wallets[uint(Wallets.Charity)],
-            op.donated);
+        _sellDefoAndDonate(op.donated);
         emit LibDonations.Donated(user, op.donated);
 
 
@@ -152,10 +150,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         op.claimedNet = op.claimedGross - op.claimTaxPaid - op.donated;
 
         address user = _msgSender();
-        defo.transferFrom(
-            wallets[uint(Wallets.RewardPool)],
-            wallets[uint(Wallets.Charity)],
-            op.donated);
+        _sellDefoAndDonate(op.donated);
         emit LibDonations.Donated(user, op.donated);
 
         defo.transferFrom(
@@ -167,6 +162,29 @@ contract RewardsFacet is BaseFacet, IRewards {
 
         op.updateStorage(_tokenId, user);
     }
+
+
+    function _sellDefoAndDonate(uint256 _donationAmountDefo) private {
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        address[WALLETS] storage wallets = s.config.wallets;
+
+        defo.transferFrom(
+            wallets[uint(Wallets.RewardPool)],
+            address(this),
+            _donationAmountDefo);
+
+        address[] memory path1;
+        path1 = new address[](2);
+        path1[0] = address(s.config.paymentTokens[uint(PaymentTokens.Defo)]);
+        path1[1] = address(s.config.paymentTokens[uint(PaymentTokens.Dai)]);
+        IDEXRouter02(wallets[uint(Wallets.DEXRouter)]).swapExactTokensForTokens(
+            _donationAmountDefo,
+            1,
+            path1,
+            wallets[uint(Wallets.Charity)],
+            block.timestamp);
+    }
+
 
     function _getCumulatedRewardAmountGross(uint256 _tokenId) internal view returns (uint256) {
         Gem memory gem = s.gems[_tokenId];
@@ -180,6 +198,5 @@ contract RewardsFacet is BaseFacet, IRewards {
             s.config.rewardPeriod);
         return totalReward;
     }
-
 
 }

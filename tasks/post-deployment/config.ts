@@ -115,9 +115,9 @@ export default task("config", "Reconfigure the contract, display configuration i
       announce("Updating wallets");
       announce(`Was ${outputFormatKeyValue("wallets", configOutput.wallets.toString())}, setting  ${taskArgs.wallets}`);
       const walletsArray = String(taskArgs.wallets).split(",");
-      if (walletsArray.length < 7)
+      if (walletsArray.length < 8)
         throw new Error(
-          `There should be all 7 wallets provided in the following string order: ${Object.values(Wallets)
+          `There should be all 8 wallets provided in the following string order: ${Object.values(Wallets)
             .filter(i => isNaN(Number(i)))
             .toString()}`,
         );

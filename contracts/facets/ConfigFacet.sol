@@ -37,6 +37,13 @@ contract ConfigFacet is BaseFacet, IConfig {
 
     function setConfigWallets(address[WALLETS] memory _wallets) external onlyOwner {
         s.config.wallets = _wallets;
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        defo.approve(_wallets[uint(Wallets.DEXRouter)], type(uint256).max);
+    }
+
+    function approveDefoForRouter() external onlyOwner {
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        defo.approve(s.config.wallets[uint(Wallets.DEXRouter)], type(uint256).max);
     }
 
     function setConfigIncomeDistributionOnMint(uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] memory _incomeDistributionOnMint) external onlyOwner {
