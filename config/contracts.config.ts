@@ -63,6 +63,7 @@ export enum Wallets {
   Charity,
   Vault,
   RedeemContract,
+  DEXRouter,
 }
 
 export const walletNames = Object.values(Wallets)
