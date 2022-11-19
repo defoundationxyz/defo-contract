@@ -177,7 +177,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         path1 = new address[](2);
         path1[0] = address(s.config.paymentTokens[uint(PaymentTokens.Defo)]);
         path1[1] = address(s.config.paymentTokens[uint(PaymentTokens.Dai)]);
-        IDEXRouter02(wallets[uint(Wallets.DEXRouter)]).swapExactTokensForTokens(
+        IDEXRouter02(s.config.routerWallet).swapExactTokensForTokens(
             _donationAmountDefo,
             1,
             path1,

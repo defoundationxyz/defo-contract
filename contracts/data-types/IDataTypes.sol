@@ -17,7 +17,7 @@ uint256 constant PAYMENT_TOKENS = 2;
 uint256 constant PAYMENT_RECEIVERS = 3;
 
 /// @dev total wallets on the protocol, see Wallets enum
-uint256 constant WALLETS = 8;
+uint256 constant WALLETS = 7;
 
 /// @dev total number of supported tax tiers
 uint256 constant TAX_TIERS = 5;
@@ -130,6 +130,7 @@ uint256 constant TAX_TIERS = 5;
         // mint limit period for coutner reset
         uint32 mintLimitWindow;
         DefoTokenLimitConfig defoTokenLimitConfig;
+        address routerWallet;
     }
 
 /**

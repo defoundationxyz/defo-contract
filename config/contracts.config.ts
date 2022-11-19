@@ -80,7 +80,7 @@ export enum TaxTiers {
 
 //====== Protocol Config ========
 
-export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets"> = {
+export const PROTOCOL_CONFIG: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets" | "routerWallet"> = {
   // export const PROTOCOL_CONFIG: Omit<ProtocolConfigDTOStruct, "paymentTokens" | "wallets"> = {
   //   add paymentTokens and wallets once deployed
   incomeDistributionOnMint: [
@@ -156,7 +156,10 @@ assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration
 
 //configurations per each network
 export const CONFIG_PER_NETWORK: {
-  [chainId: number]: { protocol: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets">; gems: GemTypeConfigStruct[] };
+  [chainId: number]: {
+    protocol: Omit<ProtocolConfigStruct, "paymentTokens" | "wallets" | "routerWallet">;
+    gems: GemTypeConfigStruct[];
+  };
 } = {
   1337: {
     protocol: PROTOCOL_CONFIG,

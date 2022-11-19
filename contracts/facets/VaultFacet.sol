@@ -97,7 +97,6 @@ contract VaultFacet is BaseFacet, IVault {
     }
 
     function lotteryWinners(uint32 _timestamp) external view returns (address[] memory) {
-
     }
 
 }

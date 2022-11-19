@@ -38,12 +38,13 @@ contract ConfigFacet is BaseFacet, IConfig {
     function setConfigWallets(address[WALLETS] memory _wallets) external onlyOwner {
         s.config.wallets = _wallets;
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        defo.approve(_wallets[uint(Wallets.DEXRouter)], type(uint256).max);
+        defo.approve(s.config.routerWallet, type(uint256).max);
     }
 
-    function approveDefoForRouter() external onlyOwner {
+    function approveDefoForRouter(address _routerWallet) external onlyOwner {
+        s.config.routerWallet = _routerWallet;
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        defo.approve(s.config.wallets[uint(Wallets.DEXRouter)], type(uint256).max);
+        defo.approve(s.config.routerWallet, type(uint256).max);
     }
 
     function setConfigIncomeDistributionOnMint(uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] memory _incomeDistributionOnMint) external onlyOwner {
@@ -116,6 +117,16 @@ contract ConfigFacet is BaseFacet, IConfig {
         AppStorage storage s = LibAppStorage.diamondStorage();
         GemTypeMintWindow storage windowStorage = s.gemTypesMintWindows[_gemTypeId];
         windowStorage.mintCount = 0;
+    }
+
+    function getTotals() external onlyOwner view returns (Fi memory)  {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.total;
+    }
+
+    function getTotal(address _user) external onlyOwner view returns (Fi memory)  {
+        AppStorage storage s = LibAppStorage.diamondStorage();
+        return s.usersFi[_user];
     }
 
 }

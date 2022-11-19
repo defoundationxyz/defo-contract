@@ -59,7 +59,6 @@ const func: DeployFunction = async hre => {
     donations,
     vault,
     deployer, //redeem contract goes here
-    dexRouter,
   ];
 
   deployInfo("Checking wallets before passing to the DEFODiamond:");
@@ -75,8 +74,15 @@ const func: DeployFunction = async hre => {
   const gemConfig = CONFIG_PER_NETWORK[chainId].gems;
 
   const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
-  await (await configFacetInstance.setConfig({ paymentTokens, wallets, ...protocolConfig })).wait();
-  await (await configFacetInstance.approveDefoForRouter()).wait();
+  await (
+    await configFacetInstance.setConfig({
+      paymentTokens,
+      wallets,
+      routerWallet: dexRouter,
+      ...protocolConfig,
+    })
+  ).wait();
+  await (await configFacetInstance.approveDefoForRouter(dexRouter)).wait();
 
   deployInfo("DEFODiamond configured.");
 
