@@ -76,6 +76,8 @@ const func: DeployFunction = async hre => {
 
   const configFacetInstance = await ethers.getContract<ConfigFacet>("DEFODiamond");
   await (await configFacetInstance.setConfig({ paymentTokens, wallets, ...protocolConfig })).wait();
+  await (await configFacetInstance.approveDefoForRouter()).wait();
+
   deployInfo("DEFODiamond configured.");
 
   deployAnnounce("\n\nConfiguring gem types...");
