@@ -42,14 +42,14 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         // check if there's enough DAI and DEFO
         for (uint i = 0; i < PAYMENT_TOKENS; i++) {
             require(
-                s.config.paymentTokens[i].balanceOf(minter) >= s.gemTypes[_gemTypeId].price[i],
+                s.config.paymentTokens[i].balanceOf(minter) >= s.gemTypes2[_gemTypeId].price[i],
                 "Insufficient balance"
             );
         }
         // distribute payment according to the distribution setup
         for (uint receiver = 0; receiver < PAYMENT_RECEIVERS; receiver++) {
             for (uint paymentToken = 0; paymentToken < PAYMENT_TOKENS; paymentToken++) {
-                uint256 amountToTransfer = PercentHelper.rate(s.gemTypes[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[paymentToken][receiver]);
+                uint256 amountToTransfer = PercentHelper.rate(s.gemTypes2[_gemTypeId].price[paymentToken], s.config.incomeDistributionOnMint[paymentToken][receiver]);
                 if (amountToTransfer != 0) {
                     require(s.config.wallets[receiver] != address(0), "YieldGem: configuration error, zero address");
                     s.config.paymentTokens[paymentToken].transferFrom(minter, s.config.wallets[receiver], amountToTransfer);
@@ -111,7 +111,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     }
 
     function moveBoosters(address _from, address _to) public onlyRedeemContract {
-        for (uint8 gemType = 0; gemType < s.gemTypes.length; gemType++) {
+        for (uint8 gemType = 0; gemType < s.gemTypes2.length; gemType++) {
             for (uint256 booster = 2; booster >= 1; booster--) {
                 s.usersNextGemBooster[_to][gemType][Booster(booster)] += s.usersNextGemBooster[_from][gemType][Booster(booster)];
                 s.usersNextGemBooster[_from][gemType][Booster(booster)] = 0;
@@ -210,7 +210,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         if (from != address(0) && to != address(0)) {
             Fi memory gemFi = s.gems[tokenId].fi;
             s.usersFi[to].fiAdd(gemFi);
-            for (uint8 i = 0; i < s.gemTypes.length; i++) {
+            for (uint8 i = 0; i < s.gemTypes2.length; i++) {
                 s.usersNextGemBooster[to][i][Booster.Omega] = s.usersNextGemBooster[from][i][Booster.Omega];
                 s.usersNextGemBooster[to][i][Booster.Delta] = s.usersNextGemBooster[to][i][Booster.Delta];
             }
@@ -226,7 +226,7 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         if (from != address(0)) {
             Fi memory gemFi = s.gems[tokenId].fi;
             s.usersFi[from].fiSubtract(gemFi);
-            for (uint8 i = 0; i < s.gemTypes.length; i++) {
+            for (uint8 i = 0; i < s.gemTypes2.length; i++) {
                 delete s.usersNextGemBooster[from][i][Booster.Omega];
                 delete s.usersNextGemBooster[from][i][Booster.Delta];
             }

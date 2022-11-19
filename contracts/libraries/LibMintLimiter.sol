@@ -17,8 +17,8 @@ library LibMintLimiter {
     */
     function isMintAvailableForGem(uint8 _gemTypeId) internal view returns (bool) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(_gemTypeId < s.gemTypes.length, "Wrong gem type");
-        GemTypeConfig memory gemType = s.gemTypes[_gemTypeId];
+        require(_gemTypeId < s.gemTypes2.length, "Wrong gem type");
+        GemTypeConfig memory gemType = s.gemTypes2[_gemTypeId];
         GemTypeMintWindow memory gemTypeMintWindow = s.gemTypesMintWindows[_gemTypeId];
 
         return !(s.config.mintLock) &&
@@ -45,7 +45,7 @@ library LibMintLimiter {
 
     function getCurrentMintWindow(uint8 _gemTypeId) internal view returns (GemTypeMintWindow memory) {
         AppStorage storage s = LibAppStorage.diamondStorage();
-        require(_gemTypeId < s.gemTypes.length, "Wrong gem type");
+        require(_gemTypeId < s.gemTypes2.length, "Wrong gem type");
         GemTypeMintWindow memory window = s.gemTypesMintWindows[_gemTypeId];
         if (block.timestamp > window.endOfMintLimitWindow) {
             //setting up new mint window

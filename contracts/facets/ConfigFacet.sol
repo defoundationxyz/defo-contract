@@ -25,11 +25,11 @@ contract ConfigFacet is BaseFacet, IConfig {
 
     function setGemTypesConfig(GemTypeConfig[] calldata _gemTypeConfig) external onlyOwner {
         // fill in the storage and reset mint limit window counter for every gem type
-        delete s.gemTypes;
+        delete s.gemTypes2;
         delete s.gemTypesMintWindows;
         for (uint gemTypeId = 0; gemTypeId < _gemTypeConfig.length; gemTypeId++) {
             GemTypeConfig memory cur = _gemTypeConfig[gemTypeId];
-            s.gemTypes.push(cur);
+            s.gemTypes2.push(cur);
             GemTypeMintWindow memory initWindow = GemTypeMintWindow(0, uint32(block.timestamp));
             s.gemTypesMintWindows.push(initWindow);
         }
@@ -38,13 +38,13 @@ contract ConfigFacet is BaseFacet, IConfig {
     function setConfigWallets(address[WALLETS] memory _wallets) external onlyOwner {
         s.config.wallets = _wallets;
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        defo.approve(s.config.routerWallet, type(uint256).max);
+        defo.approve(s.routerWallet, type(uint256).max);
     }
 
     function approveDefoForRouter(address _routerWallet) external onlyOwner {
-        s.config.routerWallet = _routerWallet;
+        s.routerWallet = _routerWallet;
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
-        defo.approve(s.config.routerWallet, type(uint256).max);
+        defo.approve(s.routerWallet, type(uint256).max);
     }
 
     function setConfigIncomeDistributionOnMint(uint256[PAYMENT_RECEIVERS][PAYMENT_TOKENS] memory _incomeDistributionOnMint) external onlyOwner {
@@ -110,7 +110,7 @@ contract ConfigFacet is BaseFacet, IConfig {
     }
 
     function getGemTypesConfig() external view returns (GemTypeConfig[] memory) {
-        return s.gemTypes;
+        return s.gemTypes2;
     }
 
     function zeroMintCount(uint8 _gemTypeId) external onlyOwner {

@@ -177,7 +177,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         path1 = new address[](2);
         path1[0] = address(s.config.paymentTokens[uint(PaymentTokens.Defo)]);
         path1[1] = address(s.config.paymentTokens[uint(PaymentTokens.Dai)]);
-        IDEXRouter02(s.config.routerWallet).swapExactTokensForTokens(
+        IDEXRouter02(s.routerWallet).swapExactTokensForTokens(
             _donationAmountDefo,
             1,
             path1,
@@ -188,7 +188,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     function _getCumulatedRewardAmountGross(uint256 _tokenId) internal view returns (uint256) {
         Gem memory gem = s.gems[_tokenId];
-        GemTypeConfig memory gemType = s.gemTypes[gem.gemTypeId];
+        GemTypeConfig memory gemType = s.gemTypes2[gem.gemTypeId];
         uint256 boostedRewardAmount = gem.booster.boostRewardsRate(gemType.rewardAmountDefo);
         uint256 totalReward = PeriodicHelper.calculateTaperedReward(
             block.timestamp - gem.mintTime, //period to calculate

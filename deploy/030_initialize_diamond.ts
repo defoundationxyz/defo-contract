@@ -78,7 +78,6 @@ const func: DeployFunction = async hre => {
     await configFacetInstance.setConfig({
       paymentTokens,
       wallets,
-      routerWallet: dexRouter,
       ...protocolConfig,
     })
   ).wait();

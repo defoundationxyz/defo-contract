@@ -49,18 +49,18 @@ export default task("config", "Reconfigure the contract, display configuration i
 
     if (taskArgs.update) {
       const chainId = Number(await hre.getChainId()) as keyof typeof CONFIG_PER_NETWORK;
-      const protocolConfig = CONFIG_PER_NETWORK[chainId].protocol;
+      // const protocolConfig = CONFIG_PER_NETWORK[chainId].protocol;
       const gemConfig = CONFIG_PER_NETWORK[chainId].gems;
-      const currentConfig = await contract.getConfig();
+      // const currentConfig = await contract.getConfig();
       announce("Updating configuration...");
-      await (
-        await contract.setConfig({
-          ...protocolConfig,
-          paymentTokens: currentConfig.paymentTokens,
-          wallets: currentConfig.wallets,
-          routerWallet: currentConfig.routerWallet,
-        })
-      ).wait();
+      // await (
+      //   await contract.setConfig({
+      //     ...protocolConfig,
+      //     paymentTokens: currentConfig.paymentTokens,
+      //     wallets: currentConfig.wallets,
+      //   })
+      // ).wait();
+      // await (await contract.approveDefoForRouter(await hre.ethers. )).wait();
 
       announce("Configuring gem types...");
       await (await contract.setGemTypesConfig(gemConfig)).wait();

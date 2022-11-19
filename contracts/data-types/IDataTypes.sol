@@ -68,8 +68,7 @@ uint256 constant TAX_TIERS = 5;
         Stabilizer,
         Charity,
         Vault,
-        RedeemContract,
-        DEXRouter
+        RedeemContract
     }
 
 
@@ -130,7 +129,6 @@ uint256 constant TAX_TIERS = 5;
         // mint limit period for coutner reset
         uint32 mintLimitWindow;
         DefoTokenLimitConfig defoTokenLimitConfig;
-        address routerWallet;
     }
 
 /**
@@ -151,7 +149,7 @@ uint256 constant TAX_TIERS = 5;
 
 /**
  * @notice A struct containing current mutable status for gemType
-     * @param mintCount counter incrementing by one on every mint, during mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
+     * @param mintCount counter incrementing by one on every mint, during       mintCountResetPeriod; after mintCountResetPeriod with no mints, reset to 0
      * @param endOfMintLimitWindow a moment to reset the mintCount counter to zero, set the new endOfMintLimitWindow and start over
      */
     struct GemTypeMintWindow {
@@ -259,4 +257,6 @@ uint256 constant TAX_TIERS = 5;
         mapping(address => Fi) usersFi;
         mapping(address => mapping(uint8 => mapping(Booster => uint256))) usersNextGemBooster;
         DEFOTokenLimitPerRewards defoTokenLimitPerRewards;
+        address routerWallet;
+        GemTypeConfig[] gemTypes2;
     }
