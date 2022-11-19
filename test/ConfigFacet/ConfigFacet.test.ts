@@ -31,7 +31,6 @@ describe("ConfigFacet", () => {
       namedAccounts.donations,
       namedAccounts.vault,
       namedAccounts.deployer, //redeem contract goes here
-      namedAccounts.dexRouter,
     ];
   });
 

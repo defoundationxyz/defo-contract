@@ -43,7 +43,7 @@ export default task("config", "Reconfigure the contract, display configuration i
   )
 
   .setAction(async (taskArgs, hre) => {
-    const contract = await hre.ethers.getContract<ConfigFacet>("DEFODiamond_DiamondProxy");
+    const contract = await hre.ethers.getContract<ConfigFacet>("DEFODiamond");
     let configOutput: ProtocolConfigStructOutput = await contract.getConfig();
     await networkInfo(hre, info);
 
