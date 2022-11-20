@@ -1,9 +1,11 @@
 /**
  * This is the core configuration file for the protocol. Mainnet goes first, other networks is at the bottom.
  */
+import { MaintenanceFeeReductionRecordStruct } from "@contractTypes/contracts/facets/ConfigFacet";
 import { GemTypeConfigStruct, ProtocolConfigStruct } from "@contractTypes/contracts/interfaces/IConfig";
 import assert, { strict } from "assert";
 import { BigNumber, ethers } from "ethers";
+import moment from "moment";
 
 export type GemNames = "sapphire" | "ruby" | "diamond";
 
@@ -152,6 +154,15 @@ export const DIAMOND_GEM: GemTypeConfigStruct = {
 export const GEM_TYPES_CONFIG = [SAPHIRE_GEM, RUBY_GEM, DIAMOND_GEM];
 
 assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration error");
+
+export const MAINTENANCE_REDUCTION: MaintenanceFeeReductionRecordStruct[] = [
+  { timeOfReduction: 1664580948, maintenanceReductionPercent: percent(100) },
+  { timeOfReduction: moment("2023-01-20").unix(), maintenanceReductionPercent: percent(50) },
+];
+
+export const MAINTENANCE_REDUCTION_MOCK: MaintenanceFeeReductionRecordStruct[] = [
+  { timeOfReduction: 0, maintenanceReductionPercent: percent(100) },
+];
 
 //configurations per each network
 export const CONFIG_PER_NETWORK: {

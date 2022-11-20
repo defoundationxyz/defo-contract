@@ -35,6 +35,16 @@ contract ConfigFacet is BaseFacet, IConfig {
         }
     }
 
+    function setMaintenanceReductionTable(MaintenanceFeeReductionRecord[] calldata _maintenanceFeeReductionTable) external onlyOwner {
+        // fill in the storage and reset mint limit window counter for every gem type
+        delete s.maintenanceFeeReductionTable;
+        for (uint i = 0; i < _maintenanceFeeReductionTable.length; i++) {
+            MaintenanceFeeReductionRecord memory cur = _maintenanceFeeReductionTable[i];
+            s.maintenanceFeeReductionTable.push(cur);
+        }
+    }
+
+
     function setConfigWallets(address[WALLETS] memory _wallets) external onlyOwner {
         s.config.wallets = _wallets;
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
@@ -112,6 +122,11 @@ contract ConfigFacet is BaseFacet, IConfig {
     function getGemTypesConfig() external view returns (GemTypeConfig[] memory) {
         return s.gemTypes2;
     }
+
+    function getMaintenanceReductionTable() external view returns (MaintenanceFeeReductionRecord[] memory) {
+        return s.maintenanceFeeReductionTable;
+    }
+
 
     function zeroMintCount(uint8 _gemTypeId) external onlyOwner {
         AppStorage storage s = LibAppStorage.diamondStorage();
