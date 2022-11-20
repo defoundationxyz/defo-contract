@@ -3,6 +3,7 @@ pragma solidity 0.8.15;
 
 import "./PercentHelper.sol";
 import "./BoosterHelper.sol";
+import "../data-types/IDataTypes.sol";
 
 /// @notice Library for reward calculations
 /// @author Decentralized Foundation
@@ -29,7 +30,27 @@ library PeriodicHelper {
         return calculatePeriodicToDate(ratePerPeriod, lastEventTime, uint32(block.timestamp), payOrDeductPeriod);
     }
 
-
+    /// @dev calculates rewards with a second precision, not prorated to date
+    function calculatePeriodicWithReductionTable(
+        uint256 ratePerPeriod,
+        MaintenanceFeeReductionRecord[] storage reduction,
+        uint32 lastEventTime,
+        uint32 payOrDeductPeriod
+    ) internal view returns (uint) {
+        uint i = 0;
+        uint amount = 0;
+        uint32 toDate = lastEventTime + payOrDeductPeriod;
+        while (toDate < uint32(block.timestamp)) {
+            while (i < reduction.length && reduction[i].timeOfReduction < toDate) {
+                i++;
+            }
+            i--;
+            uint rate = ratePerPeriod.rate(reduction[i].maintenanceReductionPercent);
+            amount += rate;
+            toDate += payOrDeductPeriod;
+        }
+        return amount;
+    }
 
     // @notice Calculated Tapered Reward starting from the mint time. To get the reward call this function and subtract already paid from it.
     // @return taperedReward, updatedRewardRate

@@ -22,7 +22,8 @@ library LibMaintainer {
             return 0;
         // amount calculation
         uint256 discountedFeeDai = BoosterHelper.reduceMaintenanceFee(gem.booster, s.gemTypes2[gem.gemTypeId].maintenanceFeeDai);
-        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.mintTime, s.config.maintenancePeriod);
+        uint256 feeAmount = PeriodicHelper.calculatePeriodicWithReductionTable(discountedFeeDai, s.maintenanceFeeReductionTable, gem.mintTime, s.config.maintenancePeriod);
+        //        uint256 feeAmount = PeriodicHelper.calculatePeriodic(discountedFeeDai, gem.mintTime, s.config.maintenancePeriod);
         return feeAmount - gem.maintenanceFeePaid;
     }
 

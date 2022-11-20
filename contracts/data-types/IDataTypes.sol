@@ -230,6 +230,12 @@ uint256 constant TAX_TIERS = 5;
         uint256 maintenanceFeePaid;
     }
 
+
+    struct MaintenanceFeeReductionRecord {
+        uint256 timeOfReduction;
+        uint256 maintenanceReductionPercent;
+    }
+
 /**
 *   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization
 *   @param config main configuration, basically everything except gemType specific
@@ -259,4 +265,5 @@ uint256 constant TAX_TIERS = 5;
         DEFOTokenLimitPerRewards defoTokenLimitPerRewards;
         address routerWallet;
         GemTypeConfig[] gemTypes2;
+        MaintenanceFeeReductionRecord[] maintenanceFeeReductionTable;
     }

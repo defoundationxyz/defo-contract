@@ -1,4 +1,4 @@
-import { CONFIG_PER_NETWORK, walletNames } from "@config";
+import { CONFIG_PER_NETWORK, MAINTENANCE_REDUCTION, walletNames } from "@config";
 import { FUJI_DAI_ADDRESS, MAINNET_DAI_ADDRESS, MAINNET_DEFO_GNOSIS_MULTISIG } from "@constants/addresses";
 import { ConfigFacet, DEFOToken, ERC721Facet } from "@contractTypes/index";
 import { getContractWithSigner, isFuji, isMainnet, namedSigner } from "@utils/chain.helper";
@@ -82,6 +82,7 @@ const func: DeployFunction = async hre => {
     })
   ).wait();
   await (await configFacetInstance.approveDefoForRouter(dexRouter)).wait();
+  await (await configFacetInstance.setMaintenanceReductionTable(MAINTENANCE_REDUCTION)).wait();
 
   deployInfo("DEFODiamond configured.");
 

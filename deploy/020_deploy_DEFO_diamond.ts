@@ -1,3 +1,5 @@
+import { MAINTENANCE_REDUCTION } from "@config";
+import { ConfigFacet } from "@contractTypes/contracts/facets";
 import { deployAndTell } from "@utils/deployFunc";
 import { DeployFunction } from "hardhat-deploy/types";
 
@@ -22,6 +24,9 @@ const func: DeployFunction = async hre => {
     facets: facetNames,
     deterministicDeployment: true,
   });
+
+  const configFacetInstance = await hre.ethers.getContract<ConfigFacet>("DEFODiamond");
+  await (await configFacetInstance.setMaintenanceReductionTable(MAINTENANCE_REDUCTION)).wait();
 };
 
 export default func;
