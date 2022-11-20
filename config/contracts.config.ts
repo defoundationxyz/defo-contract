@@ -157,7 +157,7 @@ assert(GEM_TYPES_CONFIG.length === Object.keys(GEMS).length, "gems configuration
 
 export const MAINTENANCE_REDUCTION: MaintenanceFeeReductionRecordStruct[] = [
   { timeOfReduction: 1664580948, maintenanceReductionPercent: percent(100) },
-  { timeOfReduction: moment("2023-01-20").unix(), maintenanceReductionPercent: percent(50) },
+  { timeOfReduction: moment("2022-11-20").unix(), maintenanceReductionPercent: percent(50) },
 ];
 
 export const MAINTENANCE_REDUCTION_MOCK: MaintenanceFeeReductionRecordStruct[] = [
