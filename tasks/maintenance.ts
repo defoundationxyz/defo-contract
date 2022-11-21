@@ -9,6 +9,8 @@ import { task, types } from "hardhat/config";
 import moment from "moment";
 import path from "path";
 
+import { BOOSTERS } from "../test/testHelpers";
+
 task("maintenance", "Get all the gems with maintenance details.")
   .addOptionalParam("silent", "true for silent output", false, types.boolean)
   .setAction(async ({ silent }, hre) => {
@@ -27,11 +29,21 @@ task("maintenance", "Get all the gems with maintenance details.")
     const columns = [
       { key: "gemId", header: "Gem Id" },
       { key: "minted", header: "Mint Date" },
+      { key: "booster", header: "Booster" },
+      { key: "presold", header: "Presold?" },
       { key: "maintained", header: "Maintenance Date" },
       { key: "maintenanceFeePending", header: "Pending maintenance fee" },
       { key: "maintenanceFeePaid", header: "Maintenance fee paid" },
       { key: "owner", header: "Gem Owner" },
-      { key: "feeAmount", header: "Configured fee amount" },
+      { key: "claimedGross", header: "claimedGross" },
+      { key: "claimedNet", header: "claimedNet" },
+      { key: "stakedGross", header: "stakedGross" },
+      { key: "stakedNet", header: "stakedNet" },
+      { key: "unStakedGross", header: "unStakedGross" },
+      { key: "unStakedGrossUp", header: "unStakedGrossUp" },
+      { key: "donated", header: "donated" },
+      { key: "claimTaxPaid", header: "claimTaxPaid" },
+      { key: "vaultTaxPaid", header: "vaultTaxPaid" },
     ];
 
     worksheet.columns = columns;
@@ -41,6 +53,7 @@ task("maintenance", "Get all the gems with maintenance details.")
     if (totalSupply.isZero()) throw new Error("No gems minted");
 
     const gemIds = await Promise.all(
+      // that line is for quick tests
       // [...Array(10).keys()].map(async i => await diamondContract.tokenByIndex(i)),
       [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
     );
@@ -51,11 +64,23 @@ task("maintenance", "Get all the gems with maintenance details.")
         const data = {
           gemId: gemId.toNumber(),
           minted: moment.unix(Number(gemInfo.mintTime)).format("DD.MM.YYYY"),
+          booster: gemInfo.booster > 0 ? BOOSTERS[gemInfo.booster - 1].name : "-",
+          presold: gemInfo.presold,
           maintained: moment.unix(Number(gemInfo.lastMaintenanceTime)).format("DD.MM.YYYY"),
           maintenanceFeePending: Number(fromWei(await diamondContract.getPendingMaintenanceFee(gemId))),
           maintenanceFeePaid: Number(fromWei(gemInfo.maintenanceFeePaid)),
           owner: await diamondContract.ownerOf(gemId),
           feeAmount: Number(fromWei(GEM_TYPES_CONFIG[gemInfo.gemTypeId].maintenanceFeeDai as BigNumber)),
+          claimedGross: Number(Number(fromWei(gemInfo.fi.claimedGross)).toFixed(3)),
+          claimedNet: Number(Number(fromWei(gemInfo.fi.claimedNet)).toFixed(3)),
+          stakedGross: Number(Number(fromWei(gemInfo.fi.stakedGross)).toFixed(3)),
+          stakedNet: Number(Number(fromWei(gemInfo.fi.stakedNet)).toFixed(3)),
+          unStakedGross: Number(Number(fromWei(gemInfo.fi.unStakedGross)).toFixed(3)),
+          unStakedGrossUp: Number(Number(fromWei(gemInfo.fi.unStakedGrossUp)).toFixed(3)),
+          unStakedNet: Number(Number(fromWei(gemInfo.fi.unStakedNet)).toFixed(3)),
+          donated: Number(Number(fromWei(gemInfo.fi.donated)).toFixed(3)),
+          claimTaxPaid: Number(Number(fromWei(gemInfo.fi.claimTaxPaid)).toFixed(3)),
+          vaultTaxPaid: Number(Number(fromWei(gemInfo.fi.vaultTaxPaid)).toFixed(3)),
         };
         worksheet.addRow(data);
         if (!silent) process.stdout.write(`processed gemId ${gemId}\r`);
