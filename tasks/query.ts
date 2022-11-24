@@ -82,7 +82,7 @@ task("query", "Get all the users with their balance, gems, and vault information
 
     const table = await Promise.all(
       usersArray.map(async accountAddress => {
-        const userGems = (await diamondContract.getGemIdsOf(accountAddress)).map(gemId => gemId.toNumber());
+        const userGems = (await diamondContract.getGemIdsOf(accountAddress)).map(gemId => gemId.toString());
         const stakedForGems = await Promise.all(userGems.map(gemId => diamondContract.getStaked(gemId)));
         const vault = stakedForGems.reduce<BigNumber>(
           (totalStaked, stakedForGem) => totalStaked.add(stakedForGem),

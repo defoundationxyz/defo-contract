@@ -62,7 +62,7 @@ task("maintenance", "Get all the gems with maintenance details.")
       gemIds.map(async gemId => {
         const gemInfo = await diamondContract.getGemInfo(gemId);
         const data = {
-          gemId: gemId.toNumber(),
+          gemId: gemId.toString(),
           minted: moment.unix(Number(gemInfo.mintTime)).format("DD.MM.YYYY"),
           booster: gemInfo.booster > 0 ? BOOSTERS[gemInfo.booster - 1].name : "-",
           presold: gemInfo.presold,

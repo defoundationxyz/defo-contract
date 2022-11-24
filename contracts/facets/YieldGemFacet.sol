@@ -146,9 +146,22 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     }
 
     function expire(uint256 _tokenId) public {
+        address _from = s.nft.owners[_tokenId];
+        address _to = s.config.wallets[uint(Wallets.Stabilizer)];
         if ((uint32(block.timestamp) - s.gems[_tokenId].lastMaintenanceTime > s.config.maintenancePeriod * 2) &&
-            s.nft.owners[_tokenId] != s.config.wallets[uint(Wallets.Stabilizer)]) {
-            safeTransferFrom(s.nft.owners[_tokenId], s.config.wallets[uint(Wallets.Stabilizer)], _tokenId);
+            _from != _to) {
+            _beforeTokenTransfer(_from, _to, _tokenId);
+
+            // Clear approvals from the previous owner
+            _approve(address(0), _tokenId);
+
+            s.nft.balances[_from]--;
+            s.nft.balances[_to]++;
+            s.nft.owners[_tokenId] = _to;
+
+            emit ERC721Facet.Transfer(_from, _to, _tokenId);
+
+            _afterTokenTransfer(address(0), _to, _tokenId);
         }
     }
 
