@@ -15,5 +15,6 @@ export * as lock from "./lock";
 export * as boost from "./boost";
 export * as query from "./query";
 export * as maintenance from "./maintenance";
+export * as expire from "./expire";
 export * from "./dev";
 export * from "./post-deployment";
