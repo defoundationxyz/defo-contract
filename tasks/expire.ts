@@ -24,7 +24,6 @@ task("expire", "Check expirations and run expire function")
       // [...Array(10).keys()].map(async i => await diamondContract.tokenByIndex(i)),
       [...Array(totalSupply.toNumber()).keys()].map(async i => await diamondContract.tokenByIndex(i)),
     );
-    info("gemIds collected");
 
     const table = await Promise.all(
       gemIds.map(async gemId => {
@@ -41,9 +40,11 @@ task("expire", "Check expirations and run expire function")
     );
 
     const now = (await ethers.provider.getBlock("latest")).timestamp;
-    info(`now is: ${now}, ${moment.unix(now).format("DD.MM.YYYY")}`);
     const threshold = now - (PROTOCOL_CONFIG.maintenancePeriod as number) * 2;
-    info(`the earliest non-expiration date is: ${threshold}, ${moment.unix(threshold).format("DD.MM.YYYY")}`);
+    if (!silent) {
+      info(`now is: ${now}, ${moment.unix(now).format("DD.MM.YYYY")}`);
+      info(`the earliest non-expiration date is: ${threshold}, ${moment.unix(threshold).format("DD.MM.YYYY")}`);
+    }
     const gemsToExpire = table.filter(
       gemData => threshold > gemData.maintainedInSeconds && gemData.owner !== stabilizer,
     );
