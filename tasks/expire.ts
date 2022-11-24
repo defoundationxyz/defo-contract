@@ -41,15 +41,16 @@ task("expire", "Check expirations and run expire function")
 
     const now = (await ethers.provider.getBlock("latest")).timestamp;
     const threshold = now - (PROTOCOL_CONFIG.maintenancePeriod as number) * 2;
-    if (!silent) {
-      info(`now is: ${now}, ${moment.unix(now).format("DD.MM.YYYY")}`);
-      info(`the earliest non-expiration date is: ${threshold}, ${moment.unix(threshold).format("DD.MM.YYYY")}`);
-    }
     const gemsToExpire = table.filter(
       gemData => threshold > gemData.maintainedInSeconds && gemData.owner !== stabilizer,
     );
     const gemIdsToExpire = gemsToExpire.map(i => i.gemId);
-    info(`gemIds to expire length: ${gemIdsToExpire.length}`);
+    if (!silent) {
+      info(`now is: ${now}, ${moment.unix(now).format("DD.MM.YYYY")}`);
+      info(`the earliest non-expiration date is: ${threshold}, ${moment.unix(threshold).format("DD.MM.YYYY")}`);
+      info(`gemIds to expire length: ${gemIdsToExpire.length}`);
+    }
+
     const chunkSize = 50;
     const gemIdsToMaintainChunks = [...Array(Math.ceil(gemIdsToExpire.length / chunkSize))].map((value, index) => {
       return gemIdsToExpire.slice(index * chunkSize, (index + 1) * chunkSize);
