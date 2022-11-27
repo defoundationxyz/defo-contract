@@ -1,4 +1,4 @@
-import { GEM_TYPES_CONFIG } from "@config";
+import { GEM_TYPES_CONFIG, gemName } from "@config";
 import { ERC721EnumerableFacet } from "@contractTypes/contracts/erc721-facet";
 import { MaintenanceFacet } from "@contractTypes/contracts/facets";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
@@ -28,6 +28,7 @@ task("maintenance", "Get all the gems with maintenance details.")
     const worksheet = workbook.addWorksheet("gems");
     const columns = [
       { key: "gemId", header: "Gem Id" },
+      { key: "gemType", header: "Type" },
       { key: "minted", header: "Mint Date" },
       { key: "booster", header: "Booster" },
       { key: "presold", header: "Presold?" },
@@ -63,6 +64,7 @@ task("maintenance", "Get all the gems with maintenance details.")
         const gemInfo = await diamondContract.getGemInfo(gemId);
         const data = {
           gemId: gemId.toString(),
+          gemType: gemName(gemInfo.gemTypeId),
           minted: moment.unix(Number(gemInfo.mintTime)).format("DD.MM.YYYY"),
           booster: gemInfo.booster > 0 ? BOOSTERS[gemInfo.booster - 1].name : "-",
           presold: gemInfo.presold,
