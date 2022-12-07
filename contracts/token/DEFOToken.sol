@@ -47,9 +47,6 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         _;
     }
 
-    constructor(uint256 chainId_) {
-    }
-
     function initialize(uint256 chainId_) external {
         if (!initialized) {
             initialized = true;

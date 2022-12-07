@@ -172,6 +172,25 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
     }
 
 
+    function unExpire(uint256 _tokenId, address _to) public onlyRedeemContract {
+        address _from = s.config.wallets[uint(Wallets.Stabilizer)];
+        require(_from != _to, "Can't unexpire to the same address");
+        require(s.nft.owners[_tokenId] == _from, "The token is not owned by stabilizer");
+        _beforeTokenTransfer(_from, _to, _tokenId);
+
+        // Clear approvals from the previous owner
+        _approve(address(0), _tokenId);
+
+        s.nft.balances[_from]--;
+        s.nft.balances[_to]++;
+        s.nft.owners[_tokenId] = _to;
+
+        emit ERC721Facet.Transfer(_from, _to, _tokenId);
+
+        _afterTokenTransfer(address(0), _to, _tokenId);
+    }
+
+
     function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];
     }
