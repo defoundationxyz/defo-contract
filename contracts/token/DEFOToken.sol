@@ -47,7 +47,7 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
         _;
     }
 
-    function initialize(uint256 chainId_) external {
+    function initialize(uint256 _chainId) external {
         if (!initialized) {
             initialized = true;
             wards[_msgSender()] = 1;
@@ -56,13 +56,15 @@ contract DEFOToken is Pausable, IERC20, IERC20Metadata {
                     keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
                     keccak256(bytes(name)),
                     keccak256(bytes(version)),
-                    chainId_,
+                    _chainId,
                     address(this)
                 )
             );
         }
     }
 
+    constructor(uint256 _chainId) {
+    }
 
     // --- Token ---
 

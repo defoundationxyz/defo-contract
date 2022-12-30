@@ -31,7 +31,7 @@ interface IRewards {
     function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external;
 
     /**
-    *   @notice reward earned by the sender to the moment ready to be claimed or put to vault
+*   @notice reward earned by the sender to the moment ready to be claimed or put to vault
     *   @param _tokenId unique NFT gem id
     *   @return pre-tax unclaimed reward in DEFO,- before deducting tax or charity, ready to be claimed or put to vault
     */
