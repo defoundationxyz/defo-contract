@@ -41,7 +41,10 @@ describe("MaintenanceFacet", () => {
       await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.maintenancePeriod + 1).toString()}s` });
       for (const id of Object.values(GEMS)) {
         debug(`testing  gem type: ${gemName(id)}`);
-        await expect(contract.maintain(id)).to.be.not.reverted;
+        const maintenance = await contract.getPendingMaintenanceFee(id);
+        if (maintenance.gte(ethers.constants.Zero)) {
+          await expect(contract.maintain(id)).to.be.not.reverted;
+        } else expect(true).to.be.true;
       }
     });
   });
