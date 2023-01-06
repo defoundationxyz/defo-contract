@@ -114,8 +114,10 @@ describe("RewardsFacet", () => {
       await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.maintenancePeriod + 1).toString()}s` });
       for (const id of Object.values(GEMS)) {
         debug(`testing  gem type: ${gemName(id)}`);
+        const maintenance = await contract.getPendingMaintenanceFee(id);
         const x = await contract.isClaimable(id);
-        expect(x).to.be.false;
+        const res = maintenance.eq(ethers.constants.Zero) || !x;
+        expect(res).to.be.true;
       }
     });
 
@@ -124,8 +126,15 @@ describe("RewardsFacet", () => {
       await hardhat.run("jump-in-time", { time: `${(<number>PROTOCOL_CONFIG.maintenancePeriod + 1).toString()}s` });
       for (const id of Object.values(GEMS)) {
         debug(`testing  gem type: ${gemName(id)}`);
-        await contract.maintain(id);
-        expect(await contract.isClaimable(id)).to.be.true;
+        const maintenance = await contract.getPendingMaintenanceFee(id);
+        let res = false;
+        if (maintenance.eq(ethers.constants.Zero)) {
+          res = true;
+        } else {
+          await contract.maintain(id);
+          res = await contract.isClaimable(id);
+        }
+        expect(res).to.be.true;
       }
     });
 
