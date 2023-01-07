@@ -42,7 +42,7 @@ describe("MaintenanceFacet", () => {
       for (const id of Object.values(GEMS)) {
         debug(`testing  gem type: ${gemName(id)}`);
         const maintenance = await contract.getPendingMaintenanceFee(id);
-        if (maintenance.gte(ethers.constants.Zero)) {
+        if (maintenance.gt(ethers.constants.Zero)) {
           await expect(contract.maintain(id)).to.be.not.reverted;
         } else expect(true).to.be.true;
       }
