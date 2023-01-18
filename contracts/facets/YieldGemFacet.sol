@@ -190,9 +190,10 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         _afterTokenTransfer(address(0), _to, _tokenId);
     }
 
-    function adminFix(uint256 _tokenId, address _from, address _to) public onlyRedeemContract {
+    function transferCompromised(uint256 _tokenId, address _from, address _to) public onlyRedeemContract {
         require(_from != _to, "Can't unexpire to the same address");
         require(s.nft.owners[_tokenId] == _from, "The token is not owned by the from address");
+        ERC721EnumerableFacet._beforeTokenTransfer(_from, _to, _tokenId);
         // Clear approvals from the previous owner
         _approve(address(0), _tokenId);
 
@@ -204,7 +205,6 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
 
         _afterTokenTransfer(address(0), _to, _tokenId);
     }
-
 
     function getBooster(address _to, uint8 _gemType, Booster _booster) public view returns (uint256) {
         return s.usersNextGemBooster[_to][_gemType][_booster];
