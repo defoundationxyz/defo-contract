@@ -240,6 +240,18 @@ contract YieldGemFacet is ERC721AutoIdMinterLimiterBurnableEnumerableFacet, IYie
         return LibMintLimiter.getCurrentMintWindow(_gemTypeId);
     }
 
+    function getRotValue() external view returns (uint256){
+        address user = _msgSender();
+        uint256[] memory gemIds = _getGemIds(user);
+        uint256 rotValue = 0;
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            uint256 gemType = s.gems[gemIds[i]].gemTypeId;
+            rotValue = rotValue + s.gemTypes2[gemType].price[1];
+        }
+        return rotValue;
+    }
+
+
 
     /* ============ Internal Functions ============ */
 
