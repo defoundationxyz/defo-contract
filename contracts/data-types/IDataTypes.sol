@@ -236,6 +236,12 @@ uint256 constant TAX_TIERS = 5;
         uint256 maintenanceReductionPercent;
     }
 
+    enum Phase2Status {
+        NotStarted,
+        DepositedToVault,
+        DaiReceived
+    }
+
 /**
 *   @notice Main Contract Storage utilizing App Storage pattern for Diamond Proxy data organization
 *   @param config main configuration, basically everything except gemType specific
@@ -266,4 +272,7 @@ uint256 constant TAX_TIERS = 5;
         address routerWallet;
         GemTypeConfig[] gemTypes2;
         MaintenanceFeeReductionRecord[] maintenanceFeeReductionTable;
+        mapping(address => Phase2Status) phase2Status;
+        mapping(address => uint256) phase2DepositedToVault;
+        mapping(address => uint256) phase2DaiReceived;
     }

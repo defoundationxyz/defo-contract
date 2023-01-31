@@ -29,6 +29,12 @@ contract RewardsFacet is BaseFacet, IRewards {
         _;
     }
 
+    modifier onlyP1Users() {
+        address user = _msgSender();
+        require(getP2Status(user) == Phase2Status.NotStarted, "ROT can be claimed only once");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
     function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) {
         _claimRewardAmount(_tokenId, getRewardAmount(_tokenId));
@@ -88,6 +94,16 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
+    function p2PutIntoVault() external onlyP1Users {
+        IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
+        address[WALLETS] storage wallets = s.config.wallets;
+        address user = _msgSender();
+        uint256 amount = getP2RotValue(user);
+        defo.transferFrom(wallets[uint(Wallets.RewardPool)], wallets[uint(Wallets.Vault)], amount);
+        s.phase2DepositedToVault[user] += amount;
+        s.phase2Status[user] = Phase2Status.DepositedToVault;
+    }
+
     function getRewardAmount(uint256 _tokenId) public exists(_tokenId) view returns (uint256) {
         uint256 rewardToDate = _getCumulatedRewardAmountGross(_tokenId);
         rewardToDate += s.gems[_tokenId].fi.unStakedNet;
@@ -130,6 +146,34 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     function getTaxTier(uint256 _tokenId) public view returns (TaxTiers) {
         return TaxHelper.getTaxTier(uint32(block.timestamp) - s.gems[_tokenId].lastRewardWithdrawalTime);
+    }
+
+
+    function getP2RotValue(address user) public view returns (uint256){
+        uint256[] memory gemIds = _getGemIds(user);
+        uint256 rotValue = 0;
+        uint256 rewardToDate = 0;
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            uint256 gemType = s.gems[gemIds[i]].gemTypeId;
+            rotValue += s.gemTypes2[gemType].price[1];
+            rewardToDate += _getCumulatedRewardAmountGross(gemIds[i]);
+
+        }
+        return rotValue > rewardToDate ? rotValue - rewardToDate : 0;
+    }
+
+    function getMyP2RotValue() external view returns (uint256){
+        address user = _msgSender();
+        return getP2RotValue(user);
+    }
+
+    function getP2Status(address user) public view returns (Phase2Status){
+        return s.phase2Status[user];
+    }
+
+    function getMyP2Status() external view returns (Phase2Status){
+        address user = _msgSender();
+        return getP2Status(user);
     }
 
     /* ============ Internal Functions ============ */
