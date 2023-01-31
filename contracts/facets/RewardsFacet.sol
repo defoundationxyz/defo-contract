@@ -31,22 +31,23 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     modifier onlyP1Users() {
         address user = _msgSender();
-        require(getP2Status(user) == Phase2Status.NotStarted, "ROT can be claimed only once");
+        require(s.phase2DepositedToVault[user] == 0, "ROT already deposited to the vault");
+        require(s.phase2DaiReceived[user] == 0, "ROT already claimed");
         _;
     }
 
     /* ============ External and Public Functions ============ */
-    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) {
+    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) onlyP1Users {
         _claimRewardAmount(_tokenId, getRewardAmount(_tokenId));
     }
 
-    function batchClaimReward(uint256[] calldata _tokenids) external {
+    function batchClaimReward(uint256[] calldata _tokenids) external onlyP1Users {
         for (uint256 index = 0; index < _tokenids.length; index++) {
             claimReward(_tokenids[index]);
         }
     }
 
-    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) exists(_tokenId) public {
+    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) exists(_tokenId) onlyP1Users public {
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
@@ -73,7 +74,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         op.updateStorage(_tokenId, user);
     }
 
-    function stakeAndClaim(uint256 _tokenId, uint256 _percent) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) {
+    function stakeAndClaim(uint256 _tokenId, uint256 _percent) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) onlyP1Users {
         uint256 reward = getRewardAmount(_tokenId);
         uint256 rewardToStake = PercentHelper.rate(reward, _percent);
         stakeReward(_tokenId, rewardToStake);
@@ -81,14 +82,14 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
 
-    function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external {
+    function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external onlyP1Users {
         require(_tokenIds.length == _amounts.length, "DEFORewards:_tokendIds-_amounts-inconsistent");
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stakeReward(_tokenIds[i], _amounts[i]);
         }
     }
 
-    function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external {
+    function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external onlyP1Users {
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stakeAndClaim(_tokenIds[i], _percent);
         }
@@ -100,8 +101,15 @@ contract RewardsFacet is BaseFacet, IRewards {
         address user = _msgSender();
         uint256 amount = getP2RotValue(user);
         defo.transferFrom(wallets[uint(Wallets.RewardPool)], wallets[uint(Wallets.Vault)], amount);
-        s.phase2DepositedToVault[user] += amount;
-        s.phase2Status[user] = Phase2Status.DepositedToVault;
+        s.phase2DepositedToVault[user] = amount;
+    }
+
+    function p2ClaimDai() external onlyP1Users {
+        address user = _msgSender();
+        uint256 daiToClaim = getP2DaiValue(user);
+        s.phase2DaiReceived[user] = daiToClaim;
+        IERC20 dai = s.config.paymentTokens[uint(PaymentTokens.Dai)];
+        dai.transferFrom(s.config.wallets[uint(Wallets.Stabilizer)], user, daiToClaim);
     }
 
     function getRewardAmount(uint256 _tokenId) public exists(_tokenId) view returns (uint256) {
@@ -167,14 +175,17 @@ contract RewardsFacet is BaseFacet, IRewards {
         return getP2RotValue(user);
     }
 
-    function getP2Status(address user) public view returns (Phase2Status){
-        return s.phase2Status[user];
+    function getP2DaiValue(address user) public view returns (uint256){
+        uint256 rotValue = getP2RotValue(user);
+        return s.daiToDistribute * rotValue / s.totalROT;
     }
 
-    function getMyP2Status() external view returns (Phase2Status){
+
+    function getMyP2DaiValue() external view returns (uint256){
         address user = _msgSender();
-        return getP2Status(user);
+        return getP2DaiValue(user);
     }
+
 
     /* ============ Internal Functions ============ */
 
@@ -234,8 +245,9 @@ contract RewardsFacet is BaseFacet, IRewards {
         Gem memory gem = s.gems[_tokenId];
         GemTypeConfig memory gemType = s.gemTypes2[gem.gemTypeId];
         uint256 boostedRewardAmount = gem.booster.boostRewardsRate(gemType.rewardAmountDefo);
+        uint256 toDate = s.p2CutOverTime > 0 ? s.p2CutOverTime : block.timestamp;
         uint256 totalReward = PeriodicHelper.calculateTaperedReward(
-            block.timestamp - gem.mintTime, //period to calculate
+            toDate - gem.mintTime, //period to calculate
             gemType.taperRewardsThresholdDefo,
             s.config.taperRate,
             boostedRewardAmount,

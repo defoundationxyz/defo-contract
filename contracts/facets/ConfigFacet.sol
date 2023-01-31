@@ -134,6 +134,19 @@ contract ConfigFacet is BaseFacet, IConfig {
         windowStorage.mintCount = 0;
     }
 
+    function setP2CutOverTime(uint256 _p2CutOverTime) external onlyOwner {
+        s.p2CutOverTime = _p2CutOverTime;
+    }
+
+    function setP2Finance(uint256 _daiToDistribute, uint256 _totalROT) external onlyOwner {
+        s.daiToDistribute = _daiToDistribute;
+        s.totalROT = _totalROT;
+    }
+
+    function getP2Finance() external view returns (uint256, uint256) {
+        return (s.daiToDistribute, s.totalROT);
+    }
+
     function getTotals() external onlyOwner view returns (Fi memory)  {
         AppStorage storage s = LibAppStorage.diamondStorage();
         return s.total;
@@ -142,6 +155,19 @@ contract ConfigFacet is BaseFacet, IConfig {
     function getTotal(address _user) external onlyOwner view returns (Fi memory)  {
         AppStorage storage s = LibAppStorage.diamondStorage();
         return s.usersFi[_user];
+    }
+
+    function getP2CutOverTime() public view returns (uint256){
+        return s.p2CutOverTime;
+    }
+
+    function getP2Status(address user) public view returns (uint256, uint256){
+        return (s.phase2DaiReceived[user], s.phase2DepositedToVault[user]);
+    }
+
+    function getMyP2Status() external view returns (uint256, uint256){
+        address user = _msgSender();
+        return getP2Status(user);
     }
 
 }
