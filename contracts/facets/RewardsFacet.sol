@@ -36,6 +36,11 @@ contract RewardsFacet is BaseFacet, IRewards {
         _;
     }
 
+    modifier transitionP2Started() {
+        require(s.p2CutOverTime > 0, "Transition to Phase 2 has not started yet");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
     function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) onlyP1Users {
         _claimRewardAmount(_tokenId, getRewardAmount(_tokenId));
@@ -95,7 +100,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
-    function p2PutIntoVault() external onlyP1Users {
+    function p2PutIntoVault() external onlyP1Users transitionP2Started {
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
@@ -104,7 +109,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         s.phase2DepositedToVault[user] = amount;
     }
 
-    function p2ClaimDai() external onlyP1Users {
+    function p2ClaimDai() external onlyP1Users transitionP2Started {
         address user = _msgSender();
         uint256 daiToClaim = getP2DaiValue(user);
         s.phase2DaiReceived[user] = daiToClaim;
@@ -177,7 +182,7 @@ contract RewardsFacet is BaseFacet, IRewards {
 
     function getP2DaiValue(address user) public view returns (uint256){
         uint256 rotValue = getP2RotValue(user);
-        return s.daiToDistribute * rotValue / s.totalROT;
+        return s.totalROT > 0 ? s.daiToDistribute * rotValue / s.totalROT : 0;
     }
 
 

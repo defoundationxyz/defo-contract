@@ -1,7 +1,7 @@
 import { ERC721EnumerableFacet } from "@contractTypes/contracts/erc721-facet";
 import { ConfigFacet } from "@contractTypes/contracts/facets";
 import { IDEFODiamond } from "@contractTypes/contracts/interfaces";
-import { announce, info, networkInfo } from "@utils/output.helper";
+import { announce, formatAmount, info, networkInfo } from "@utils/output.helper";
 import DAI_ABI from "abi/dai-abi.json";
 import assert from "assert";
 import chalk from "chalk";
@@ -91,21 +91,21 @@ task("query", "Get all the users with their balance, gems, and vault information
         const userData = await diamondContract.getTotal(accountAddress);
         const data = {
           address: accountAddress,
-          avax: Number(Number(fromWei(await ethers.provider.getBalance(accountAddress))).toFixed(3)),
-          dai: Number(Number(fromWei(await daiContract.balanceOf(accountAddress))).toFixed(3)),
-          defo: defoContract && Number(Number(fromWei(await defoContract.balanceOf(accountAddress))).toFixed(3)),
+          avax: formatAmount(await ethers.provider.getBalance(accountAddress)),
+          dai: formatAmount(await daiContract.balanceOf(accountAddress)),
+          defo: defoContract && formatAmount(await defoContract.balanceOf(accountAddress)),
           gems: Number(await diamondContract.balanceOf(accountAddress)),
           vault: Number(fromWei(vault)),
-          claimedGross: Number(Number(fromWei(userData.claimedGross)).toFixed(3)),
-          claimedNet: Number(Number(fromWei(userData.claimedNet)).toFixed(3)),
-          stakedGross: Number(Number(fromWei(userData.stakedGross)).toFixed(3)),
-          stakedNet: Number(Number(fromWei(userData.stakedNet)).toFixed(3)),
-          unStakedGross: Number(Number(fromWei(userData.unStakedGross)).toFixed(3)),
-          unStakedGrossUp: Number(Number(fromWei(userData.unStakedGrossUp)).toFixed(3)),
-          unStakedNet: Number(Number(fromWei(userData.unStakedNet)).toFixed(3)),
-          donated: Number(Number(fromWei(userData.donated)).toFixed(3)),
-          claimTaxPaid: Number(Number(fromWei(userData.claimTaxPaid)).toFixed(3)),
-          vaultTaxPaid: Number(Number(fromWei(userData.vaultTaxPaid)).toFixed(3)),
+          claimedGross: formatAmount(userData.claimedGross),
+          claimedNet: formatAmount(userData.claimedNet),
+          stakedGross: formatAmount(userData.stakedGross),
+          stakedNet: formatAmount(userData.stakedNet),
+          unStakedGross: formatAmount(userData.unStakedGross),
+          unStakedGrossUp: formatAmount(userData.unStakedGrossUp),
+          unStakedNet: formatAmount(userData.unStakedNet),
+          donated: formatAmount(userData.donated),
+          claimTaxPaid: formatAmount(userData.claimTaxPaid),
+          vaultTaxPaid: formatAmount(userData.vaultTaxPaid),
         };
         worksheet.addRow(data);
         if (!silent) process.stdout.write(`processed ${accountAddress}\r`);

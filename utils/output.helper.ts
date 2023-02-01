@@ -89,3 +89,5 @@ export const getChainTime = getTime(timestamp => moment.unix(Number(timestamp)).
 export const networkInfo = async (hre: HardhatRuntimeEnvironment, display: (message: string) => void) =>
   !process.env.HIDE_SHOW_NETWORK &&
   display(`Network:  ${await chainName(hre)} (${hre.network.live ? chalk.red("live!") : chalk.yellow("local")})\n`);
+
+export const formatAmount = (num: BigNumberish) => Number(Number(fromWei(num)).toFixed(3));

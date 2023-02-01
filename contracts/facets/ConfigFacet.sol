@@ -161,13 +161,22 @@ contract ConfigFacet is BaseFacet, IConfig {
         return s.p2CutOverTime;
     }
 
-    function getP2Status(address user) public view returns (uint256, uint256){
-        return (s.phase2DaiReceived[user], s.phase2DepositedToVault[user]);
+    function getP2DaiReceived(address user) public view returns (uint256){
+        return s.phase2DaiReceived[user];
     }
 
-    function getMyP2Status() external view returns (uint256, uint256){
+    function getP2DepositedToVault(address user) public view returns (uint256){
+        return s.phase2DepositedToVault[user];
+    }
+
+    function getMyP2DaiReceived() external view returns (uint256){
         address user = _msgSender();
-        return getP2Status(user);
+        return getP2DaiReceived(user);
+    }
+
+    function getMyP2DepositedToVault(address user) external view returns (uint256){
+        address user = _msgSender();
+        return getP2DepositedToVault(user);
     }
 
 }
