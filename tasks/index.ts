@@ -16,5 +16,7 @@ export * as boost from "./boost";
 export * as query from "./query";
 export * as maintenance from "./maintenance";
 export * as expire from "./expire";
+export * as startp2 from "./startp2";
+export * as statsp2 from "./statsp2";
 export * from "./dev";
 export * from "./post-deployment";

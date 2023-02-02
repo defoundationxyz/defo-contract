@@ -6,7 +6,7 @@ import Excel from "exceljs";
 import { task, types } from "hardhat/config";
 import path from "path";
 
-task("stats-p2", "Get all the users with their ROT, DAI ROT, and P2 status.")
+task("statsp2", "Get all the users with their ROT, DAI ROT, and P2 status.")
   .addOptionalParam("silent", "true for silent output", false, types.boolean)
   .setAction(async ({ silent }, hre) => {
     const { ethers } = hre;

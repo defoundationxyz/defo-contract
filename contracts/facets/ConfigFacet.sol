@@ -174,7 +174,7 @@ contract ConfigFacet is BaseFacet, IConfig {
         return getP2DaiReceived(user);
     }
 
-    function getMyP2DepositedToVault(address user) external view returns (uint256){
+    function getMyP2DepositedToVault() external view returns (uint256){
         address user = _msgSender();
         return getP2DepositedToVault(user);
     }

@@ -127,7 +127,7 @@
     "swap": "hardhat swap --network",
     "jump-in-time": "hardhat --network localhost jump-in-time",
     "history": "hardhat history --time 7days --network",
-    "dev": "cross-env HIDE_SHOW_NETWORK=true yarn get-some-dai localhost && yarn get-some-defo localhost && yarn permit localhost && yarn get-some-gems localhost && yarn jump-in-time --time 8d && yarn claim localhost --id 0 && yarn vault localhost --op stake --id 1 --amount 1 && yarn vault localhost --op stake --id 2 --amount 5 && yarn vault localhost --op unstake --id 2 --amount 4.75 && yarn gems localhost && yarn accounts localhost ",
+    "dev": "cross-env HIDE_SHOW_NETWORK=true yarn get-some-dai localhost && yarn get-some-defo localhost && yarn permit localhost && yarn get-some-gems localhost && yarn jump-in-time --time 8d && yarn claim localhost --id 0 && yarn vault localhost --op stake --id 2 --amount 2 && yarn vault localhost --op unstake --id 2 --amount 1 && yarn gems localhost && yarn accounts localhost ",
     "test": "cross-env HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true OPTIMIZER_DISABLED=true DEBUG='defo:*' hardhat test",
     "gas": "cross-env REPORT_GAS=true HIDE_DEPLOY_LOG=true HIDE_TASK_LOG=true hardhat test",
     "verify": "hardhat etherscan-verify --license GPL-3.0 --solc-input --network",
