@@ -17,7 +17,7 @@ export default task(
     true,
     types.boolean,
   )
-  .addOptionalParam("date", "Cutover date in format 2023-02-17", types.string)
+  .addOptionalParam("date", "Cutover date in format 2023-02-17", undefined, types.string)
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet & ConfigFacet & RewardsFacet>(
@@ -41,16 +41,14 @@ export default task(
     info(`Total ${usersArray.length} users.`);
 
     await networkInfo(hre, info);
-    const rots = await Promise.all(
-      usersArray.map(async accountAddress => diamondContract.getP2RotValue(accountAddress)),
-    );
+    const rots = await Promise.all(usersArray.map(accountAddress => diamondContract.getP2RotValue(accountAddress)));
     const totalRot = rots.reduce((a, b) => a.add(b), ethers.BigNumber.from(0));
 
     info(`total ROT: ${formatAmount(totalRot)}`);
 
     const { stabilizer, dai: daiAddress } = await hre.getNamedAccounts();
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
-    const daiLiquidity = daiContract.balanceOf(stabilizer);
+    const daiLiquidity = await daiContract.balanceOf(stabilizer);
     info(`dai liquidity: ${formatAmount(daiLiquidity)}`);
 
     if (!taskArgs.test) {
@@ -59,7 +57,17 @@ export default task(
       if (taskArgs.date) {
         announce("Setting start date to current time");
         await (await diamondContract.setP2CutOverTime(moment(taskArgs.date).unix())).wait();
+        announce("Stopping contract");
+        await (await diamondContract.pause()).wait();
+        await (await diamondContract.lockMint()).wait();
       } else announce("Cutover date not provided, not set");
       success("Done.");
     }
+
+    const cutOverTime = await diamondContract.getP2CutOverTime();
+    const p2Finance = await diamondContract.getP2Finance();
+    announce("Reading the contract");
+    info(`P2 start date: ${moment.unix(cutOverTime.toNumber()).format("DD.MM.YYYY HH:MM")}`);
+    info(`Dai total: ${formatAmount(p2Finance[0])}`);
+    info(`ROT total: ${formatAmount(p2Finance[1])}`);
   });
