@@ -17,7 +17,12 @@ export default task(
     true,
     types.boolean,
   )
-  .addOptionalParam("date", "Cutover date in format 2023-02-17", undefined, types.string)
+  .addOptionalParam(
+    "date",
+    "Cutover date in format DD.MM.YYYY HH:MM ",
+    moment().format("DD.MM.YYYY HH:MM"),
+    types.string,
+  )
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre;
     const diamondContract = await ethers.getContract<IDEFODiamond & ERC721EnumerableFacet & ConfigFacet & RewardsFacet>(
@@ -46,21 +51,25 @@ export default task(
 
     info(`total ROT: ${formatAmount(totalRot)}`);
 
-    const { stabilizer, dai: daiAddress } = await hre.getNamedAccounts();
+    const { stabilizer, rewardPool, dai: daiAddress } = await hre.getNamedAccounts();
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
+
+    if (!taskArgs.test && (await hre.getChainId()) == "1337") {
+      announce("Funding stabilizer for local hardhat network");
+      await hre.run("get-some-dai", { user: stabilizer });
+      await hre.run("get-some-defo", { user: rewardPool });
+      await hre.run("permit", { user: stabilizer });
+    }
     const daiLiquidity = await daiContract.balanceOf(stabilizer);
     info(`dai liquidity: ${formatAmount(daiLiquidity)}`);
 
     if (!taskArgs.test) {
+      announce("Setting start date to current time");
+      await (await diamondContract.setP2CutOverTime(moment(taskArgs.date, "DD.MM.YYYY HH:MM").unix())).wait();
+      announce("Stopping contract");
+      await (await diamondContract.lockMint()).wait();
       announce("Updating contract configuration with total ROT and LP");
       await (await diamondContract.setP2Finance(daiLiquidity, totalRot)).wait();
-      if (taskArgs.date) {
-        announce("Setting start date to current time");
-        await (await diamondContract.setP2CutOverTime(moment(taskArgs.date).unix())).wait();
-        announce("Stopping contract");
-        await (await diamondContract.pause()).wait();
-        await (await diamondContract.lockMint()).wait();
-      } else announce("Cutover date not provided, not set");
       success("Done.");
     }
 

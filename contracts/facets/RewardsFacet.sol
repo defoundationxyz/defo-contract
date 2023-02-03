@@ -251,6 +251,9 @@ contract RewardsFacet is BaseFacet, IRewards {
         GemTypeConfig memory gemType = s.gemTypes2[gem.gemTypeId];
         uint256 boostedRewardAmount = gem.booster.boostRewardsRate(gemType.rewardAmountDefo);
         uint256 toDate = s.p2CutOverTime > 0 ? s.p2CutOverTime : block.timestamp;
+        if (toDate < gem.mintTime) {
+            return 0;
+        }
         uint256 totalReward = PeriodicHelper.calculateTaperedReward(
             toDate - gem.mintTime, //period to calculate
             gemType.taperRewardsThresholdDefo,
