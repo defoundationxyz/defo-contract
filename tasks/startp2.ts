@@ -45,13 +45,16 @@ export default task(
 
     info(`Total ${usersArray.length} users.`);
 
+    const { stabilizer, rewardPool, dai: daiAddress } = await hre.getNamedAccounts();
+
     await networkInfo(hre, info);
-    const rots = await Promise.all(usersArray.map(accountAddress => diamondContract.getP2RotValue(accountAddress)));
+    const rots = await Promise.all(
+      usersArray.filter(el => el != stabilizer).map(accountAddress => diamondContract.getP2RotValue(accountAddress)),
+    );
     const totalRot = rots.reduce((a, b) => a.add(b), ethers.BigNumber.from(0));
 
     info(`total ROT: ${formatAmount(totalRot)}`);
 
-    const { stabilizer, rewardPool, dai: daiAddress } = await hre.getNamedAccounts();
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress);
 
     if (!taskArgs.test && (await hre.getChainId()) == "1337") {
