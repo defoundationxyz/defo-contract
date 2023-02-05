@@ -19,8 +19,8 @@ export default task(
   )
   .addOptionalParam(
     "date",
-    "Cutover date in format DD.MM.YYYY HH:MM ",
-    moment().format("DD.MM.YYYY HH:MM"),
+    "Cutover date in format DD.MM.YYYY HH:MM (default is current UTC time)",
+    moment().utc().format("DD.MM.YYYY HH:MM"),
     types.string,
   )
   .setAction(async (taskArgs, hre) => {
@@ -71,7 +71,7 @@ export default task(
       announce("Updating contract configuration with total ROT and LP");
       await (await diamondContract.setP2Finance(daiLiquidity, totalRot)).wait();
       success("Done.");
-    }
+    } else announce("Test mode, not setting start date and not pausing the contract");
 
     const cutOverTime = await diamondContract.getP2CutOverTime();
     const p2Finance = await diamondContract.getP2Finance();

@@ -168,9 +168,14 @@ contract RewardsFacet is BaseFacet, IRewards {
         uint256 rewardToDate = 0;
         for (uint256 i = 0; i < gemIds.length; i++) {
             uint256 gemType = s.gems[gemIds[i]].gemTypeId;
-            rotValue += s.gemTypes2[gemType].price[1];
+            uint256 price = s.gemTypes2[gemType].price[1];
+            Booster booster = s.gems[gemIds[i]].booster;
+            if (booster == Booster.Omega) {
+                rotValue += price * 115 / 100;
+            } else if (booster == Booster.Delta) {
+                rotValue += price * 110 / 100;
+            } else rotValue += price;
             rewardToDate += _getCumulatedRewardAmountGross(gemIds[i]);
-
         }
         return rotValue > rewardToDate ? rotValue - rewardToDate : 0;
     }
