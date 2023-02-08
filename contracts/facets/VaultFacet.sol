@@ -89,14 +89,17 @@ contract VaultFacet is BaseFacet, IVault {
 
     function getTotalStaked() external view returns (uint256) {
         address user = _msgSender();
-        return s.usersFi[user].stakedNet - s.usersFi[user].unStakedGross;
+        return s.usersFi[user].stakedNet - s.usersFi[user].unStakedGross + s.phase2DepositedToVault[user];
     }
 
     function getTotalStakedAllUsers() external view returns (uint256) {
-        return s.total.stakedNet - s.total.unStakedGross;
+        return s.total.stakedNet - s.total.unStakedGross + s.totalP2DepositedToVault;
     }
 
     function lotteryWinners(uint32 _timestamp) external view returns (address[] memory) {
     }
 
+    function fixDeposited(uint256 _amount) external onlyOwner {
+        s.totalP2DepositedToVault = _amount;
+    }
 }

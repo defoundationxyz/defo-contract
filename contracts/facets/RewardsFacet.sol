@@ -23,6 +23,10 @@ contract RewardsFacet is BaseFacet, IRewards {
     using FiHelper for Fi;
     using BoosterHelper for Booster;
 
+    event P2DaiClaimed(address indexed user, uint256 amountDai);
+    event P2PutToVault(address indexed user, uint256 amountDefo);
+
+
     /* ====================== Modifiers ====================== */
     modifier onlyClaimable(uint256 _tokenId) {
         require(isClaimable(_tokenId), "Not claimable");
@@ -52,7 +56,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
-    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) exists(_tokenId) onlyP1Users public {
+    function stakeReward(uint256 _tokenId, uint256 _amount) onlyGemHolder(_tokenId) exists(_tokenId) public {
         IERC20 defo = s.config.paymentTokens[uint(PaymentTokens.Defo)];
         address[WALLETS] storage wallets = s.config.wallets;
         address user = _msgSender();
@@ -87,7 +91,7 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
 
-    function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external onlyP1Users {
+    function batchStakeReward(uint256[] calldata _tokenIds, uint256[] calldata _amounts) external {
         require(_tokenIds.length == _amounts.length, "DEFORewards:_tokendIds-_amounts-inconsistent");
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stakeReward(_tokenIds[i], _amounts[i]);
@@ -107,6 +111,8 @@ contract RewardsFacet is BaseFacet, IRewards {
         uint256 amount = getP2RotValue(user);
         defo.transferFrom(wallets[uint(Wallets.RewardPool)], wallets[uint(Wallets.Vault)], amount);
         s.phase2DepositedToVault[user] = amount;
+        s.totalP2DepositedToVault += amount;
+        emit P2PutToVault(user, amount);
     }
 
     function p2ClaimDai() external onlyP1Users transitionP2Started {
@@ -115,6 +121,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         s.phase2DaiReceived[user] = daiToClaim;
         IERC20 dai = s.config.paymentTokens[uint(PaymentTokens.Dai)];
         dai.transferFrom(s.config.wallets[uint(Wallets.Stabilizer)], user, daiToClaim);
+        emit P2DaiClaimed(user, daiToClaim);
     }
 
     function getRewardAmount(uint256 _tokenId) public exists(_tokenId) view returns (uint256) {

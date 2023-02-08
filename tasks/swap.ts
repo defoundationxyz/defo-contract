@@ -26,7 +26,8 @@ export default task("swap", "swaps DAI to DEFO and vice versa, specify FROM toke
       (dai === undefined && defo === undefined) ||
       (isNaN(Number(dai)) && isNaN(Number(defo)))
     )
-      throw new Error("You must specify either dai or defo amount to swap from.");
+      ``;
+    throw new Error("You must specify either dai or defo amount to swap from.");
 
     const defoContract = await ethers.getContract<DEFOToken>("DEFOToken", account);
     const daiContract = await ethers.getContractAt(DAI_ABI, daiAddress, account);

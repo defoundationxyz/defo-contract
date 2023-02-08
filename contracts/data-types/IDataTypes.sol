@@ -271,4 +271,5 @@ uint256 constant TAX_TIERS = 5;
         uint256 p2CutOverTime;
         uint256 daiToDistribute;
         uint256 totalROT;
+        uint256 totalP2DepositedToVault;
     }
