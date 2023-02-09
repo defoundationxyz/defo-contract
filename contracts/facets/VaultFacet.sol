@@ -19,8 +19,15 @@ import "../libraries/FiHelper.sol";
 contract VaultFacet is BaseFacet, IVault {
     using FiHelper for Fi;
 
+    modifier onlyP1Users() {
+        address user = _msgSender();
+        require(s.phase2DepositedToVault[user] == 0, "ROT already deposited to the vault");
+        require(s.phase2DaiReceived[user] == 0, "ROT already claimed");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
-    function unStakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) {
+    function unStakeReward(uint256 _tokenId, uint256 _amount) external onlyGemHolder(_tokenId) onlyP1Users {
         address user = _msgSender();
         Gem storage gem = s.gems[_tokenId];
         uint256 vaultAmount = gem.fi.stakedNet - gem.fi.unStakedGross;
@@ -97,9 +104,5 @@ contract VaultFacet is BaseFacet, IVault {
     }
 
     function lotteryWinners(uint32 _timestamp) external view returns (address[] memory) {
-    }
-
-    function fixDeposited(uint256 _amount) external onlyOwner {
-        s.totalP2DepositedToVault = _amount;
     }
 }

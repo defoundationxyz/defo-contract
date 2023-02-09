@@ -45,12 +45,17 @@ contract RewardsFacet is BaseFacet, IRewards {
         _;
     }
 
+    modifier transitionP2NotStarted() {
+        require(s.p2CutOverTime == 0, "Transition to Phase 2 has already started");
+        _;
+    }
+
     /* ============ External and Public Functions ============ */
-    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) onlyP1Users {
+    function claimReward(uint256 _tokenId) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) transitionP2NotStarted {
         _claimRewardAmount(_tokenId, getRewardAmount(_tokenId));
     }
 
-    function batchClaimReward(uint256[] calldata _tokenids) external onlyP1Users {
+    function batchClaimReward(uint256[] calldata _tokenids) external transitionP2NotStarted {
         for (uint256 index = 0; index < _tokenids.length; index++) {
             claimReward(_tokenids[index]);
         }
@@ -83,7 +88,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         op.updateStorage(_tokenId, user);
     }
 
-    function stakeAndClaim(uint256 _tokenId, uint256 _percent) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) onlyP1Users {
+    function stakeAndClaim(uint256 _tokenId, uint256 _percent) public onlyGemHolder(_tokenId) onlyClaimable(_tokenId) transitionP2NotStarted {
         uint256 reward = getRewardAmount(_tokenId);
         uint256 rewardToStake = PercentHelper.rate(reward, _percent);
         stakeReward(_tokenId, rewardToStake);
@@ -98,7 +103,7 @@ contract RewardsFacet is BaseFacet, IRewards {
         }
     }
 
-    function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external onlyP1Users {
+    function batchStakeAndClaim(uint256[] calldata _tokenIds, uint256 _percent) external transitionP2NotStarted {
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             stakeAndClaim(_tokenIds[i], _percent);
         }
@@ -133,10 +138,13 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     function isClaimable(uint256 _tokenId) public view returns (bool) {
-        return (
-        TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
-        LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0 &&
-        getRewardAmount(_tokenId) != 0);
+        if (s.p2CutOverTime == 0)
+            return (
+            TimeHelper.hasPassedFromOrNotHappenedYet(s.gems[_tokenId].lastRewardWithdrawalTime, s.config.rewardPeriod) &&
+            LibMaintainer._getPendingMaintenanceFee(_tokenId) == 0 &&
+            getRewardAmount(_tokenId) != 0);
+        else
+            return false;
     }
 
     function getCumulatedReward() external view returns (uint256) {
