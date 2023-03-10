@@ -41,7 +41,8 @@ contract RewardsFacet is BaseFacet, IRewards {
     }
 
     modifier transitionP2Started() {
-        require(s.p2CutOverTime > 0, "Transition to Phase 2 has not started yet");
+        //        require(s.p2CutOverTime > 0, "Transition to Phase 2 has not started yet");
+        revert("Phase 2 is over");
         _;
     }
 
@@ -280,6 +281,22 @@ contract RewardsFacet is BaseFacet, IRewards {
             s.config.taperRate,
             boostedRewardAmount,
             s.config.rewardPeriod);
+        return totalReward;
+    }
+
+    function calculateTaperedReward(
+        uint timePeriod, //blockit i.timestamp - mintTime
+        uint256 taperThreshold, //120 for diamond
+        uint256 taperPercent, //80% usually, NOTE this is 80% but not 20%
+        uint ratePerPeriod, //5 for diamond, pass already boosted rate if boost is applicable
+        uint payOrDeductPeriod //in seconds, initially it's 1 week
+    ) public view returns (uint256) {
+        uint256 totalReward = PeriodicHelper.calculateTaperedReward(
+            timePeriod, //period to calculate
+            taperThreshold,
+            taperPercent,
+            ratePerPeriod,
+            payOrDeductPeriod);
         return totalReward;
     }
 
