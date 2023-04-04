@@ -1,0 +1,9 @@
+{
+  "name": "DEFO Sapphire Vault",
+  "description": "DEFO Sapphire Vault",
+  "image": "https://defo-vault.s3.amazonaws.com/defo-vault-sapphire.png",
+  "properties": {
+    "rarity": "common",
+    "vault": "sapphire"
+  }
+}

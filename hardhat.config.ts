@@ -2,6 +2,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
+import "@xyrusworx/hardhat-solidity-json";
 import { config as dotenvConfig } from "dotenv";
 import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";

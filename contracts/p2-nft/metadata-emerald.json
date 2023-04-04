@@ -1,0 +1,9 @@
+{
+  "name": "DEFO Emerald Vault",
+  "description": "DEFO Emerald Vault",
+  "image": "https://defo-vault.s3.amazonaws.com/defo-vault-emerald.png",
+  "properties": {
+    "rarity": "common",
+    "vault": "emerald"
+  }
+}

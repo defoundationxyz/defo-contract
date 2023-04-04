@@ -1,0 +1,9 @@
+{
+  "name": "DEFO Ruby Vault",
+  "description": "DEFO Ruby Vault",
+  "image": "https://defo-vault.s3.amazonaws.com/defo-vault-ruby.png",
+  "properties": {
+    "rarity": "common",
+    "vault": "ruby"
+  }
+}

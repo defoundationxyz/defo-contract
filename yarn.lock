@@ -2799,6 +2799,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xyrusworx/hardhat-solidity-json@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@xyrusworx/hardhat-solidity-json@npm:1.0.2"
+  peerDependencies:
+    hardhat: ^2.9.0
+  checksum: d732ed972fc713d3c2e5b62775a88ace58d0974aca36ae1320e29216a2fa08f4353f824b729263b4728a37f2af091f278636bc248f2f0dd96323f1594c0832da
+  languageName: node
+  linkType: hard
+
 "@yarnpkg/lockfile@npm:^1.1.0":
   version: 1.1.0
   resolution: "@yarnpkg/lockfile@npm:1.1.0"
@@ -6150,6 +6159,7 @@ __metadata:
     "@types/qrcode-terminal": ^0.12.0
     "@typescript-eslint/eslint-plugin": ^5.30.5
     "@typescript-eslint/parser": ^5.30.5
+    "@xyrusworx/hardhat-solidity-json": ^1.0.2
     add: ^2.0.6
     bignumber.js: ^9.0.2
     chai: ^4.3.6

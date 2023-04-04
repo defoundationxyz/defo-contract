@@ -34,6 +34,7 @@
     "@types/qrcode-terminal": "^0.12.0",
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
+    "@xyrusworx/hardhat-solidity-json": "^1.0.2",
     "add": "^2.0.6",
     "bignumber.js": "^9.0.2",
     "chai": "^4.3.6",
